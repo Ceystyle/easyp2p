@@ -17,21 +17,38 @@ class P2P:
         
 def choose_P2P():
     P2P_platforms = {
-        "Bondora": "https://www.bondora.com/de/login",  \
-        "Mintos": "https://www.mintos.com/de/", 
+        '0': 'Alle', \
+        '1': 'Mintos', \
+        '2': 'Robocash',\
+        '3': 'Swaper', \
+        '4': 'PeerBerry'
     }
     
-    print ("Folgende Plattformen sind verfügbar:")
-    print([p for p in P2P_platforms.keys()])
+    print ('Folgende Plattformen sind verfügbar:')
+    for k, v in P2P_platforms.items():
+        print('{0}: {1}'.format(k, v))
     
-    platform = ""
-    while platform not in P2P_platforms.keys():
-        platform = input("Für welche P2P-Plattformen sollen Ergebnisse heruntergeladen werden? ")
-        
-        if platform not in P2P_platforms.keys():
-            print("Diese Plattform ist nicht verfügbar.")
-        
-    return P2P_platforms[platform]
+    cont = True
+    
+    while cont:
+        platform_set = set(input('Für welche P2P-Plattformen sollen Ergebnisse heruntergeladen werden? '))
+        platform_set.discard(',')
+        platform_set.discard(' ')
+        check_list = platform_set - set(P2P_platforms.keys())
+        if len(check_list) > 0:    
+            print("Die Plattformen {0} sind nicht verfügbar.".format(list(check_list)))
+        else:
+            cont = False
+
+    platforms = []
+    if '0' in platform_set:
+        platforms = list(P2P_platforms.values())
+    else:
+        for pl in platform_set:
+            platforms.append(P2P_platforms[pl])
+
+    print(platforms)
+    return 0
 
 def get_date(date_label):
     cont = True
@@ -81,7 +98,8 @@ def show_results(df):
     return 0
 
 if __name__=="__main__":
-    #url = choose_P2P()
+
+    p2p_choice = choose_P2P()
 
     # Get start and end dates for statement generation
 #    start_date = get_date('Startdatum')
@@ -113,34 +131,36 @@ if __name__=="__main__":
 #    parse_bondora(start_date,  end_date,  df_bondora, df_result)
     
     #Mintos
-#    if open_selenium_mintos(start_date,  end_date) < 0:
-#        print('Mintos wird nicht im Ergebnis berücksichtigt')
-#    else:
-#        df_mintos = parse_mintos()
-#        list_of_dfs.append(df_mintos)
+    if 'Mintos' in p2p_choice:
+        if wd.open_selenium_mintos(start_date,  end_date) < 0:
+            print('Mintos wird nicht im Ergebnis berücksichtigt')
+        else:
+            df_mintos = p2p_parser.mintos()
+            list_of_dfs.append(df_mintos)
     
     #Robocash
-#    if open_selenium_robocash(start_date,  end_date) < 0:
-#        print('Robocash wird nicht im Ergebnis berücksichtigt')
-#    else:
-#        df_robocash = parse_robocash()
-#        list_of_dfs.append(df_robocash)
-#
-#    #Swaper
-#    if open_selenium_swaper(start_date,  end_date) < 0:
-#        print('Swaper wird nicht im Ergebnis berücksichtigt')
-#    else:
-#        df_swaper = parse_swaper()
-#        list_of_dfs.append(df_swaper)
-#
-#    #Peerberry
-#    if wd.open_selenium_peerberry(start_date,  end_date) < 0:
-#        print('Peerberry wird nicht im Ergebnis berücksichtigt')
-#    else:
-#        df_peerberry = p2p_parser.peerberry()
-#        list_of_dfs.append(df_peerberry)
+    if 'Robocash' in p2p_choice:
+        if wd.open_selenium_robocash(start_date,  end_date) < 0:
+            print('Robocash wird nicht im Ergebnis berücksichtigt')
+        else:
+            df_robocash = p2p_parser.robocash()
+            list_of_dfs.append(df_robocash)
 
-    wd.open_selenium_peerberry(start_date,  end_date) 
+    #Swaper
+    if 'Swaper' in p2p_choice:
+        if wd.open_selenium_swaper(start_date,  end_date) < 0:
+            print('Swaper wird nicht im Ergebnis berücksichtigt')
+        else:
+            df_swaper = p2p_parser.swaper()
+            list_of_dfs.append(df_swaper)
+
+    #Peerberry
+    if 'PeerBerry' in p2p_choice:
+        if wd.open_selenium_peerberry(start_date,  end_date) < 0:
+            print('Peerberry wird nicht im Ergebnis berücksichtigt')
+        else:
+            df_peerberry = p2p_parser.peerberry()
+            list_of_dfs.append(df_peerberry)
 
 #    df_mintos = p2p_parser.parse_mintos()
 #    list_of_dfs.append(df_mintos)
