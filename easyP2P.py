@@ -43,12 +43,12 @@ def choose_P2P():
     platforms = []
     if '0' in platform_set:
         platforms = list(P2P_platforms.values())
+        platforms.remove('Alle')
     else:
         for pl in platform_set:
             platforms.append(P2P_platforms[pl])
 
-    print(platforms)
-    return 0
+    return platforms
 
 def get_date(date_label):
     cont = True
@@ -114,9 +114,6 @@ if __name__=="__main__":
     if not os.path.isdir(dl_location):
         os.makedirs(dl_location)
     
-    #TODO: hide browser windows
-    #TODO: read passwords from file
-    
     list_of_dfs = []
     
 #    df_result = pd.DataFrame(columns=['Datum','Währung', 'Plattform', 'Anfangssaldo '+str(start_date), 'Investitionen',\
@@ -130,37 +127,22 @@ if __name__=="__main__":
 #    df_bondora = pd.read_csv('Bondora_Gesamt.csv',  index_col=0)
 #    parse_bondora(start_date,  end_date,  df_bondora, df_result)
     
-    #Mintos
-    if 'Mintos' in p2p_choice:
-        if wd.open_selenium_mintos(start_date,  end_date) < 0:
-            print('Mintos wird nicht im Ergebnis berücksichtigt')
+    for platform in p2p_choice:
+        try:
+            func = getattr(wd, 'open_selenium_'+platform.lower())
+        except AttributeError:
+            print('Die Funktion zum Öffnen von {0} konnte nicht gefunden werden.'.format(platform))
         else:
-            df_mintos = p2p_parser.mintos()
-            list_of_dfs.append(df_mintos)
-    
-    #Robocash
-    if 'Robocash' in p2p_choice:
-        if wd.open_selenium_robocash(start_date,  end_date) < 0:
-            print('Robocash wird nicht im Ergebnis berücksichtigt')
-        else:
-            df_robocash = p2p_parser.robocash()
-            list_of_dfs.append(df_robocash)
-
-    #Swaper
-    if 'Swaper' in p2p_choice:
-        if wd.open_selenium_swaper(start_date,  end_date) < 0:
-            print('Swaper wird nicht im Ergebnis berücksichtigt')
-        else:
-            df_swaper = p2p_parser.swaper()
-            list_of_dfs.append(df_swaper)
-
-    #Peerberry
-    if 'PeerBerry' in p2p_choice:
-        if wd.open_selenium_peerberry(start_date,  end_date) < 0:
-            print('Peerberry wird nicht im Ergebnis berücksichtigt')
-        else:
-            df_peerberry = p2p_parser.peerberry()
-            list_of_dfs.append(df_peerberry)
+            if func(start_date,  end_date) < 0:
+                print('{0} wird nicht im Ergebnis berücksichtigt'.format(platform))
+            else:
+                try:
+                    parser = getattr(p2p_parser, platform.lower())
+                except AttributeError:
+                    print('Der Parser für {0} konnte nicht gefunden werden'.format(platform))
+                else:
+                    df = parser()
+                    list_of_dfs.append(df)
 
 #    df_mintos = p2p_parser.parse_mintos()
 #    list_of_dfs.append(df_mintos)

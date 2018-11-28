@@ -15,6 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 
 def init_webdriver():
+    #TODO: hide browser windows
     options = webdriver.ChromeOptions()
     dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
     prefs = {"download.default_directory": dl_location}
