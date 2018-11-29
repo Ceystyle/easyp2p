@@ -51,16 +51,16 @@ def mintos():
     df.rename(columns={'Date': 'Datum',  'Currency': 'Währung'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'])
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Mintos_CF_type'], df['Loan ID'] = df['Details'].str.split(' Loan ID: ').str
-    df['Mintos_CF_type'] = df['Mintos_CF_type'].str.split(' Rebuy purpose').str[0]
-    df['CF_type'] = df['Mintos_CF_type'].map(mintos_dict)
+    df['Mintos_Cashflow-Typ'], df['Loan ID'] = df['Details'].str.split(' Loan ID: ').str
+    df['Mintos_Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].str.split(' Rebuy purpose').str[0]
+    df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
     df['Plattform'] = 'Mintos'
     
-    if df['Mintos_CF_type'].where(df['CF_type'].isna()).dropna().size > 0:
+    if df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
         print('Mintos: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Mintos_CF_type'].where(df['CF_type'].isna()).dropna().tolist()))
+            set(df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Turnover',  index=['Plattform','Datum', 'Währung'],  columns=['CF_type'],\
+    df_result = pd.pivot_table(df, values='Turnover',  index=['Plattform','Datum', 'Währung'],  columns=['Cashflow-Typ'],\
         aggfunc=sum)
     df_result.fillna(0,  inplace=True)
     
@@ -82,15 +82,15 @@ def robocash():
     df.rename(columns={'Datum und Laufzeit': 'Datum'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%Y-%m-%d %H:%M:%S')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['CF_type'] = df['Operation'].map(robocash_dict)
+    df['Cashflow-Typ'] = df['Operation'].map(robocash_dict)
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Robocash'
 
-    if df['Operation'].where(df['CF_type'].isna()).dropna().size > 0:
+    if df['Operation'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
         print('Robocash: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Operation'].where(df['CF_type'].isna()).dropna().tolist()))
+            set(df['Operation'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Betrag',  index=['Plattform', 'Datum', 'Währung'],  columns=['CF_type'], \
+    df_result = pd.pivot_table(df, values='Betrag',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
         aggfunc=sum)
     df_result.fillna(0,  inplace=True)
 
@@ -111,15 +111,15 @@ def swaper():
     
     df.rename(columns={'Booking date': 'Datum'},  inplace=True)
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['CF_type'] = df['Transaction type'].map(swaper_dict)
+    df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Swaper'
 
-    if df['Transaction type'].where(df['CF_type'].isna()).dropna().size > 0:
+    if df['Transaction type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
         print('Swaper: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Transaction type'].where(df['CF_type'].isna()).dropna().tolist()))
+            set(df['Transaction type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['CF_type'], \
+    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
         aggfunc=sum)
     df_result.fillna(0,  inplace=True)
 
@@ -139,14 +139,49 @@ def peerberry():
     df.rename(columns={'Date': 'Datum',  'Currency Id': 'Währung'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%Y-%m-%d')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['CF_type'] = df['Type'].map(peerberry_dict)
+    df['Cashflow-Typ'] = df['Type'].map(peerberry_dict)
     df['Plattform'] = 'Peerberry'
 
-    if df['Type'].where(df['CF_type'].isna()).dropna().size > 0:
+    if df['Type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
         print('Peerberry: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Type'].where(df['CF_type'].isna()).dropna().tolist()))
+            set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['CF_type'], \
+    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
+        aggfunc=sum)
+    df_result.fillna(0,  inplace=True)
+
+    return df_result
+
+def estateguru():
+    #df = pd.read_csv('p2p_downloads/estateguru_statement.csv',  index_col=1)
+    df = pd.read_csv('p2p_downloads/estateguru_statement.csv')
+
+    if df is None:
+        return None 
+ 
+    estateguru_dict = dict()
+    estateguru_dict['Zins'] = 'Zinszahlungen'
+    estateguru_dict['Bonus'] = 'Zinszahlungen' # treat bonus payments as normal interest payments
+    estateguru_dict['Investition  (Auto Investieren)'] = 'Investitionen'
+    estateguru_dict['Hauptbetrag'] = 'Tilgungszahlungen'
+    estateguru_dict['Einzahlung  (Banktransfer)'] = 'Einzahlungen'
+    estateguru_dict['Entschädigung'] = 'Verzugsgebühren'
+
+    df = df[:-1] #drop last line which only contains a summary
+    df.rename(columns={'Bestätigungsdatum': 'Datum',  'Cashflow-Typ': 'Estateguru_Cashflow-Typ'},  inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y, %H:%M')
+    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    df['Cashflow-Typ'] = df['Estateguru_Cashflow-Typ'].map(estateguru_dict)
+    df['Plattform'] = 'Estateguru'
+    df['Währung'] = 'EUR'
+    df['Betrag (€)'] = df['Betrag (€)'].apply(lambda x: x.replace('(', '-').replace(')', '').replace(',', '.'))\
+        .astype('float')
+
+    if df['Estateguru_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
+        print('Estateguru: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
+            set(df['Estateguru_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+
+    df_result = pd.pivot_table(df, values='Betrag (€)',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
         aggfunc=sum)
     df_result.fillna(0,  inplace=True)
 

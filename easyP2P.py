@@ -4,7 +4,6 @@ import os
 import pandas as pd
 import p2p_webdriver as wd
 import p2p_parser
-from selenium.webdriver.common.keys import Keys
 
 class P2P:
     def __init__(self,  name=None,  login_url=None, login_name=None, login_pw=None, cashflow_url=None):
@@ -21,7 +20,8 @@ def choose_P2P():
         '1': 'Mintos', \
         '2': 'Robocash',\
         '3': 'Swaper', \
-        '4': 'PeerBerry'
+        '4': 'PeerBerry', \
+        '5': 'Estateguru'
     }
     
     print ('Folgende Plattformen sind verfügbar:')
@@ -131,7 +131,8 @@ if __name__=="__main__":
         try:
             func = getattr(wd, 'open_selenium_'+platform.lower())
         except AttributeError:
-            print('Die Funktion zum Öffnen von {0} konnte nicht gefunden werden.'.format(platform))
+            print('Die Funktion zum Öffnen von {0} konnte nicht gefunden werden. Ist p2p_webdriver.py vorhanden?'\
+                .format(platform))
         else:
             if func(start_date,  end_date) < 0:
                 print('{0} wird nicht im Ergebnis berücksichtigt'.format(platform))
@@ -139,7 +140,7 @@ if __name__=="__main__":
                 try:
                     parser = getattr(p2p_parser, platform.lower())
                 except AttributeError:
-                    print('Der Parser für {0} konnte nicht gefunden werden'.format(platform))
+                    print('Der Parser für {0} konnte nicht gefunden werden. Ist p2p_parser.py vorhanden?'.format(platform))
                 else:
                     df = parser()
                     list_of_dfs.append(df)
