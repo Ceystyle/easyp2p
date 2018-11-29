@@ -84,12 +84,11 @@ def show_results(df):
     show_columns = [col for col in df.columns if col in target_columns]
         
     df.reset_index(level=['Datum', 'Währung'],  inplace=True)
-
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
-    df['Monat'] = df['Datum'].dt.strftime('%b %Y')
+    df['Monat'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y').dt.to_period('M')
     print('Monatsergebnisse für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
         end_date.strftime('%d.%m.%Y')))
-    print(pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung', 'Monat'],  aggfunc=sum))    
+    month_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung', 'Monat'],  aggfunc=sum)
+    print(month_pivot_table)
     
     print('Gesamtergebnis für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
         end_date.strftime('%d.%m.%Y')))
