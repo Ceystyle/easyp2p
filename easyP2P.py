@@ -73,7 +73,7 @@ def combine_dfs(list_of_dfs):
 
     return df_result
 
-def show_results(df):
+def show_results(df,  start_date,  end_date):
     
     if df is None:
         print('Keine Ergebnisse vorhanden')
@@ -82,9 +82,16 @@ def show_results(df):
     target_columns = ['Investitionen', 'Tilgungszahlungen', 'Zinszahlungen', 'Verzugsgebühren',\
         'Rückkäufe', 'Zinszahlungen aus Rückkäufen']
     show_columns = [col for col in df.columns if col in target_columns]
-        
+
     df.reset_index(level=['Datum', 'Währung'],  inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
     df['Monat'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y').dt.to_period('M')
+
+    #Make sure we only show results between start and end date
+    start_date = pd.Timestamp(start_date)
+    end_date = pd.Timestamp(end_date)
+    df = df[(df['Datum'] >= start_date) & (df['Datum'] <= end_date)]
+
     print('Monatsergebnisse für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
         end_date.strftime('%d.%m.%Y')))
     month_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung', 'Monat'],  aggfunc=sum)
@@ -152,6 +159,6 @@ if __name__=="__main__":
 #    list_of_dfs.append(df_swaper)
     
     df_result = combine_dfs(list_of_dfs)
-    show_results(df_result)
+    show_results(df_result,  start_date,  end_date)
 
     # Get rid of download directory
