@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import p2p_webdriver as wd
 import p2p_parser
+import sys
 
 class P2P:
     def __init__(self,  name=None,  login_url=None, login_name=None, login_pw=None, cashflow_url=None):
@@ -33,14 +34,18 @@ def choose_P2P():
     cont = True
     
     while cont:
-        platform_set = set(input('Für welche P2P-Plattformen sollen Ergebnisse heruntergeladen werden? '))
-        platform_set.discard(',')
-        platform_set.discard(' ')
-        check_list = platform_set - set(P2P_platforms.keys())
-        if len(check_list) > 0:    
-            print("Die Plattformen {0} sind nicht verfügbar.".format(list(check_list)))
-        else:
-            cont = False
+        try:
+            platform_set = set(input('Für welche P2P-Plattformen sollen Ergebnisse heruntergeladen werden? '))
+            platform_set.discard(',')
+            platform_set.discard(' ')
+            check_list = platform_set - set(P2P_platforms.keys())
+            if len(check_list) > 0:
+                print("Die Plattformen {0} sind nicht verfügbar.".format(list(check_list)))
+            else:
+                cont = False
+        except KeyboardInterrupt:
+            print('\n')
+            sys.exit()
 
     platforms = []
     if '0' in platform_set:
