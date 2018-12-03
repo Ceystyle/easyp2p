@@ -131,6 +131,20 @@ def get_calendar_clicks(target_date,  start_date):
     
     return clicks
 
+def rename_statement(p2p_name, default_name,  file_format):
+    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
+    if len(list) == 1:
+        os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(p2p_name.lower(), file_format))
+    elif len(list) == 0:
+        print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
+        return -1
+    else:
+        # TODO: instead of bailing out, sort by date and rename newest download file
+        print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
+        return -1
+
+    return 0
+
 def open_selenium_bondora():
     # TODO: this function is currently broken and needs to be fixed first
     login_url = "https://www.bondora.com/de/login"
@@ -257,12 +271,9 @@ def open_selenium_mintos(start_date,  end_date):
 
     #Rename downloaded file from generic YYYYMMDD-account-statement.xlsx
     today = datetime.today()
-    default_name = './p2p_downloads/{0}{1}{2}-account-statement.xlsx'.format(today.year,  today.strftime('%m'),\
+    default_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
         today.strftime('%d'))
-    if os.path.exists(default_name):
-        os.rename(default_name, './p2p_downloads/mintos_statement.xlsx')
-    else:
-        print('Der Mintos-Kontoauszug konnte nicht erfolgreich heruntergeladen werden!')
+    if rename_statement(p2p_name, default_name, 'xlsx') < 0:
         return -1
 
     return 0
@@ -436,17 +447,9 @@ def open_selenium_swaper(start_date,  end_date):
     driver.close()
 
     #Rename downloaded file from generic file name
-    list = glob.glob('p2p_downloads/excel-storage*')
-    if len(list) == 1:
-        os.rename(list[0], 'p2p_downloads/swaper_statement.xlsx')
-    elif len(list) == 0:
-        print('Swaper Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.')
+    if rename_statement(p2p_name, 'excel-storage*', 'xlsx') < 0:
         return -1
-    else:   #older Swaper downloads are present
-        # TODO: instead of bailing out, sort by date and rename newest download file
-        print('Alte Swaper Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.')
-        return -1
-        
+
     return 0
 
 def open_selenium_peerberry(start_date,  end_date):
@@ -575,11 +578,7 @@ def open_selenium_peerberry(start_date,  end_date):
     driver.close()
 
     #Rename downloaded file from generic transactions.csv
-    default_name = './p2p_downloads/transactions.csv'
-    if os.path.exists(default_name):
-        os.rename(default_name, './p2p_downloads/peerberry_statement.csv')
-    else:
-        print('Der Peerberry-Kontoauszug konnte nicht erfolgreich heruntergeladen werden!')
+    if rename_statement(p2p_name, 'transactions', 'csv') < 0:
         return -1
 
     return 0
@@ -721,15 +720,7 @@ def open_selenium_iuvo(start_date,  end_date):
     driver.close()
 
     #Rename downloaded file from generic name
-    list = glob.glob('p2p_downloads/AccountStatement*')
-    if len(list) == 1:
-        os.rename(list[0], 'p2p_downloads/iuvo_statement.xlsx')
-    elif len(list) == 0:
-        print('Iuvo Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.')
-        return -1
-    else:   #older Swaper downloads are present
-        # TODO: instead of bailing out, sort by date and rename newest download file
-        print('Alte Iuvo Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.')
+    if rename_statement(p2p_name, 'AccountStatement*', 'xlsx') < 0:
         return -1
 
     return 0
@@ -792,15 +783,7 @@ def open_selenium_grupeer(start_date,  end_date):
     driver.close()
 
     #Rename downloaded file from generic name
-    list = glob.glob('p2p_downloads/Account statement.xlsx')
-    if len(list) == 1:
-        os.rename(list[0], 'p2p_downloads/grupeer_statement.xlsx')
-    elif len(list) == 0:
-        print('Grupeer Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.')
-        return -1
-    else:
-        # TODO: instead of bailing out, sort by date and rename newest download file
-        print('Alte Grupeer Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.')
+    if rename_statement(p2p_name, 'Account statement', 'xlsx') < 0:
         return -1
 
     return 0
