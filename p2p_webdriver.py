@@ -646,3 +646,87 @@ def open_selenium_estateguru(start_date,  end_date):
     driver.close()
 
     return 0
+
+def open_selenium_iuvo(start_date,  end_date):
+
+    p2p_name = 'Iuvo'
+    login_url = 'https://www.iuvo-group.com/de/login/'
+    cashflow_url = 'https://www.iuvo-group.com/de/account-statement/'
+
+    driver = init_webdriver()
+    delay = 3 # seconds
+
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, element_to_check='login',\
+        delay=delay,  check_method=EC.element_to_be_clickable, check_by=By.NAME,\
+        title_check='Einloggen - Iuvo') < 0:
+        return -1
+
+    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='login', password_field='password', \
+        element_to_check='p2p_btn_deposit_page_add_funds',  delay=10, check_by=By.ID) < 0:
+        return -1
+
+    # Click away cookie policy, if present
+    try:
+        driver.find_element_by_id('CybotCookiebotDialogBodyButtonAccept').click()
+        print('Iuvo: Cookies wurden akzeptiert')
+    except NoSuchElementException:
+        pass
+
+    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Kontoauszug',\
+        element_to_check='date_from', delay=delay) < 0:
+        return -1
+
+    # Create account statement for given date range
+    try:
+        date_from = driver.find_element_by_id('date_from')
+        date_from.clear()
+        date_from.send_keys(datetime.strftime(start_date,'%Y-%m-%d'))
+        date_to = driver.find_element_by_id('date_to')
+        date_to.clear()
+        date_to.send_keys(datetime.strftime(end_date,'%Y-%m-%d'))
+        driver.find_element_by_id('account_statement_filters_btn').click()
+        WebDriverWait(driver, delay).until(EC.text_to_be_present_in_element((By.XPATH,\
+            '//*[@id="p2p_cont"]/div/div[4]/div/table/tbody/tr[1]/td[2]/strong'),\
+            'Anfangsbestand '+str(start_date.strftime('%Y-%m-%d'))))
+    except NoSuchElementException:
+        print('Generierung des Iuvo Kontoauszugs konnte nicht gestartet werden.')
+        return -1
+    except TimeoutException:
+        print('Generierung des Iuvo Kontoauszugs hat zu lange gedauert.')
+        return -1
+
+    #Download account statement
+    try:
+        driver.find_element_by_xpath('/html/body/div[5]/main/div/div/div/div[3]/div[2]/a').click()
+    except NoSuchElementException:
+        print('Download des Iuvo Kontoauszugs konnte nicht gestartet werden.')
+        return -1
+
+    #Logout
+    try:
+        elem = driver.find_element_by_link_text('User name')
+        hover = ActionChains(driver).move_to_element(elem)
+        hover.perform()
+        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.ID,'p2p_logout')))
+        driver.find_element_by_id('p2p_logout').click()
+        WebDriverWait(driver, delay).until(EC.title_contains('Investieren Sie in Kredite'))
+    except TimeoutException:
+        print("Iuvo-Logout war nicht erfolgreich!")
+        #continue anyway
+
+    #Close browser window
+    driver.close()
+
+    #Rename downloaded file from generic name
+    list = glob.glob('p2p_downloads/AccountStatement*')
+    if len(list) == 1:
+        os.rename(list[0], 'p2p_downloads/iuvo_statement.xlsx')
+    elif len(list) == 0:
+        print('Iuvo Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.')
+        return -1
+    else:   #older Swaper downloads are present
+        # TODO: instead of bailing out, sort by date and rename newest download file
+        print('Alte Iuvo Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.')
+        return -1
+
+    return 0

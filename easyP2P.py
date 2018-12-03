@@ -21,7 +21,8 @@ def choose_P2P():
         '2': 'Robocash',\
         '3': 'Swaper', \
         '4': 'PeerBerry', \
-        '5': 'Estateguru'
+        '5': 'Estateguru', \
+        '6': 'Iuvo'
     }
     
     print ('Folgende Plattformen sind verfügbar:')
