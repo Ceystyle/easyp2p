@@ -221,3 +221,31 @@ def iuvo():
     df_result.fillna(0,  inplace=True)
 
     return df_result
+
+def grupeer():
+    df = read_excel('Grupeer', 'p2p_downloads/grupeer_statement.xlsx')
+
+    if df is None:
+        return None
+
+    grupeer_dict = dict()
+    grupeer_dict['Interest'] = 'Zinszahlungen'
+    grupeer_dict['Investment'] = 'Investitionen'
+
+    df.rename(columns={'Date': 'Datum'},  inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'],  format="%d.%m.%Y")
+    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    df['Cashflow-Typ'] = df['Type'].map(grupeer_dict)
+    df['Plattform'] = 'Grupeer'
+    df['Währung'] = 'EUR'
+    df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype('float')
+
+    if df['Type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
+        print('Grupeer: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
+            set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+
+    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
+        aggfunc=sum)
+    df_result.fillna(0,  inplace=True)
+
+    return df_result

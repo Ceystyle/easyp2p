@@ -662,7 +662,7 @@ def open_selenium_iuvo(start_date,  end_date):
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='login', password_field='password', \
-        element_to_check='p2p_btn_deposit_page_add_funds',  delay=10, check_by=By.ID) < 0:
+        element_to_check='p2p_btn_deposit_page_add_funds',  delay=delay, check_by=By.ID) < 0:
         return -1
 
     # Click away cookie policy, if present
@@ -727,6 +727,83 @@ def open_selenium_iuvo(start_date,  end_date):
     else:   #older Swaper downloads are present
         # TODO: instead of bailing out, sort by date and rename newest download file
         print('Alte Iuvo Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.')
+        return -1
+
+    return 0
+
+def open_selenium_grupeer(start_date,  end_date):
+
+    p2p_name = 'Grupeer'
+    login_url = 'https://www.grupeer.com/de/login'
+    cashflow_url = 'https://www.grupeer.com/de/account-statement'
+
+    driver = init_webdriver()
+    delay = 3 # seconds
+
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, element_to_check='email',\
+        delay=delay,  check_method=EC.element_to_be_clickable, check_by=By.NAME,\
+        title_check='Grupeer') < 0:
+        return -1
+
+    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
+        element_to_check='Meine Investments',  delay=delay, check_by=By.LINK_TEXT) < 0:
+        return -1
+
+    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url, \
+        title='Account Statement', element_to_check='from', delay=delay) < 0:
+        return -1
+
+    # Create account statement for given date range
+    try:
+        date_from = driver.find_element_by_id('from')
+        date_from.clear()
+        date_from.send_keys(datetime.strftime(start_date,'%d.%m.%Y'))
+        date_to = driver.find_element_by_id('to')
+        date_to.clear()
+        date_to.send_keys(datetime.strftime(end_date,'%d.%m.%Y'))
+        driver.find_element_by_name('submit').click()
+        WebDriverWait(driver, delay).until(EC.text_to_be_present_in_element((By.XPATH,\
+            '/html/body/div[4]/div/div[2]/div/div/div[1]/div[2]'),\
+            'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y'))))
+    except NoSuchElementException:
+        print('Generierung des Grupeer Kontoauszugs konnte nicht gestartet werden.')
+        return -1
+    except TimeoutException:
+        print('Generierung des Grupeer Kontoauszugs hat zu lange gedauert.')
+        return -1
+
+    #Download account statement
+    try:
+        driver.find_element_by_name('excel').click()
+    except NoSuchElementException:
+        print('Download des Grupeer Kontoauszugs konnte nicht gestartet werden.')
+        return -1
+
+    #Logout
+    try:
+        elem = driver.find_element_by_xpath('/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li/a/span')
+        hover = ActionChains(driver).move_to_element(elem)
+        hover.perform()
+        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.LINK_TEXT,'Ausloggen')))
+        driver.find_element_by_link_text('Ausloggen').click()
+        WebDriverWait(driver, delay).until(EC.title_contains('P2P Investitionsplattform Grupeer'))
+    except TimeoutException:
+        print('Grupeer-Logout war nicht erfolgreich!')
+        #continue anyway
+
+    #Close browser window
+    driver.close()
+
+    #Rename downloaded file from generic name
+    list = glob.glob('p2p_downloads/Account statement.xlsx')
+    if len(list) == 1:
+        os.rename(list[0], 'p2p_downloads/grupeer_statement.xlsx')
+    elif len(list) == 0:
+        print('Grupeer Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.')
+        return -1
+    else:
+        # TODO: instead of bailing out, sort by date and rename newest download file
+        print('Alte Grupeer Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.')
         return -1
 
     return 0

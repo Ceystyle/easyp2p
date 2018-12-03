@@ -22,7 +22,8 @@ def choose_P2P():
         '3': 'Swaper', \
         '4': 'PeerBerry', \
         '5': 'Estateguru', \
-        '6': 'Iuvo'
+        '6': 'Iuvo', \
+        '7': 'Grupeer'
     }
     
     print ('Folgende Plattformen sind verfügbar:')
