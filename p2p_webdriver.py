@@ -43,7 +43,7 @@ def open_start_page(driver,  p2p_name, login_url, element_to_check, delay, check
 def log_into_page(driver,  p2p_name,   name_field,  password_field, element_to_check, delay,\
     check_method=EC.presence_of_element_located,  check_by=By.XPATH,\
     login_field=None, find_login_field='xpath',\
-    submit_button=None,  find_submit_button='xpath'):
+    submit_button=None,  find_submit_button='xpath',  fill_delay=0):
 
     try:
         getattr(credentials, p2p_name)['username']
@@ -67,6 +67,7 @@ def log_into_page(driver,  p2p_name,   name_field,  password_field, element_to_c
         elem = driver.find_element_by_name(name_field)
         elem.clear()
         elem.send_keys(getattr(credentials, p2p_name)['username'])
+        time.sleep(fill_delay)
         elem = driver.find_element_by_name(password_field)
         elem.clear()
         elem.send_keys(getattr(credentials, p2p_name)['password'])
@@ -131,17 +132,19 @@ def get_calendar_clicks(target_date,  start_date):
     
     return clicks
 
-def rename_statement(p2p_name, default_name,  file_format):
+def rename_statement(p2p_name, default_name,  file_format,  print_status=True):
     list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
     if len(list) == 1:
         os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(p2p_name.lower(), file_format))
     elif len(list) == 0:
-        print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
+        if print_status==True:
+            print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
         return -1
     else:
         # TODO: instead of bailing out, sort by date and rename newest download file
-        print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
-        return -1
+        if print_status==True:
+            print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
+        return 1
 
     return 0
 
@@ -369,7 +372,7 @@ def open_selenium_swaper(start_date,  end_date):
     
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
         element_to_check='open-investments', delay=delay,  check_method=EC.presence_of_element_located, \
-        check_by = By.ID) < 0:
+        check_by = By.ID,  fill_delay=0.5) < 0:
         return -1
     
     if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Swaper',\
@@ -429,10 +432,24 @@ def open_selenium_swaper(start_date,  end_date):
     
     #Download account statement
     try:
-        print("Versuche Download zu starten")
-        driver.find_element_by_xpath('//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]').click()
+        download_button = driver.find_element_by_xpath('//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]')
+        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.XPATH,\
+            '//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]')))
+        download_button.click()
+
+        #Wait max. 5 seconds until download has finished
+        count = 0
+        while rename_statement(p2p_name, 'excel-storage*', 'xlsx', print_status=False) < 0 or count > 5:
+            time.sleep(1)
+            count += 1
+
+        if count > 5:
+            raise TimeoutException
     except NoSuchElementException:
         print('Download des Swaper Kontoauszugs konnte nicht gestartet werden.')
+        return -1
+    except TimeoutException:
+        print('Download des Swaper Kontoauszugs war nicht erfolgreich.')
         return -1
     
     #Logout
@@ -445,10 +462,6 @@ def open_selenium_swaper(start_date,  end_date):
 
     #Close browser window
     driver.close()
-
-    #Rename downloaded file from generic file name
-    if rename_statement(p2p_name, 'excel-storage*', 'xlsx') < 0:
-        return -1
 
     return 0
 
