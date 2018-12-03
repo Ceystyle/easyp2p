@@ -102,6 +102,21 @@ def open_account_statement_page(driver,  p2p_name,  cashflow_url,  title,  eleme
         return -1
     
     return 0
+
+def logout_page(p2p_name, driver, delay, logout_elem,  logout_elem_by, logout_success_title,\
+    hover_elem=None, hover_elem_by=None):
+    try:
+        if hover_elem is not None:
+            elem = driver.find_element(hover_elem_by, hover_elem)
+            hover = ActionChains(driver).move_to_element(elem)
+            hover.perform()
+            WebDriverWait(driver, delay).until(EC.element_to_be_clickable((logout_elem_by, logout_elem)))
+
+        driver.find_element(logout_elem_by, logout_elem).click()
+        WebDriverWait(driver, delay).until(EC.title_contains(logout_success_title))
+    except TimeoutException:
+        print('{0}-Logout war nicht erfolgreich!'.format(p2p_name))
+        #continue anyway
     
 def get_calendar_clicks(target_date,  start_date):
     # right arrow clicks are positive, left arrow clicks negative
@@ -233,12 +248,9 @@ def open_selenium_mintos(start_date,  end_date):
     driver.find_element_by_id('export-button').click()
 
     #Logout
-    try:
-        driver.find_element_by_xpath("//a[contains(@href,'logout')]").click()
-        WebDriverWait(driver, delay).until(EC.title_contains('Vielen Dank'))
-    except TimeoutException:
-        print("Mintos-Logout war nicht erfolgreich!")
-        #continue anyway
+    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
+        logout_elem="//a[contains(@href,'logout')]",  logout_elem_by=By.XPATH,\
+        logout_success_title='Vielen Dank')
 
     #Close browser window
     driver.close()
@@ -555,12 +567,9 @@ def open_selenium_peerberry(start_date,  end_date):
     time.sleep(10)
     
     #Logout
-    try:
-        driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div').click()
-        WebDriverWait(driver, delay).until(EC.title_contains('Einloggen'))
-    except TimeoutException:
-        print("Peerberry-Logout war nicht erfolgreich!")
-        #continue anyway
+    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
+        logout_elem='//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div',  logout_elem_by=By.XPATH,\
+        logout_success_title='Einloggen')
 
     #Close browser window
     driver.close()
@@ -703,16 +712,10 @@ def open_selenium_iuvo(start_date,  end_date):
         return -1
 
     #Logout
-    try:
-        elem = driver.find_element_by_link_text('User name')
-        hover = ActionChains(driver).move_to_element(elem)
-        hover.perform()
-        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.ID,'p2p_logout')))
-        driver.find_element_by_id('p2p_logout').click()
-        WebDriverWait(driver, delay).until(EC.title_contains('Investieren Sie in Kredite'))
-    except TimeoutException:
-        print("Iuvo-Logout war nicht erfolgreich!")
-        #continue anyway
+    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
+        logout_elem='p2p_logout',  logout_elem_by=By.ID,\
+        logout_success_title='Investieren Sie in Kredite',\
+        hover_elem='User name', hover_elem_by=By.NAME)
 
     #Close browser window
     driver.close()
@@ -780,16 +783,10 @@ def open_selenium_grupeer(start_date,  end_date):
         return -1
 
     #Logout
-    try:
-        elem = driver.find_element_by_xpath('/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li/a/span')
-        hover = ActionChains(driver).move_to_element(elem)
-        hover.perform()
-        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.LINK_TEXT,'Ausloggen')))
-        driver.find_element_by_link_text('Ausloggen').click()
-        WebDriverWait(driver, delay).until(EC.title_contains('P2P Investitionsplattform Grupeer'))
-    except TimeoutException:
-        print('Grupeer-Logout war nicht erfolgreich!')
-        #continue anyway
+    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
+        logout_elem='Ausloggen',  logout_elem_by=By.LINK_TEXT,\
+        logout_success_title='P2P Investitionsplattform Grupeer',\
+        hover_elem='/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li/a/span', hover_elem_by=By.XPATH)
 
     #Close browser window
     driver.close()
