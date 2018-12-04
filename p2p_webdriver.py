@@ -24,15 +24,15 @@ def init_webdriver():
     driver.maximize_window()
     return driver
 
-def open_start_page(driver,  p2p_name, login_url, element_to_check, delay, check_method=EC.presence_of_element_located,\
-    title_check=None,  check_by=By.XPATH):
-    
+def open_start_page(driver,  p2p_name, login_url, wait_until, delay, title_check=None):
+
+    #Most platforms use their name in the title, title_check will handle the few cases where they don't
     if title_check==None:
         title_check = p2p_name
     
     try:
         driver.get(login_url)
-        WebDriverWait(driver, delay).until(check_method((check_by, element_to_check)))
+        WebDriverWait(driver, delay).until(wait_until)
         assert title_check in driver.title
     except AssertionError:
         print('Die {0} Webseite konnte nicht geladen werden.'.format(p2p_name))
@@ -226,8 +226,8 @@ def open_selenium_mintos(start_date,  end_date):
     driver = init_webdriver()
     delay = 3 # seconds
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, element_to_check='MyAccountButton',\
-        delay=delay,  check_method=EC.element_to_be_clickable, check_by=By.NAME) < 0:
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay, \
+        wait_until=EC.element_to_be_clickable((By.NAME, 'MyAccountButton'))) < 0:
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='_username', password_field='_password', \
@@ -291,8 +291,9 @@ def open_selenium_robocash(start_date,  end_date):
     driver = init_webdriver()
     delay = 3 # seconds
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url,\
-        element_to_check='/html/body/header/div/div/div[3]/a[1]',  delay=delay,  title_check='Robo.cash') < 0:
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay, \
+        wait_until=EC.presence_of_element_located((By.XPATH, '/html/body/header/div/div/div[3]/a[1]')),\
+        title_check='Robo.cash') < 0:
         return -1
     
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
@@ -366,8 +367,8 @@ def open_selenium_swaper(start_date,  end_date):
     driver = init_webdriver()
     delay = 3 # seconds
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, element_to_check='email',\
-        delay=delay,  check_method=EC.presence_of_element_located, check_by=By.NAME) < 0:
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay, \
+        wait_until=EC.presence_of_element_located((By.NAME, 'email'))) < 0:
         return -1
     
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
@@ -474,8 +475,8 @@ def open_selenium_peerberry(start_date,  end_date):
     driver = init_webdriver()
     delay = 3 # seconds
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name+'.com', login_url=login_url, element_to_check='email',\
-        delay=delay,  check_method=EC.element_to_be_clickable, check_by=By.NAME) < 0:
+    if open_start_page(driver=driver,  p2p_name=p2p_name+'.com', login_url=login_url, delay=delay,\
+        wait_until=EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
@@ -606,9 +607,8 @@ def open_selenium_estateguru(start_date,  end_date):
     driver = init_webdriver()
     delay = 3 # seconds
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, element_to_check='username',\
-        delay=delay,  check_method=EC.element_to_be_clickable, check_by=By.NAME,\
-        title_check='Sign in/Register') < 0:
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
+        wait_until=EC.element_to_be_clickable((By.NAME, 'username')), title_check='Sign in/Register') < 0:
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='username', password_field='password', \
@@ -677,9 +677,8 @@ def open_selenium_iuvo(start_date,  end_date):
     driver = init_webdriver()
     delay = 3 # seconds
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, element_to_check='login',\
-        delay=delay,  check_method=EC.element_to_be_clickable, check_by=By.NAME,\
-        title_check='Einloggen - Iuvo') < 0:
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
+        wait_until=EC.element_to_be_clickable((By.NAME, 'login'))) < 0:
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='login', password_field='password', \
@@ -747,9 +746,8 @@ def open_selenium_grupeer(start_date,  end_date):
     driver = init_webdriver()
     delay = 3 # seconds
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, element_to_check='email',\
-        delay=delay,  check_method=EC.element_to_be_clickable, check_by=By.NAME,\
-        title_check='Grupeer') < 0:
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
+        wait_until=EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
