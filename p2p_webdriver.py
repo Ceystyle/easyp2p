@@ -40,10 +40,8 @@ def open_start_page(driver,  p2p_name, login_url, wait_until, delay, title_check
     
     return 0
     
-def log_into_page(driver,  p2p_name,   name_field,  password_field, element_to_check, delay,\
-    check_method=EC.presence_of_element_located,  check_by=By.XPATH,\
-    login_field=None, find_login_field='xpath',\
-    submit_button=None,  find_submit_button='xpath',  fill_delay=0):
+def log_into_page(driver,  p2p_name,   name_field,  password_field, delay, wait_until, \
+    login_field=None, find_login_field='xpath', submit_button=None,  find_submit_button='xpath',  fill_delay=0):
 
     try:
         getattr(credentials, p2p_name)['username']
@@ -82,8 +80,7 @@ def log_into_page(driver,  p2p_name,   name_field,  password_field, element_to_c
                 print('Unbekannte Suchmethode beim Senden der {0}-Logindaten.'.format(p2p_name))
                 return -1
         
-        WebDriverWait(driver, delay).until(check_method((check_by,\
-            element_to_check)))
+        WebDriverWait(driver, delay).until(wait_until)
     except NoSuchElementException:
         print("{0}-Loginseite konnte leider nicht geladen werden.".format(p2p_name))
         return -1
@@ -231,7 +228,7 @@ def open_selenium_mintos(start_date,  end_date):
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='_username', password_field='_password', \
-        element_to_check='Kontoauszug',  delay=delay, check_by=By.LINK_TEXT,\
+        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),\
         login_field='MyAccountButton',  find_login_field='name') < 0:
         return -1
 
@@ -296,8 +293,8 @@ def open_selenium_robocash(start_date,  end_date):
         title_check='Robo.cash') < 0:
         return -1
     
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
-        element_to_check='/html/body/header/div/div/div[2]/nav/ul/li[3]/a',  delay=delay, \
+    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', delay=delay,\
+        wait_until=EC.element_to_be_clickable((By.XPATH, '/html/body/header/div/div/div[2]/nav/ul/li[3]/a')),\
         login_field='/html/body/header/div/div/div[3]/a[1]') < 0:
         return -1
     
@@ -479,9 +476,8 @@ def open_selenium_peerberry(start_date,  end_date):
         wait_until=EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
         return -1
 
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
-        #user_name='nsandschn@gmx.de',  password='PeerNick2018',\
-        element_to_check='Kontoauszug',  delay=delay, check_by=By.LINK_TEXT) < 0:
+    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', delay=delay, \
+        wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))) < 0:
         return -1
 
     if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Kontoauszug',\
@@ -612,7 +608,7 @@ def open_selenium_estateguru(start_date,  end_date):
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='username', password_field='password', \
-        element_to_check='KONTOSTAND',  delay=delay, check_by=By.LINK_TEXT) < 0:
+        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND'))) < 0:
         return -1
 
     if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Übersicht',\
@@ -682,7 +678,7 @@ def open_selenium_iuvo(start_date,  end_date):
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='login', password_field='password', \
-        element_to_check='p2p_btn_deposit_page_add_funds',  delay=delay, check_by=By.ID) < 0:
+        delay=delay, wait_until=EC.element_to_be_clickable((By.ID, 'p2p_btn_deposit_page_add_funds'))) < 0:
         return -1
 
     # Click away cookie policy, if present
@@ -751,7 +747,7 @@ def open_selenium_grupeer(start_date,  end_date):
         return -1
 
     if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
-        element_to_check='Meine Investments',  delay=delay, check_by=By.LINK_TEXT) < 0:
+        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments'))) < 0:
         return -1
 
     if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url, \
