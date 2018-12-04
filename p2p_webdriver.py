@@ -145,6 +145,28 @@ def rename_statement(p2p_name, default_name,  file_format,  print_status=True):
 
     return 0
 
+def generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id, end_id, date_format,\
+    wait_until=None,  submit_btn=None):
+    try:
+        date_from = driver.find_element_by_id(start_id)
+        date_from.clear()
+        date_from.send_keys(datetime.strftime(start_date, date_format))
+        date_to = driver.find_element_by_id(end_id)
+        date_to.clear()
+        date_to.send_keys(datetime.strftime(end_date, date_format))
+        if submit_btn is not None:
+            driver.find_element_by_name(submit_btn).click()
+        if wait_until is not None:
+            WebDriverWait(driver, delay).until(wait_until)
+    except NoSuchElementException:
+        print('Generierung des {0} Kontoauszugs konnte nicht gestartet werden.'.format(p2p_name))
+        return -1
+    except TimeoutException:
+        print('Generierung des {0} Kontoauszugs hat zu lange gedauert.'.format(p2p_name))
+        return -1
+
+    return 0
+
 def open_selenium_bondora():
     # TODO: this function is currently broken and needs to be fixed first
     login_url = "https://www.bondora.com/de/login"
@@ -305,17 +327,14 @@ def open_selenium_robocash(start_date,  end_date):
     # Create account statement for given date range
     try:
         driver.find_element_by_id('new_statement').click()
-        date_after = driver.find_element_by_id('date-after')
-        date_after.clear()
-        date_after.send_keys(datetime.strftime(start_date,'%Y-%m-%d'))
-        date_before = driver.find_element_by_id('date-before')
-        date_before.clear()
-        date_before.send_keys(datetime.strftime(end_date,'%Y-%m-%d'))
-        date_before.send_keys(Keys.RETURN)
     except NoSuchElementException:
         print('Generierung des Robocash Kontoauszugs konnte nicht gestartet werden.')
         return -1
-    
+
+    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='date-after',\
+        end_id='date-before', date_format='%Y-%m-%d') < 0:
+        return -1
+
     # Robocash does not show download button after statement generation is done without reload
     present = False
     wait = 0
@@ -693,22 +712,10 @@ def open_selenium_iuvo(start_date,  end_date):
         return -1
 
     # Create account statement for given date range
-    try:
-        date_from = driver.find_element_by_id('date_from')
-        date_from.clear()
-        date_from.send_keys(datetime.strftime(start_date,'%Y-%m-%d'))
-        date_to = driver.find_element_by_id('date_to')
-        date_to.clear()
-        date_to.send_keys(datetime.strftime(end_date,'%Y-%m-%d'))
-        driver.find_element_by_id('account_statement_filters_btn').click()
-        WebDriverWait(driver, delay).until(EC.text_to_be_present_in_element((By.XPATH,\
-            '//*[@id="p2p_cont"]/div/div[4]/div/table/tbody/tr[1]/td[2]/strong'),\
-            'Anfangsbestand '+str(start_date.strftime('%Y-%m-%d'))))
-    except NoSuchElementException:
-        print('Generierung des Iuvo Kontoauszugs konnte nicht gestartet werden.')
-        return -1
-    except TimeoutException:
-        print('Generierung des Iuvo Kontoauszugs hat zu lange gedauert.')
+    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='date_from', end_id='date_to',\
+        date_format='%Y-%m-%d', wait_until=EC.text_to_be_present_in_element((By.XPATH,\
+        '//*[@id="p2p_cont"]/div/div[4]/div/table/tbody/tr[1]/td[2]/strong'),\
+        'Anfangsbestand '+str(start_date.strftime('%Y-%m-%d')))) < 0:
         return -1
 
     #Download account statement
@@ -755,22 +762,10 @@ def open_selenium_grupeer(start_date,  end_date):
         return -1
 
     # Create account statement for given date range
-    try:
-        date_from = driver.find_element_by_id('from')
-        date_from.clear()
-        date_from.send_keys(datetime.strftime(start_date,'%d.%m.%Y'))
-        date_to = driver.find_element_by_id('to')
-        date_to.clear()
-        date_to.send_keys(datetime.strftime(end_date,'%d.%m.%Y'))
-        driver.find_element_by_name('submit').click()
-        WebDriverWait(driver, delay).until(EC.text_to_be_present_in_element((By.XPATH,\
-            '/html/body/div[4]/div/div[2]/div/div/div[1]/div[2]'),\
-            'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y'))))
-    except NoSuchElementException:
-        print('Generierung des Grupeer Kontoauszugs konnte nicht gestartet werden.')
-        return -1
-    except TimeoutException:
-        print('Generierung des Grupeer Kontoauszugs hat zu lange gedauert.')
+    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='from', end_id='to',\
+        date_format='%d.%m.%Y', wait_until=EC.text_to_be_present_in_element((By.XPATH,\
+        '/html/body/div[4]/div/div[2]/div/div/div[1]/div[2]'),\
+        'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y')))) < 0:
         return -1
 
     #Download account statement
