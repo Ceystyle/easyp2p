@@ -379,10 +379,9 @@ def open_selenium_swaper(start_date,  end_date):
     if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay, \
         wait_until=EC.presence_of_element_located((By.NAME, 'email'))) < 0:
         return -1
-    
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
-        element_to_check='open-investments', delay=delay,  check_method=EC.presence_of_element_located, \
-        check_by = By.ID,  fill_delay=0.5) < 0:
+
+    if log_into_page(driver,  p2p_name, 'email', 'password', delay,\
+        EC.presence_of_element_located((By.ID, 'open-investments')), fill_delay=0.5) < 0:
         return -1
     
     if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Swaper',\
