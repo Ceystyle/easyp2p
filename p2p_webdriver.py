@@ -146,16 +146,25 @@ def rename_statement(p2p_name, default_name,  file_format,  print_status=True):
     return 0
 
 def generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id, end_id, date_format,\
-    wait_until=None,  submit_btn=None):
+    wait_until=None, submit_btn_id=None, submit_btn_name=None):
     try:
         date_from = driver.find_element_by_id(start_id)
-        date_from.clear()
+        date_from.send_keys(Keys.CONTROL + 'a')
         date_from.send_keys(datetime.strftime(start_date, date_format))
+
         date_to = driver.find_element_by_id(end_id)
-        date_to.clear()
+        date_to.send_keys(Keys.CONTROL + 'a')
         date_to.send_keys(datetime.strftime(end_date, date_format))
-        if submit_btn is not None:
-            driver.find_element_by_name(submit_btn).click()
+        date_to.send_keys(Keys.RETURN)
+
+        if submit_btn_name is not None:
+            WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.NAME, submit_btn_name)))
+            driver.find_element_by_name(submit_btn_name).click()
+        elif submit_btn_id is not None:
+            WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.ID, submit_btn_id)))
+            time.sleep(1) # Mintos needs some time until the button really works, TODO: find better fix
+            driver.find_element_by_id(submit_btn_id).click()
+
         if wait_until is not None:
             WebDriverWait(driver, delay).until(wait_until)
     except NoSuchElementException:
@@ -259,25 +268,9 @@ def open_selenium_mintos(start_date,  end_date):
         return -1
 
     #Set start and end date for account statement
-    try:
-        elem = driver.find_element_by_id("period-from")
-        elem.clear()
-        elem.send_keys(datetime.strftime(start_date,'%d.%m.%Y'))
-        elem = driver.find_element_by_id("period-to")
-        elem.clear()
-        elem.send_keys(datetime.strftime(end_date,'%d.%m.%Y'))
-        
-        #Select all payment types
-        driver.find_element_by_xpath('//*[@id="sel-booking-types"]/div').click()
-        driver.find_element_by_xpath('//*[@id="sel-booking-types"]/div/ul/li[1]/a').click()
-        
-        driver.find_element_by_id('filter-button').click()
-        WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.ID, 'export-button')))
-    except NoSuchElementException:
-        print("Fehler beim Generieren des Mintos Kontoauszugs!")
-        return -1
-    except TimeoutException:
-        print("Die Generierung des Mintos Kontoauszugs hat zu lange gedauert...")
+    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='period-from', end_id='period-to',\
+        date_format='%d.%m.%Y', wait_until=EC.presence_of_element_located((By.ID, 'export-button')),\
+        submit_btn_id='filter-button') < 0:
         return -1
         
     #Download  account statement
