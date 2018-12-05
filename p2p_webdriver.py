@@ -195,6 +195,90 @@ def generate_statement_direct(p2p_name, driver, delay, start_date, end_date, sta
 
     return 0
 
+def generate_statement_calendar(p2p_name, driver, delay, start_date, end_date,  default_dates, arrows, days_table,\
+    calendar_id_by, calendar_id):
+
+    try:
+        #identify the two calendars
+        if calendar_id_by == 'name':
+            start_calendar = driver.find_element_by_name(calendar_id[0])
+            end_calendar = driver.find_element_by_name(calendar_id[1])
+        elif calendar_id_by == 'class':
+            datepicker = driver.find_elements_by_xpath("//div[@class='{0}']".format(calendar_id))
+            start_calendar = datepicker[0]
+            end_calendar = datepicker[1]
+        else: # this should never happen
+            print('Keine ID für Kalender übergeben')
+            return -1
+
+        # how many clicks on the arrow buttons are necessary?
+        start_calendar_clicks = get_calendar_clicks(start_date,  default_dates[0])
+        end_calendar_clicks = get_calendar_clicks(end_date,  default_dates[1])
+
+        # identify the arrows for both start and end calendar
+        left_arrows = driver.find_elements_by_xpath("//{0}[@class='{1}']".format(arrows[2], arrows[0]))
+        right_arrows = driver.find_elements_by_xpath("//{0}[@class='{1}']".format(arrows[2], arrows[1]))
+
+        # set start_date
+        start_calendar.click()
+        WebDriverWait(driver, delay).until(EC.visibility_of(left_arrows[0]))
+        if start_calendar_clicks < 0:
+            for i in range(0, abs(start_calendar_clicks)):
+                left_arrows[0].click()
+        elif start_calendar_clicks > 0:
+            for i in range(0, start_calendar_clicks):
+                right_arrows[0].click()
+
+        # get all dates from left calendar and find the start day
+        day_table_class_name = days_table[0]
+        day_table_identifier = days_table[1]
+        current_day_identifier = days_table[2]
+        id_from_calendar = days_table[3]
+
+        if id_from_calendar == True:
+            start_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, start_calendar.get_attribute('id'))
+        else:
+            start_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, day_table_class_name)
+        all_days = driver.find_elements_by_xpath(start_days_xpath)
+
+        for elem in all_days:
+            if current_day_identifier=='':
+                if elem.text == str(start_date.day):
+                    elem.click()
+            else:
+                if elem.text == str(start_date.day) and elem.get_attribute('class') == current_day_identifier:
+                    elem.click()
+
+        # set end_date
+        end_calendar.click()
+        WebDriverWait(driver, delay).until(EC.visibility_of(left_arrows[1]))
+        if end_calendar_clicks < 0:
+            for i in range(0, abs(end_calendar_clicks)):
+                left_arrows[1].click()
+        elif end_calendar_clicks > 0:
+            for i in range(0, end_calendar_clicks):
+                right_arrows[1].click()
+
+        # get all dates from right calendar and find the end day
+        if id_from_calendar == True:
+            end_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, end_calendar.get_attribute('id'))
+        else:
+            end_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, day_table_class_name)
+        all_days = driver.find_elements_by_xpath(end_days_xpath)
+
+        for elem in all_days:
+            if current_day_identifier=='':
+                if elem.text == str(end_date.day):
+                    elem.click()
+            else:
+                if elem.text == str(end_date.day) and elem.get_attribute('class') == current_day_identifier:
+                    elem.click()
+    except (NoSuchElementException,  TimeoutException):
+        print('{0}: Konnte die gewünschten Daten für den Kontoauszug nicht setzen.'.format(p2p_name))
+        return -1
+
+    return 0
+
 def download_statement(p2p_name, driver, default_name, file_format, download_btn_id=None,  download_btn_name=None, \
     download_btn_xpath=None, actions = None):
     try:
@@ -457,56 +541,16 @@ def open_selenium_swaper(start_date,  end_date):
         return -1
 
     # Create account statement for given date range
-    # Swaper does not allow direct input of the two dates, they need to be selected in the pop-up calendars
-    # Furthermore, the id of the two datepickers is generated dynamically
-    try:
-        # find the two datepicker fields
-        datepicker = driver.find_elements_by_xpath("//div[@class='datepicker-container']")
-        from_date = datepicker[0]
-        to_date = datepicker[1]
-        
-        # get the pre-filled default values in order to identify how often months need to be changed
-        default_dates = driver.find_elements_by_xpath("//input[@type='text']")
-        default_start_date = datetime.strptime(default_dates[0].get_attribute('value'),  '%Y-%m-%d')
-        default_end_date = datetime.strptime(default_dates[1].get_attribute('value'),  '%Y-%m-%d')
-        
-        # how many clicks on the arrow buttons are necessary?
-        left_calendar_clicks = get_calendar_clicks(start_date,  default_start_date)
-        right_calendar_clicks = get_calendar_clicks(end_date,  default_end_date)
-        
-        # identify the arrows for both left and right calendar
-        calendar_left_arrows = driver.find_elements_by_xpath("//div[@class='icon icon icon-left']")
-        calendar_right_arrows = driver.find_elements_by_xpath("//div[@class='icon icon icon-right']")
-        left_calendar_left_arrow = calendar_left_arrows[0]
-        left_calendar_right_arrow = calendar_right_arrows[0]
-        right_calendar_left_arrow = calendar_left_arrows[1]
-        right_calendar_right_arrow = calendar_right_arrows[1]
-        
-        # set start_date
-        from_date.click()
-        if left_calendar_clicks < 0:
-            for i in range(0, abs(left_calendar_clicks)):
-                left_calendar_left_arrow.click()
-        elif left_calendar_clicks > 0:
-            for i in range(0, left_calendar_clicks):
-                left_calendar_right_arrow.click()
-                
-        driver.find_elements_by_xpath("//span[text()={0}]".format(start_date.day))[0].click()
-        
-        # set end_date
-        to_date.click()
-        if right_calendar_clicks < 0:
-            for i in range(0, abs(right_calendar_clicks)):
-                right_calendar_left_arrow.click()
-        elif right_calendar_clicks > 0:
-            for i in range(0, right_calendar_clicks):
-                right_calendar_right_arrow.click()
-                
-        driver.find_elements_by_xpath("//span[text()={0}]".format(end_date.day))[1].click()
-    except NoSuchElementException:
-        print('Konnte die gewünschten Daten für den Kontoauszug nicht setzen.')
+    calendar_id_by = 'class'
+    calendar_id = 'datepicker-container'
+    arrows = ['icon icon icon-left', 'icon icon icon-right',  'div']
+    days_table = ['', 'id', ' ',  True]
+    default_dates = [datetime.today().replace(day=1),  datetime.now()]
+
+    if generate_statement_calendar(p2p_name, driver, delay, start_date, end_date,  default_dates, \
+        arrows, days_table, calendar_id_by,  calendar_id) < 0:
         return -1
-    
+
     #Download account statement
     if download_statement(p2p_name, driver, default_name, file_format,\
         download_btn_xpath='//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]') < 0:
@@ -552,7 +596,7 @@ def open_selenium_peerberry(start_date,  end_date):
     if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Kontoauszug',\
         element_to_check='startDate',  delay=delay,  check_by=By.NAME) < 0:
         return -1
-        
+
     # Close the cookie policy, if present
     try:
         driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div[4]/div/div/div[1]').click()
@@ -560,59 +604,16 @@ def open_selenium_peerberry(start_date,  end_date):
         pass
 
     # Create account statement for given date range
-    # Peerberry does not allow direct input of the two dates, they need to be selected in the pop-up calendars
-    try:
-        # how many clicks on the arrow buttons are necessary? They open on the current month
-        left_calendar_clicks = get_calendar_clicks(start_date,  datetime.now())
-        right_calendar_clicks = get_calendar_clicks(end_date,  datetime.now())
-        
-        # identify the arrows for both left and right calendar
-        # the two left arrows will be used to check if the page has loaded already
-        left_calendar_left_arrow_xpath = '//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div[1]/div/div[1]/div/div/div/table/thead/tr[1]/th[1]/span'
-        right_calendar_left_arrow_xpath = '//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div/table/thead/tr[1]/th[1]/span'
-        left_calendar_left_arrow = driver.find_element_by_xpath(left_calendar_left_arrow_xpath)
-        left_calendar_right_arrow = driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div[1]/div/div[1]/div/div/div/table/thead/tr[1]/th[3]/span')
-        right_calendar_left_arrow = driver.find_element_by_xpath(right_calendar_left_arrow_xpath)
-        right_calendar_right_arrow = driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div/table/thead/tr[1]/th[3]/span')
-        
-        # set start_date
-        driver.find_element_by_name("startDate").click()
-        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.XPATH, left_calendar_left_arrow_xpath)))
-        if left_calendar_clicks < 0:
-            for i in range(0, abs(left_calendar_clicks)):
-                left_calendar_left_arrow.click()
-        elif left_calendar_clicks > 0:
-            for i in range(0, left_calendar_clicks):
-                left_calendar_right_arrow.click()
-                
-        # get all dates from left calendar and find the start day
-        all_dates = driver.find_elements_by_xpath('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div[1]/div/div[1]/div/div/div/table//td')
-        
-        for elem in all_dates:
-            if elem.text == str(start_date.day) and elem.get_attribute('class') == 'rdtDay':
-                elem.click()
-        
-        # set end_date
-        driver.find_element_by_name("endDate").click()
-        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.XPATH, right_calendar_left_arrow_xpath)))
-        if right_calendar_clicks < 0:
-            for i in range(0, abs(right_calendar_clicks)):
-                right_calendar_left_arrow.click()
-        elif right_calendar_clicks > 0:
-            for i in range(0, right_calendar_clicks):
-                right_calendar_right_arrow.click()
-    
-        # get all dates from right calendar and find the end day
-        all_dates = driver.find_elements_by_xpath('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[1]/div/div[1]/div[1]/div/div[2]/div/div/div/table//td')
-        
-        for elem in all_dates:
-            if elem.text == str(end_date.day) and elem.get_attribute('class') == 'rdtDay':
-                elem.click()
-            
-    except (NoSuchElementException,  TimeoutException):
-        print('Peerberry: Konnte die gewünschten Daten für den Kontoauszug nicht setzen.')
+    default_dates = [datetime.now(),  datetime.now()]
+    arrows = ['rdtPrev', 'rdtNext', 'th']
+    calendar_id_by = 'name'
+    calendar_id = ['startDate',  'endDate']
+    days_table = ['rdtDays', 'class', 'rdtDay', False]
+
+    if generate_statement_calendar(p2p_name, driver, delay, start_date, end_date,  default_dates, \
+        arrows, days_table, calendar_id_by, calendar_id) < 0:
         return -1
-    
+
     # Generate account statement
     try:
         driver.find_element_by_xpath('/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/div[2]/div/div[2]/div/span').click()
