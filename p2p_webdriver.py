@@ -129,18 +129,31 @@ def get_calendar_clicks(target_date,  start_date):
     
     return clicks
 
-def rename_statement(p2p_name, default_name,  file_format,  print_status=True):
+def clean_download_location(p2p_name, default_name, file_format):
+    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
+    if len(list) > 0:
+        print('Alte {0} Downloads in ./p2p_downloads entdeckt.'.format(p2p_name))
+        choice = None
+        while choice != 'a' or choice != 'm':
+            choice = input('(A)utomatisch löschen oder (M)anuell entfernen?').lower
+        if choice == 'm':
+            return -1
+        else:
+            for file in list:
+                os.remove(file)
+
+    return 0
+
+def rename_statement(p2p_name, default_name,  file_format):
     list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
     if len(list) == 1:
         os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(p2p_name.lower(), file_format))
     elif len(list) == 0:
-        if print_status==True:
-            print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
+        print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
         return -1
     else:
-        # TODO: instead of bailing out, sort by date and rename newest download file
-        if print_status==True:
-            print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
+        # this should never happen
+        print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
         return 1
 
     return 0
@@ -244,13 +257,20 @@ def open_selenium_bondora():
     driver.close()
     
     return df
-    
+
 def open_selenium_mintos(start_date,  end_date):
 
     p2p_name = 'Mintos'
     login_url = "https://www.mintos.com/de/"
     cashflow_url = "https://www.mintos.com/de/kontoauszug/"
     
+    today = datetime.today()
+    default_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
+        today.strftime('%d'))
+    file_format = 'xlsx'
+    if clean_download_location(p2p_name, default_name, file_format) < 0:
+        return -1
+
     driver = init_webdriver()
     delay = 3 # seconds
 
@@ -372,7 +392,12 @@ def open_selenium_swaper(start_date,  end_date):
     p2p_name = 'Swaper'
     login_url = 'https://www.swaper.com/#/dashboard'
     cashflow_url = 'https://www.swaper.com/#/overview/account-statement'
-    
+
+    default_name = 'excel-storage*'
+    file_format = 'xlsx'
+    if clean_download_location(p2p_name, default_name, file_format) < 0:
+        return -1
+
     driver = init_webdriver()
     delay = 3 # seconds
 
@@ -479,7 +504,12 @@ def open_selenium_peerberry(start_date,  end_date):
     p2p_name = 'PeerBerry'
     login_url = 'https://peerberry.com/de/login'
     cashflow_url = 'https://peerberry.com/de/statement'
-    
+
+    default_name = 'transactions'
+    file_format = 'csv'
+    if clean_download_location(p2p_name, default_name, file_format) < 0:
+        return -1
+
     driver = init_webdriver()
     delay = 3 # seconds
 
@@ -681,6 +711,11 @@ def open_selenium_iuvo(start_date,  end_date):
     login_url = 'https://www.iuvo-group.com/de/login/'
     cashflow_url = 'https://www.iuvo-group.com/de/account-statement/'
 
+    default_name = 'AccountStatement*'
+    file_format = 'xlsx'
+    if clean_download_location(p2p_name, default_name, file_format) < 0:
+        return -1
+
     driver = init_webdriver()
     delay = 3 # seconds
 
@@ -737,6 +772,11 @@ def open_selenium_grupeer(start_date,  end_date):
     p2p_name = 'Grupeer'
     login_url = 'https://www.grupeer.com/de/login'
     cashflow_url = 'https://www.grupeer.com/de/account-statement'
+
+    default_name = 'Account statement'
+    file_format = 'xlsx'
+    if clean_download_location(p2p_name, default_name, file_format) < 0:
+        return -1
 
     driver = init_webdriver()
     delay = 3 # seconds
