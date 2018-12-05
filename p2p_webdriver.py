@@ -189,6 +189,47 @@ def generate_statement_direct(p2p_name, driver, delay, start_date, end_date, sta
 
     return 0
 
+def download_statement(p2p_name, driver, default_name, file_format, download_btn_id=None,  download_btn_name=None, \
+    download_btn_xpath=None, actions = None):
+    try:
+        if download_btn_id is not None:
+            download_button = driver.find_element_by_id(download_btn_id)
+        elif download_btn_xpath is not None:
+            download_button = driver.find_element_by_xpath(download_btn_xpath)
+        elif download_btn_name is not None:
+            download_button = driver.find_element_by_name(download_btn_xpath)
+        else: # this should never happen
+            print('{0}-Download-Button konnte nicht identifziert werden'.format(p2p_name))
+            return -1
+
+        if actions == 'move_to_element':
+            action = ActionChains(driver)
+            action.move_to_element(download_button).perform()
+        download_button.click()
+    except NoSuchElementException:
+        print('Download des {0} Kontoauszugs konnte nicht gestartet werden.'.format(p2p_name))
+        return -1
+
+    download_finished = False
+    duration = 0
+    while download_finished == False:
+        list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
+        if len(list) == 1:
+            download_finished = True
+        elif len(list) == 0:
+            list = glob.glob('p2p_downloads/{0}.{1}.crdownload'.format(default_name, file_format))
+            if len(list) < 1 and duration > 1:
+                print('Download des {0} Kontoauszugs abgebrochen.'.format(p2p_name))
+                return -1
+            elif duration < 1:
+                time.sleep(1)
+                duration += 1
+
+    if rename_statement(p2p_name, default_name,  file_format) < 0:
+        return -1
+
+    return 0
+
 def open_selenium_bondora():
     # TODO: this function is currently broken and needs to be fixed first
     login_url = "https://www.bondora.com/de/login"
@@ -294,7 +335,10 @@ def open_selenium_mintos(start_date,  end_date):
         return -1
         
     #Download  account statement
-    driver.find_element_by_id('export-button').click()
+    if download_statement(p2p_name, driver, default_name,  file_format,  download_btn_id='export-button') < 0:
+        success = -1
+    else:
+        success = 0
 
     #Logout
     logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
@@ -304,14 +348,7 @@ def open_selenium_mintos(start_date,  end_date):
     #Close browser window
     driver.close()
 
-    #Rename downloaded file from generic YYYYMMDD-account-statement.xlsx
-    today = datetime.today()
-    default_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
-        today.strftime('%d'))
-    if rename_statement(p2p_name, default_name, 'xlsx') < 0:
-        return -1
-
-    return 0
+    return success
     
 def open_selenium_robocash(start_date,  end_date):
 
@@ -465,26 +502,11 @@ def open_selenium_swaper(start_date,  end_date):
         return -1
     
     #Download account statement
-    try:
-        download_button = driver.find_element_by_xpath('//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]')
-        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.XPATH,\
-            '//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]')))
-        download_button.click()
-
-        #Wait max. 5 seconds until download has finished
-        count = 0
-        while rename_statement(p2p_name, 'excel-storage*', 'xlsx', print_status=False) < 0 or count > 5:
-            time.sleep(1)
-            count += 1
-
-        if count > 5:
-            raise TimeoutException
-    except NoSuchElementException:
-        print('Download des Swaper Kontoauszugs konnte nicht gestartet werden.')
-        return -1
-    except TimeoutException:
-        print('Download des Swaper Kontoauszugs war nicht erfolgreich.')
-        return -1
+    if download_statement(p2p_name, driver, default_name, file_format,\
+        download_btn_xpath='//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]') < 0:
+        success = -1
+    else:
+        success = 0
     
     #Logout
     try:
@@ -497,7 +519,7 @@ def open_selenium_swaper(start_date,  end_date):
     #Close browser window
     driver.close()
 
-    return 0
+    return success
 
 def open_selenium_peerberry(start_date,  end_date):
 
@@ -595,30 +617,12 @@ def open_selenium_peerberry(start_date,  end_date):
         return -1
     
     #Download  account statement
-    try:
-        download_button = driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div')
-        actions = ActionChains(driver)
-        actions.move_to_element(download_button).perform()
-        download_button.click()
-    except NoSuchElementException:
-        print('Der Peerberry Kontoauszug konnte nicht heruntergeladen werden')
-        return -1
-    
-    #It usually takes several seconds until the download actually starts
-    #TODO: make sure that download finished before closing the window
-#    peerberry_window = driver.window_handles[0]
-#    driver.execute_script('window.open();')
-#    download_window = driver.window_handles[1]
-#    driver.switch_to.window(download_window)
-#    for count in range(0, 10):
-#        try:
-#            time.sleep(2)
-#            driver.get('chrome://downloads/')
-#            print(driver.find_elements_by_id('content'))
-#        except NoSuchElementException:
-#            print('Download läuft noch')
-#    driver.switch_to.window(peerberry_window)
-    time.sleep(10)
+    if download_statement(p2p_name, driver, default_name, file_format,\
+        download_btn_xpath='//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div',\
+        actions='move_to_element') < 0:
+        success = -1
+    else:
+        success = 0
     
     #Logout
     logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
@@ -632,7 +636,7 @@ def open_selenium_peerberry(start_date,  end_date):
     if rename_statement(p2p_name, 'transactions', 'csv') < 0:
         return -1
 
-    return 0
+    return success
 
 def open_selenium_estateguru(start_date,  end_date):
 
@@ -745,12 +749,12 @@ def open_selenium_iuvo(start_date,  end_date):
         'Anfangsbestand '+str(start_date.strftime('%Y-%m-%d')))) < 0:
         return -1
 
-    #Download account statement
-    try:
-        driver.find_element_by_xpath('/html/body/div[5]/main/div/div/div/div[3]/div[2]/a').click()
-    except NoSuchElementException:
-        print('Download des Iuvo Kontoauszugs konnte nicht gestartet werden.')
-        return -1
+    #Download  account statement
+    if download_statement(p2p_name, driver, default_name, file_format,\
+        download_btn_xpath='/html/body/div[5]/main/div/div/div/div[3]/div[2]/a') < 0:
+        success = -1
+    else:
+        success = 0
 
     #Logout
     logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
@@ -765,7 +769,7 @@ def open_selenium_iuvo(start_date,  end_date):
     if rename_statement(p2p_name, 'AccountStatement*', 'xlsx') < 0:
         return -1
 
-    return 0
+    return success
 
 def open_selenium_grupeer(start_date,  end_date):
 
@@ -801,11 +805,11 @@ def open_selenium_grupeer(start_date,  end_date):
         return -1
 
     #Download account statement
-    try:
-        driver.find_element_by_name('excel').click()
-    except NoSuchElementException:
-        print('Download des Grupeer Kontoauszugs konnte nicht gestartet werden.')
-        return -1
+    if download_statement(p2p_name, driver, default_name, file_format,\
+        download_btn_name='excel') < 0:
+        success = -1
+    else:
+        success = 0
 
     #Logout
     logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
