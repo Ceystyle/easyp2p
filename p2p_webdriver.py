@@ -638,10 +638,6 @@ def open_selenium_peerberry(start_date,  end_date):
     #Close browser window
     driver.close()
 
-    #Rename downloaded file from generic transactions.csv
-    if rename_statement(p2p_name, 'transactions', 'csv') < 0:
-        return -1
-
     return success
 
 def open_selenium_estateguru(start_date,  end_date):
@@ -770,10 +766,6 @@ def open_selenium_iuvo(start_date,  end_date):
 
     #Close browser window
     driver.close()
-
-    #Rename downloaded file from generic name
-    if rename_statement(p2p_name, 'AccountStatement*', 'xlsx') < 0:
-        return -1
 
     return success
 
