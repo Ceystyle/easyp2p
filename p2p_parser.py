@@ -252,3 +252,33 @@ def grupeer():
     df_result.fillna(0,  inplace=True)
 
     return df_result
+
+def dofinance():
+    df = read_excel('DoFinance', 'p2p_downloads/dofinance_statement.xlsx')
+
+    if df is None:
+        return None
+
+    dofinance_dict = dict()
+    dofinance_dict['Verdienter Gewinn'] = 'Zinszahlungen'
+    dofinance_dict['Auszahlung auf Bankkonto'] = 'Auszahlungen'
+    dofinance_dict['Abgeschlossene Investition\nRate: 12% Typ: automatisch'] = 'Tilgungszahlungen'
+    dofinance_dict['Anlage\nRate: 12% Typ: automatisch'] = 'Investitionen'
+
+    df = df[:-2] #drop the last two rows
+    df.rename(columns={'Bearbeitungsdatum': 'Datum'},  inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
+    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    df['Cashflow-Typ'] = df['Art der Transaktion'].map(dofinance_dict)
+    df['Plattform'] = 'DoFinance'
+    df['Währung'] = 'EUR'
+
+    if df['Art der Transaktion'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
+        print('DoFinance: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
+            set(df['Art der Transaktion'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+
+    df_result = pd.pivot_table(df, values='Betrag, €',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
+        aggfunc=sum)
+    df_result.fillna(0,  inplace=True)
+
+    return df_result

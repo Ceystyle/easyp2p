@@ -11,6 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 
@@ -165,10 +166,15 @@ def generate_statement_direct(p2p_name, driver, delay, start_date, end_date, sta
         date_from.send_keys(Keys.CONTROL + 'a')
         date_from.send_keys(datetime.strftime(start_date, date_format))
 
-        date_to = driver.find_element_by_id(end_id)
-        date_to.send_keys(Keys.CONTROL + 'a')
-        date_to.send_keys(datetime.strftime(end_date, date_format))
-        date_to.send_keys(Keys.RETURN)
+        try:
+            date_to = driver.find_element_by_id(end_id)
+            date_to.send_keys(Keys.CONTROL + 'a')
+            date_to.send_keys(datetime.strftime(end_date, date_format))
+            date_to.send_keys(Keys.RETURN)
+        except StaleElementReferenceException: # some sites refresh the page after a change which leads to this exception
+            date_to = driver.find_element_by_id(end_id)
+            date_to.send_keys(Keys.CONTROL + 'a')
+            date_to.send_keys(datetime.strftime(end_date, date_format))
 
         if submit_btn_name is not None:
             WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.NAME, submit_btn_name)))
@@ -197,7 +203,7 @@ def download_statement(p2p_name, driver, default_name, file_format, download_btn
         elif download_btn_xpath is not None:
             download_button = driver.find_element_by_xpath(download_btn_xpath)
         elif download_btn_name is not None:
-            download_button = driver.find_element_by_name(download_btn_xpath)
+            download_button = driver.find_element_by_name(download_btn_name)
         else: # this should never happen
             print('{0}-Download-Button konnte nicht identifziert werden'.format(p2p_name))
             return -1
@@ -824,4 +830,58 @@ def open_selenium_grupeer(start_date,  end_date):
     if rename_statement(p2p_name, 'Account statement', 'xlsx') < 0:
         return -1
 
-    return 0
+    return success
+
+def open_selenium_dofinance(start_date,  end_date):
+
+    p2p_name = 'DoFinance'
+    login_url = 'https://www.dofinance.eu/de/users/login'
+    cashflow_url = 'https://www.dofinance.eu/de/users/statement'
+    logout_url = 'https://www.dofinance.eu/de/users/logout'
+
+    default_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(start_date.strftime('%Y-%m-%d'),\
+        end_date.strftime('%Y-%m-%d'))
+    file_format = 'xlsx'
+    if clean_download_location(p2p_name, default_name, file_format) < 0:
+        return -1
+
+    driver = init_webdriver()
+    delay = 3 # seconds
+
+    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
+        wait_until=EC.element_to_be_clickable((By.NAME, 'email')), title_check='Anmeldung') < 0:
+        return -1
+
+    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
+        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN'))) < 0:
+        return -1
+
+    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url, \
+        title='Transaktionen', element_to_check='date-from', delay=delay) < 0:
+        return -1
+
+    # Create account statement for given date range
+    if generate_statement_direct(p2p_name=p2p_name, driver=driver, delay=delay, start_date=start_date, end_date=end_date,\
+        start_id='date-from', end_id='date-to', date_format='%d.%m.%Y',\
+        wait_until=EC.text_to_be_present_in_element((By.XPATH, '/html/body/section[1]/div/div/div[2]/div[1]/div[4]/div[1]'),\
+        'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))),  submit_btn_name='trans_type') < 0:
+        return -1
+
+    #Download account statement
+    if download_statement(p2p_name, driver, default_name, file_format, download_btn_name='xls') < 0:
+        success = -1
+    else:
+        success = 0
+
+    #Logout
+    try:
+        driver.get(logout_url)
+        WebDriverWait(driver, delay).until(EC.title_contains('Kreditvergabe Plattform'))
+    except TimeoutException:
+        print("{0}-Logout war nicht erfolgreich!".format(p2p_name))
+        #continue anyway
+
+    #Close browser window
+    driver.close()
+
+    return success
