@@ -47,6 +47,9 @@ def mintos():
     mintos_dict['Investment principal increase'] = 'Investitionen'
     mintos_dict['Investment principal repayment'] = 'Tilgungszahlungen'
     mintos_dict['Late payment fee income'] = 'Verzugsgebühren'
+    mintos_dict['Incoming client payment'] = 'Einzahlungen'
+    mintos_dict['Cashback bonus'] = 'Zinszahlungen' # treat bonus payments as normal interest payments
+    mintos_dict['Reversed incoming client payment'] = 'Auszahlungen'
     
     df.rename(columns={'Date': 'Datum',  'Currency': 'Währung'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'])
