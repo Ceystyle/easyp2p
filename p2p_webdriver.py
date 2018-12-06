@@ -110,7 +110,7 @@ class P2P:
 
         return 0
 
-    def logout_page(self, logout_elem,  logout_elem_by, wait_until, hover_elem=None, hover_elem_by=None):
+    def logout_by_button(self, logout_elem,  logout_elem_by, wait_until, hover_elem=None, hover_elem_by=None):
         try:
             if hover_elem is not None:
                 elem = self.driver.find_element(hover_elem_by, hover_elem)
@@ -434,7 +434,7 @@ def open_selenium_mintos(start_date,  end_date):
         success = 0
 
     #Logout
-    mintos.logout_page("//a[contains(@href,'logout')]",  By.XPATH, EC.title_contains('Vielen Dank'))
+    mintos.logout_by_button("//a[contains(@href,'logout')]",  By.XPATH, EC.title_contains('Vielen Dank'))
 
     #Close browser window
     mintos.driver.close()
@@ -547,7 +547,7 @@ def open_selenium_swaper(start_date,  end_date):
         success = 0
 
     #Logout
-    swaper.logout_page('//*[@id="logout"]/span[1]/span', EC.presence_of_element_located((By.ID, 'about')))
+    swaper.logout_by_button('//*[@id="logout"]/span[1]/span', EC.presence_of_element_located((By.ID, 'about')))
 
     #Close browser window
     swaper.driver.close()
@@ -607,7 +607,7 @@ def open_selenium_peerberry(start_date,  end_date):
         success = 0
     
     #Logout
-    peerberry.logout_page('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div', By.XPATH, \
+    peerberry.logout_by_button('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div', By.XPATH, \
         EC.title_contains('Einloggen'))
 
     #Close browser window
@@ -696,7 +696,7 @@ def open_selenium_iuvo(start_date,  end_date):
         success = 0
 
     #Logout
-    iuvo.logout_page('p2p_logout', By.ID, EC.title_contains('Investieren Sie in Kredite'),\
+    iuvo.logout_by_button('p2p_logout', By.ID, EC.title_contains('Investieren Sie in Kredite'),\
         hover_elem='User name', hover_elem_by=By.NAME)
 
     #Close browser window
@@ -736,7 +736,7 @@ def open_selenium_grupeer(start_date,  end_date):
         success = 0
 
     #Logout
-    grupeer.logout_page('Ausloggen', By.LINK_TEXT, EC.title_contains('P2P Investitionsplattform Grupeer'),\
+    grupeer.logout_by_button('Ausloggen', By.LINK_TEXT, EC.title_contains('P2P Investitionsplattform Grupeer'),\
         '/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li/a/span', By.XPATH)
 
     #Close browser window
