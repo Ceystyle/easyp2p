@@ -664,52 +664,43 @@ def open_selenium_bondora():
 
 def open_selenium_mintos(start_date,  end_date):
 
-    p2p_name = 'Mintos'
-    login_url = "https://www.mintos.com/de/"
-    cashflow_url = "https://www.mintos.com/de/kontoauszug/"
+    mintos = P2P('Mintos', 3, 'https://www.mintos.com/de/', 'https://www.mintos.com/de/kontoauszug/')
     
     today = datetime.today()
     default_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
         today.strftime('%d'))
     file_format = 'xlsx'
-    if clean_download_location(p2p_name, default_name, file_format) < 0:
+    if clean_download_location(mintos.name, default_name, file_format) < 0:
         return -1
 
-    driver = init_webdriver()
-    delay = 3 # seconds
-
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay, \
-        wait_until=EC.element_to_be_clickable((By.NAME, 'MyAccountButton'))) < 0:
+    if mintos.open_start_page(EC.element_to_be_clickable((By.NAME, 'MyAccountButton'))) < 0:
         return -1
 
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='_username', password_field='_password', \
-        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),\
+    if mintos.log_into_page(name_field='_username', password_field='_password', \
+        wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),\
         login_field='MyAccountButton',  find_login_field='name') < 0:
         return -1
 
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Account Statement',\
-        element_to_check='period-from',  delay=delay) < 0:
+    if mintos.open_account_statement_page(title='Account Statement', element_to_check='period-from') < 0:
         return -1
 
     #Set start and end date for account statement
-    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='period-from', end_id='period-to',\
+    if mintos.generate_statement_direct(start_date, end_date, start_id='period-from', end_id='period-to',\
         date_format='%d.%m.%Y', wait_until=EC.presence_of_element_located((By.ID, 'export-button')),\
         submit_btn_id='filter-button') < 0:
         return -1
         
     #Download  account statement
-    if download_statement(p2p_name, driver, default_name,  file_format,  download_btn_id='export-button') < 0:
+    if mintos.download_statement(default_name,  file_format,  download_btn_id='export-button') < 0:
         success = -1
     else:
         success = 0
 
     #Logout
-    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
-        logout_elem="//a[contains(@href,'logout')]",  logout_elem_by=By.XPATH,\
-        logout_success_title='Vielen Dank')
+    mintos.logout_page("//a[contains(@href,'logout')]",  By.XPATH, EC.title_contains('Vielen Dank'))
 
     #Close browser window
-    driver.close()
+    mintos.driver.close()
 
     return success
     
