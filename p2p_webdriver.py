@@ -773,28 +773,22 @@ def open_selenium_robocash(start_date,  end_date):
     
 def open_selenium_swaper(start_date,  end_date):
 
-    p2p_name = 'Swaper'
-    login_url = 'https://www.swaper.com/#/dashboard'
-    cashflow_url = 'https://www.swaper.com/#/overview/account-statement'
+    swaper = P2P('Swaper', 3, 'https://www.swaper.com/#/dashboard', \
+        'https://www.swaper.com/#/overview/account-statement')
 
     default_name = 'excel-storage*'
     file_format = 'xlsx'
-    if clean_download_location(p2p_name, default_name, file_format) < 0:
+    if clean_download_location(swaper.name, default_name, file_format) < 0:
         return -1
 
-    driver = init_webdriver()
-    delay = 3 # seconds
-
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay, \
-        wait_until=EC.presence_of_element_located((By.NAME, 'email'))) < 0:
+    if swaper.open_start_page(EC.presence_of_element_located((By.NAME, 'email'))) < 0:
         return -1
 
-    if log_into_page(driver,  p2p_name, 'email', 'password', delay,\
-        EC.presence_of_element_located((By.ID, 'open-investments')), fill_delay=0.5) < 0:
+    if swaper.log_into_page('email', 'password', EC.presence_of_element_located((By.ID, 'open-investments')), \
+        fill_delay=0.5) < 0:
         return -1
     
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Swaper',\
-        element_to_check='account-statement',  delay=delay) < 0:
+    if swaper.open_account_statement_page(title='Swaper', element_to_check='account-statement') < 0:
         return -1
 
     # Create account statement for given date range
@@ -804,27 +798,22 @@ def open_selenium_swaper(start_date,  end_date):
     days_table = ['', 'id', ' ',  True]
     default_dates = [datetime.today().replace(day=1),  datetime.now()]
 
-    if generate_statement_calendar(p2p_name, driver, delay, start_date, end_date,  default_dates, \
-        arrows, days_table, calendar_id_by,  calendar_id) < 0:
+    if swaper.generate_statement_calendar(start_date, end_date,  default_dates, arrows, days_table, \
+        calendar_id_by,  calendar_id) < 0:
         return -1
 
     #Download account statement
-    if download_statement(p2p_name, driver, default_name, file_format,\
+    if swaper.download_statement(default_name, file_format,\
         download_btn_xpath='//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]') < 0:
         success = -1
     else:
         success = 0
-    
+
     #Logout
-    try:
-        driver.find_element_by_xpath('//*[@id="logout"]/span[1]/span').click()
-        WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.ID, 'about')))
-    except (NoSuchElementException,  TimeoutException):
-        print("Swaper-Logout war nicht erfolgreich!")
-        #continue anyway
+    swaper.logout_page('//*[@id="logout"]/span[1]/span', EC.presence_of_element_located((By.ID, 'about')))
 
     #Close browser window
-    driver.close()
+    swaper.driver.close()
 
     return success
 
