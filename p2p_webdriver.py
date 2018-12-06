@@ -819,33 +819,25 @@ def open_selenium_swaper(start_date,  end_date):
 
 def open_selenium_peerberry(start_date,  end_date):
 
-    p2p_name = 'PeerBerry'
-    login_url = 'https://peerberry.com/de/login'
-    cashflow_url = 'https://peerberry.com/de/statement'
+    peerberry = P2P('Peerberry', 3, 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement')
 
     default_name = 'transactions'
     file_format = 'csv'
-    if clean_download_location(p2p_name, default_name, file_format) < 0:
+    if clean_download_location(peerberry.name, default_name, file_format) < 0:
         return -1
 
-    driver = init_webdriver()
-    delay = 3 # seconds
-
-    if open_start_page(driver=driver,  p2p_name=p2p_name+'.com', login_url=login_url, delay=delay,\
-        wait_until=EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
+    if peerberry.open_start_page(EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
         return -1
 
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', delay=delay, \
-        wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))) < 0:
+    if peerberry.log_into_page('email', 'password', EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))) < 0:
         return -1
 
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Kontoauszug',\
-        element_to_check='startDate',  delay=delay,  check_by=By.NAME) < 0:
+    if peerberry.open_account_statement_page('Kontoauszug', 'startDate', check_by=By.NAME) < 0:
         return -1
 
     # Close the cookie policy, if present
     try:
-        driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div[4]/div/div/div[1]').click()
+        peerberry.driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div[4]/div/div/div[1]').click()
     except NoSuchElementException:
         pass
 
@@ -856,21 +848,21 @@ def open_selenium_peerberry(start_date,  end_date):
     calendar_id = ['startDate',  'endDate']
     days_table = ['rdtDays', 'class', 'rdtDay', False]
 
-    if generate_statement_calendar(p2p_name, driver, delay, start_date, end_date,  default_dates, \
-        arrows, days_table, calendar_id_by, calendar_id) < 0:
+    if peerberry.generate_statement_calendar(start_date, end_date,  default_dates, arrows, days_table, \
+        calendar_id_by, calendar_id) < 0:
         return -1
 
     # Generate account statement
     try:
-        driver.find_element_by_xpath('/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/div[2]/div/div[2]/div/span').click()
-        WebDriverWait(driver, delay).until(EC.text_to_be_present_in_element(((By.XPATH, '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/div/div/div[1]')), \
+        peerberry.driver.find_element_by_xpath('/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/div[2]/div/div[2]/div/span').click()
+        peerberry.wdwait(EC.text_to_be_present_in_element(((By.XPATH, '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/div/div/div[1]')), \
             'Eröffnungssaldo '+str(start_date).format('%Y-%m-%d')))
     except (NoSuchElementException,  TimeoutException):
         print('Die Generierung des Peerberry-Kontoauszugs konnte nicht gestartet werden.')
         return -1
     
     #Download  account statement
-    if download_statement(p2p_name, driver, default_name, file_format,\
+    if peerberry.download_statement(default_name, file_format,\
         download_btn_xpath='//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div',\
         actions='move_to_element') < 0:
         success = -1
@@ -878,12 +870,11 @@ def open_selenium_peerberry(start_date,  end_date):
         success = 0
     
     #Logout
-    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
-        logout_elem='//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div',  logout_elem_by=By.XPATH,\
-        logout_success_title='Einloggen')
+    peerberry.logout_page('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div', By.XPATH, \
+        EC.title_contains('Einloggen'))
 
     #Close browser window
-    driver.close()
+    peerberry.driver.close()
 
     return success
 
