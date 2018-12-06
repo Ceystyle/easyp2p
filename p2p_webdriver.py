@@ -16,14 +16,15 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 
 class P2P:
-    def __init__(self,  name,  delay, login_url, statement_url, logout_url=None):
+    def __init__(self,  name, login_url, statement_url, logout_url=None):
         self.name = name
         self.login_url = login_url
         self.statement_url = statement_url
         self.logout_url = logout_url
-        self.init_webdriver(delay)
+        self.delay = 5
+        self.init_webdriver()
 
-    def init_webdriver(self, delay):
+    def init_webdriver(self):
         #TODO: hide browser windows
         options = webdriver.ChromeOptions()
         dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
@@ -31,7 +32,6 @@ class P2P:
         options.add_experimental_option("prefs", prefs)
         driver = webdriver.Chrome(options=options)
         driver.maximize_window()
-        self.delay = delay
         self.driver = driver
 
     def open_start_page(self, wait_until, title_check=None):
@@ -408,7 +408,7 @@ def open_selenium_bondora():
 
 def open_selenium_mintos(start_date,  end_date):
 
-    mintos = P2P('Mintos', 3, 'https://www.mintos.com/de/', 'https://www.mintos.com/de/kontoauszug/')
+    mintos = P2P('Mintos', 'https://www.mintos.com/de/', 'https://www.mintos.com/de/kontoauszug/')
     
     today = datetime.today()
     default_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
@@ -450,7 +450,7 @@ def open_selenium_mintos(start_date,  end_date):
     
 def open_selenium_robocash(start_date,  end_date):
 
-    robocash = P2P('Robocash', 3, 'https://robo.cash/de', 'https://robo.cash/de/cabinet/statement', \
+    robocash = P2P('Robocash', 'https://robo.cash/de', 'https://robo.cash/de/cabinet/statement', \
     'https://robo.cash/de/logout')
 
     if robocash.open_start_page(EC.presence_of_element_located((By.XPATH, '/html/body/header/div/div/div[3]/a[1]')),\
@@ -512,7 +512,7 @@ def open_selenium_robocash(start_date,  end_date):
     
 def open_selenium_swaper(start_date,  end_date):
 
-    swaper = P2P('Swaper', 3, 'https://www.swaper.com/#/dashboard', \
+    swaper = P2P('Swaper', 'https://www.swaper.com/#/dashboard', \
         'https://www.swaper.com/#/overview/account-statement')
 
     default_name = 'excel-storage*'
@@ -558,7 +558,7 @@ def open_selenium_swaper(start_date,  end_date):
 
 def open_selenium_peerberry(start_date,  end_date):
 
-    peerberry = P2P('Peerberry', 3, 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement')
+    peerberry = P2P('Peerberry', 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement')
 
     default_name = 'transactions'
     file_format = 'csv'
@@ -619,7 +619,7 @@ def open_selenium_peerberry(start_date,  end_date):
 
 def open_selenium_estateguru(start_date,  end_date):
 
-    estateguru = P2P('Estateguru', 3, 'https://estateguru.co/portal/login/auth?lang=de', \
+    estateguru = P2P('Estateguru', 'https://estateguru.co/portal/login/auth?lang=de', \
         'https://estateguru.co/portal/portfolio/account', 'https://estateguru.co/portal/logout/index')
 
     if estateguru.open_start_page(EC.element_to_be_clickable((By.NAME, 'username')), 'Sign in/Register') < 0:
@@ -655,7 +655,7 @@ def open_selenium_estateguru(start_date,  end_date):
 
 def open_selenium_iuvo(start_date,  end_date):
 
-    iuvo = P2P('Iuvo', 3, 'https://www.iuvo-group.com/de/login/', \
+    iuvo = P2P('Iuvo', 'https://www.iuvo-group.com/de/login/', \
         'https://www.iuvo-group.com/de/account-statement/')
 
     default_name = 'AccountStatement*'
@@ -703,7 +703,7 @@ def open_selenium_iuvo(start_date,  end_date):
 
 def open_selenium_grupeer(start_date,  end_date):
 
-    grupeer = P2P('Grupeer', 3, 'https://www.grupeer.com/de/login', 'https://www.grupeer.com/de/account-statement')
+    grupeer = P2P('Grupeer', 'https://www.grupeer.com/de/login', 'https://www.grupeer.com/de/account-statement')
 
     default_name = 'Account statement'
     file_format = 'xlsx'
@@ -743,7 +743,7 @@ def open_selenium_grupeer(start_date,  end_date):
 
 def open_selenium_dofinance(start_date,  end_date):
 
-    dofinance = P2P('DoFinance', 3, 'https://www.dofinance.eu/de/users/login', \
+    dofinance = P2P('DoFinance', 'https://www.dofinance.eu/de/users/login', \
         'https://www.dofinance.eu/de/users/statement', 'https://www.dofinance.eu/de/users/logout')
 
     default_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(start_date.strftime('%Y-%m-%d'),\
