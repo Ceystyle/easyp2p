@@ -6,15 +6,6 @@ import p2p_webdriver as wd
 import p2p_parser
 import sys
 
-class P2P:
-    def __init__(self,  name=None,  login_url=None, login_name=None, login_pw=None, cashflow_url=None):
-        self.name = name
-        self.login_url = login_url
-        self.cashflow_url = cashflow_url
-
-        self.login_name = login_name
-        self.login_pw = login_pw
-        
 def choose_P2P():
     P2P_platforms = {
         '0': 'Alle', \

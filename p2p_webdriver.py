@@ -15,6 +15,279 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 
+class P2P:
+    def __init__(self,  name,  delay, login_url, statement_url, logout_url=None):
+        self.name = name
+        self.login_url = login_url
+        self.statement_url = statement_url
+        self.logout_url = logout_url
+        self.init_webdriver(delay)
+
+    def init_webdriver(self, delay):
+        #TODO: hide browser windows
+        options = webdriver.ChromeOptions()
+        dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
+        prefs = {"download.default_directory": dl_location}
+        options.add_experimental_option("prefs", prefs)
+        driver = webdriver.Chrome(options=options)
+        driver.maximize_window()
+        self.delay = delay
+        self.driver = driver
+
+    def open_start_page(self, wait_until, title_check=None):
+        #Most platforms use their name in the title, title_check will handle the few cases where they don't
+        if title_check==None:
+            title_check = self.name
+
+        try:
+            self.driver.get(self.login_url)
+            self.wdwait(wait_until)
+            assert title_check in self.driver.title
+        except AssertionError:
+            print('Die {0} Webseite konnte nicht geladen werden.'.format(self.name))
+            return -1
+
+        return 0
+
+    def log_into_page(self, name_field, password_field, wait_until, login_field=None, find_login_field='xpath',\
+        submit_button=None,  find_submit_button='xpath',  fill_delay=0):
+
+        try:
+            getattr(credentials, self.name)['username']
+            getattr(credentials, self.name)['password']
+        except AttributeError:
+            print('Username/Passwort für {0} sind nicht vorhanden. Bitte manuell zu credentials.py hinzufügen.'\
+                .format(self.name))
+            return -1
+
+        try:
+            if login_field is not None:
+                if find_login_field == 'xpath':
+                    self.driver.find_element_by_xpath(login_field).click()
+                elif find_login_field == 'name':
+                    self.driver.find_element_by_name(login_field).click()
+                else:
+                    print('Unbekannte Suchmethode beim Laden der {0}-Loginseite.'.format(self.name))
+                    return -1
+
+            self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
+            elem = self.driver.find_element_by_name(name_field)
+            elem.clear()
+            elem.send_keys(getattr(credentials, self.name)['username'])
+            time.sleep(fill_delay)
+            elem = self.driver.find_element_by_name(password_field)
+            elem.clear()
+            elem.send_keys(getattr(credentials, self.name)['password'])
+            elem.send_keys(Keys.RETURN)
+
+            if submit_button is not None:
+                if find_submit_button == 'xpath':
+                    self.driver.find_element_by_xpath(submit_button).click()
+                elif find_submit_button == 'name':
+                    self.driver.find_element_by_name(submit_button).click()
+                else:
+                    print('Unbekannte Suchmethode beim Senden der {0}-Logindaten.'.format(self.name))
+                    return -1
+
+            self.wdwait(wait_until)
+        except NoSuchElementException:
+            print("{0}-Loginseite konnte leider nicht geladen werden.".format(self.name))
+            return -1
+        except TimeoutException:
+            print("{0}-Login war leider nicht erfolgreich. Passwort korrekt?".format(self.name))
+            return -1
+
+        return 0
+
+    def open_account_statement_page(self, title, element_to_check, check_by=By.ID):
+        try:
+            self.driver.get(self.statement_url)
+            self.wdwait(EC.presence_of_element_located((check_by, element_to_check)))
+            assert title in self.driver.title
+        except (AssertionError,  TimeoutException):
+            print("{0} Kontoauszugsseite konnte nicht geladen werden.".format(self.name))
+            return -1
+
+        return 0
+
+    def logout_page(self, logout_elem,  logout_elem_by, wait_until, hover_elem=None, hover_elem_by=None):
+        try:
+            if hover_elem is not None:
+                elem = self.driver.find_element(hover_elem_by, hover_elem)
+                hover = ActionChains(self.driver).move_to_element(elem)
+                hover.perform()
+                self.wdwait(EC.element_to_be_clickable((logout_elem_by, logout_elem)))
+
+            self.driver.find_element(logout_elem_by, logout_elem).click()
+            self.wdwait(wait_until)
+        except TimeoutException:
+            print('{0}-Logout war nicht erfolgreich!'.format(self.name))
+            #continue anyway
+
+    def generate_statement_direct(self, start_date, end_date, start_id, end_id, date_format,\
+        wait_until=None, submit_btn_id=None, submit_btn_name=None):
+        try:
+            date_from = self.driver.find_element_by_id(start_id)
+            date_from.send_keys(Keys.CONTROL + 'a')
+            date_from.send_keys(datetime.strftime(start_date, date_format))
+
+            try:
+                date_to = self.driver.find_element_by_id(end_id)
+                date_to.send_keys(Keys.CONTROL + 'a')
+                date_to.send_keys(datetime.strftime(end_date, date_format))
+                date_to.send_keys(Keys.RETURN)
+            except StaleElementReferenceException: # some sites refresh the page after a change which leads to this exception
+                date_to = self.driver.find_element_by_id(end_id)
+                date_to.send_keys(Keys.CONTROL + 'a')
+                date_to.send_keys(datetime.strftime(end_date, date_format))
+
+            if submit_btn_name is not None:
+                self.wdwait(EC.element_to_be_clickable((By.NAME, submit_btn_name)))
+                self.driver.find_element_by_name(submit_btn_name).click()
+            elif submit_btn_id is not None:
+                self.wdwait(EC.element_to_be_clickable((By.ID, submit_btn_id)))
+                time.sleep(1) # Mintos needs some time until the button really works, TODO: find better fix
+                self.driver.find_element_by_id(submit_btn_id).click()
+
+            if wait_until is not None:
+                self.wdwait(wait_until)
+        except NoSuchElementException:
+            print('Generierung des {0} Kontoauszugs konnte nicht gestartet werden.'.format(self.name))
+            return -1
+        except TimeoutException:
+            print('Generierung des {0} Kontoauszugs hat zu lange gedauert.'.format(self.name))
+            return -1
+
+        return 0
+
+    def generate_statement_calendar(self, start_date, end_date, default_dates, arrows, days_table,\
+        calendar_id_by, calendar_id):
+
+        try:
+            #identify the two calendars
+            if calendar_id_by == 'name':
+                start_calendar = self.driver.find_element_by_name(calendar_id[0])
+                end_calendar = self.driver.find_element_by_name(calendar_id[1])
+            elif calendar_id_by == 'class':
+                datepicker = self.driver.find_elements_by_xpath("//div[@class='{0}']".format(calendar_id))
+                start_calendar = datepicker[0]
+                end_calendar = datepicker[1]
+            else: # this should never happen
+                print('Keine ID für Kalender übergeben')
+                return -1
+
+            # how many clicks on the arrow buttons are necessary?
+            start_calendar_clicks = get_calendar_clicks(start_date,  default_dates[0])
+            end_calendar_clicks = get_calendar_clicks(end_date,  default_dates[1])
+
+            # identify the arrows for both start and end calendar
+            left_arrows = self.driver.find_elements_by_xpath("//{0}[@class='{1}']".format(arrows[2], arrows[0]))
+            right_arrows = self.driver.find_elements_by_xpath("//{0}[@class='{1}']".format(arrows[2], arrows[1]))
+
+            # set start_date
+            start_calendar.click()
+            self.wdwait(EC.visibility_of(left_arrows[0]))
+            if start_calendar_clicks < 0:
+                for i in range(0, abs(start_calendar_clicks)):
+                    left_arrows[0].click()
+            elif start_calendar_clicks > 0:
+                for i in range(0, start_calendar_clicks):
+                    right_arrows[0].click()
+
+            # get all dates from left calendar and find the start day
+            day_table_class_name = days_table[0]
+            day_table_identifier = days_table[1]
+            current_day_identifier = days_table[2]
+            id_from_calendar = days_table[3]
+
+            if id_from_calendar == True:
+                start_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, start_calendar.get_attribute('id'))
+            else:
+                start_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, day_table_class_name)
+            all_days = self.driver.find_elements_by_xpath(start_days_xpath)
+
+            for elem in all_days:
+                if current_day_identifier=='':
+                    if elem.text == str(start_date.day):
+                        elem.click()
+                else:
+                    if elem.text == str(start_date.day) and elem.get_attribute('class') == current_day_identifier:
+                        elem.click()
+
+            # set end_date
+            end_calendar.click()
+            self.wdwait(EC.visibility_of(left_arrows[1]))
+            if end_calendar_clicks < 0:
+                for i in range(0, abs(end_calendar_clicks)):
+                    left_arrows[1].click()
+            elif end_calendar_clicks > 0:
+                for i in range(0, end_calendar_clicks):
+                    right_arrows[1].click()
+
+            # get all dates from right calendar and find the end day
+            if id_from_calendar == True:
+                end_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, end_calendar.get_attribute('id'))
+            else:
+                end_days_xpath = "//*[@{0}='{1}']//table//td".format(day_table_identifier, day_table_class_name)
+            all_days = self.driver.find_elements_by_xpath(end_days_xpath)
+
+            for elem in all_days:
+                if current_day_identifier=='':
+                    if elem.text == str(end_date.day):
+                        elem.click()
+                else:
+                    if elem.text == str(end_date.day) and elem.get_attribute('class') == current_day_identifier:
+                        elem.click()
+        except (NoSuchElementException,  TimeoutException):
+            print('{0}: Konnte die gewünschten Daten für den Kontoauszug nicht setzen.'.format(self.name))
+            return -1
+
+        return 0
+
+    def download_statement(self, default_name, file_format, download_btn_id=None,  download_btn_name=None, \
+        download_btn_xpath=None, actions = None):
+        try:
+            if download_btn_id is not None:
+                download_button = self.driver.find_element_by_id(download_btn_id)
+            elif download_btn_xpath is not None:
+                download_button = self.driver.find_element_by_xpath(download_btn_xpath)
+            elif download_btn_name is not None:
+                download_button = self.driver.find_element_by_name(download_btn_name)
+            else: # this should never happen
+                print('{0}-Download-Button konnte nicht identifziert werden'.format(self.name))
+                return -1
+
+            if actions == 'move_to_element':
+                action = ActionChains(self.driver)
+                action.move_to_element(download_button).perform()
+            download_button.click()
+        except NoSuchElementException:
+            print('Download des {0} Kontoauszugs konnte nicht gestartet werden.'.format(self.name))
+            return -1
+
+        download_finished = False
+        duration = 0
+        while download_finished == False:
+            list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
+            if len(list) == 1:
+                download_finished = True
+            elif len(list) == 0:
+                list = glob.glob('p2p_downloads/{0}.{1}.crdownload'.format(default_name, file_format))
+                if len(list) < 1 and duration > 1:
+                    print('Download des {0} Kontoauszugs abgebrochen.'.format(self.name))
+                    return -1
+                elif duration < 1:
+                    time.sleep(1)
+                    duration += 1
+
+        if rename_statement(self.name, default_name,  file_format) < 0:
+            return -1
+
+        return 0
+
+    def wdwait(self, wait_until):
+        return WebDriverWait(self.driver, self.delay).until(wait_until)
+
 def init_webdriver():
     #TODO: hide browser windows
     options = webdriver.ChromeOptions()
@@ -116,48 +389,6 @@ def logout_page(p2p_name, driver, delay, logout_elem,  logout_elem_by, logout_su
     except TimeoutException:
         print('{0}-Logout war nicht erfolgreich!'.format(p2p_name))
         #continue anyway
-    
-def get_calendar_clicks(target_date,  start_date):
-    # right arrow clicks are positive, left arrow clicks negative
-    
-    if target_date.year != start_date.year:
-        clicks = 12 * (target_date.year - start_date.year)
-    else:
-        clicks = 0
-        
-    if target_date.month != start_date.month:
-        clicks += target_date.month - start_date.month
-    
-    return clicks
-
-def clean_download_location(p2p_name, default_name, file_format):
-    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
-    if len(list) > 0:
-        print('Alte {0} Downloads in ./p2p_downloads entdeckt.'.format(p2p_name))
-        choice = None
-        while choice != 'a' or choice != 'm':
-            choice = input('(A)utomatisch löschen oder (M)anuell entfernen?').lower
-        if choice == 'm':
-            return -1
-        else:
-            for file in list:
-                os.remove(file)
-
-    return 0
-
-def rename_statement(p2p_name, default_name,  file_format):
-    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
-    if len(list) == 1:
-        os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(p2p_name.lower(), file_format))
-    elif len(list) == 0:
-        print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
-        return -1
-    else:
-        # this should never happen
-        print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
-        return 1
-
-    return 0
 
 def generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id, end_id, date_format,\
     wait_until=None, submit_btn_id=None, submit_btn_name=None):
@@ -317,6 +548,48 @@ def download_statement(p2p_name, driver, default_name, file_format, download_btn
 
     if rename_statement(p2p_name, default_name,  file_format) < 0:
         return -1
+
+    return 0
+
+def get_calendar_clicks(target_date,  start_date):
+    # right arrow clicks are positive, left arrow clicks negative
+
+    if target_date.year != start_date.year:
+        clicks = 12 * (target_date.year - start_date.year)
+    else:
+        clicks = 0
+
+    if target_date.month != start_date.month:
+        clicks += target_date.month - start_date.month
+
+    return clicks
+
+def clean_download_location(p2p_name, default_name, file_format):
+    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
+    if len(list) > 0:
+        print('Alte {0} Downloads in ./p2p_downloads entdeckt.'.format(p2p_name))
+        choice = None
+        while choice != 'a' or choice != 'm':
+            choice = input('(A)utomatisch löschen oder (M)anuell entfernen?').lower
+        if choice == 'm':
+            return -1
+        else:
+            for file in list:
+                os.remove(file)
+
+    return 0
+
+def rename_statement(p2p_name, default_name,  file_format):
+    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
+    if len(list) == 1:
+        os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(p2p_name.lower(), file_format))
+    elif len(list) == 0:
+        print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
+        return -1
+    else:
+        # this should never happen
+        print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
+        return 1
 
     return 0
 
