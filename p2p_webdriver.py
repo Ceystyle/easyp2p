@@ -124,6 +124,13 @@ class P2P:
             print('{0}-Logout war nicht erfolgreich!'.format(self.name))
             #continue anyway
 
+    def logout_by_url(self, wait_until):
+        try:
+            self.driver.get(self.logout_url)
+            self.wdwait(wait_until)
+        except TimeoutException:
+            print("{0}-Logout war nicht erfolgreich!".format(self.name))
+
     def generate_statement_direct(self, start_date, end_date, start_id, end_id, date_format,\
         wait_until=None, submit_btn_id=None, submit_btn_name=None):
         try:
@@ -496,12 +503,7 @@ def open_selenium_robocash(start_date,  end_date):
         output.write(r.content)
     
     #Logout
-    try:
-        robocash.driver.get(robocash.logout_url)
-        robocash.wdwait(EC.title_contains('Willkommen'))
-    except TimeoutException:
-        print("Robocash-Logout war nicht erfolgreich!")
-        #continue anyway
+    robocash.logout_by_url(EC.title_contains('Willkommen'))
 
     #Close browser window
     robocash.driver.close()
@@ -644,12 +646,7 @@ def open_selenium_estateguru(start_date,  end_date):
     df[0].to_csv('p2p_downloads/estateguru_statement.csv')
     
     #Logout
-    try:
-        estateguru.driver.get(estateguru.logout_url)
-        estateguru.wdwait(EC.title_contains('Einloggen/Registrieren'))
-    except TimeoutException:
-        print("Estateguru-Logout war nicht erfolgreich!")
-        #continue anyway
+    estateguru.logout_by_url(EC.title_contains('Einloggen/Registrieren'))
 
     #Close browser window
     estateguru.driver.close()
@@ -777,12 +774,7 @@ def open_selenium_dofinance(start_date,  end_date):
         success = 0
 
     #Logout
-    try:
-        dofinance.driver.get(dofinance.logout_url)
-        dofinance.wdwait(EC.title_contains('Kreditvergabe Plattform'))
-    except TimeoutException:
-        print("{0}-Logout war nicht erfolgreich!".format(dofinance.name))
-        #continue anyway
+    dofinance.logout_by_url(EC.title_contains('Kreditvergabe Plattform'))
 
     #Close browser window
     dofinance.driver.close()
