@@ -921,163 +921,133 @@ def open_selenium_estateguru(start_date,  end_date):
 
 def open_selenium_iuvo(start_date,  end_date):
 
-    p2p_name = 'Iuvo'
-    login_url = 'https://www.iuvo-group.com/de/login/'
-    cashflow_url = 'https://www.iuvo-group.com/de/account-statement/'
+    iuvo = P2P('Iuvo', 3, 'https://www.iuvo-group.com/de/login/', \
+        'https://www.iuvo-group.com/de/account-statement/')
 
     default_name = 'AccountStatement*'
     file_format = 'xlsx'
-    if clean_download_location(p2p_name, default_name, file_format) < 0:
+    if clean_download_location(iuvo.name, default_name, file_format) < 0:
         return -1
 
-    driver = init_webdriver()
-    delay = 3 # seconds
-
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
-        wait_until=EC.element_to_be_clickable((By.NAME, 'login'))) < 0:
+    if iuvo.open_start_page(EC.element_to_be_clickable((By.NAME, 'login'))) < 0:
         return -1
 
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='login', password_field='password', \
-        delay=delay, wait_until=EC.element_to_be_clickable((By.ID, 'p2p_btn_deposit_page_add_funds'))) < 0:
+    if iuvo.log_into_page('login', 'password', EC.element_to_be_clickable((By.ID, 'p2p_btn_deposit_page_add_funds'))) < 0:
         return -1
 
     # Click away cookie policy, if present
     try:
-        driver.find_element_by_id('CybotCookiebotDialogBodyButtonAccept').click()
+        iuvo.driver.find_element_by_id('CybotCookiebotDialogBodyButtonAccept').click()
         print('Iuvo: Cookies wurden akzeptiert')
     except NoSuchElementException:
         pass
 
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Kontoauszug',\
-        element_to_check='date_from', delay=delay) < 0:
+    if iuvo.open_account_statement_page('Kontoauszug', 'date_from') < 0:
         return -1
 
     # Create account statement for given date range
-    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='date_from', end_id='date_to',\
-        date_format='%Y-%m-%d', wait_until=EC.text_to_be_present_in_element((By.XPATH,\
-        '//*[@id="p2p_cont"]/div/div[4]/div/table/tbody/tr[1]/td[2]/strong'),\
+    if iuvo.generate_statement_direct(start_date, end_date, 'date_from', 'date_to', '%Y-%m-%d', \
+        EC.text_to_be_present_in_element((By.XPATH, '//*[@id="p2p_cont"]/div/div[4]/div/table/tbody/tr[1]/td[2]/strong'),\
         'Anfangsbestand '+str(start_date.strftime('%Y-%m-%d')))) < 0:
         return -1
 
     #Download  account statement
-    if download_statement(p2p_name, driver, default_name, file_format,\
+    if iuvo.download_statement(default_name, file_format, \
         download_btn_xpath='/html/body/div[5]/main/div/div/div/div[3]/div[2]/a') < 0:
         success = -1
     else:
         success = 0
 
     #Logout
-    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
-        logout_elem='p2p_logout',  logout_elem_by=By.ID,\
-        logout_success_title='Investieren Sie in Kredite',\
+    iuvo.logout_page('p2p_logout', By.ID, EC.title_contains('Investieren Sie in Kredite'),\
         hover_elem='User name', hover_elem_by=By.NAME)
 
     #Close browser window
-    driver.close()
+    iuvo.driver.close()
 
     return success
 
 def open_selenium_grupeer(start_date,  end_date):
 
-    p2p_name = 'Grupeer'
-    login_url = 'https://www.grupeer.com/de/login'
-    cashflow_url = 'https://www.grupeer.com/de/account-statement'
+    grupeer = P2P('Grupeer', 3, 'https://www.grupeer.com/de/login', 'https://www.grupeer.com/de/account-statement')
 
     default_name = 'Account statement'
     file_format = 'xlsx'
-    if clean_download_location(p2p_name, default_name, file_format) < 0:
+    if clean_download_location(grupeer.name, default_name, file_format) < 0:
         return -1
 
-    driver = init_webdriver()
-    delay = 3 # seconds
-
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
-        wait_until=EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
+    if grupeer.open_start_page(EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
         return -1
 
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
-        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments'))) < 0:
+    if grupeer.log_into_page('email', 'password', EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments'))) < 0:
         return -1
 
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url, \
-        title='Account Statement', element_to_check='from', delay=delay) < 0:
+    if grupeer.open_account_statement_page('Account Statement', 'from') < 0:
         return -1
 
     # Create account statement for given date range
-    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='from', end_id='to',\
-        date_format='%d.%m.%Y', wait_until=EC.text_to_be_present_in_element((By.XPATH,\
+    if grupeer.generate_statement_direct(start_date, end_date, 'from', 'to', '%d.%m.%Y', \
+        EC.text_to_be_present_in_element((By.XPATH,\
         '/html/body/div[4]/div/div[2]/div/div/div[1]/div[2]'),\
         'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y')))) < 0:
         return -1
 
     #Download account statement
-    if download_statement(p2p_name, driver, default_name, file_format,\
-        download_btn_name='excel') < 0:
+    if grupeer.download_statement(default_name, file_format, download_btn_name='excel') < 0:
         success = -1
     else:
         success = 0
 
     #Logout
-    logout_page(p2p_name=p2p_name, driver=driver, delay=delay,\
-        logout_elem='Ausloggen',  logout_elem_by=By.LINK_TEXT,\
-        logout_success_title='P2P Investitionsplattform Grupeer',\
-        hover_elem='/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li/a/span', hover_elem_by=By.XPATH)
+    grupeer.logout_page('Ausloggen', By.LINK_TEXT, EC.title_contains('P2P Investitionsplattform Grupeer'),\
+        '/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li/a/span', By.XPATH)
 
     #Close browser window
-    driver.close()
+    grupeer.driver.close()
 
     return success
 
 def open_selenium_dofinance(start_date,  end_date):
 
-    p2p_name = 'DoFinance'
-    login_url = 'https://www.dofinance.eu/de/users/login'
-    cashflow_url = 'https://www.dofinance.eu/de/users/statement'
-    logout_url = 'https://www.dofinance.eu/de/users/logout'
+    dofinance = P2P('DoFinance', 3, 'https://www.dofinance.eu/de/users/login', \
+        'https://www.dofinance.eu/de/users/statement', 'https://www.dofinance.eu/de/users/logout')
 
     default_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(start_date.strftime('%Y-%m-%d'),\
         end_date.strftime('%Y-%m-%d'))
     file_format = 'xlsx'
-    if clean_download_location(p2p_name, default_name, file_format) < 0:
+    if clean_download_location(dofinance.name, default_name, file_format) < 0:
         return -1
 
-    driver = init_webdriver()
-    delay = 3 # seconds
-
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
-        wait_until=EC.element_to_be_clickable((By.NAME, 'email')), title_check='Anmeldung') < 0:
+    if dofinance.open_start_page(EC.element_to_be_clickable((By.NAME, 'email')), title_check='Anmeldung') < 0:
         return -1
 
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', \
-        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN'))) < 0:
+    if dofinance.log_into_page('email', 'password', EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN'))) < 0:
         return -1
 
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url, \
-        title='Transaktionen', element_to_check='date-from', delay=delay) < 0:
+    if dofinance.open_account_statement_page('Transaktionen', 'date-from') < 0:
         return -1
 
     # Create account statement for given date range
-    if generate_statement_direct(p2p_name=p2p_name, driver=driver, delay=delay, start_date=start_date, end_date=end_date,\
-        start_id='date-from', end_id='date-to', date_format='%d.%m.%Y',\
-        wait_until=EC.text_to_be_present_in_element((By.XPATH, '/html/body/section[1]/div/div/div[2]/div[1]/div[4]/div[1]'),\
-        'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))),  submit_btn_name='trans_type') < 0:
+    if dofinance.generate_statement_direct(start_date, end_date, 'date-from', 'date-to', '%d.%m.%Y', \
+        EC.text_to_be_present_in_element((By.XPATH, '/html/body/section[1]/div/div/div[2]/div[1]/div[4]/div[1]'),\
+        'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))), 'trans_type') < 0:
         return -1
 
     #Download account statement
-    if download_statement(p2p_name, driver, default_name, file_format, download_btn_name='xls') < 0:
+    if dofinance.download_statement(default_name, file_format, 'xls') < 0:
         success = -1
     else:
         success = 0
 
     #Logout
     try:
-        driver.get(logout_url)
-        WebDriverWait(driver, delay).until(EC.title_contains('Kreditvergabe Plattform'))
+        dofinance.driver.get(dofinance.logout_url)
+        dofinance.wdwait(EC.title_contains('Kreditvergabe Plattform'))
     except TimeoutException:
-        print("{0}-Logout war nicht erfolgreich!".format(p2p_name))
+        print("{0}-Logout war nicht erfolgreich!".format(dofinance.name))
         #continue anyway
 
     #Close browser window
-    driver.close()
+    dofinance.driver.close()
 
     return success
