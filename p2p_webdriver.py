@@ -706,36 +706,29 @@ def open_selenium_mintos(start_date,  end_date):
     
 def open_selenium_robocash(start_date,  end_date):
 
-    p2p_name = 'Robocash'
-    login_url = "https://robo.cash/de"
-    cashflow_url = "https://robo.cash/de/cabinet/statement"
-    logout_url = "https://robo.cash/de/logout"
-    
-    driver = init_webdriver()
-    delay = 3 # seconds
+    robocash = P2P('Robocash', 3, 'https://robo.cash/de', 'https://robo.cash/de/cabinet/statement', \
+    'https://robo.cash/de/logout')
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay, \
-        wait_until=EC.presence_of_element_located((By.XPATH, '/html/body/header/div/div/div[3]/a[1]')),\
-        title_check='Robo.cash') < 0:
+    if robocash.open_start_page(EC.presence_of_element_located((By.XPATH, '/html/body/header/div/div/div[3]/a[1]')),\
+        'Robo.cash') < 0:
         return -1
     
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='email', password_field='password', delay=delay,\
+    if robocash.log_into_page(name_field='email', password_field='password',\
         wait_until=EC.element_to_be_clickable((By.XPATH, '/html/body/header/div/div/div[2]/nav/ul/li[3]/a')),\
         login_field='/html/body/header/div/div/div[3]/a[1]') < 0:
         return -1
     
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Kontoauszug',\
-        element_to_check='new_statement',  delay=delay) < 0:
+    if robocash.open_account_statement_page(title='Kontoauszug', element_to_check='new_statement') < 0:
         return -1
 
     # Create account statement for given date range
     try:
-        driver.find_element_by_id('new_statement').click()
+        robocash.driver.find_element_by_id('new_statement').click()
     except NoSuchElementException:
         print('Generierung des Robocash Kontoauszugs konnte nicht gestartet werden.')
         return -1
 
-    if generate_statement_direct(p2p_name, driver, delay, start_date, end_date, start_id='date-after',\
+    if robocash.generate_statement_direct(start_date, end_date, start_id='date-after',\
         end_id='date-before', date_format='%Y-%m-%d') < 0:
         return -1
 
@@ -744,8 +737,8 @@ def open_selenium_robocash(start_date,  end_date):
     wait = 0
     while not present:
         try:
-            driver.get(cashflow_url)
-            WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.ID, 'download_statement')))
+            robocash.driver.get(robocash.statement_url)
+            robocash.wdwait(EC.presence_of_element_located((By.ID, 'download_statement')))
             present = True
         except TimeoutException:
             wait += 1
@@ -756,8 +749,8 @@ def open_selenium_robocash(start_date,  end_date):
             print('Generierung des Robocash Kontoauszugs noch in Arbeit...')
 
     #Download account statement
-    download_url = driver.find_element_by_id('download_statement').get_attribute('href')
-    driver_cookies = driver.get_cookies()
+    download_url = robocash.driver.find_element_by_id('download_statement').get_attribute('href')
+    driver_cookies = robocash.driver.get_cookies()
     cookies_copy = {}
     for driver_cookie in driver_cookies:
         cookies_copy[driver_cookie["name"]] = driver_cookie["value"]
@@ -767,14 +760,14 @@ def open_selenium_robocash(start_date,  end_date):
     
     #Logout
     try:
-        driver.get(logout_url)
-        WebDriverWait(driver, delay).until(EC.title_contains('Willkommen'))
+        robocash.driver.get(robocash.logout_url)
+        robocash.wdwait(EC.title_contains('Willkommen'))
     except TimeoutException:
         print("Robocash-Logout war nicht erfolgreich!")
         #continue anyway
 
     #Close browser window
-    driver.close()
+    robocash.driver.close()
     
     return 0
     
