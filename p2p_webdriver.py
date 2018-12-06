@@ -819,10 +819,6 @@ def open_selenium_grupeer(start_date,  end_date):
     #Close browser window
     driver.close()
 
-    #Rename downloaded file from generic name
-    if rename_statement(p2p_name, 'Account statement', 'xlsx') < 0:
-        return -1
-
     return success
 
 def open_selenium_dofinance(start_date,  end_date):
