@@ -880,57 +880,27 @@ def open_selenium_peerberry(start_date,  end_date):
 
 def open_selenium_estateguru(start_date,  end_date):
 
-    p2p_name = 'Estateguru'
-    login_url = 'https://estateguru.co/portal/login/auth?lang=de'
-    cashflow_url = 'https://estateguru.co/portal/portfolio/account'
-    logout_url = 'https://estateguru.co/portal/logout/index'
-    
-    driver = init_webdriver()
-    delay = 3 # seconds
+    estateguru = P2P('Estateguru', 3, 'https://estateguru.co/portal/login/auth?lang=de', \
+        'https://estateguru.co/portal/portfolio/account', 'https://estateguru.co/portal/logout/index')
 
-    if open_start_page(driver=driver,  p2p_name=p2p_name, login_url=login_url, delay=delay,\
-        wait_until=EC.element_to_be_clickable((By.NAME, 'username')), title_check='Sign in/Register') < 0:
+    if estateguru.open_start_page(EC.element_to_be_clickable((By.NAME, 'username')), 'Sign in/Register') < 0:
         return -1
 
-    if log_into_page(driver=driver,  p2p_name=p2p_name, name_field='username', password_field='password', \
-        delay=delay, wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND'))) < 0:
+    if estateguru.log_into_page('username', 'password', EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND'))) < 0:
         return -1
 
-    if open_account_statement_page(driver=driver,  p2p_name=p2p_name,  cashflow_url=cashflow_url,  title='Übersicht',\
+    if estateguru.open_account_statement_page('Übersicht',\
         element_to_check='/html/body/section/div/div/div/div[2]/section[1]/div/div/div[2]/div/form/div[2]/ul/li[5]/a',\
-        delay=delay,  check_by=By.XPATH) < 0:
+        check_by=By.XPATH) < 0:
         return -1
 
     #Estateguru currently doesn't offer functionality for downloading cashflow statements.
     #Therefore they have to be read directly from the webpage after applying the filter
     #Since the filter functionality is not really convenient currently (it takes time and the site needs to be reloaded)
-    #We just import the default table, which shows all cashflows ever generated for this account
-    #The filter settings are commented out in case we will need them again in the future
-    
-#    try:
-#        #click filter button
-#        driver.find_element_by_xpath('/html/body/section/div/div/div/div[2]/section[2]/div[1]/div[1]/button').click()
-#        WebDriverWait(driver, delay).until(EC.element_to_be_clickable((By.ID, 'dateApproveFilter')))
-#        elem = driver.find_element_by_id('dateApproveFilter')
-#        elem.clear()
-#        elem.send_keys(datetime.strftime(start_date,'%d.%m.%Y'))
-#        elem = driver.find_element_by_id('dateApproveFilterTo')
-#        elem.clear()
-#        elem.send_keys(datetime.strftime(end_date,'%d.%m.%Y'))
-#        elem.send_keys(Keys.RETURN)
-#        
-#        #click 'Los' button
-#        driver.find_element_by_xpath('/html/body/section/div/div/div/div[2]/section[2]/div[1]/div[3]/form/div[6]/div/div[3]/button').click()
-#        WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.XPATH, '/html/body/section/div/div/div/div[2]/section[2]/div[2]/div/div/table')))
-#    except NoSuchElementException:
-#        print("Fehler beim Generieren des Estateguru Kontoauszugs!")
-#        return -1
-#    except TimeoutException:
-#        print("Die Generierung des Estateguru Kontoauszugs hat zu lange gedauert...")
-#        return -1
+    #we just import the default table, which shows all cashflows ever generated for this account
     
     #Read cashflow data from webpage
-    cashflow_table = driver.find_element_by_xpath('//*[@id="divTransactionList"]/div')
+    cashflow_table = estateguru.driver.find_element_by_xpath('//*[@id="divTransactionList"]/div')
     df = pd.read_html(cashflow_table.get_attribute("innerHTML"),  index_col=0, thousands='.', decimal=',')
 
     #Export data to file
@@ -938,14 +908,14 @@ def open_selenium_estateguru(start_date,  end_date):
     
     #Logout
     try:
-        driver.get(logout_url)
-        WebDriverWait(driver, delay).until(EC.title_contains('Einloggen/Registrieren'))
+        estateguru.driver.get(estateguru.logout_url)
+        estateguru.wdwait(EC.title_contains('Einloggen/Registrieren'))
     except TimeoutException:
         print("Estateguru-Logout war nicht erfolgreich!")
         #continue anyway
 
     #Close browser window
-    driver.close()
+    estateguru.driver.close()
 
     return 0
 
