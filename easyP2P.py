@@ -1,4 +1,3 @@
-import time
 from datetime import datetime
 import os
 import pandas as pd
@@ -113,25 +112,14 @@ if __name__=="__main__":
     end_date_dt = datetime.strptime('31.10.2018','%d.%m.%Y')
     start_date = datetime.date(start_date_dt)
     end_date = datetime.date(end_date_dt)
-    
+
     # Check if download directory exists, if not create it
     dl_location = './p2p_downloads'
     if not os.path.isdir(dl_location):
         os.makedirs(dl_location)
-    
-    list_of_dfs = []
-    
-#    df_result = pd.DataFrame(columns=['Datum','Währung', 'Plattform', 'Anfangssaldo '+str(start_date), 'Investitionen',\
-#        'Tilgungszahlungen', 'Zinszahlungen', 'Verzugsgebühren', 'Ausfälle', 'Rückkäufe',\
-#        'Zinszahlungen aus Rückkäufen', 'Zinszahlungen (gesamt)','Endsaldo '+str(end_date)],  dtype='float64')
 
-    #Bondora (Selenium)
-#    open_selenium_bondora()
-    #TODO: Fehlerfälle (int-Returns) behandeln
-    #df_bondora.to_csv('Bondora_Gesamt.csv')
-#    df_bondora = pd.read_csv('Bondora_Gesamt.csv',  index_col=0)
-#    parse_bondora(start_date,  end_date,  df_bondora, df_result)
-    
+    list_of_dfs = []
+
     for platform in p2p_choice:
         try:
             func = getattr(wd, 'open_selenium_'+platform.lower())
@@ -150,14 +138,5 @@ if __name__=="__main__":
                     df = parser()
                     list_of_dfs.append(df)
 
-#    df_mintos = p2p_parser.parse_mintos()
-#    list_of_dfs.append(df_mintos)
-#    df_robocash = parse_robocash()
-#    list_of_dfs.append(df_robocash)
-#    df_swaper = parse_swaper()
-#    list_of_dfs.append(df_swaper)
-    
     df_result = combine_dfs(list_of_dfs)
     show_results(df_result,  start_date,  end_date)
-
-    # Get rid of download directory
