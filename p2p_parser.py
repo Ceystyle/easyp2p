@@ -1,3 +1,4 @@
+import locale
 import pandas as pd
 import xlrd
 
@@ -13,25 +14,31 @@ def read_excel(p2p_name,  filename):
         
     return df
 
-def bondora(start_date,  end_date,  df_bondora,  df_result):
-    try:
-        df_bondora.replace({'\.': '',  ',':'.',  '€':''},  inplace=True,  regex=True)
-        df_data = df_bondora.loc['Okt 2018'].astype(float)
-        df_result.loc['Bondora']['Anfangssaldo '+str(start_date)] = df_data['Startguthaben']
-        df_result.loc['Bondora']['Investitionen'] = df_data['Investitionen (netto)']
-        df_result.loc['Bondora']['Tilgungszahlungen'] = df_data['Erhaltener Kapitalbetrag - gesamt']
-        df_result.loc['Bondora']['Zinszahlungen'] = df_data['Erhaltene Zinsen - gesamt']
-        df_result.loc['Bondora']['Verzugsgebühren'] = 0 #Bondora doesn't show late fees separately
-        df_result.loc['Bondora']['Ausfälle'] = \
-            round(df_data['Geplanter Kapitalbetrag - gesamt'] - df_data['Erhaltener Kapitalbetrag - gesamt'],  2)
-        df_result.loc['Bondora']['Rückkäufe'] = 0 # Bondora doesn't provide a buyback service
-        df_result.loc['Bondora']['Zinszahlungen aus Rückkäufen'] = 0 # Bondora doesn't provide a buyback service
-        df_result.loc['Bondora']['Zinszahlungen (gesamt)'] = df_data['Erhaltene Zinsen - gesamt']
-        df_result.loc['Bondora']['Endsaldo '+str(end_date)] = df_data['Endsaldo']
-        df_result.loc['Bondora'] = df_result.loc['Bondora'].astype(str) + '€'
-        df_result.loc['Bondora'].replace('\.', ',',  inplace=True,  regex=True)
-    except:
-        print("Der Bondora-Kontoauszug konnte nicht verarbeitet werden!")
+def bondora():
+    df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
+
+    df.drop(['Gesamt:'], inplace=True)
+    df.replace({'\.': '',  ',':'.',  '€':''},  inplace=True,  regex=True)
+    df.rename_axis('Datum', inplace=True)
+    df.rename(columns={'Erhaltene Zinsen - gesamt': 'Zinszahlungen', 'Investitionen (netto)': 'Investitionen', \
+        'Erhaltener Kapitalbetrag - gesamt': 'Tilgungszahlungen', 'Eingesetztes Kapital (netto)': 'Einzahlungen'},  inplace=True)
+    df.rename(columns={'Darlehensbetrag und erhaltene Zinsen - insgesamt': 'Gesamtzahlungen', \
+        'Geplanter Kapitalbetrag - gesamt': 'Geplante Tilgungszahlungen', \
+        'Geplante Zinsen - gesamt': 'Geplante Zinszahlungen', \
+        'Kapitalbetrag und geplante Zinsen - gesamt': 'Geplante Gesamtzahlungen'},  inplace=True)
+    df = df.astype('float64')
+
+    df['Währung'] = 'EUR'
+    df['Plattform'] = 'Bondora'
+    df['Ausfälle'] = df['Tilgungszahlungen'] - df['Geplante Tilgungszahlungen']
+
+    df.reset_index(level=0, inplace=True)
+    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8') #TODO: make sure locale is installed
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%b %Y')
+    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
+
+    return df_result
 
 def mintos():
     df = read_excel('Mintos', 'p2p_downloads/mintos_statement.xlsx')

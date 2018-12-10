@@ -15,7 +15,8 @@ def choose_P2P():
         '5': 'Estateguru', \
         '6': 'Iuvo', \
         '7': 'Grupeer', \
-        '8': 'DoFinance'
+        '8': 'DoFinance', \
+        '9': 'Bondora'
     }
     
     print ('Folgende Plattformen sind verfügbar:')

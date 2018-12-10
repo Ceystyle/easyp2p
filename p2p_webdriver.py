@@ -1,11 +1,13 @@
 import credentials
 from datetime import datetime
 import glob
+import locale
 import os
 import pandas as pd
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -337,74 +339,58 @@ def rename_statement(p2p_name, default_name,  file_format):
 
     return 0
 
-def open_selenium_bondora():
-    # TODO: this function is currently broken and needs to be fixed first
-    login_url = "https://www.bondora.com/de/login"
-    cashflow_url = "https://www.bondora.com/de/cashflow"
-    logout_url = "https://www.bondora.com/de/authorize/logout"
+def open_selenium_bondora(start_date, end_date):
+    bondora = P2P('Bondora', 'https://www.bondora.com/de/login', 'https://www.bondora.com/de/cashflow', 'https://www.bondora.com/de/authorize/logout')
 
-    driver = init_webdriver()
-    delay = 3 # seconds
-    
-    try:
-        driver.get(login_url)
-        assert "Bondora" in driver.title
-    except:
-        print("Die Bondora Webseite konnte nicht geladen werden.")
-        return -1
-    
-    #Log in
-    elem = driver.find_element_by_name("Email")
-    elem.clear()
-    elem.send_keys('')
-    elem.send_keys(Keys.RETURN)
-    
-    elem = driver.find_element_by_name("Password")
-    elem.clear()
-    elem.send_keys('')
-    elem.send_keys(Keys.RETURN)
-
-    try:
-        # TODO: this needs to fixed
-        pass
-#        WebDriverWait(driver, delay).until(EC.text_to_be_present_in_element(((By.XPATH, '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/div/div/div[1]')), \
-#            'Eröffnungssaldo '+str(start_date).format('%Y-%m-%d')))
-    except TimeoutException:
-        print("Laden der Bondora-Seite hat zu lange gedauert!")
-        return -1
-    
-    #Open cashflow page
-    driver.get(cashflow_url)
-    try:
-        assert "Cashflow" in driver.title
-        WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'th.text-center:nth-child(3)')))
-    except:
-        print("Cashflow-Übersicht konnte nicht geladen werden. Passwort korrekt?")
+    if bondora.open_start_page(EC.element_to_be_clickable((By.NAME, 'Email'))) < 0:
         return -1
 
-    #Read cashflow page
-    #TODO: make sure that all relevant columns are visible
-    try:
-        html = driver.page_source
-        df = pd.read_html(html,  index_col=0)[1]
-        assert len(df.index) > 0
-    except:
-        print("Cashflow-Tabelle konnte nicht ausgelesen werden.")
-        return -3
+    if bondora.log_into_page(name_field='Email', password_field='Password', \
+        wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow'))) < 0:
+        return -1
+
+    if bondora.open_account_statement_page(title='Cashflow', element_to_check='StartYear') < 0:
+        return -1
+
+    #Set start and end date for account statement
+    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8') #TODO: make sure locale is installed
+    start_year = Select(bondora.driver.find_element_by_id('StartYear')).first_selected_option.text
+    start_month = Select(bondora.driver.find_element_by_id('StartMonth')).first_selected_option.text
+    end_year = Select(bondora.driver.find_element_by_id('EndYear')).first_selected_option.text
+    end_month = Select(bondora.driver.find_element_by_id('EndMonth')).first_selected_option.text
+
+    if start_year != start_date.year:
+        select = Select(bondora.driver.find_element_by_id('StartYear'))
+        select.select_by_visible_text(str(start_date.year))
+
+    if start_month != start_date.strftime('%b'):
+        select = Select(bondora.driver.find_element_by_id('StartMonth'))
+        select.select_by_visible_text(str(start_date.strftime('%b')))
+
+    if end_year != end_date.year:
+        select = Select(bondora.driver.find_element_by_id('EndYear'))
+        select.select_by_visible_text(str(end_date.year))
+
+    if end_month != end_date.strftime('%b'):
+        select = Select(bondora.driver.find_element_by_id('EndMonth'))
+        select.select_by_visible_text(str(end_date.strftime('%b')))
+
+    bondora.driver.find_element_by_xpath('//*[@id="page-content-wrapper"]/div/div/div[1]/form/div[3]/button').click()
+    bondora.wdwait(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div[1]/div/div/div/div[3]/div/table/tbody/tr[2]/td[1]/a'), \
+    '{0} {1}'.format(start_date.strftime('%b'), start_date.year)))
+
+    #Read cashflow data from webpage and write it to file
+    cashflow_table = bondora.driver.find_element_by_id('cashflow-content')
+    df = pd.read_html(cashflow_table.get_attribute("innerHTML"),  index_col=0, thousands='.', decimal=',')
+    df[0].to_csv('p2p_downloads/bondora_statement.csv')
 
     #Logout
-    driver.get(logout_url)
-    try:
-        WebDriverWait(driver, delay).until(EC.title_contains('Einloggen'))
-        print("Logout erfolgreich!")
-    except:
-        print("Logout nicht erfolgreich!")
-        return -4
+    bondora.logout_by_url(EC.title_contains('Einloggen'))
 
-    #Browserfenster schließen
-    driver.close()
-    
-    return df
+    #Close browser window
+    bondora.driver.close()
+
+    return 0
 
 def open_selenium_mintos(start_date,  end_date):
 
