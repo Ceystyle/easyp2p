@@ -549,7 +549,7 @@ def open_selenium_swaper(start_date,  end_date):
         success = 0
 
     #Logout
-    swaper.logout_by_button('//*[@id="logout"]/span[1]/span', EC.presence_of_element_located((By.ID, 'about')))
+    swaper.logout_by_button('//*[@id="logout"]/span[1]/span', By.XPATH, EC.presence_of_element_located((By.ID, 'about')))
 
     #Close browser window
     swaper.driver.close()
