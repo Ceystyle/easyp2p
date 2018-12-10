@@ -90,15 +90,27 @@ def show_results(df,  start_date,  end_date):
     end_date = pd.Timestamp(end_date)
     df = df[(df['Datum'] >= start_date) & (df['Datum'] <= end_date)]
 
+    #print monthly results to screen
     print('Monatsergebnisse für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
         end_date.strftime('%d.%m.%Y')))
     month_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung', 'Monat'],  aggfunc=sum)
     print(month_pivot_table)
+
+    #print monthly results to file
+    output_file = 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(start_date.strftime('%d.%m.%Y'), end_date.strftime('%d.%m.%Y'))
+    writer = pd.ExcelWriter(output_file)
+    month_pivot_table.to_excel(writer, 'Monatsergebnisse')
     
+    #print total results to screen
     print('Gesamtergebnis für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
         end_date.strftime('%d.%m.%Y')))
-    print(pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung'],  aggfunc=sum))
-        
+    totals_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung'],  aggfunc=sum)
+    print(totals_pivot_table)
+
+    #print total results to file
+    totals_pivot_table.to_excel(writer, 'Gesamtergebnis')
+    writer.save()
+
     return 0
 
 if __name__=="__main__":
