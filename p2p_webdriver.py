@@ -558,14 +558,14 @@ def open_selenium_swaper(start_date,  end_date):
 
 def open_selenium_peerberry(start_date,  end_date):
 
-    peerberry = P2P('Peerberry', 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement')
+    peerberry = P2P('PeerBerry', 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement')
 
     default_name = 'transactions'
     file_format = 'csv'
     if clean_download_location(peerberry.name, default_name, file_format) < 0:
         return -1
 
-    if peerberry.open_start_page(EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
+    if peerberry.open_start_page(EC.element_to_be_clickable((By.NAME, 'email')), 'PeerBerry.com') < 0:
         return -1
 
     if peerberry.log_into_page('email', 'password', EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))) < 0:
