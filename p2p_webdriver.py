@@ -409,7 +409,7 @@ def open_selenium_bondora():
 def open_selenium_mintos(start_date,  end_date):
 
     mintos = P2P('Mintos', 'https://www.mintos.com/de/', 'https://www.mintos.com/de/kontoauszug/')
-    
+
     today = datetime.today()
     default_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
         today.strftime('%d'))
@@ -433,7 +433,7 @@ def open_selenium_mintos(start_date,  end_date):
         date_format='%d.%m.%Y', wait_until=EC.presence_of_element_located((By.ID, 'export-button')),\
         submit_btn_id='filter-button') < 0:
         return -1
-        
+
     #Download  account statement
     if mintos.download_statement(default_name,  file_format,  download_btn_id='export-button') < 0:
         success = -1
@@ -447,7 +447,7 @@ def open_selenium_mintos(start_date,  end_date):
     mintos.driver.close()
 
     return success
-    
+
 def open_selenium_robocash(start_date,  end_date):
 
     robocash = P2P('Robocash', 'https://robo.cash/de', 'https://robo.cash/de/cabinet/statement', \
@@ -456,12 +456,12 @@ def open_selenium_robocash(start_date,  end_date):
     if robocash.open_start_page(EC.presence_of_element_located((By.XPATH, '/html/body/header/div/div/div[3]/a[1]')),\
         'Robo.cash') < 0:
         return -1
-    
+
     if robocash.log_into_page(name_field='email', password_field='password',\
         wait_until=EC.element_to_be_clickable((By.XPATH, '/html/body/header/div/div/div[2]/nav/ul/li[3]/a')),\
         login_field='/html/body/header/div/div/div[3]/a[1]') < 0:
         return -1
-    
+
     if robocash.open_account_statement_page(title='Kontoauszug', element_to_check='new_statement') < 0:
         return -1
 
@@ -489,7 +489,7 @@ def open_selenium_robocash(start_date,  end_date):
             if wait > 10: # roughly 10*delay=30 seconds
                 print('Generierung des Robocash Kontoauszugs abgebrochen.')
                 return -1
-                
+
             print('Generierung des Robocash Kontoauszugs noch in Arbeit...')
 
     #Download account statement
@@ -501,15 +501,15 @@ def open_selenium_robocash(start_date,  end_date):
     r = requests.get(download_url, cookies = cookies_copy)
     with open('p2p_downloads/robocash_statement.xls', 'wb') as output:
         output.write(r.content)
-    
+
     #Logout
     robocash.logout_by_url(EC.title_contains('Willkommen'))
 
     #Close browser window
     robocash.driver.close()
-    
+
     return 0
-    
+
 def open_selenium_swaper(start_date,  end_date):
 
     swaper = P2P('Swaper', 'https://www.swaper.com/#/dashboard', \
@@ -526,7 +526,7 @@ def open_selenium_swaper(start_date,  end_date):
     if swaper.log_into_page('email', 'password', EC.presence_of_element_located((By.ID, 'open-investments')), \
         fill_delay=0.5) < 0:
         return -1
-    
+
     if swaper.open_account_statement_page(title='Swaper', element_to_check='account-statement') < 0:
         return -1
 
@@ -599,7 +599,7 @@ def open_selenium_peerberry(start_date,  end_date):
     except (NoSuchElementException,  TimeoutException):
         print('Die Generierung des Peerberry-Kontoauszugs konnte nicht gestartet werden.')
         return -1
-    
+
     #Download  account statement
     if peerberry.download_statement(default_name, file_format,\
         download_btn_xpath='//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div',\
@@ -607,7 +607,7 @@ def open_selenium_peerberry(start_date,  end_date):
         success = -1
     else:
         success = 0
-    
+
     #Logout
     peerberry.logout_by_button('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div', By.XPATH, \
         EC.title_contains('Einloggen'))
@@ -637,14 +637,14 @@ def open_selenium_estateguru(start_date,  end_date):
     #Therefore they have to be read directly from the webpage after applying the filter
     #Since the filter functionality is not really convenient currently (it takes time and the site needs to be reloaded)
     #we just import the default table, which shows all cashflows ever generated for this account
-    
+
     #Read cashflow data from webpage
     cashflow_table = estateguru.driver.find_element_by_xpath('//*[@id="divTransactionList"]/div')
     df = pd.read_html(cashflow_table.get_attribute("innerHTML"),  index_col=0, thousands='.', decimal=',')
 
     #Export data to file
     df[0].to_csv('p2p_downloads/estateguru_statement.csv')
-    
+
     #Logout
     estateguru.logout_by_url(EC.title_contains('Einloggen/Registrieren'))
 
