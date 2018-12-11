@@ -722,9 +722,8 @@ def open_selenium_grupeer(start_date,  end_date):
 
     # Create account statement for given date range
     if grupeer.generate_statement_direct(start_date, end_date, 'from', 'to', '%d.%m.%Y', \
-        EC.text_to_be_present_in_element((By.XPATH,\
-        '/html/body/div[4]/div/div[2]/div/div/div[1]/div[2]'),\
-        'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y')))) < 0:
+        EC.text_to_be_present_in_element((By.CLASS_NAME, 'balance-block'), 'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y'))), \
+        submit_btn_name='submit') < 0:
         return -1
 
     #Download account statement
