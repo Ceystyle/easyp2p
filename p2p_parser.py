@@ -242,6 +242,9 @@ def grupeer():
     grupeer_dict = dict()
     grupeer_dict['Interest'] = 'Zinszahlungen'
     grupeer_dict['Investment'] = 'Investitionen'
+    grupeer_dict['Deposit'] = 'Einzahlungen'
+    grupeer_dict['Cashback'] = 'Zinszahlungen' # treat cashback as interest payment
+    grupeer_dict['Principal'] = 'Tilgungszahlungen'
 
     df.rename(columns={'Date': 'Datum'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format="%d.%m.%Y")
