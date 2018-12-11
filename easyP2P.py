@@ -78,8 +78,8 @@ def show_results(df,  start_date,  end_date):
         print('Keine Ergebnisse vorhanden')
         return -1
 
-    target_columns = ['Investitionen', 'Tilgungszahlungen', 'Zinszahlungen', 'Verzugsgebühren',\
-        'Rückkäufe', 'Zinszahlungen aus Rückkäufen']
+    target_columns = ['Startguthaben', 'Endsaldo', 'Investitionen', 'Tilgungszahlungen', 'Zinszahlungen', 'Verzugsgebühren',\
+        'Rückkäufe', 'Zinszahlungen aus Rückkäufen', 'Ausfälle']
     show_columns = [col for col in df.columns if col in target_columns]
 
     df.reset_index(level=['Datum', 'Währung'],  inplace=True)
@@ -103,9 +103,13 @@ def show_results(df,  start_date,  end_date):
     month_pivot_table.to_excel(writer, 'Monatsergebnisse')
     
     #print total results to screen
+    start_balance = month_pivot_table.iloc[0]['Startguthaben']
+    end_balance = month_pivot_table.iloc[-1]['Endsaldo']
     print('Gesamtergebnis für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
         end_date.strftime('%d.%m.%Y')))
     totals_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung'],  aggfunc=sum)
+    totals_pivot_table['Startguthaben']  = start_balance
+    totals_pivot_table['Endsaldo']  = end_balance
     print(totals_pivot_table)
 
     #print total results to file
