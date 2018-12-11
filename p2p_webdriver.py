@@ -469,7 +469,7 @@ def open_selenium_robocash(start_date,  end_date):
     while not present:
         try:
             robocash.driver.get(robocash.statement_url)
-            robocash.wdwait(EC.presence_of_element_located((By.ID, 'download_statement')))
+            robocash.wdwait(EC.element_to_be_clickable((By.ID, 'download_statement')))
             present = True
         except TimeoutException:
             wait += 1

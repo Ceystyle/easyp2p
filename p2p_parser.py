@@ -88,7 +88,9 @@ def robocash():
     robocash_dict['Zinsenzahlung'] = 'Zinszahlungen'
     robocash_dict['Darlehenskauf'] = 'Investitionen'
     robocash_dict['Kreditrückzahlung'] = 'Tilgungszahlungen'
-    
+    robocash_dict['Die Geldauszahlung'] = 'Auszahlungen'
+
+    df = df[df.Operation != 'Die Geldauszahlung aus dem Portfolio']
     df.rename(columns={'Datum und Laufzeit': 'Datum'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%Y-%m-%d %H:%M:%S')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
