@@ -114,6 +114,7 @@ def swaper():
 
     swaper_dict = dict()
     swaper_dict['REPAYMENT_INTEREST'] = 'Zinszahlungen'
+    swaper_dict['EXTENSION_INTEREST'] = 'Zinszahlungen'
     swaper_dict['INVESTMENT'] = 'Investitionen'
     swaper_dict['REPAYMENT_PRINCIPAL'] = 'Tilgungszahlungen'
     swaper_dict['BUYBACK_INTEREST'] = 'Zinszahlungen aus Rückkäufen'
