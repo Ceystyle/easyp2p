@@ -54,12 +54,12 @@ def get_date(date_label):
     while cont:
         try:
             input_date = input('Bitte geben Sie das '+date_label+' an: ')
-            date = datetime.strptime(input_date,'%d.%m.%Y')
+            target_date = datetime.strptime(input_date,'%d.%m.%Y').date()
             cont = False
-        except:
+        except ValueError:
             print("Ungültige Angabe. Bitte geben Sie das Datum im Format dd.mm.yyyy ein!")
             
-    return date
+    return target_date
     
 def combine_dfs(list_of_dfs):
     
@@ -123,12 +123,8 @@ if __name__=="__main__":
     p2p_choice = choose_P2P()
 
     # Get start and end dates for statement generation
-#    start_date = get_date('Startdatum')
-#    end_date = get_date('Enddatum')
-    start_date_dt = datetime.strptime('01.09.2018','%d.%m.%Y')
-    end_date_dt = datetime.strptime('31.10.2018','%d.%m.%Y')
-    start_date = datetime.date(start_date_dt)
-    end_date = datetime.date(end_date_dt)
+    start_date = get_date('Startdatum')
+    end_date = get_date('Enddatum')
 
     # Check if download directory exists, if not create it
     dl_location = './p2p_downloads'
