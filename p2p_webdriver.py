@@ -764,11 +764,11 @@ def open_selenium_dofinance(start_date,  end_date):
     # Create account statement for given date range
     if dofinance.generate_statement_direct(start_date, end_date, 'date-from', 'date-to', '%d.%m.%Y', \
         EC.text_to_be_present_in_element((By.XPATH, '/html/body/section[1]/div/div/div[2]/div[1]/div[4]/div[1]'),\
-        'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))), 'trans_type') < 0:
+        'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))), submit_btn_name='trans_type') < 0:
         return -1
 
     #Download account statement
-    if dofinance.download_statement(default_name, file_format, 'xls') < 0:
+    if dofinance.download_statement(default_name, file_format, download_btn_name='xls') < 0:
         success = -1
     else:
         success = 0
