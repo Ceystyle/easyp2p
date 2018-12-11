@@ -1,5 +1,6 @@
+import calendar
 import credentials
-from datetime import datetime
+from datetime import datetime,  date,  timedelta
 import glob
 import locale
 import os
@@ -644,11 +645,6 @@ def open_selenium_iuvo(start_date,  end_date):
     iuvo = P2P('Iuvo', 'https://www.iuvo-group.com/de/login/', \
         'https://www.iuvo-group.com/de/account-statement/')
 
-    default_name = 'AccountStatement*'
-    file_format = 'xlsx'
-    if clean_download_location(iuvo.name, default_name, file_format) < 0:
-        return -1
-
     if iuvo.open_start_page(EC.element_to_be_clickable((By.NAME, 'login'))) < 0:
         return -1
 
@@ -665,27 +661,46 @@ def open_selenium_iuvo(start_date,  end_date):
     if iuvo.open_account_statement_page('Kontoauszug', 'date_from') < 0:
         return -1
 
-    # Create account statement for given date range
-    if iuvo.generate_statement_direct(start_date, end_date, 'date_from', 'date_to', '%Y-%m-%d', \
-        EC.text_to_be_present_in_element((By.XPATH, '//*[@id="p2p_cont"]/div/div[4]/div/table/tbody/tr[1]/td[2]/strong'),\
-        'Anfangsbestand '+str(start_date.strftime('%Y-%m-%d')))) < 0:
-        return -1
+    #Since Dec 2018 Iuvo only provides aggregated cashflows for the whole requested date range, no more detailed information
+    #Workaround to get monthly data: create account statement for each month in date range
 
-    #Download  account statement
-    if iuvo.download_statement(default_name, file_format, \
-        download_btn_xpath='/html/body/div[5]/main/div/div/div/div[3]/div[2]/a') < 0:
-        success = -1
-    else:
-        success = 0
+    #Get all required monthly date ranges
+    months = []
+    m = start_date
+    while m < end_date:
+        months.append([date(m.year, m.month, 1), date(m.year, m.month, calendar.monthrange(m.year, m.month)[1])])
+        m = m + timedelta(days=31)
+
+    df_result = None
+    for month in months:
+        # Create account statement for given date range
+        if iuvo.generate_statement_direct(month[0], month[1], 'date_from', 'date_to', '%Y-%m-%d', \
+            EC.text_to_be_present_in_element((By.XPATH, '/html/body/div[5]/main/div/div/div/div[4]/div/table/thead/tr[1]/td[1]/strong'),\
+            'Anfangsbestand'), submit_btn_id='account_statement_filters_btn') < 0:
+            return -1
+
+        #Read statement from page
+        time.sleep(3) #TODO: find better way for waiting until new statement is generated
+        statement_table = iuvo.driver.find_element_by_class_name('table-responsive')
+        df = pd.read_html(statement_table.get_attribute("innerHTML"), index_col=0)[0]
+        df = df.T
+        df['Datum'] = month[0].strftime('%d.%m.%Y')
+
+        if df_result is None:
+            df_result = df
+        else:
+            df_result = df_result.append(df, sort=True)
+
+    df_result.to_csv('p2p_downloads/iuvo_statement.csv')
 
     #Logout
     iuvo.logout_by_button('p2p_logout', By.ID, EC.title_contains('Investieren Sie in Kredite'),\
-        hover_elem='User name', hover_elem_by=By.NAME)
+        hover_elem='User name', hover_elem_by=By.LINK_TEXT)
 
     #Close browser window
     iuvo.driver.close()
 
-    return success
+    return 0
 
 def open_selenium_grupeer(start_date,  end_date):
 

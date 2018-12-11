@@ -197,38 +197,36 @@ def estateguru():
     return df_result
 
 def iuvo():
-    df = read_excel('Iuvo', 'p2p_downloads/iuvo_statement.xlsx')
+    df = pd.read_csv('p2p_downloads/iuvo_statement.csv', index_col=-1)
 
     if df is None:
         return None
 
-    iuvo_dict = dict()
-    iuvo_dict['payment_interest'] = 'Zinszahlungen'
-    iuvo_dict['payment_interest_early'] = 'Zinszahlungen'
-    iuvo_dict['primary_market_auto_invest'] = 'Investitionen'
-    iuvo_dict['payment_principal_buyback'] = 'Rückkäufe'
-    iuvo_dict['payment_principal'] = 'Tilgungszahlungen'
-    iuvo_dict['payment_principal_early'] = 'Tilgungszahlungen'
-    iuvo_dict['late_fee'] = 'Verzugsgebühren'
+    df['Zinszahlungen'] = 0
+    df['Tilgungszahlungen'] = 0
+    df = df.astype('float64', errors='ignore') #the date column will raise an error which can be ignored
 
-    df = df[1:] #drop first two lines
-    df = df[:-3] #drop the last three rows
-    new_header = df.iloc[0] #grab the first row for the header
-    df = df[1:] #take the data less the header row
-    df.columns = new_header #set the header row as the df header
-    df.rename(columns={'Date': 'Datum',  'Currency': 'Währung'},  inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'],  format="%Y-%m-%d %H:%M:%S.%f")
+    interest_types = ['Zins erhalten', 'Vorzeitige Zinstilgung']
+    for it in interest_types:
+        if it in df.columns:
+            df['Zinszahlungen'] += df[it]
+            del df[it]
+
+    redemption_types = ['Vorzeitige Kreditbetragtilgung', 'Kreditbetrag erhalten']
+    for rt in redemption_types:
+        if rt in df.columns:
+            df['Tilgungszahlungen'] += df[rt]
+            del df[rt]
+
+    df.rename(columns={'Anfangsbestand': 'Startguthaben', 'Endbestand': 'Endsaldo', 'Automatische Kapitalanlage auf dem Primärmarkt': 'Investitionen', \
+        'Kreditbetrag bei Rückkauf erhalten': 'Rückkäufe', 'Verzugsstrafen erhalten': 'Verzugsgebühren'}, inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Cashflow-Typ'] = df['Transaction Type'].map(iuvo_dict)
     df['Plattform'] = 'Iuvo'
+    df['Währung'] = 'EUR'
 
-    if df['Transaction Type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Iuvo: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Transaction Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
-
-    df_result = pd.pivot_table(df, values='Turnover',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
-    df_result.fillna(0,  inplace=True)
+    df.reset_index(level=0, inplace=True)
+    df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
     return df_result
 
