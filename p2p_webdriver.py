@@ -340,6 +340,17 @@ def rename_statement(p2p_name, default_name,  file_format):
 
     return 0
 
+def short_month_to_nbr(short_name):
+    short_month_to_nbr = {'Jan': '01',  'Feb': '02', 'Mrz': '03', 'Mar': '03', 'Apr': '04', 'Mai': '05', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', \
+        'Sep': '09', 'Okt': '10', 'Oct': '10', 'Nov': '11', 'Dez': '12', 'Dec': '12'}
+    return short_month_to_nbr[short_name]
+
+def nbr_to_short_month(nbr):
+    #Only German locale is used so far
+    nbr_to_short_month = {'01': 'Jan', '02': 'Feb', '03': 'Mrz', '04': 'Apr', '05': 'Mai', '06': 'Jun', '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Okt', \
+        '11': 'Nov', '12': 'Dez'}
+    return nbr_to_short_month[nbr]
+
 def open_selenium_bondora(start_date, end_date):
     bondora = P2P('Bondora', 'https://www.bondora.com/de/login', 'https://www.bondora.com/de/cashflow', 'https://www.bondora.com/de/authorize/logout')
 
@@ -354,7 +365,6 @@ def open_selenium_bondora(start_date, end_date):
         return -1
 
     #Set start and end date for account statement
-    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8') #TODO: make sure locale is installed
     start_year = Select(bondora.driver.find_element_by_id('StartYear')).first_selected_option.text
     start_month = Select(bondora.driver.find_element_by_id('StartMonth')).first_selected_option.text
     end_year = Select(bondora.driver.find_element_by_id('EndYear')).first_selected_option.text
@@ -364,17 +374,17 @@ def open_selenium_bondora(start_date, end_date):
         select = Select(bondora.driver.find_element_by_id('StartYear'))
         select.select_by_visible_text(str(start_date.year))
 
-    if start_month != start_date.strftime('%b'):
+    if short_month_to_nbr(start_month) != start_date.strftime('%m'):
         select = Select(bondora.driver.find_element_by_id('StartMonth'))
-        select.select_by_visible_text(str(start_date.strftime('%b')))
+        select.select_by_visible_text(nbr_to_short_month(start_date.strftime('%m')))
 
     if end_year != end_date.year:
         select = Select(bondora.driver.find_element_by_id('EndYear'))
         select.select_by_visible_text(str(end_date.year))
 
-    if end_month != end_date.strftime('%b'):
+    if short_month_to_nbr(end_month) != end_date.strftime('%m'):
         select = Select(bondora.driver.find_element_by_id('EndMonth'))
-        select.select_by_visible_text(str(end_date.strftime('%b')))
+        select.select_by_visible_text(nbr_to_short_month(end_date.strftime('%m')))
 
     bondora.driver.find_element_by_xpath('//*[@id="page-content-wrapper"]/div/div/div[1]/form/div[3]/button').click()
     bondora.wdwait(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div[1]/div/div/div/div[3]/div/table/tbody/tr[2]/td[1]/a'), \
