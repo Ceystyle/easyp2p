@@ -29,7 +29,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
-        self.platforms = []
+        self.platforms =set([])
         self.start_month = 1
         self.start_year = 2010
         self.end_month = 1
@@ -51,8 +51,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Bondora')
+        if checked:
+            self.platforms.add('Bondora')
         else:
             self.platforms.remove('Bondora')
     
@@ -64,8 +64,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Grupeer')
+        if checked:
+            self.platforms.add('Grupeer')
         else:
             self.platforms.remove('Grupeer')
     
@@ -77,8 +77,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('DoFinance')
+        if checked:
+            self.platforms.add('DoFinance')
         else:
             self.platforms.remove('DoFinance')
     
@@ -90,8 +90,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Iuvo')
+        if checked:
+            self.platforms.add('Iuvo')
         else:
             self.platforms.remove('Iuvo')
     
@@ -103,8 +103,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('PeerBerry')
+        if checked:
+            self.platforms.add('PeerBerry')
         else:
             self.platforms.remove('PeerBerry')
     
@@ -116,8 +116,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Mintos')
+        if checked:
+            self.platforms.add('Mintos')
         else:
             self.platforms.remove('Mintos')
     
@@ -129,8 +129,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Robocash')
+        if checked:
+            self.platforms.add('Robocash')
         else:
             self.platforms.remove('Robocash')
     
@@ -142,8 +142,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Estateguru')
+        if checked:
+            self.platforms.add('Estateguru')
         else:
             self.platforms.remove('Estateguru')
     
@@ -155,8 +155,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Swaper')
+        if checked:
+            self.platforms.add('Swaper')
         else:
             self.platforms.remove('Swaper')
     
@@ -168,8 +168,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @param checked DESCRIPTION
         @type bool
         """
-        if checked == True:
-            self.platforms.append('Twino')
+        if checked:
+            self.platforms.add('Twino')
         else:
             self.platforms.remove('Twino')
 
