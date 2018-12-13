@@ -11,7 +11,7 @@ def combine_dfs(list_of_dfs):
 
     return df_result
 
-def show_results(df,  start_date,  end_date):
+def show_results(df,  start_date,  end_date, output_file):
 
     if df is None:
         print('Keine Ergebnisse vorhanden')
@@ -37,7 +37,6 @@ def show_results(df,  start_date,  end_date):
     print(month_pivot_table)
 
     #print monthly results to file
-    output_file = 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(start_date.strftime('%d.%m.%Y'), end_date.strftime('%d.%m.%Y'))
     writer = pd.ExcelWriter(output_file)
     month_pivot_table.to_excel(writer, 'Monatsergebnisse')
 

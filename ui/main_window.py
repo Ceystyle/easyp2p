@@ -10,7 +10,7 @@ import p2p_parser
 import p2p_results
 import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit
 
 from .Ui_main_window import Ui_MainWindow
 
@@ -34,6 +34,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.start_year = 2010
         self.end_month = 1
         self.end_year = 2010
+        self.set_start_date()
+        self.set_end_date()
+
+    def set_start_date(self):
+        self.start_date = date(self.start_year, self.start_month, 1)
+
+    def set_end_date(self):
+        self.end_date = date(self.end_year, self.end_month, calendar.monthrange(self.end_year, self.end_month)[1])
     
     @pyqtSlot(bool)
     def on_checkBox_bondora_toggled(self, checked):
@@ -174,6 +182,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @type str
         """
         self.start_month = int(wd.short_month_to_nbr(p0))
+        self.set_start_date()
     
     @pyqtSlot(str)
     def on_comboBox_start_year_activated(self, p0):
@@ -184,6 +193,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @type str
         """
         self.start_year = int(p0)
+        self.set_start_date()
     
     @pyqtSlot(str)
     def on_comboBox_end_month_activated(self, p0):
@@ -194,6 +204,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @type str
         """
         self.end_month = int(wd.short_month_to_nbr(p0))
+        self.set_end_date()
     
     @pyqtSlot(str)
     def on_comboBox_end_year_activated(self, p0):
@@ -204,15 +215,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @type str
         """
         self.end_year = int(p0)
+        self.set_end_date()
     
     @pyqtSlot()
     def on_pushButton_start_clicked(self):
         """
         Slot documentation goes here.
         """
-        self.start_date = date(self.start_year, self.start_month, 1)
-        self.end_date = date(self.end_year, self.end_month, calendar.monthrange(self.end_year, self.end_month)[1])
-
         # Check if download directory exists, if not create it
         dl_location = './p2p_downloads'
         if not os.path.isdir(dl_location):
@@ -239,4 +248,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         list_of_dfs.append(df)
 
         df_result = p2p_results.combine_dfs(list_of_dfs)
-        p2p_results.show_results(df_result,  self.start_date,  self.end_date)
+        p2p_results.show_results(df_result,  self.start_date,  self.end_date, self.output_file)
+    
+    @pyqtSlot(str)
+    def on_lineEdit_output_file_textChanged(self, p0):
+        """
+        Slot documentation goes here.
+        
+        @param p0 DESCRIPTION
+        @type str
+        """
+        QLineEdit.setText(self.lineEdit_output_file, p0)
+    
+    @pyqtSlot()
+    def on_pushButton_file_chooser_clicked(self):
+        """
+        Slot documentation goes here.
+        """
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        default_name = 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(self.start_date.strftime('%d.%m.%Y'), self.end_date.strftime('%d.%m.%Y'))
+        self.output_file, _ = QFileDialog.getSaveFileName(self, "Ausgabedatei wählen", default_name, "MS Excel Dateien (*.xlsx)", options=options)
+        if self.output_file:
+            self.on_lineEdit_output_file_textChanged(self.output_file)

@@ -2,7 +2,6 @@ import calendar
 import credentials
 from datetime import datetime,  date,  timedelta
 import glob
-import locale
 import os
 import pandas as pd
 import requests
