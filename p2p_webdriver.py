@@ -682,6 +682,7 @@ def open_selenium_iuvo(start_date,  end_date):
 
     df_result = None
     for month in months:
+        start_balance = iuvo.driver.find_element_by_xpath('/html/body/div[5]/main/div/div/div/div[4]/div/table/thead/tr[1]/td[2]/strong').text
         # Create account statement for given date range
         if iuvo.generate_statement_direct(month[0], month[1], 'date_from', 'date_to', '%Y-%m-%d', \
             EC.text_to_be_present_in_element((By.XPATH, '/html/body/div[5]/main/div/div/div/div[4]/div/table/thead/tr[1]/td[1]/strong'),\
@@ -689,7 +690,9 @@ def open_selenium_iuvo(start_date,  end_date):
             return -1
 
         #Read statement from page
-        time.sleep(3) #TODO: find better way for waiting until new statement is generated
+        new_start_balance = iuvo.driver.find_element_by_xpath('/html/body/div[5]/main/div/div/div/div[4]/div/table/thead/tr[1]/td[2]/strong').text
+        if new_start_balance == start_balance: # if the start balance didn't change, the calculation is most likely not finished yet
+            time.sleep(3) #TODO: find better way for waiting until new statement is generated
         statement_table = iuvo.driver.find_element_by_class_name('table-responsive')
         df = pd.read_html(statement_table.get_attribute("innerHTML"), index_col=0)[0]
         df = df.T
