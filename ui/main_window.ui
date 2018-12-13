@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>658</width>
-    <height>611</height>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QGroupBox" name="groupBox_4">
+          <widget class="QGroupBox" name="groupBox_platforms">
            <property name="title">
             <string>Für welche P2P-Plattformen sollen Ergebnisse geladen werden?</string>
            </property>
@@ -100,6 +100,26 @@
                  <string>Twino</string>
                 </property>
                </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QCheckBox" name="checkBox_select_all">
+                <property name="text">
+                 <string>Alle aus-/abwählen</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </item>

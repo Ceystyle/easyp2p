@@ -10,7 +10,7 @@ import p2p_parser
 import p2p_results
 import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 
 from .Ui_main_window import Ui_MainWindow
 
@@ -271,3 +271,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.output_file, _ = QFileDialog.getSaveFileName(self, "Ausgabedatei wählen", default_name, "MS Excel Dateien (*.xlsx)", options=options)
         if self.output_file:
             self.on_lineEdit_output_file_textChanged(self.output_file)
+    
+    @pyqtSlot(bool)
+    def on_checkBox_select_all_toggled(self, checked):
+        """
+        Slot documentation goes here.
+        
+        @param checked DESCRIPTION
+        @type bool
+        """
+        for check_box in self.groupBox_platforms.findChildren(QCheckBox):
+            check_box.setChecked(checked)
