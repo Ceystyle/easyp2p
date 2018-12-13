@@ -40,6 +40,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comboBox_end_year.setCurrentIndex(self.comboBox_end_year.findText(str(self.end_year)))
         self.set_start_date()
         self.set_end_date()
+        self.output_file = os.getcwd() + '/P2P_Ergebnisse_{0}-{1}.xlsx'.format(self.start_date.strftime('%d.%m.%Y'), self.end_date.strftime('%d.%m.%Y'))
+        self.on_lineEdit_output_file_textChanged(self.output_file)
 
     def set_start_date(self):
         self.start_date = date(self.start_year, self.start_month, 1)
@@ -271,8 +273,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        default_name = 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(self.start_date.strftime('%d.%m.%Y'), self.end_date.strftime('%d.%m.%Y'))
-        self.output_file, _ = QFileDialog.getSaveFileName(self, "Ausgabedatei wählen", default_name, "MS Excel Dateien (*.xlsx)", options=options)
+        self.output_file, _ = QFileDialog.getSaveFileName(self, "Ausgabedatei wählen", self.output_file, "MS Excel Dateien (*.xlsx)", options=options)
         if self.output_file:
             self.on_lineEdit_output_file_textChanged(self.output_file)
     
