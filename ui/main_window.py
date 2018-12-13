@@ -30,10 +30,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.platforms =set([])
-        self.start_month = 1
-        self.start_year = 2010
-        self.end_month = 1
-        self.end_year = 2010
+        self.start_month = date.today().month - 1
+        self.comboBox_start_month.setCurrentIndex(self.comboBox_start_month.findText(wd.nbr_to_short_month(str(self.start_month))))
+        self.start_year = date.today().year
+        self.comboBox_start_year.setCurrentIndex(self.comboBox_start_year.findText(str(self.start_year)))
+        self.end_month = date.today().month - 1
+        self.comboBox_end_month.setCurrentIndex(self.comboBox_end_month.findText(wd.nbr_to_short_month(str(self.end_month))))
+        self.end_year = date.today().year
+        self.comboBox_end_year.setCurrentIndex(self.comboBox_end_year.findText(str(self.end_year)))
         self.set_start_date()
         self.set_end_date()
 
