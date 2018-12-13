@@ -51,7 +51,7 @@ class P2P:
 
         return 0
 
-    def log_into_page(self, name_field, password_field, wait_until, login_field=None, find_login_field='xpath',\
+    def log_into_page(self, name_field, password_field, wait_until, login_field=None, find_login_by=By.XPATH,\
         submit_button=None,  find_submit_button='xpath',  fill_delay=0):
 
         try:
@@ -64,13 +64,7 @@ class P2P:
 
         try:
             if login_field is not None:
-                if find_login_field == 'xpath':
-                    self.driver.find_element_by_xpath(login_field).click()
-                elif find_login_field == 'name':
-                    self.driver.find_element_by_name(login_field).click()
-                else:
-                    print('Unbekannte Suchmethode beim Laden der {0}-Loginseite.'.format(self.name))
-                    return -1
+                self.driver.find_element(find_login_by, login_field).click()
 
             self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
             elem = self.driver.find_element_by_name(name_field)
@@ -418,7 +412,7 @@ def open_selenium_mintos(start_date,  end_date):
 
     if mintos.log_into_page(name_field='_username', password_field='_password', \
         wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),\
-        login_field='MyAccountButton',  find_login_field='name') < 0:
+        login_field='MyAccountButton',  find_login_by=By.NAME) < 0:
         return -1
 
     if mintos.open_account_statement_page(title='Account Statement', element_to_check='period-from') < 0:
