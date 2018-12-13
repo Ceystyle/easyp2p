@@ -31,6 +31,7 @@ def show_results(df,  start_date,  end_date, output_file):
     df.reset_index(level=['Datum', 'Währung'],  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
     df['Monat'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y').dt.to_period('M')
+    df.round(2)
 
     #Make sure we only show results between start and end date
     start_date = pd.Timestamp(start_date)
