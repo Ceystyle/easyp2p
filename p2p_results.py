@@ -17,8 +17,15 @@ def show_results(df,  start_date,  end_date, output_file):
         print('Keine Ergebnisse vorhanden')
         return -1
 
+    #Calculate total income for each row
+    income_columns = ['Zinszahlungen', 'Verzugsgebühren', 'Zinszahlungen aus Rückkäufen', 'Ausfälle']
+    df['Gesamteinnahmen'] = 0
+    for col in [col for col in df.columns if col in income_columns]:
+        df['Gesamteinnahmen'] += df[col]
+
+    #Show only existing columns
     target_columns = ['Startguthaben', 'Endsaldo', 'Investitionen', 'Tilgungszahlungen', 'Zinszahlungen', 'Verzugsgebühren',\
-        'Rückkäufe', 'Zinszahlungen aus Rückkäufen', 'Ausfälle']
+        'Rückkäufe', 'Zinszahlungen aus Rückkäufen', 'Ausfälle', 'Gesamteinnahmen']
     show_columns = [col for col in df.columns if col in target_columns]
 
     df.reset_index(level=['Datum', 'Währung'],  inplace=True)
