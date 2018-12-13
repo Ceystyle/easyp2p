@@ -127,20 +127,20 @@ class P2P:
         except TimeoutException:
             print("{0}-Logout war nicht erfolgreich!".format(self.name))
 
-    def generate_statement_direct(self, start_date, end_date, start_id, end_id, date_format,\
-        wait_until=None, submit_btn_id=None, submit_btn_name=None):
+    def generate_statement_direct(self, start_date, end_date, start_element, end_element, date_format,\
+        find_elem_by=By.ID, wait_until=None, submit_btn_id=None, submit_btn_name=None):
         try:
-            date_from = self.driver.find_element_by_id(start_id)
+            date_from = self.driver.find_element(find_elem_by, start_element)
             date_from.send_keys(Keys.CONTROL + 'a')
             date_from.send_keys(datetime.strftime(start_date, date_format))
 
             try:
-                date_to = self.driver.find_element_by_id(end_id)
+                date_to = self.driver.find_element(find_elem_by,  end_element)
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
                 date_to.send_keys(Keys.RETURN)
             except StaleElementReferenceException: # some sites refresh the page after a change which leads to this exception
-                date_to = self.driver.find_element_by_id(end_id)
+                date_to = self.driver.find_element(find_elem_by,  end_element)
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
 
@@ -419,9 +419,8 @@ def open_selenium_mintos(start_date,  end_date):
         return -1
 
     #Set start and end date for account statement
-    if mintos.generate_statement_direct(start_date, end_date, start_id='period-from', end_id='period-to',\
-        date_format='%d.%m.%Y', wait_until=EC.presence_of_element_located((By.ID, 'export-button')),\
-        submit_btn_id='filter-button') < 0:
+    if mintos.generate_statement_direct(start_date, end_date, 'period-from', 'period-to', '%d.%m.%Y', \
+        wait_until=EC.presence_of_element_located((By.ID, 'export-button')), submit_btn_id='filter-button') < 0:
         return -1
 
     #Download  account statement
@@ -462,8 +461,7 @@ def open_selenium_robocash(start_date,  end_date):
         print('Generierung des Robocash Kontoauszugs konnte nicht gestartet werden.')
         return -1
 
-    if robocash.generate_statement_direct(start_date, end_date, start_id='date-after',\
-        end_id='date-before', date_format='%Y-%m-%d') < 0:
+    if robocash.generate_statement_direct(start_date, end_date, 'date-after', 'date-before', '%Y-%m-%d') < 0:
         return -1
 
     # Robocash does not show download button after statement generation is done without reload
