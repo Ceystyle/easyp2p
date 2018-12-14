@@ -249,18 +249,9 @@ class P2P:
 
         return 0
 
-    def download_statement(self, default_name, file_format, download_btn_id=None,  download_btn_name=None, \
-        download_btn_xpath=None, actions = None):
+    def download_statement(self, default_name, file_format, download_btn, find_btn_by, actions = None):
         try:
-            if download_btn_id is not None:
-                download_button = self.driver.find_element_by_id(download_btn_id)
-            elif download_btn_xpath is not None:
-                download_button = self.driver.find_element_by_xpath(download_btn_xpath)
-            elif download_btn_name is not None:
-                download_button = self.driver.find_element_by_name(download_btn_name)
-            else: # this should never happen
-                print('{0}-Download-Button konnte nicht identifziert werden'.format(self.name))
-                return -1
+            download_button = self.driver.find_element(find_btn_by, download_btn)
 
             if actions == 'move_to_element':
                 action = ActionChains(self.driver)
@@ -426,7 +417,7 @@ def open_selenium_mintos(start_date,  end_date):
         return -1
 
     #Download  account statement
-    if mintos.download_statement(default_name,  file_format,  download_btn_id='export-button') < 0:
+    if mintos.download_statement(default_name,  file_format,  download_btn='export-button', find_btn_by=By.ID) < 0:
         success = -1
     else:
         success = 0
@@ -533,7 +524,7 @@ def open_selenium_swaper(start_date,  end_date):
 
     #Download account statement
     if swaper.download_statement(default_name, file_format,\
-        download_btn_xpath='//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]') < 0:
+        download_btn='//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]', find_btn_by=By.XPATH) < 0:
         success = -1
     else:
         success = 0
@@ -592,7 +583,7 @@ def open_selenium_peerberry(start_date,  end_date):
 
     #Download  account statement
     if peerberry.download_statement(default_name, file_format,\
-        download_btn_xpath='//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div',\
+        download_btn='//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div', find_btn_by=By.XPATH, \
         actions='move_to_element') < 0:
         success = -1
     else:
@@ -733,7 +724,7 @@ def open_selenium_grupeer(start_date,  end_date):
         return -1
 
     #Download account statement
-    if grupeer.download_statement(default_name, file_format, download_btn_name='excel') < 0:
+    if grupeer.download_statement(default_name, file_format, download_btn='excel', find_btn_by=By.NAME) < 0:
         success = -1
     else:
         success = 0
@@ -774,7 +765,7 @@ def open_selenium_dofinance(start_date,  end_date):
         return -1
 
     #Download account statement
-    if dofinance.download_statement(default_name, file_format, download_btn_name='xls') < 0:
+    if dofinance.download_statement(default_name, file_format, download_btn='xls', find_btn_by=By.NAME) < 0:
         success = -1
     else:
         success = 0
