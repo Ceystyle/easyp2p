@@ -293,3 +293,41 @@ def dofinance():
     df_result.fillna(0,  inplace=True)
 
     return df_result
+
+def twino():
+    df = read_excel('Twino', 'p2p_downloads/twino_statement.xlsx')
+
+    if df is None:
+        return None
+
+    twino_dict = dict()
+    twino_dict['EXTENSION INTEREST'] = 'Zinszahlungen'
+    twino_dict['REPAYMENT INTEREST'] = 'Zinszahlungen'
+    twino_dict['SCHEDULE INTEREST'] = 'Zinszahlungen'
+    twino_dict['BUYBACK INTEREST'] = 'Zinszahlungen aus Rückkäufen'
+    twino_dict['REPURCHASE INTEREST'] = 'Zinszahlungen aus Rückkäufen'
+    twino_dict['BUYBACK PRINCIPAL'] = 'Rückkäufe'
+    twino_dict['REPURCHASE PRINCIPAL'] = 'Rückkäufe'
+    twino_dict['REPAYMENT PRINCIPAL'] = 'Tilgungszahlungen'
+    twino_dict['BUY_SHARES PRINCIPAL'] = 'Investitionen'
+
+    df = df[1:] #drop first two rows
+    df.columns = df.iloc[0] # the first row now contains header names
+    df = df[1:]
+    df.rename(columns={'Booking Date': 'Datum'},  inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y %H:%M')
+    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    df['Twino-Cashflow'] = df['Type'] + ' ' + df['Description']
+    df['Cashflow-Typ'] = df['Twino-Cashflow'].map(twino_dict)
+    df['Plattform'] = 'Twino'
+    df['Währung'] = 'EUR'
+
+    if df['Twino-Cashflow'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
+        print('Twino: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
+            set(df['Twino-Cashflow'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+
+    df_result = pd.pivot_table(df, values='Amount, EUR',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
+        aggfunc=sum)
+    df_result.fillna(0,  inplace=True)
+
+    return df_result

@@ -138,6 +138,7 @@ class P2P:
 
             try:
                 date_to = self.driver.find_element(find_elem_by,  end_element)
+                date_to.click()
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
                 date_to.send_keys(Keys.RETURN)
@@ -775,5 +776,49 @@ def open_selenium_dofinance(start_date,  end_date):
 
     #Close browser window
     dofinance.driver.close()
+
+    return success
+
+def open_selenium_twino(start_date,  end_date):
+
+    twino = P2P('Twino', 'https://www.twino.eu/de/', \
+        'https://www.twino.eu/de/profile/investor/my-investments/account-transactions', 'https://www.twino.eu/logout')
+
+    default_name = 'account_statement_*'
+    file_format = 'xlsx'
+    if clean_download_location(twino.name, default_name, file_format) < 0:
+        return -1
+
+    login_btn_xpath = '/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/div/div[1]/button'
+    start_date_xpath = '//*[@date-picker="filterData.processingDateFrom"]'
+    end_date_xpath = '//*[@date-picker="filterData.processingDateTo"]'
+
+    if twino.open_start_page(EC.element_to_be_clickable((By.XPATH, login_btn_xpath)), title_check='TWINO') < 0:
+        return -1
+
+    if twino.log_into_page('email', 'login-password', \
+        EC.element_to_be_clickable((By.XPATH, '//a[@href="/de/profile/investor/my-investments/individual-investments"]')), \
+        login_field=login_btn_xpath, find_login_by=By.XPATH) < 0:
+        return -1
+
+    if twino.open_account_statement_page('TWINO', start_date_xpath, check_by=By.XPATH) < 0:
+        return -1
+
+    # Create account statement for given date range
+    if twino.generate_statement_direct(start_date, end_date, start_date_xpath, end_date_xpath, '%d.%m.%Y', find_elem_by=By.XPATH, \
+        wait_until=EC.element_to_be_clickable((By.CSS_SELECTOR, '.accStatement__pdf'))) < 0:
+        return -1
+
+    #Download account statement
+    if twino.download_statement(default_name, file_format, download_btn='.accStatement__pdf',  find_btn_by=By.CSS_SELECTOR) < 0:
+        success = -1
+    else:
+        success = 0
+
+    #Logout
+    twino.logout_by_button('//a[@href="/logout"]', By.XPATH, EC.element_to_be_clickable((By.XPATH, login_btn_xpath)))
+
+    #Close browser window
+    twino.driver.close()
 
     return success
