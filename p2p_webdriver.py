@@ -50,6 +50,7 @@ class P2P:
             return -1
         except TimeoutException:
             print('Das Laden der {0} Webseite hat zu lange gedauert.'.format(self.name))
+            return -1
 
         return 0
 
