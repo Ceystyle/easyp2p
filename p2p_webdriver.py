@@ -54,9 +54,23 @@ class P2P:
 
         return 0
 
-    def log_into_page(self, name_field, password_field, wait_until, login_field=None, find_login_by=By.XPATH,\
-        submit_button=None,  find_submit_button='xpath',  fill_delay=0):
+    def log_into_page(self, name_field, password_field, wait_until, login_field=None, find_login_by=By.XPATH, fill_delay=0):
+        """This function perform the login procedure for the P2P site. It will fill in user name and password.
 
+        Args:
+            name_field (str): name of web element where the user name has to be entered
+            password_field (str): name of web element where the password has to be entered
+            wait_until (EC.*): Expected condition in case of success
+
+        Keyword Args:
+            login_field (str): id of web element which has to be clicked in order to open login form
+            find_login_by (By.*): method for translating login_field into web element
+            fill_delay (float): a small delay between filling in password and user name fields
+
+        Returns:
+            int: 0 on success, -1 on failure
+
+        """
         try:
             getattr(credentials, self.name)['username']
             getattr(credentials, self.name)['password']
@@ -78,16 +92,6 @@ class P2P:
             elem.clear()
             elem.send_keys(getattr(credentials, self.name)['password'])
             elem.send_keys(Keys.RETURN)
-
-            if submit_button is not None:
-                if find_submit_button == 'xpath':
-                    self.driver.find_element_by_xpath(submit_button).click()
-                elif find_submit_button == 'name':
-                    self.driver.find_element_by_name(submit_button).click()
-                else:
-                    print('Unbekannte Suchmethode beim Senden der {0}-Logindaten.'.format(self.name))
-                    return -1
-
             self.wdwait(wait_until)
         except NoSuchElementException:
             print("{0}-Loginseite konnte leider nicht geladen werden.".format(self.name))
