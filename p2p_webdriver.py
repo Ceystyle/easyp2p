@@ -518,7 +518,8 @@ def open_selenium_bondora(start_date, end_date):
     Returns:
         int: 0 on success, -1 on failure
     """
-    bondora = P2P('Bondora', 'https://www.bondora.com/de/login', 'https://www.bondora.com/de/cashflow', 'https://www.bondora.com/de/authorize/logout')
+    bondora = P2P('Bondora', 'https://www.bondora.com/de/login', 'https://www.bondora.com/de/cashflow', \
+        logout_url='https://www.bondora.com/de/authorize/logout')
 
     if bondora.open_start_page(EC.element_to_be_clickable((By.NAME, 'Email'))) < 0:
         return -1
@@ -630,7 +631,7 @@ def open_selenium_robocash(start_date,  end_date):
         int: 0 on success, -1 on failure
     """
     robocash = P2P('Robocash', 'https://robo.cash/de', 'https://robo.cash/de/cabinet/statement', \
-    'https://robo.cash/de/logout')
+        logout_url='https://robo.cash/de/logout')
 
     if robocash.open_start_page(EC.presence_of_element_located((By.XPATH, '/html/body/header/div/div/div[3]/a[1]')),\
         'Robo.cash') < 0:
@@ -818,7 +819,7 @@ def open_selenium_estateguru(start_date,  end_date):
         int: 0 on success, -1 on failure
     """
     estateguru = P2P('Estateguru', 'https://estateguru.co/portal/login/auth?lang=de', \
-        'https://estateguru.co/portal/portfolio/account', 'https://estateguru.co/portal/logout/index')
+        'https://estateguru.co/portal/portfolio/account', logout_url='https://estateguru.co/portal/logout/index')
 
     if estateguru.open_start_page(EC.element_to_be_clickable((By.NAME, 'username')), 'Sign in/Register') < 0:
         return -1
@@ -983,7 +984,7 @@ def open_selenium_dofinance(start_date,  end_date):
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(start_date.strftime('%Y-%m-%d'),\
         end_date.strftime('%Y-%m-%d'))
     dofinance = P2P('DoFinance', 'https://www.dofinance.eu/de/users/login', \
-        'https://www.dofinance.eu/de/users/statement', 'https://www.dofinance.eu/de/users/logout', \
+        'https://www.dofinance.eu/de/users/statement', logout_url='https://www.dofinance.eu/de/users/logout', \
         default_file_name=default_file_name,  file_format='xlsx')
 
     if dofinance.clean_download_location() < 0:
