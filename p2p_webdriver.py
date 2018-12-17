@@ -1001,7 +1001,7 @@ def open_selenium_dofinance(start_date,  end_date):
 
     # Create account statement for given date range
     if dofinance.generate_statement_direct(start_date, end_date, 'date-from', 'date-to', '%d.%m.%Y', \
-        EC.text_to_be_present_in_element((By.XPATH, '/html/body/section[1]/div/div/div[2]/div[1]/div[4]/div[1]'),\
+        wait_until=EC.text_to_be_present_in_element((By.XPATH, '/html/body/section[1]/div/div/div[2]/div[1]/div[4]/div[1]'),\
         'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))), submit_btn='trans_type', find_submit_btn_by=By.NAME) < 0:
         return -1
 
