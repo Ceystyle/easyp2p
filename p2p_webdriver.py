@@ -251,10 +251,10 @@ class P2P:
                 date_to.send_keys(datetime.strftime(end_date, date_format))
 
             if submit_btn is not None:
-                self.wdwait(EC.element_to_be_clickable((find_submit_btn_by, submit_btn)))
+                button = self.wdwait(EC.element_to_be_clickable((find_submit_btn_by, submit_btn)))
                 if self.name == 'Mintos':
                     time.sleep(1) # Mintos needs some time until the button really works, TODO: find better fix
-                self.driver.find_element((find_submit_btn_by, submit_btn)).click()
+                button.click()
 
             if wait_until is not None:
                 self.wdwait(wait_until)
@@ -952,7 +952,7 @@ def open_selenium_grupeer(start_date,  end_date):
 
     # Create account statement for given date range
     if grupeer.generate_statement_direct(start_date, end_date, 'from', 'to', '%d.%m.%Y', \
-        EC.text_to_be_present_in_element((By.CLASS_NAME, 'balance-block'), 'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y'))), \
+        wait_until=EC.text_to_be_present_in_element((By.CLASS_NAME, 'balance-block'), 'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y'))), \
         submit_btn='submit', find_submit_btn_by=By.NAME) < 0:
         return -1
 
