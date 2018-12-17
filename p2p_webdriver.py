@@ -269,7 +269,21 @@ class P2P:
 
         return 0
 
-    def download_statement(self, default_name, file_format, download_btn, find_btn_by, actions = None):
+    def download_statement(self, download_btn, find_btn_by, actions = None):
+        """Will download the generated account statement and check if the download was successful. If the download was successful,
+            it will also call the rename_statement function to rename the downloaded file.
+
+        Args:
+            download_btn (str): id of the download button
+            find_btn_by (str): method for translating download_btn into web element
+
+        Keyword Args:
+            actions (str): 'move to element' or None: some P2P sites require that the mouse hovers over a certain element in order to
+                make the download button clickable
+
+        Returns:
+            int: 0 on success, -1 on failure
+        """
         try:
             download_button = self.driver.find_element(find_btn_by, download_btn)
 
@@ -284,11 +298,11 @@ class P2P:
         download_finished = False
         duration = 0
         while download_finished == False:
-            list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
+            list = glob.glob('p2p_downloads/{0}.{1}'.format(self.default_file_name, self.file_format))
             if len(list) == 1:
                 download_finished = True
             elif len(list) == 0:
-                list = glob.glob('p2p_downloads/{0}.{1}.crdownload'.format(default_name, file_format))
+                list = glob.glob('p2p_downloads/{0}.{1}.crdownload'.format(self.default_file_name, self.file_format))
                 if len(list) < 1 and duration > 1:
                     print('Download des {0} Kontoauszugs abgebrochen.'.format(self.name))
                     return -1
@@ -296,13 +310,42 @@ class P2P:
                     time.sleep(1)
                     duration += 1
 
-        if rename_statement(self.name, default_name,  file_format) < 0:
+        if self.rename_statement() < 0:
             return -1
 
         return 0
 
     def wdwait(self, wait_until):
         return WebDriverWait(self.driver, self.delay).until(wait_until)
+
+    def clean_download_location(self):
+        list = glob.glob('p2p_downloads/{0}.{1}'.format(self.default_file_name, self.file_format))
+        if len(list) > 0:
+            print('Alte {0} Downloads in ./p2p_downloads entdeckt.'.format(self.name))
+            choice = None
+            while choice != 'a' or choice != 'm':
+                choice = input('(A)utomatisch löschen oder (M)anuell entfernen?').lower
+            if choice == 'm':
+                return -1
+            else:
+                for file in list:
+                    os.remove(file)
+
+        return 0
+
+    def rename_statement(self):
+        list = glob.glob('p2p_downloads/{0}.{1}'.format(self.default_file_name, self.file_format))
+        if len(list) == 1:
+            os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(self.name.lower(), self.file_format))
+        elif len(list) == 0:
+            print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(self.name))
+            return -1
+        else:
+            # this should never happen
+            print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(self.name))
+            return 1
+
+        return 0
 
 def get_calendar_clicks(target_date,  start_date):
     # right arrow clicks are positive, left arrow clicks negative
@@ -316,35 +359,6 @@ def get_calendar_clicks(target_date,  start_date):
         clicks += target_date.month - start_date.month
 
     return clicks
-
-def clean_download_location(p2p_name, default_name, file_format):
-    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
-    if len(list) > 0:
-        print('Alte {0} Downloads in ./p2p_downloads entdeckt.'.format(p2p_name))
-        choice = None
-        while choice != 'a' or choice != 'm':
-            choice = input('(A)utomatisch löschen oder (M)anuell entfernen?').lower
-        if choice == 'm':
-            return -1
-        else:
-            for file in list:
-                os.remove(file)
-
-    return 0
-
-def rename_statement(p2p_name, default_name,  file_format):
-    list = glob.glob('p2p_downloads/{0}.{1}'.format(default_name, file_format))
-    if len(list) == 1:
-        os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(p2p_name.lower(), file_format))
-    elif len(list) == 0:
-        print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(p2p_name))
-        return -1
-    else:
-        # this should never happen
-        print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(p2p_name))
-        return 1
-
-    return 0
 
 def short_month_to_nbr(short_name):
     short_month_to_nbr = {'Jan': '01',  'Feb': '02', 'Mrz': '03', 'Mar': '03', 'Apr': '04', 'Mai': '05', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', \
@@ -411,13 +425,13 @@ def open_selenium_bondora(start_date, end_date):
 
 def open_selenium_mintos(start_date,  end_date):
 
-    mintos = P2P('Mintos', 'https://www.mintos.com/de/', 'https://www.mintos.com/de/kontoauszug/')
-
     today = datetime.today()
-    default_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
+    default_file_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
         today.strftime('%d'))
-    file_format = 'xlsx'
-    if clean_download_location(mintos.name, default_name, file_format) < 0:
+    mintos = P2P('Mintos', 'https://www.mintos.com/de/', 'https://www.mintos.com/de/kontoauszug/', \
+        default_file_name=default_file_name, file_format='xlsx')
+
+    if mintos.clean_download_location() < 0:
         return -1
 
     if mintos.open_start_page(EC.element_to_be_clickable((By.NAME, 'MyAccountButton'))) < 0:
@@ -438,7 +452,7 @@ def open_selenium_mintos(start_date,  end_date):
         return -1
 
     #Download  account statement
-    if mintos.download_statement(default_name,  file_format,  download_btn='export-button', find_btn_by=By.ID) < 0:
+    if mintos.download_statement('export-button', By.ID) < 0:
         success = -1
     else:
         success = 0
@@ -515,11 +529,9 @@ def open_selenium_robocash(start_date,  end_date):
 def open_selenium_swaper(start_date,  end_date):
 
     swaper = P2P('Swaper', 'https://www.swaper.com/#/dashboard', \
-        'https://www.swaper.com/#/overview/account-statement')
+        'https://www.swaper.com/#/overview/account-statement', default_file_name='excel-storage*', file_format='xlsx')
 
-    default_name = 'excel-storage*'
-    file_format = 'xlsx'
-    if clean_download_location(swaper.name, default_name, file_format) < 0:
+    if swaper.clean_download_location() < 0:
         return -1
 
     if swaper.open_start_page(EC.presence_of_element_located((By.NAME, 'email'))) < 0:
@@ -544,8 +556,8 @@ def open_selenium_swaper(start_date,  end_date):
         return -1
 
     #Download account statement
-    if swaper.download_statement(default_name, file_format,\
-        download_btn='//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]', find_btn_by=By.XPATH) < 0:
+    if swaper.download_statement('//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a/div[1]/div/span[2]', \
+        By.XPATH) < 0:
         success = -1
     else:
         success = 0
@@ -560,11 +572,10 @@ def open_selenium_swaper(start_date,  end_date):
 
 def open_selenium_peerberry(start_date,  end_date):
 
-    peerberry = P2P('PeerBerry', 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement')
+    peerberry = P2P('PeerBerry', 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement', \
+        default_file_name='transactions', file_format='csv')
 
-    default_name = 'transactions'
-    file_format = 'csv'
-    if clean_download_location(peerberry.name, default_name, file_format) < 0:
+    if peerberry.clean_download_location() < 0:
         return -1
 
     if peerberry.open_start_page(EC.element_to_be_clickable((By.NAME, 'email')), 'PeerBerry.com') < 0:
@@ -603,8 +614,7 @@ def open_selenium_peerberry(start_date,  end_date):
         return -1
 
     #Download  account statement
-    if peerberry.download_statement(default_name, file_format,\
-        download_btn='//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div', find_btn_by=By.XPATH, \
+    if peerberry.download_statement('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/div', By.XPATH, \
         actions='move_to_element') < 0:
         success = -1
     else:
@@ -722,11 +732,10 @@ def open_selenium_iuvo(start_date,  end_date):
 
 def open_selenium_grupeer(start_date,  end_date):
 
-    grupeer = P2P('Grupeer', 'https://www.grupeer.com/de/login', 'https://www.grupeer.com/de/account-statement')
+    grupeer = P2P('Grupeer', 'https://www.grupeer.com/de/login', 'https://www.grupeer.com/de/account-statement', \
+        default_file_name='Account statement', file_format='xlsx')
 
-    default_name = 'Account statement'
-    file_format = 'xlsx'
-    if clean_download_location(grupeer.name, default_name, file_format) < 0:
+    if grupeer.clean_download_location() < 0:
         return -1
 
     if grupeer.open_start_page(EC.element_to_be_clickable((By.NAME, 'email'))) < 0:
@@ -745,7 +754,7 @@ def open_selenium_grupeer(start_date,  end_date):
         return -1
 
     #Download account statement
-    if grupeer.download_statement(default_name, file_format, download_btn='excel', find_btn_by=By.NAME) < 0:
+    if grupeer.download_statement('excel', By.NAME) < 0:
         success = -1
     else:
         success = 0
@@ -761,13 +770,13 @@ def open_selenium_grupeer(start_date,  end_date):
 
 def open_selenium_dofinance(start_date,  end_date):
 
-    dofinance = P2P('DoFinance', 'https://www.dofinance.eu/de/users/login', \
-        'https://www.dofinance.eu/de/users/statement', 'https://www.dofinance.eu/de/users/logout')
-
-    default_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(start_date.strftime('%Y-%m-%d'),\
+    default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(start_date.strftime('%Y-%m-%d'),\
         end_date.strftime('%Y-%m-%d'))
-    file_format = 'xlsx'
-    if clean_download_location(dofinance.name, default_name, file_format) < 0:
+    dofinance = P2P('DoFinance', 'https://www.dofinance.eu/de/users/login', \
+        'https://www.dofinance.eu/de/users/statement', 'https://www.dofinance.eu/de/users/logout', \
+        default_file_name=default_file_name,  file_format='xlsx')
+
+    if dofinance.clean_download_location() < 0:
         return -1
 
     if dofinance.open_start_page(EC.element_to_be_clickable((By.NAME, 'email')), title_check='Anmeldung') < 0:
@@ -786,7 +795,7 @@ def open_selenium_dofinance(start_date,  end_date):
         return -1
 
     #Download account statement
-    if dofinance.download_statement(default_name, file_format, download_btn='xls', find_btn_by=By.NAME) < 0:
+    if dofinance.download_statement('xls', By.NAME) < 0:
         success = -1
     else:
         success = 0
@@ -802,11 +811,10 @@ def open_selenium_dofinance(start_date,  end_date):
 def open_selenium_twino(start_date,  end_date):
 
     twino = P2P('Twino', 'https://www.twino.eu/de/', \
-        'https://www.twino.eu/de/profile/investor/my-investments/account-transactions', 'https://www.twino.eu/logout')
-
-    default_name = 'account_statement_*'
-    file_format = 'xlsx'
-    if clean_download_location(twino.name, default_name, file_format) < 0:
+        'https://www.twino.eu/de/profile/investor/my-investments/account-transactions', \
+        default_file_name='account_statement_*', file_format = 'xlsx')
+    
+    if twino.clean_download_location() < 0:
         return -1
 
     login_btn_xpath = '/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/div/div[1]/button'
@@ -830,7 +838,7 @@ def open_selenium_twino(start_date,  end_date):
         return -1
 
     #Download account statement
-    if twino.download_statement(default_name, file_format, download_btn='.accStatement__pdf',  find_btn_by=By.CSS_SELECTOR) < 0:
+    if twino.download_statement('.accStatement__pdf', By.CSS_SELECTOR) < 0:
         success = -1
     else:
         success = 0
