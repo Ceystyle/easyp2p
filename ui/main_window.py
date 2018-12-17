@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Module implementing MainWindow.
+Module implementing MainWindow, the main window of easyP2P
 """
 import calendar
 from datetime import date
@@ -17,14 +17,14 @@ from .Ui_main_window import Ui_MainWindow
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     """
-    Class documentation goes here.
+    This class defines the main window of easyP2P
     """
     def __init__(self, parent=None):
         """
         Constructor
         
-        @param parent reference to the parent widget
-        @type QWidget
+        Keyword Args:
+        parent (QWidget): reference to the parent widget
         """
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
@@ -50,25 +50,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.end_date = date(self.end_year, self.end_month, calendar.monthrange(self.end_year, self.end_month)[1])
     
     @pyqtSlot(bool)
-    def on_checkBox_bondora_toggled(self, checked):
+    def on_checkBox_Dofinance_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Dofinance to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Dofinance, if False remove Dofinance
         """
         if checked:
-            self.platforms.add('Bondora')
+            self.platforms.add('Dofinance')
         else:
-            self.platforms.remove('Bondora')
+            self.platforms.remove('Dofinance')
     
     @pyqtSlot(bool)
     def on_checkBox_grupeer_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Grupeer to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Grupeer, if False remove Grupeer
         """
         if checked:
             self.platforms.add('Grupeer')
@@ -78,10 +78,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_dofinance_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Dofinance to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Dofinance, if False remove Dofinance
         """
         if checked:
             self.platforms.add('DoFinance')
@@ -89,25 +89,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.platforms.remove('DoFinance')
     
     @pyqtSlot(bool)
-    def on_checkBox_iuvo_toggled(self, checked):
+    def on_checkBox_Robocash_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Robocash to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Robocash, if False remove Robocash
         """
         if checked:
-            self.platforms.add('Iuvo')
+            self.platforms.add('Robocash')
         else:
-            self.platforms.remove('Iuvo')
+            self.platforms.remove('Robocash')
     
     @pyqtSlot(bool)
     def on_checkBox_peerberry_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Peerberry to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Peerberry, if False remove Peerberry
         """
         if checked:
             self.platforms.add('PeerBerry')
@@ -117,10 +117,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_mintos_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Mintos to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Mintos, if False remove Mintos
         """
         if checked:
             self.platforms.add('Mintos')
@@ -130,10 +130,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_robocash_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Robocash to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Robocash, if False remove Robocash
         """
         if checked:
             self.platforms.add('Robocash')
@@ -143,10 +143,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_estateguru_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Estateguru to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Estateguru, if False remove Estateguru
         """
         if checked:
             self.platforms.add('Estateguru')
@@ -156,10 +156,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_swaper_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Swaper to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Swaper, if False remove Swaper
         """
         if checked:
             self.platforms.add('Swaper')
@@ -169,10 +169,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_twino_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Add/remove Twino to list of platforms for which account statements should be generated
+
+        Args:        
+            checked (bool): if True add Twino, if False remove Twino
         """
         if checked:
             self.platforms.add('Twino')
@@ -182,10 +182,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_start_month_activated(self, p0):
         """
-        Slot documentation goes here.
-        
-        @param p0 DESCRIPTION
-        @type str
+        Update start date if the user changes start month in the combo box
+
+        Args:        
+            p0 (str): short month name chosen by the user in the combo box
         """
         self.start_month = int(wd.short_month_to_nbr(p0))
         self.set_start_date()
@@ -193,10 +193,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_start_year_activated(self, p0):
         """
-        Slot documentation goes here.
-        
-        @param p0 DESCRIPTION
-        @type str
+        Update start date if the user changes start year in the combo box
+
+        Args:        
+            p0 (str): year chosen by the user in the combo box
         """
         self.start_year = int(p0)
         self.set_start_date()
@@ -204,10 +204,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_end_month_activated(self, p0):
         """
-        Slot documentation goes here.
-        
-        @param p0 DESCRIPTION
-        @type str
+        Update end date if the user changes end month in the combo box
+
+        Args:        
+            p0 (str): short month name chosen by the user in the combo box
         """
         self.end_month = int(wd.short_month_to_nbr(p0))
         self.set_end_date()
@@ -215,10 +215,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_end_year_activated(self, p0):
         """
-        Slot documentation goes here.
-        
-        @param p0 DESCRIPTION
-        @type str
+        Update end date if the user changes end year in the combo box
+
+        Args:        
+            p0 (str): year chosen by the user in the combo box
         """
         self.end_year = int(p0)
         self.set_end_date()
@@ -226,7 +226,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_pushButton_start_clicked(self):
         """
-        Slot documentation goes here.
+        Start evaluation for the chosen P2P platforms and the given date range. Show the results for all P2P platforms for which account
+        statement generation was successful.
         """
         # Check if download directory exists, if not create it
         dl_location = './p2p_downloads'
@@ -259,17 +260,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_lineEdit_output_file_textChanged(self, p0):
         """
-        Slot documentation goes here.
-        
-        @param p0 DESCRIPTION
-        @type str
+        Update location where the results file should be saved.
+
+        Args:
+            p0 (str): file name entered by the user
         """
         QLineEdit.setText(self.lineEdit_output_file, p0)
     
     @pyqtSlot()
     def on_pushButton_file_chooser_clicked(self):
         """
-        Slot documentation goes here.
+        Open dialog window for changing the save location of the results file
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -280,10 +281,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_select_all_toggled(self, checked):
         """
-        Slot documentation goes here.
-        
-        @param checked DESCRIPTION
-        @type bool
+        Toggle/untoggle all P2P platforms
+
+        Args:        
+            checked (bool): if True toggle all check boxes, if False untoggle all check boxes
         """
         for check_box in self.groupBox_platforms.findChildren(QCheckBox):
             check_box.setChecked(checked)
