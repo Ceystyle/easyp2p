@@ -135,7 +135,23 @@ class P2P:
             print("{0}-Logout war nicht erfolgreich!".format(self.name))
 
     def generate_statement_direct(self, start_date, end_date, start_element, end_element, date_format,\
-        find_elem_by=By.ID, wait_until=None, submit_btn_id=None, submit_btn_name=None):
+        find_elem_by=By.ID, wait_until=None, submit_btn=None, find_submit_btn_by=None):
+        """For P2P sites where the two date range fields for account statement generation can be edited directly. The function will
+            locate the two date fields, enter start and end date and then start the account statement generation.
+
+        Args:
+            start_date (datetime.date): start of date range for which the account statement should be generated
+            end_date (datetime.date): end of date range for which the account statement should be generated
+            start_element (str): id of field where the start date needs to be entered
+            end_element (str): id of field where the end date needs to be entered
+            date_format (str): date format
+
+        Keyword Args:
+            find_elem_by (By.*): method for translating start_element and end_element into web elements
+            wait_until (EC.*): Expected condition in case of successful account statement generation
+            submit_btn (str): id of button which needs to clicked to start account statement generation. Not all P2P require this.
+            find_submit_btn_by (By.*): method for translating submit_btn into web element
+        """
         try:
             date_from = self.driver.find_element(find_elem_by, start_element)
             date_from.send_keys(Keys.CONTROL + 'a')
@@ -152,13 +168,11 @@ class P2P:
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
 
-            if submit_btn_name is not None:
-                self.wdwait(EC.element_to_be_clickable((By.NAME, submit_btn_name)))
-                self.driver.find_element_by_name(submit_btn_name).click()
-            elif submit_btn_id is not None:
-                self.wdwait(EC.element_to_be_clickable((By.ID, submit_btn_id)))
-                time.sleep(1) # Mintos needs some time until the button really works, TODO: find better fix
-                self.driver.find_element_by_id(submit_btn_id).click()
+            if submit_btn is not None:
+                self.wdwait(EC.element_to_be_clickable((find_submit_btn_by, submit_btn)))
+                if self.name == 'Mintos':
+                    time.sleep(1) # Mintos needs some time until the button really works, TODO: find better fix
+                self.driver.find_element((find_submit_btn_by, submit_btn)).click()
 
             if wait_until is not None:
                 self.wdwait(wait_until)
@@ -419,7 +433,8 @@ def open_selenium_mintos(start_date,  end_date):
 
     #Set start and end date for account statement
     if mintos.generate_statement_direct(start_date, end_date, 'period-from', 'period-to', '%d.%m.%Y', \
-        wait_until=EC.presence_of_element_located((By.ID, 'export-button')), submit_btn_id='filter-button') < 0:
+        wait_until=EC.presence_of_element_located((By.ID, 'export-button')), submit_btn='filter-button', \
+        find_submit_btn_by=By.ID) < 0:
         return -1
 
     #Download  account statement
@@ -677,7 +692,7 @@ def open_selenium_iuvo(start_date,  end_date):
         # Create account statement for given date range
         if iuvo.generate_statement_direct(month[0], month[1], 'date_from', 'date_to', '%Y-%m-%d', \
             EC.text_to_be_present_in_element((By.XPATH, '/html/body/div[5]/main/div/div/div/div[4]/div/table/thead/tr[1]/td[1]/strong'),\
-            'Anfangsbestand'), submit_btn_id='account_statement_filters_btn') < 0:
+            'Anfangsbestand'), submit_btn='account_statement_filters_btn', find_submit_btn_by=By.ID) < 0:
             return -1
 
         #Read statement from page
@@ -726,7 +741,7 @@ def open_selenium_grupeer(start_date,  end_date):
     # Create account statement for given date range
     if grupeer.generate_statement_direct(start_date, end_date, 'from', 'to', '%d.%m.%Y', \
         EC.text_to_be_present_in_element((By.CLASS_NAME, 'balance-block'), 'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y'))), \
-        submit_btn_name='submit') < 0:
+        submit_btn='submit', find_submit_btn_by=By.NAME) < 0:
         return -1
 
     #Download account statement
@@ -767,7 +782,7 @@ def open_selenium_dofinance(start_date,  end_date):
     # Create account statement for given date range
     if dofinance.generate_statement_direct(start_date, end_date, 'date-from', 'date-to', '%d.%m.%Y', \
         EC.text_to_be_present_in_element((By.XPATH, '/html/body/section[1]/div/div/div[2]/div[1]/div[4]/div[1]'),\
-        'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))), submit_btn_name='trans_type') < 0:
+        'Schlussbilanz '+str(end_date.strftime('%d.%m.%Y'))), submit_btn='trans_type', find_submit_btn_by=By.NAME) < 0:
         return -1
 
     #Download account statement
