@@ -1,3 +1,14 @@
+"""p2p_webdriver
+
+.. module:: p2p_webdriver
+    :platform: Linux
+    :synopsis: This module defines the P2P class and contains code for accessing and handling supported P2P sites. \
+        It relies mainly on functionality provided by the Selenium webdriver. easyP2P uses Chromedriver as webdriver.
+
+.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
+
+"""
+
 import calendar
 import credentials
 from datetime import datetime,  date,  timedelta
@@ -18,16 +29,35 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 
 class P2P:
-    def __init__(self,  name, login_url, statement_url, logout_url=None):
+    """"Represents a P2P platform and the required methods for login/logout, generating and downloading account statements"""
+
+    def __init__(self,  name, login_url, statement_url, default_file_name=None, file_format=None, logout_url=None):
+        """Constructor
+
+        Args:
+            name (str): Name of the P2P platform
+            login_url (str): Login URL of the P2P platform
+            statement_url (str): URL of the account statement page of the P2P platform
+
+        Keyword Args:
+            default_file_name (str): default name for account statement downloads, chosen by the P2P platform
+            file_format (str): format of the download file
+            logout_url (str): Logout URL of the P2P platform
+        """
         self.name = name
         self.login_url = login_url
         self.statement_url = statement_url
+        self.default_file_name = default_file_name
+        self.file_format = file_format
         self.logout_url = logout_url
-        self.delay = 5
+        self.delay = 5 # delay in seconds, input for WebDriverWait
         self.init_webdriver()
 
     def init_webdriver(self):
+        """This function initializes Chromedriver as webdriver, sets the default download location to p2p_downloads relative to the current
+        working directory and opens a new maximized browser window"""
         #TODO: hide browser windows
+        #TODO. handle error cases
         options = webdriver.ChromeOptions()
         dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
         prefs = {"download.default_directory": dl_location}
@@ -37,6 +67,19 @@ class P2P:
         self.driver = driver
 
     def open_start_page(self, wait_until, title_check=None):
+        """This function will open the login/start page of the P2P platform in the webdriver. It will check the title of the window to make
+            sure the page was loaded correctly.        
+
+        Args:
+            wait_until (EC.*): Expected condition in case of success, in general the clickability of the user name field
+
+        Keyword Args:
+            title_check (str): used to check if the correct page was loaded. Defaults to name of P2P platform if None is provided
+
+        Returns:
+            int: 0 on success, -1 on failure
+
+        """
         #Most platforms use their name in the title, title_check will handle the few cases where they don't
         if title_check==None:
             title_check = self.name
@@ -55,7 +98,10 @@ class P2P:
         return 0
 
     def log_into_page(self, name_field, password_field, wait_until, login_field=None, find_login_by=By.XPATH, fill_delay=0):
-        """This function perform the login procedure for the P2P site. It will fill in user name and password.
+        """This function performs the login procedure for the P2P site. It will fill in user name and password. Some P2P sites only show
+            the user name and password field after clicking a button. The id of the button can be provided by the optional login_field.
+            Some P2P sites (e.g. Swaper) also require a small delay between filling in name and password. Otherwise it can sometimes happen \
+            that the password is mistakenly written to the name field, too.
 
         Args:
             name_field (str): name of web element where the user name has to be entered
@@ -103,6 +149,20 @@ class P2P:
         return 0
 
     def open_account_statement_page(self, title, element_to_check, check_by=By.ID):
+        """This function opens the account statement page of the P2P site. The URL of the account statement page is provided as an
+            attribute of the P2P class. 
+
+        Args:
+            title (str): (part of the) window title of the account statement page
+            element_to_check (str): id of web element which must be present on the account statement page
+
+        Keyword Args:
+            check_by (By.*): method for translating element_to_check into web element
+
+        Returns:
+            int: 0 on success, -1 on failure
+
+        """
         try:
             self.driver.get(self.statement_url)
             self.wdwait(EC.presence_of_element_located((check_by, element_to_check)))
@@ -114,6 +174,19 @@ class P2P:
         return 0
 
     def logout_by_button(self, logout_elem,  logout_elem_by, wait_until, hover_elem=None, hover_elem_by=None):
+        """This function performs the logout procedure for P2P sites where a button needs to be clicked to logout. For some sites the
+            button only becomes clickable after hovering over a certain element. This element is provided by the optional hover_elem
+            variable.
+
+        Args:
+            logout_elem (str): id of logout button
+            logout_elem_by (By.*): method for translating logout_elem into web element
+            wait_until (EC.*): Expected condition in case of successful logout
+
+        Keyword Args:
+            hover_elem (str): id of web element over which the mouse needs to be hovered in order to make the logout button visible
+            hover_elem_by (By.*): method for translating hover_elem into web element
+        """
         try:
             if hover_elem is not None:
                 elem = self.driver.find_element(hover_elem_by, hover_elem)
@@ -128,6 +201,12 @@ class P2P:
             #continue anyway
 
     def logout_by_url(self, wait_until):
+        """This function performs the logout procedure for P2P sites where the logout page has an URL. The URL itself is provided
+            as an attribute of the P2P class.
+
+        Args:
+            wait_until (EC.*): Expected condition in case of successful logout
+        """
         try:
             self.driver.get(self.logout_url)
             self.wdwait(wait_until)
@@ -151,6 +230,9 @@ class P2P:
             wait_until (EC.*): Expected condition in case of successful account statement generation
             submit_btn (str): id of button which needs to clicked to start account statement generation. Not all P2P require this.
             find_submit_btn_by (By.*): method for translating submit_btn into web element
+
+        Returns:
+            int: 0 on success, -1 on failure
         """
         try:
             date_from = self.driver.find_element(find_elem_by, start_element)
@@ -187,7 +269,23 @@ class P2P:
 
     def generate_statement_calendar(self, start_date, end_date, default_dates, arrows, days_table,\
         calendar_id_by, calendar_id):
+        """For P2P sites where the two date range fields for account statement generation cannot be edited directly, but must be
+            clicked in a calendar. The function will locate the two calendars, determine how many clicks are necessary to get to the
+            correct month, perform the clicks and finally locate and click the chosen day.
 
+        Args:
+            start_date (datetime.date): start of date range for which the account statement should be generated
+            end_date (datetime.date): end of date range for which the account statement should be generated
+            default_dates (list of datetime.datetime): the two pre-filled default dates of the date pickers
+            arrows (list (str, str, str)): list with three entries: class name of left arrows, class name of right arrows, tag name of arrows
+            days_table (list (str, str, str, bool)): list with four entries: class name of day table, id of day table, id of current day,
+                is day contained in id?
+            calendar_id_by (str): method for translating calendar_id to web element
+            calendar_id (str): id of the two calendars
+
+        Returns:
+            int: 0 on success, -1 on failure
+        """
         try:
             #identify the two calendars
             if calendar_id_by == 'name':
@@ -316,9 +414,24 @@ class P2P:
         return 0
 
     def wdwait(self, wait_until):
+        """Shorthand for WebDriverWait
+
+        Args:
+            wait_until (EC.*): expected condition for which the webdriver should wait
+
+        Returns:
+            WebElement: WebElement which WebDriverWait waited for
+        """
         return WebDriverWait(self.driver, self.delay).until(wait_until)
 
     def clean_download_location(self):
+        """Makes sure that the download location does not contain old downloads which would be overwritten. In case old downloads
+            are detected they can be automatically deleted or the user has to delete them manually. In the latter case no statement
+            is generated for the P2P platform.
+
+        Returns:
+            int: 0 if download location is clean, -1 if user wants to manually delete the files
+        """
         list = glob.glob('p2p_downloads/{0}.{1}'.format(self.default_file_name, self.file_format))
         if len(list) > 0:
             print('Alte {0} Downloads in ./p2p_downloads entdeckt.'.format(self.name))
@@ -334,6 +447,12 @@ class P2P:
         return 0
 
     def rename_statement(self):
+        """Will rename the downloaded statement from the default name chosen by the P2P platform to 
+            platform_name_statement.file_format
+
+        Returns:
+            int: 0 on success, -1 on failure
+        """
         list = glob.glob('p2p_downloads/{0}.{1}'.format(self.default_file_name, self.file_format))
         if len(list) == 1:
             os.rename(list[0], 'p2p_downloads/{0}_statement.{1}'.format(self.name.lower(), self.file_format))
@@ -348,8 +467,16 @@ class P2P:
         return 0
 
 def get_calendar_clicks(target_date,  start_date):
-    # right arrow clicks are positive, left arrow clicks negative
+    """This function will determine how many months in the past/future the target date is compared to a given start date. Positive
+        numbers mean months into the future, negative numbers months into the past.
 
+    Args:
+        target_date (datetime.date): Target date
+        start_date (datetime.date): Start date
+
+    Returns:
+        int: number of months between start and target date
+    """
     if target_date.year != start_date.year:
         clicks = 12 * (target_date.year - start_date.year)
     else:
@@ -361,17 +488,36 @@ def get_calendar_clicks(target_date,  start_date):
     return clicks
 
 def short_month_to_nbr(short_name):
+    """Helper method for translating month short names to corresponding numbers
+
+    Returns:
+        str: two-digit month number padded with 0
+    """
     short_month_to_nbr = {'Jan': '01',  'Feb': '02', 'Mrz': '03', 'Mar': '03', 'Apr': '04', 'Mai': '05', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', \
         'Sep': '09', 'Okt': '10', 'Oct': '10', 'Nov': '11', 'Dez': '12', 'Dec': '12'}
     return short_month_to_nbr[short_name]
 
 def nbr_to_short_month(nbr):
+    """Helper method for translating numbers to corresponding month short names
+
+    Returns:
+        str: month short name
+    """
     #Only German locale is used so far
     nbr_to_short_month = {'01': 'Jan', '02': 'Feb', '03': 'Mrz', '04': 'Apr', '05': 'Mai', '06': 'Jun', '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Okt', \
         '11': 'Nov', '12': 'Dez'}
     return nbr_to_short_month[nbr]
 
 def open_selenium_bondora(start_date, end_date):
+    """The purpose of this method is to generate and download the Bondora account statement for the given date range.
+
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     bondora = P2P('Bondora', 'https://www.bondora.com/de/login', 'https://www.bondora.com/de/cashflow', 'https://www.bondora.com/de/authorize/logout')
 
     if bondora.open_start_page(EC.element_to_be_clickable((By.NAME, 'Email'))) < 0:
@@ -424,7 +570,15 @@ def open_selenium_bondora(start_date, end_date):
     return 0
 
 def open_selenium_mintos(start_date,  end_date):
+    """The purpose of this method is to generate and download the Mintos account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     today = datetime.today()
     default_file_name = '{0}{1}{2}-account-statement'.format(today.year,  today.strftime('%m'),\
         today.strftime('%d'))
@@ -466,7 +620,15 @@ def open_selenium_mintos(start_date,  end_date):
     return success
 
 def open_selenium_robocash(start_date,  end_date):
+    """The purpose of this method is to generate and download the Robocash account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     robocash = P2P('Robocash', 'https://robo.cash/de', 'https://robo.cash/de/cabinet/statement', \
     'https://robo.cash/de/logout')
 
@@ -527,7 +689,15 @@ def open_selenium_robocash(start_date,  end_date):
     return 0
 
 def open_selenium_swaper(start_date,  end_date):
+    """The purpose of this method is to generate and download the Swaper account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     swaper = P2P('Swaper', 'https://www.swaper.com/#/dashboard', \
         'https://www.swaper.com/#/overview/account-statement', default_file_name='excel-storage*', file_format='xlsx')
 
@@ -571,7 +741,15 @@ def open_selenium_swaper(start_date,  end_date):
     return success
 
 def open_selenium_peerberry(start_date,  end_date):
+    """The purpose of this method is to generate and download the Peerberry account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     peerberry = P2P('PeerBerry', 'https://peerberry.com/de/login', 'https://peerberry.com/de/statement', \
         default_file_name='transactions', file_format='csv')
 
@@ -630,7 +808,15 @@ def open_selenium_peerberry(start_date,  end_date):
     return success
 
 def open_selenium_estateguru(start_date,  end_date):
+    """The purpose of this method is to generate and download the Estateguru account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     estateguru = P2P('Estateguru', 'https://estateguru.co/portal/login/auth?lang=de', \
         'https://estateguru.co/portal/portfolio/account', 'https://estateguru.co/portal/logout/index')
 
@@ -666,7 +852,15 @@ def open_selenium_estateguru(start_date,  end_date):
     return 0
 
 def open_selenium_iuvo(start_date,  end_date):
+    """The purpose of this method is to generate and download the Iuvo account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     iuvo = P2P('Iuvo', 'https://www.iuvo-group.com/de/login/', \
         'https://www.iuvo-group.com/de/account-statement/')
 
@@ -731,7 +925,15 @@ def open_selenium_iuvo(start_date,  end_date):
     return 0
 
 def open_selenium_grupeer(start_date,  end_date):
+    """The purpose of this method is to generate and download the Grupeer account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     grupeer = P2P('Grupeer', 'https://www.grupeer.com/de/login', 'https://www.grupeer.com/de/account-statement', \
         default_file_name='Account statement', file_format='xlsx')
 
@@ -769,7 +971,15 @@ def open_selenium_grupeer(start_date,  end_date):
     return success
 
 def open_selenium_dofinance(start_date,  end_date):
+    """The purpose of this method is to generate and download the Dofinance account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(start_date.strftime('%Y-%m-%d'),\
         end_date.strftime('%Y-%m-%d'))
     dofinance = P2P('DoFinance', 'https://www.dofinance.eu/de/users/login', \
@@ -809,7 +1019,15 @@ def open_selenium_dofinance(start_date,  end_date):
     return success
 
 def open_selenium_twino(start_date,  end_date):
+    """The purpose of this method is to generate and download the Twino account statement for the given date range.
 
+    Args:
+        start_date (datetime.date): Start of date range for which account statement must be generated
+        end_date (datetime.date): End of date range for which account statement must be generated
+
+    Returns:
+        int: 0 on success, -1 on failure
+    """
     twino = P2P('Twino', 'https://www.twino.eu/de/', \
         'https://www.twino.eu/de/profile/investor/my-investments/account-transactions', \
         default_file_name='account_statement_*', file_format = 'xlsx')
