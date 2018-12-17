@@ -229,6 +229,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Start evaluation for the chosen P2P platforms and the given date range. Show the results for all P2P platforms for which account
         statement generation was successful.
         """
+        #Check that start date is before end date
+        if self.start_date > self.end_date:
+            print('Startdatum liegt nach Enddatum!')
+            return
+
         # Check if download directory exists, if not create it
         dl_location = './p2p_downloads'
         if not os.path.isdir(dl_location):
