@@ -1,3 +1,11 @@
+"""easyP2P
+    :platform: Linux
+    :synopsis: easyP2P is a Python module for collecting and processing of investment results for various P2P lending platforms
+
+.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
+
+"""
+
 from PyQt5 import QtWidgets
 import sys
 from ui.main_window import MainWindow
