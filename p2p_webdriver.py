@@ -62,9 +62,10 @@ class P2P:
         This function initializes Chromedriver as webdriver, sets the default download location to p2p_downloads relative to the current
         working directory and opens a new maximized browser window
         """
-        #TODO: hide browser windows
         #TODO. handle error cases
         options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--window-size=1920,1200")
         dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
         prefs = {"download.default_directory": dl_location}
         options.add_experimental_option("prefs", prefs)
