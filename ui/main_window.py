@@ -9,9 +9,8 @@ import os
 import p2p_parser
 import p2p_results
 import p2p_webdriver as wd
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
-
 from .Ui_main_window import Ui_MainWindow
 
 
@@ -261,7 +260,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         df_result = p2p_results.combine_dfs(list_of_dfs)
         p2p_results.show_results(df_result,  self.start_date,  self.end_date, self.output_file)
-    
+
+    def updateProgressBar(self, value):
+        """
+        Updates the progress bar in ProgressWindow to new value
+
+        Args:
+            value (float): value of the progress bar, between 0 and 100
+        """
+        assert value >= 0 and value <=100, 'Fortschrittsindikator beträgt: %r. Er muss zwischen 0 und 100 liegen!' % value
+        self.progressWindow.progressBar.setValue(value)
+
+    def updateProgressText(self, txt):
+        """
+        Appends a new line to the progress text in ProgressWindow
+
+        Args:
+            txt (str): string to add to progress text
+        """
+        self.progressWindow.progressText.append(txt)
+
     @pyqtSlot(str)
     def on_lineEdit_output_file_textChanged(self, p0):
         """

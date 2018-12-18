@@ -10,7 +10,7 @@ from .Ui_progress_window import Ui_Dialog
 
 class ProgressWindow(QDialog, Ui_Dialog):
     """
-    Contains code for handling events for the Progess Window
+    Contains code for handling events for the Progress Window
     """
     def __init__(self, parent=None):
         """
