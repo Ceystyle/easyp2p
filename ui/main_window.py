@@ -10,7 +10,7 @@ import p2p_parser
 import p2p_results
 import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox
 from .Ui_main_window import Ui_MainWindow
 
 
@@ -233,6 +233,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #Check that start date is before end date
         if self.start_date > self.end_date:
             print('Startdatum liegt nach Enddatum!')
+            return
+
+        #Check that at least one platform is selected
+        if len(self.platforms) == 0:
+            QMessageBox.warning(self, 'Keine P2P Plattform ausgewählt!', 'Bitte wähle mindestens eine P2P Plattform aus')
             return
 
         # Check if download directory exists, if not create it
