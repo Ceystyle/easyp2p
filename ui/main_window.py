@@ -28,6 +28,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
+        self.progressWindow = None
+        self.worker = None
         self.platforms =set([])
         self.start_month = date.today().month - 1
         self.comboBox_start_month.setCurrentIndex(self.comboBox_start_month.findText(wd.nbr_to_short_month(str(self.start_month))))
@@ -225,8 +227,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_pushButton_start_clicked(self):
         """
-        Start evaluation for the chosen P2P platforms and the given date range. Show the results for all P2P platforms for which account
-        statement generation was successful.
+        Start evaluation for the selected P2P platforms and the given date range. The evaluation will be done by a worker thread. Progress
+        is tracked in ProgressWindow.
         """
         #Check that start date is before end date
         if self.start_date > self.end_date:
@@ -238,28 +240,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not os.path.isdir(dl_location):
             os.makedirs(dl_location)
 
-        list_of_dfs = []
+        self.worker = WorkerThread()
+        self.worker.platforms = self.platforms
+        self.worker.start_date = self.start_date
+        self.worker.end_date = self.end_date
+        self.worker.output_file = self.output_file
+        self.abort = False
+        self.worker.updateProgressBar.connect(self.updateProgressBar)
+        self.worker.updateProgressText.connect(self.updateProgressText)
+        self.worker.start()
 
-        for platform in self.platforms:
-            try:
-                func = getattr(wd, 'open_selenium_'+platform.lower())
-            except AttributeError:
-                print('Die Funktion zum Öffnen von {0} konnte nicht gefunden werden. Ist p2p_webdriver.py vorhanden?'\
-                    .format(platform))
-            else:
-                if func(self.start_date,  self.end_date) < 0:
-                    print('{0} wird nicht im Ergebnis berücksichtigt'.format(platform))
-                else:
-                    try:
-                        parser = getattr(p2p_parser, platform.lower())
-                    except AttributeError:
-                        print('Der Parser für {0} konnte nicht gefunden werden. Ist p2p_parser.py vorhanden?'.format(platform))
-                    else:
-                        df = parser()
-                        list_of_dfs.append(df)
+        #Open progress window
+        from ui.progress_window import ProgressWindow
+        self.progressWindow = ProgressWindow()
+        self.progressWindow.exec_()
 
-        df_result = p2p_results.combine_dfs(list_of_dfs)
-        p2p_results.show_results(df_result,  self.start_date,  self.end_date, self.output_file)
+        if self.progressWindow.result() == 0:
+            self.worker.abort = True
 
     def updateProgressBar(self, value):
         """
