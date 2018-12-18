@@ -311,3 +311,60 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         for check_box in self.groupBox_platforms.findChildren(QCheckBox):
             check_box.setChecked(checked)
+
+class WorkerThread(QThread):
+    """
+    This class is responsible for accessing the P2P platforms and preparing the results.
+    """
+    #Signals for communicating with the MainWindow
+    updateProgressBar = pyqtSignal(float)
+    updateProgressText = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        """
+        Constructor
+
+        Keyword Args:
+        parent (QThread): reference to the parent thread
+        """
+        super(WorkerThread, self).__init__(parent)
+        self.abort = False
+
+    def run(self):
+        """
+        Iterates over all selected P2P platforms, gets the results from p2p_webdriver and outputs the results
+        """
+
+        list_of_dfs = []
+        progress = 0
+        step = 95/len(self.platforms) #the last 5 percent are for preparing the results
+
+        for platform in self.platforms:
+            try:
+                func = getattr(wd, 'open_selenium_'+platform.lower())
+            except AttributeError:
+                self.updateProgressText.emit('Funktion zum Öffnen von {0} konnte nicht gefunden werden.'
+                    ' Ist p2p_webdriver.py vorhanden?'.format(platform))
+            else:
+                if not self.abort:
+                    self.updateProgressText.emit('Start der Auswertung von {0}...'.format(platform))
+                    if func(self.start_date,  self.end_date) < 0:
+                        self.updateProgressText.emit('Es ist ein Fehler aufgetreten! '
+                            '{0} wird nicht im Ergebnis berücksichtigt'.format(platform))
+                    else:
+                        progress += step
+                        self.updateProgressBar.emit(progress)
+                        self.updateProgressText.emit('{0} erfolgreich ausgewertet!'.format(platform))
+                        try:
+                            parser = getattr(p2p_parser, platform.lower())
+                        except AttributeError:
+                            self.updateProgressText.emit('Parser für {0} konnte nicht gefunden werden.'
+                                ' Ist p2p_parser.py vorhanden?'.format(platform))
+                        else:
+                            df = parser()
+                            list_of_dfs.append(df)
+
+        if not self.abort:
+            df_result = p2p_results.combine_dfs(list_of_dfs)
+            p2p_results.show_results(df_result,  self.start_date,  self.end_date, self.output_file)
+            self.updateProgressBar.emit(100)
