@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import pandas as pd
+
 
 def combine_dfs(list_of_dfs):
 
@@ -11,46 +14,63 @@ def combine_dfs(list_of_dfs):
 
     return df_result
 
+
 def show_results(df,  start_date,  end_date, output_file):
 
     if df is None:
         print('Keine Ergebnisse vorhanden')
         return -1
 
-    #Calculate total income for each row
-    income_columns = ['Zinszahlungen', 'Verzugsgebühren', 'Zinszahlungen aus Rückkäufen', 'Ausfälle']
+    # Calculate total income for each row
+    income_columns = [
+        'Zinszahlungen',
+        'Verzugsgebühren',
+        'Zinszahlungen aus Rückkäufen',
+        'Ausfälle'
+    ]
     df['Gesamteinnahmen'] = 0
     for col in [col for col in df.columns if col in income_columns]:
         df['Gesamteinnahmen'] += df[col]
 
-    #Show only existing columns
-    target_columns = ['Startguthaben', 'Endsaldo', 'Investitionen', 'Tilgungszahlungen', 'Zinszahlungen', 'Verzugsgebühren',\
-        'Rückkäufe', 'Zinszahlungen aus Rückkäufen', 'Ausfälle', 'Gesamteinnahmen']
+    # Show only existing columns
+    target_columns = [
+        'Startguthaben',
+        'Endsaldo',
+        'Investitionen',
+        'Tilgungszahlungen',
+        'Zinszahlungen',
+        'Verzugsgebühren',
+        'Rückkäufe',
+        'Zinszahlungen aus Rückkäufen',
+        'Ausfälle',
+        'Gesamteinnahmen',
+    ]
     show_columns = [col for col in df.columns if col in target_columns]
 
-    df.reset_index(level=['Datum', 'Währung'],  inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
-    df['Monat'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y').dt.to_period('M')
+    df.reset_index(level=['Datum', 'Währung'], inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
+    df['Monat'] = \
+        pd.to_datetime(df['Datum'], format='%d.%m.%Y').dt.to_period('M')
     df.round(2)
 
-    #Make sure we only show results between start and end date
+    # Make sure we only show results between start and end date
     start_date = pd.Timestamp(start_date)
     end_date = pd.Timestamp(end_date)
     df = df[(df['Datum'] >= start_date) & (df['Datum'] <= end_date)]
 
-    #print monthly results to screen
-    print('Monatsergebnisse für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
-        end_date.strftime('%d.%m.%Y')))
+    # Print monthly results to screen
+    print('Monatsergebnisse für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),
+          end_date.strftime('%d.%m.%Y')))
     month_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung', 'Monat'],  aggfunc=sum)
     print(month_pivot_table)
 
-    #print monthly results to file
+    # Write monthly results to file
     writer = pd.ExcelWriter(output_file)
     month_pivot_table.to_excel(writer, 'Monatsergebnisse')
 
-    #print total results to screen
-    print('Gesamtergebnis für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),\
-        end_date.strftime('%d.%m.%Y')))
+    # Print total results to screen
+    print('Gesamtergebnis für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),
+          end_date.strftime('%d.%m.%Y')))
     totals_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung'],  aggfunc=sum)
 
     if 'Startguthaben' in totals_pivot_table.columns:
@@ -64,7 +84,7 @@ def show_results(df,  start_date,  end_date, output_file):
 
     print(totals_pivot_table)
 
-    #print total results to file
+    # Write total results to file
     totals_pivot_table.to_excel(writer, 'Gesamtergebnis')
     writer.save()
 

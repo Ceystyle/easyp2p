@@ -1,31 +1,49 @@
+# -*- coding: utf-8 -*-
+
 import locale
 import pandas as pd
 import xlrd
+
 
 def read_excel(p2p_name,  filename):
     try:
         df = pd.read_excel(filename)
     except xlrd.biffh.XLRDError:
-        print('Der heruntergeladene {0}-Kontoauszug ist beschädigt und wird daher ignoriert.'.format(p2p_name))
+        print('Der heruntergeladene {0}-Kontoauszug ist beschädigt '
+              'und wird daher ignoriert.'.format(p2p_name))
         return None
     except FileNotFoundError:
-        print('Der heruntergeladene {0}-Kontoauszug konnte nicht gefunden werden.'.format(p2p_name))
+        print('Der heruntergeladene {0}-Kontoauszug konnte nicht '
+              'gefunden werden.'.format(p2p_name))
         return None
-        
+
     return df
+
 
 def bondora():
     df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
 
     df.drop(['Gesamt:'], inplace=True)
-    df.replace({'\.': '',  ',':'.',  '€':''},  inplace=True,  regex=True)
+    df.replace({'\.': '',  ',': '.',  '€': ''},  inplace=True,  regex=True)
     df.rename_axis('Datum', inplace=True)
-    df.rename(columns={'Erhaltene Zinsen - gesamt': 'Zinszahlungen', 'Investitionen (netto)': 'Investitionen', \
-        'Erhaltener Kapitalbetrag - gesamt': 'Tilgungszahlungen', 'Eingesetztes Kapital (netto)': 'Einzahlungen'},  inplace=True)
-    df.rename(columns={'Darlehensbetrag und erhaltene Zinsen - insgesamt': 'Gesamtzahlungen', \
-        'Geplanter Kapitalbetrag - gesamt': 'Geplante Tilgungszahlungen', \
-        'Geplante Zinsen - gesamt': 'Geplante Zinszahlungen', \
-        'Kapitalbetrag und geplante Zinsen - gesamt': 'Geplante Gesamtzahlungen'},  inplace=True)
+    df.rename(
+        columns={
+            'Eingesetztes Kapital (netto)': 'Einzahlungen',
+            'Erhaltene Zinsen - gesamt': 'Zinszahlungen',
+            'Erhaltener Kapitalbetrag - gesamt': 'Tilgungszahlungen',
+            'Investitionen (netto)': 'Investitionen',
+        },
+        inplace=True
+    )
+    df.rename(
+        columns={
+            'Darlehensbetrag und erhaltene Zinsen - insgesamt': 'Gesamtzahlungen',
+            'Geplante Zinsen - gesamt': 'Geplante Zinszahlungen',
+            'Geplanter Kapitalbetrag - gesamt': 'Geplante Tilgungszahlungen',
+            'Kapitalbetrag und geplante Zinsen - gesamt': 'Geplante Gesamtzahlungen'
+        },
+        inplace=True
+    )
     df = df.astype('float64')
 
     df['Währung'] = 'EUR'
@@ -33,19 +51,21 @@ def bondora():
     df['Ausfälle'] = df['Tilgungszahlungen'] - df['Geplante Tilgungszahlungen']
 
     df.reset_index(level=0, inplace=True)
-    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8') #TODO: make sure locale is installed
+    # TODO: make sure locale is installed
+    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
     df['Datum'] = pd.to_datetime(df['Datum'], format='%b %Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
     return df_result
 
+
 def mintos():
     df = read_excel('Mintos', 'p2p_downloads/mintos_statement.xlsx')
-    
+
     if df is None:
         return None
-        
+
     mintos_dict = dict()
     mintos_dict['Interest income'] = 'Zinszahlungen'
     mintos_dict['Interest income on rebuy'] = 'Zinszahlungen aus Rückkäufen'
@@ -55,35 +75,43 @@ def mintos():
     mintos_dict['Investment principal repayment'] = 'Tilgungszahlungen'
     mintos_dict['Late payment fee income'] = 'Verzugsgebühren'
     mintos_dict['Incoming client payment'] = 'Einzahlungen'
-    mintos_dict['Cashback bonus'] = 'Zinszahlungen' # treat bonus payments as normal interest payments
+    # Treat bonus/cashback payments as normal interest payments
+    mintos_dict['Cashback bonus'] = 'Zinszahlungen'
     mintos_dict['Reversed incoming client payment'] = 'Auszahlungen'
-    
+
     df.rename(columns={'Date': 'Datum',  'Currency': 'Währung'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'])
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Mintos_Cashflow-Typ'], df['Loan ID'] = df['Details'].str.split(' Loan ID: ').str
-    df['Mintos_Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].str.split(' Rebuy purpose').str[0]
+    df['Mintos_Cashflow-Typ'], df['Loan ID'] = \
+        df['Details'].str.split(' Loan ID: ').str
+    df['Mintos_Cashflow-Typ'] = \
+        df['Mintos_Cashflow-Typ'].str.split(' Rebuy purpose').str[0]
     df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
     df['Plattform'] = 'Mintos'
-    
-    if df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Mintos: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Turnover',  index=['Plattform','Datum', 'Währung'],  columns=['Cashflow-Typ'],\
-        aggfunc=sum)
+    if df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
+        print('Mintos: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
+              set(df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+
+    df_result = pd.pivot_table(
+        df, values='Turnover',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
-    
-    #TODO: Anfangs- und Endsaldo ermitteln
+
+    # TODO: get start and end balance
 
     return df_result
+
 
 def robocash():
     df = read_excel('Robo.cash', 'p2p_downloads/robocash_statement.xls')
 
     if df is None:
         return None
-        
+
     robocash_dict = dict()
     robocash_dict['Zinsenzahlung'] = 'Zinszahlungen'
     robocash_dict['Darlehenskauf'] = 'Investitionen'
@@ -101,18 +129,23 @@ def robocash():
     df['Plattform'] = 'Robocash'
 
     if df['Operation'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Robocash: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Operation'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+        print('Robocash: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
+              set(df['Operation'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Betrag',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
+    df_result = pd.pivot_table(
+        df, values='Betrag',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
 
     return df_result
-    
+
+
 def swaper():
     df = read_excel('Swaper', 'p2p_downloads/swaper_statement.xlsx')
-    
+
     if df is None:
         return None
 
@@ -123,7 +156,7 @@ def swaper():
     swaper_dict['REPAYMENT_PRINCIPAL'] = 'Tilgungszahlungen'
     swaper_dict['BUYBACK_INTEREST'] = 'Zinszahlungen aus Rückkäufen'
     swaper_dict['BUYBACK_PRINCIPAL'] = 'Rückkäufe'
-    
+
     df.rename(columns={'Booking date': 'Datum'},  inplace=True)
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
@@ -131,18 +164,23 @@ def swaper():
     df['Plattform'] = 'Swaper'
 
     if df['Transaction type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Swaper: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Transaction type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+        print('Swaper: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
+              set(df['Transaction type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
+    df_result = pd.pivot_table(
+        df, values='Amount',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
 
     return df_result
-    
+
+
 def peerberry():
     df = pd.read_csv('p2p_downloads/peerberry_statement.csv')
-    
+
     if df is None:
         return None
 
@@ -158,48 +196,66 @@ def peerberry():
     df['Plattform'] = 'Peerberry'
 
     if df['Type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Peerberry: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+        print('Peerberry: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
+              set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
+    df_result = pd.pivot_table(
+        df, values='Amount',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
 
     return df_result
+
 
 def estateguru():
     df = pd.read_csv('p2p_downloads/estateguru_statement.csv')
 
     if df is None:
-        return None 
- 
+        return None
+
     estateguru_dict = dict()
     estateguru_dict['Zins'] = 'Zinszahlungen'
-    estateguru_dict['Bonus'] = 'Zinszahlungen' # treat bonus payments as normal interest payments
+    # Treat bonus payments as normal interest payments
+    estateguru_dict['Bonus'] = 'Zinszahlungen'
     estateguru_dict['Investition  (Auto Investieren)'] = 'Investitionen'
     estateguru_dict['Hauptbetrag'] = 'Tilgungszahlungen'
     estateguru_dict['Einzahlung  (Banktransfer)'] = 'Einzahlungen'
     estateguru_dict['Entschädigung'] = 'Verzugsgebühren'
 
-    df = df[:-1] #drop last line which only contains a summary
-    df.rename(columns={'Bestätigungsdatum': 'Datum',  'Cashflow-Typ': 'Estateguru_Cashflow-Typ'},  inplace=True)
+    df = df[:-1]  # Drop last line which only contains a summary
+    df.rename(
+        columns={
+            'Bestätigungsdatum': 'Datum',
+            'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
+        },
+        inplace=True
+    )
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y, %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Estateguru_Cashflow-Typ'].map(estateguru_dict)
     df['Plattform'] = 'Estateguru'
     df['Währung'] = 'EUR'
-    df['Betrag (€)'] = df['Betrag (€)'].apply(lambda x: x.replace('(', '-').replace(')', '').replace(',', '.'))\
-        .astype('float')
+    df['Betrag (€)'] = df['Betrag (€)'].\
+        apply(lambda x: x.replace('(', '-').replace(')', '').replace(',', '.')).\
+        astype('float')
 
     if df['Estateguru_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Estateguru: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Estateguru_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+        print('Estateguru: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
+              set(df['Estateguru_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Betrag (€)',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
+    df_result = pd.pivot_table(
+        df, values='Betrag (€)',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
 
     return df_result
+
 
 def iuvo():
     df = pd.read_csv('p2p_downloads/iuvo_statement.csv', index_col=-1)
@@ -209,7 +265,7 @@ def iuvo():
 
     df['Zinszahlungen'] = 0
     df['Tilgungszahlungen'] = 0
-    df = df.astype('float64', errors='ignore') #the date column will raise an error which can be ignored
+    df = df.astype('float64', errors='ignore')  # Date column will raise an error which can be ignored
 
     interest_types = ['Zins erhalten', 'Vorzeitige Zinstilgung']
     for it in interest_types:
@@ -223,8 +279,15 @@ def iuvo():
             df['Tilgungszahlungen'] += df[rt]
             del df[rt]
 
-    df.rename(columns={'Anfangsbestand': 'Startguthaben', 'Endbestand': 'Endsaldo', 'Automatische Kapitalanlage auf dem Primärmarkt': 'Investitionen', \
-        'Kreditbetrag bei Rückkauf erhalten': 'Rückkäufe', 'Verzugsstrafen erhalten': 'Verzugsgebühren'}, inplace=True)
+    df.rename(
+        columns={
+            'Anfangsbestand': 'Startguthaben',
+            'Automatische Kapitalanlage auf dem Primärmarkt': 'Investitionen',
+            'Endbestand': 'Endsaldo',
+            'Kreditbetrag bei Rückkauf erhalten': 'Rückkäufe',
+            'Verzugsstrafen erhalten': 'Verzugsgebühren'
+        }, inplace=True
+    )
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Plattform'] = 'Iuvo'
@@ -234,6 +297,7 @@ def iuvo():
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
     return df_result
+
 
 def grupeer():
     df = read_excel('Grupeer', 'p2p_downloads/grupeer_statement.xlsx')
@@ -245,7 +309,7 @@ def grupeer():
     grupeer_dict['Interest'] = 'Zinszahlungen'
     grupeer_dict['Investment'] = 'Investitionen'
     grupeer_dict['Deposit'] = 'Einzahlungen'
-    grupeer_dict['Cashback'] = 'Zinszahlungen' # treat cashback as interest payment
+    grupeer_dict['Cashback'] = 'Zinszahlungen'  # treat cashback as interest payment
     grupeer_dict['Principal'] = 'Tilgungszahlungen'
 
     df.rename(columns={'Date': 'Datum'},  inplace=True)
@@ -257,14 +321,19 @@ def grupeer():
     df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype('float')
 
     if df['Type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Grupeer: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+        print('Grupeer: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
+              set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Amount',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
+    df_result = pd.pivot_table(
+        df, values='Amount',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
 
     return df_result
+
 
 def dofinance():
     df = read_excel('DoFinance', 'p2p_downloads/dofinance_statement.xlsx')
@@ -278,7 +347,7 @@ def dofinance():
     dofinance_dict['Abgeschlossene Investition\nRate: 12% Typ: automatisch'] = 'Tilgungszahlungen'
     dofinance_dict['Anlage\nRate: 12% Typ: automatisch'] = 'Investitionen'
 
-    df = df[:-2] #drop the last two rows
+    df = df[:-2]  # drop the last two rows
     df.rename(columns={'Bearbeitungsdatum': 'Datum'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
@@ -287,14 +356,19 @@ def dofinance():
     df['Währung'] = 'EUR'
 
     if df['Art der Transaktion'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('DoFinance: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
+        print('DoFinance: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
             set(df['Art der Transaktion'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Betrag, €',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
+    df_result = pd.pivot_table(
+        df, values='Betrag, €',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
 
     return df_result
+
 
 def twino():
     df = read_excel('Twino', 'p2p_downloads/twino_statement.xlsx')
@@ -313,8 +387,8 @@ def twino():
     twino_dict['REPAYMENT PRINCIPAL'] = 'Tilgungszahlungen'
     twino_dict['BUY_SHARES PRINCIPAL'] = 'Investitionen'
 
-    df = df[1:] #drop first two rows
-    df.columns = df.iloc[0] # the first row now contains header names
+    df = df[1:]  # drop first two rows
+    df.columns = df.iloc[0]  # the first row now contains header names
     df = df[1:]
     df.rename(columns={'Booking Date': 'Datum'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y %H:%M')
@@ -325,11 +399,15 @@ def twino():
     df['Währung'] = 'EUR'
 
     if df['Twino-Cashflow'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Twino: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',\
-            set(df['Twino-Cashflow'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+        print('Twino: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
+              set(df['Twino-Cashflow'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
 
-    df_result = pd.pivot_table(df, values='Amount, EUR',  index=['Plattform', 'Datum', 'Währung'],  columns=['Cashflow-Typ'], \
-        aggfunc=sum)
+    df_result = pd.pivot_table(
+        df, values='Amount, EUR',
+        index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'],
+        aggfunc=sum
+    )
     df_result.fillna(0,  inplace=True)
 
     return df_result

@@ -30,10 +30,10 @@ class Ui_Dialog(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushButton_OK = QtWidgets.QPushButton(self.layoutWidget)
-        self.pushButton_OK.setEnabled(False)
-        self.pushButton_OK.setObjectName("pushButton_OK")
-        self.horizontalLayout.addWidget(self.pushButton_OK)
+        self.pushButton_ok = QtWidgets.QPushButton(self.layoutWidget)
+        self.pushButton_ok.setEnabled(False)
+        self.pushButton_ok.setObjectName("pushButton_ok")
+        self.horizontalLayout.addWidget(self.pushButton_ok)
         self.pushButton_abort = QtWidgets.QPushButton(self.layoutWidget)
         self.pushButton_abort.setObjectName("pushButton_abort")
         self.horizontalLayout.addWidget(self.pushButton_abort)
@@ -45,7 +45,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "easyP2P"))
-        self.pushButton_OK.setText(_translate("Dialog", "OK"))
+        self.pushButton_ok.setText(_translate("Dialog", "OK"))
         self.pushButton_abort.setText(_translate("Dialog", "Abbrechen"))
 
 
