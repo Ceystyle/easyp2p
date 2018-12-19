@@ -58,20 +58,16 @@ def show_results(df,  start_date,  end_date, output_file):
     end_date = pd.Timestamp(end_date)
     df = df[(df['Datum'] >= start_date) & (df['Datum'] <= end_date)]
 
-    # Print monthly results to screen
-    print('Monatsergebnisse für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),
-          end_date.strftime('%d.%m.%Y')))
-    month_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung', 'Monat'],  aggfunc=sum)
-    print(month_pivot_table)
-
     # Write monthly results to file
     writer = pd.ExcelWriter(output_file)
+    month_pivot_table = pd.pivot_table(
+        df, values=show_columns,
+        index=['Plattform', 'Währung', 'Monat'], aggfunc=sum)
     month_pivot_table.to_excel(writer, 'Monatsergebnisse')
 
-    # Print total results to screen
-    print('Gesamtergebnis für den Zeitraum {0}-{1} pro Plattform:\n'.format(start_date.strftime('%d.%m.%Y'),
-          end_date.strftime('%d.%m.%Y')))
-    totals_pivot_table = pd.pivot_table(df, values=show_columns,  index=['Plattform',  'Währung'],  aggfunc=sum)
+    totals_pivot_table = pd.pivot_table(
+        df, values=show_columns,
+        index=['Plattform', 'Währung'], aggfunc=sum)
 
     if 'Startguthaben' in totals_pivot_table.columns:
         for pl in month_pivot_table.index.levels[0]:
@@ -81,8 +77,6 @@ def show_results(df,  start_date,  end_date, output_file):
         for pl in month_pivot_table.index.levels[0]:
             end_balance = month_pivot_table.loc[pl]['Endsaldo'][0]
             totals_pivot_table.loc[pl]['Endsaldo'] = end_balance
-
-    print(totals_pivot_table)
 
     # Write total results to file
     totals_pivot_table.to_excel(writer, 'Gesamtergebnis')
