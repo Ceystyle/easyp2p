@@ -247,7 +247,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         # Check that start date is before end date
         if self.start_date > self.end_date:
-            print('Startdatum liegt nach Enddatum!')
+            QMessageBox.warning(
+                self, 'Startdatum liegt nach Enddatum!',
+                'Das Startdatum darf nicht nach dem Enddatum liegen!')
             return
 
         # Check that at least one platform is selected
@@ -263,7 +265,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             os.makedirs(dl_location)
 
         self.worker = WorkerThread()
-        print(self.platforms)
         self.worker.platforms = self.platforms
         self.worker.start_date = self.start_date
         self.worker.end_date = self.end_date
