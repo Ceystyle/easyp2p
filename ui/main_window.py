@@ -63,6 +63,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.end_date = date(self.end_year, self.end_month, end_of_month)
 
     @pyqtSlot(bool)
+    def on_checkBox_bondora_toggled(self, checked):
+        """
+        Add/remove Bondora to list of platforms.
+
+        Args:
+            checked (bool): if True add Bondora, if False remove Bondora
+
+        """
+        if checked:
+            self.platforms.add('Bondora')
+        else:
+            self.platforms.remove('Bondora')
+
+    @pyqtSlot(bool)
     def on_checkBox_grupeer_toggled(self, checked):
         """
         Add/remove Grupeer to list of platforms.
@@ -91,18 +105,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.platforms.remove('DoFinance')
 
     @pyqtSlot(bool)
-    def on_checkBox_Robocash_toggled(self, checked):
+    def on_checkBox_iuvo_toggled(self, checked):
         """
-        Add/remove Robocash to list of platforms.
+        Add/remove Iuvo to list of platforms.
 
         Args:
-            checked (bool): if True add Robocash, if False remove Robocash
+            checked (bool): if True add Iuvo, if False remove Iuvo
 
         """
         if checked:
-            self.platforms.add('Robocash')
+            self.platforms.add('Iuvo')
         else:
-            self.platforms.remove('Robocash')
+            self.platforms.remove('Iuvo')
 
     @pyqtSlot(bool)
     def on_checkBox_peerberry_toggled(self, checked):
