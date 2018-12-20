@@ -20,6 +20,11 @@ def read_excel(p2p_name,  filename):
     return df
 
 
+def check_missing_cf_types(df, orig_cf_type_name):
+    return set(df[orig_cf_type_name].where(
+        df['Cashflow-Typ'].isna()).dropna().tolist())
+
+
 def bondora():
     df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
 
@@ -57,7 +62,9 @@ def bondora():
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
-    return df_result
+    # Since we define the column names, Bondora cannot have missing CF types
+    missing_cf_types = set()
+    return [df_result, missing_cf_types]
 
 
 def mintos():
@@ -82,16 +89,14 @@ def mintos():
     df.rename(columns={'Date': 'Datum',  'Currency': 'Währung'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'])
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Mintos_Cashflow-Typ'], df['Loan ID'] = \
-        df['Details'].str.split(' Loan ID: ').str
-    df['Mintos_Cashflow-Typ'] = \
-        df['Mintos_Cashflow-Typ'].str.split(' Rebuy purpose').str[0]
+    df['Mintos_Cashflow-Typ'], df['Loan ID'] = df['Details'].str.split(
+        ' Loan ID: ').str
+    df['Mintos_Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].str.split(
+        ' Rebuy purpose').str[0]
     df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
     df['Plattform'] = 'Mintos'
 
-    if df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Mintos: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-              set(df['Mintos_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Mintos_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Turnover',
@@ -102,8 +107,9 @@ def mintos():
     df_result.fillna(0,  inplace=True)
 
     # TODO: get start and end balance
+    # TODO: find better way for handing over missing_cf_types to worker thread
 
-    return df_result
+    return [df_result, missing_cf_types]
 
 
 def robocash():
@@ -128,9 +134,7 @@ def robocash():
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Robocash'
 
-    if df['Operation'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Robocash: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-              set(df['Operation'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Operation')
 
     df_result = pd.pivot_table(
         df, values='Betrag',
@@ -140,7 +144,7 @@ def robocash():
     )
     df_result.fillna(0,  inplace=True)
 
-    return df_result
+    return [df_result, missing_cf_types]
 
 
 def swaper():
@@ -163,9 +167,7 @@ def swaper():
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Swaper'
 
-    if df['Transaction type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Swaper: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-              set(df['Transaction type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Transaction type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -175,7 +177,7 @@ def swaper():
     )
     df_result.fillna(0,  inplace=True)
 
-    return df_result
+    return [df_result, missing_cf_types]
 
 
 def peerberry():
@@ -195,9 +197,7 @@ def peerberry():
     df['Cashflow-Typ'] = df['Type'].map(peerberry_dict)
     df['Plattform'] = 'Peerberry'
 
-    if df['Type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Peerberry: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-              set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -207,7 +207,7 @@ def peerberry():
     )
     df_result.fillna(0,  inplace=True)
 
-    return df_result
+    return [df_result, missing_cf_types]
 
 
 def estateguru():
@@ -239,12 +239,10 @@ def estateguru():
     df['Plattform'] = 'Estateguru'
     df['Währung'] = 'EUR'
     df['Betrag (€)'] = df['Betrag (€)'].\
-        apply(lambda x: x.replace('(', '-').replace(')', '').replace(',', '.')).\
-        astype('float')
+        apply(lambda x: x.replace('(', '-').replace(')', '').replace(
+            ',', '.')).astype('float')
 
-    if df['Estateguru_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Estateguru: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-              set(df['Estateguru_Cashflow-Typ'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Estateguru_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Betrag (€)',
@@ -254,7 +252,7 @@ def estateguru():
     )
     df_result.fillna(0,  inplace=True)
 
-    return df_result
+    return [df_result, missing_cf_types]
 
 
 def iuvo():
@@ -265,7 +263,8 @@ def iuvo():
 
     df['Zinszahlungen'] = 0
     df['Tilgungszahlungen'] = 0
-    df = df.astype('float64', errors='ignore')  # Date column will raise an error which can be ignored
+    # Date column will raise an error which can be ignored:
+    df = df.astype('float64', errors='ignore')
 
     interest_types = ['Zins erhalten', 'Vorzeitige Zinstilgung']
     for it in interest_types:
@@ -273,7 +272,8 @@ def iuvo():
             df['Zinszahlungen'] += df[it]
             del df[it]
 
-    redemption_types = ['Vorzeitige Kreditbetragtilgung', 'Kreditbetrag erhalten']
+    redemption_types = [
+        'Vorzeitige Kreditbetragtilgung', 'Kreditbetrag erhalten']
     for rt in redemption_types:
         if rt in df.columns:
             df['Tilgungszahlungen'] += df[rt]
@@ -296,7 +296,9 @@ def iuvo():
     df.reset_index(level=0, inplace=True)
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
-    return df_result
+    # Since we set the column names, there cannot be unknown CF types
+    missing_cf_types = set()
+    return [df_result, missing_cf_types]
 
 
 def grupeer():
@@ -309,7 +311,8 @@ def grupeer():
     grupeer_dict['Interest'] = 'Zinszahlungen'
     grupeer_dict['Investment'] = 'Investitionen'
     grupeer_dict['Deposit'] = 'Einzahlungen'
-    grupeer_dict['Cashback'] = 'Zinszahlungen'  # treat cashback as interest payment
+    # Treat cashback as interest payment:
+    grupeer_dict['Cashback'] = 'Zinszahlungen'
     grupeer_dict['Principal'] = 'Tilgungszahlungen'
 
     df.rename(columns={'Date': 'Datum'},  inplace=True)
@@ -318,11 +321,10 @@ def grupeer():
     df['Cashflow-Typ'] = df['Type'].map(grupeer_dict)
     df['Plattform'] = 'Grupeer'
     df['Währung'] = 'EUR'
-    df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype('float')
+    df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype(
+        'float')
 
-    if df['Type'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Grupeer: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-              set(df['Type'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -332,7 +334,7 @@ def grupeer():
     )
     df_result.fillna(0,  inplace=True)
 
-    return df_result
+    return [df_result, missing_cf_types]
 
 
 def dofinance():
@@ -355,9 +357,7 @@ def dofinance():
     df['Plattform'] = 'DoFinance'
     df['Währung'] = 'EUR'
 
-    if df['Art der Transaktion'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('DoFinance: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-            set(df['Art der Transaktion'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Art der Transaktion')
 
     df_result = pd.pivot_table(
         df, values='Betrag, €',
@@ -367,7 +367,7 @@ def dofinance():
     )
     df_result.fillna(0,  inplace=True)
 
-    return df_result
+    return [df_result, missing_cf_types]
 
 
 def twino():
@@ -393,14 +393,12 @@ def twino():
     df.rename(columns={'Booking Date': 'Datum'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Twino-Cashflow'] = df['Type'] + ' ' + df['Description']
-    df['Cashflow-Typ'] = df['Twino-Cashflow'].map(twino_dict)
+    df['Twino_Cashflow-Typ'] = df['Type'] + ' ' + df['Description']
+    df['Cashflow-Typ'] = df['Twino_Cashflow-Typ'].map(twino_dict)
     df['Plattform'] = 'Twino'
     df['Währung'] = 'EUR'
 
-    if df['Twino-Cashflow'].where(df['Cashflow-Typ'].isna()).dropna().size > 0:
-        print('Twino: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: ',
-              set(df['Twino-Cashflow'].where(df['Cashflow-Typ'].isna()).dropna().tolist()))
+    missing_cf_types = check_missing_cf_types(df, 'Twino_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Amount, EUR',
@@ -410,4 +408,4 @@ def twino():
     )
     df_result.fillna(0,  inplace=True)
 
-    return df_result
+    return [df_result, missing_cf_types]

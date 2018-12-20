@@ -434,8 +434,14 @@ class WorkerThread(QThread):
                                          'vorhanden?'.format(platform))
                         self.updateProgressText.emit(error_message)
                     else:
-                        df = parser()
+                        df = parser()[0]
                         list_of_dfs.append(df)
+
+                        if len(parser()[1]) > 0:
+                            warning_message = ('{0}: unbekannter Cashflow-Typ '
+                                'wird im Ergebnis ignoriert: {1}'.format(
+                                    platform, parser()[1]))
+                            self.updateProgressText.emit(warning_message)
 
         if self.abort:
             return
