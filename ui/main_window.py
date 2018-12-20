@@ -392,10 +392,15 @@ class WorkerThread(QThread):
                         df = parser()
                         list_of_dfs.append(df)
 
-        if not self.abort:
-            df_result = p2p_results.combine_dfs(list_of_dfs)
-            p2p_results.show_results(
+        if self.abort:
+            return
+
+        df_result = p2p_results.combine_dfs(list_of_dfs)
+
+        if p2p_results.show_results(
                 df_result, self.start_date,
-                self.end_date, self.output_file
-            )
-            self.updateProgressBar.emit(100)
+                self.end_date, self.output_file) < 0:
+            error_message = ('Keine Ergebnisse vorhanden')
+            self.updateProgressText.emit(error_message)
+
+        self.updateProgressBar.emit(100)

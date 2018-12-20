@@ -49,11 +49,10 @@ def show_results(df,  start_date,  end_date, output_file):
         output_file (str): absolute path to the output file
 
     Returns:
-        int: 0 on success
+        int: 0 on success, -1 on failure
 
     """
     if df is None:
-        print('Keine Ergebnisse vorhanden')
         return -1
 
     # Calculate total income for each row
