@@ -1,10 +1,28 @@
 # -*- coding: utf-8 -*-
 
+"""
+    p2p_results provides two public functions for combining and presenting the
+    investment results of the various P2P platforms.
+
+.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
+
+"""
+
 import pandas as pd
 
 
 def combine_dfs(list_of_dfs):
+    """
+    Helper method for combining pandas data frames.
 
+    Args:
+        list_of_dfs (list(pandas.DataFrame)): a list of data frames which need
+            to be combined
+
+    Returns:
+        pandas.DataFrame: the combined data frame
+
+    """
     df_result = None
     for df in list_of_dfs:
         if df_result is not None:
@@ -16,7 +34,24 @@ def combine_dfs(list_of_dfs):
 
 
 def show_results(df,  start_date,  end_date, output_file):
+    """
+    Sums up the results and writes them to an Excel file.
 
+    The results are presented in two ways: on a monthly basis (in the Excel tab
+    'Monatsergebnisse') and the total sums (in tab 'Gesamtergebnis') for the
+    period between start and end date.
+
+    Args:
+        df (pandas.DataFrame): data frame containing the combined data from
+            the P2P platforms
+        start_date (datetime.date): start of the evaluation period
+        end_date (datetime.date): end of the evaluation period
+        output_file (str): absolute path to the output file
+
+    Returns:
+        int: 0 on success
+
+    """
     if df is None:
         print('Keine Ergebnisse vorhanden')
         return -1
@@ -49,8 +84,8 @@ def show_results(df,  start_date,  end_date, output_file):
 
     df.reset_index(level=['Datum', 'Währung'], inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
-    df['Monat'] = \
-        pd.to_datetime(df['Datum'], format='%d.%m.%Y').dt.to_period('M')
+    df['Monat'] = pd.to_datetime(
+        df['Datum'], format='%d.%m.%Y').dt.to_period('M')
     df.round(2)
 
     # Make sure we only show results between start and end date
