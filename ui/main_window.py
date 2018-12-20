@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Module implementing MainWindow, the main window of easyP2P"""
+"""Module implementing MainWindow, the main window of easyP2P."""
 
 import calendar
 from datetime import date
@@ -15,12 +15,12 @@ from .Ui_main_window import Ui_MainWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    """
-    This class defines the main window of easyP2P
-    """
+
+    """This class defines the main window of easyP2P."""
+
     def __init__(self, parent=None):
         """
-        Constructor
+        Constructor.
 
         Keyword Args:
         parent (QWidget): reference to the parent widget
@@ -54,9 +54,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.on_lineEdit_output_file_textChanged(self.output_file)
 
     def set_start_date(self):
+        """Helper method to set start date to first day of selected month."""
         self.start_date = date(self.start_year, self.start_month, 1)
 
     def set_end_date(self):
+        """Helper method to set end date to last day of selected month."""
         end_of_month = calendar.monthrange(self.end_year, self.end_month)[1]
         self.end_date = date(self.end_year, self.end_month, end_of_month)
 
@@ -67,6 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Grupeer, if False remove Grupeer
+
         """
         if checked:
             self.platforms.add('Grupeer')
@@ -80,6 +83,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Dofinance, if False remove Dofinance
+
         """
         if checked:
             self.platforms.add('DoFinance')
@@ -93,6 +97,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Robocash, if False remove Robocash
+
         """
         if checked:
             self.platforms.add('Robocash')
@@ -106,6 +111,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Peerberry, if False remove Peerberry
+
         """
         if checked:
             self.platforms.add('PeerBerry')
@@ -119,6 +125,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Mintos, if False remove Mintos
+
         """
         if checked:
             self.platforms.add('Mintos')
@@ -132,6 +139,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Robocash, if False remove Robocash
+
         """
         if checked:
             self.platforms.add('Robocash')
@@ -145,6 +153,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Estateguru, if False remove Estateguru
+
         """
         if checked:
             self.platforms.add('Estateguru')
@@ -158,6 +167,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Swaper, if False remove Swaper
+
         """
         if checked:
             self.platforms.add('Swaper')
@@ -171,6 +181,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             checked (bool): if True add Twino, if False remove Twino
+
         """
         if checked:
             self.platforms.add('Twino')
@@ -180,10 +191,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_start_month_activated(self, p0):
         """
-        Update start date if the user changes start month in the combo box
+        Update start date if the user changed start month in the combo box.
 
         Args:
             p0 (str): short month name chosen by the user in the combo box
+
         """
         self.start_month = int(wd.short_month_to_nbr(p0))
         self.set_start_date()
@@ -191,10 +203,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_start_year_activated(self, p0):
         """
-        Update start date if the user changes start year in the combo box
+        Update start date if the user changed start year in the combo box.
 
         Args:
             p0 (str): year chosen by the user in the combo box
+
         """
         self.start_year = int(p0)
         self.set_start_date()
@@ -202,10 +215,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_end_month_activated(self, p0):
         """
-        Update end date if the user changes end month in the combo box
+        Update end date if the user changed end month in the combo box.
 
         Args:
             p0 (str): short month name chosen by the user in the combo box
+
         """
         self.end_month = int(wd.short_month_to_nbr(p0))
         self.set_end_date()
@@ -213,10 +227,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_comboBox_end_year_activated(self, p0):
         """
-        Update end date if the user changes end year in the combo box
+        Update end date if the user changed end year in the combo box.
 
         Args:
             p0 (str): year chosen by the user in the combo box
+
         """
         self.end_year = int(p0)
         self.set_end_date()
@@ -226,8 +241,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         Start evaluation for selected P2P platforms and the given date range.
 
-        The evaluation will be done by a worker thread. Progress
-        is tracked in ProgressWindow.
+        The evaluation will be done by a worker thread in class WorkerThread.
+        Progress is tracked in ProgressWindow.
+
         """
         # Check that start date is before end date
         if self.start_date > self.end_date:
@@ -267,10 +283,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def updateProgressBar(self, value):
         """
-        Updates the progress bar in ProgressWindow to new value
+        Updates the progress bar in ProgressWindow to new value.
 
         Args:
             value (float): value of the progress bar, between 0 and 100
+
         """
         if not (value >= 0 and value <= 100):
             error_message = ('Fortschrittsindikator beträgt: {0}. Er muss '
@@ -283,10 +300,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def updateProgressText(self, txt):
         """
-        Appends a new line to the progress text in ProgressWindow
+        Appends a new line to the progress text in ProgressWindow.
 
         Args:
             txt (str): string to add to progress text
+
         """
         self.progressWindow.progressText.append(txt)
 
@@ -297,13 +315,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         Args:
             p0 (str): file name entered by the user
+
         """
         QLineEdit.setText(self.lineEdit_output_file, p0)
 
     @pyqtSlot()
     def on_pushButton_file_chooser_clicked(self):
         """
-        Open dialog window for changing the save location of the results file
+        Open dialog window for changing the save location of the results file.
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -316,20 +335,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(bool)
     def on_checkBox_select_all_toggled(self, checked):
         """
-        Toggle/untoggle all P2P platforms
+        Toggle/untoggle all P2P platforms.
 
         Args:
             checked (bool): if True toggle all check boxes, if False untoggle
                 all check boxes
+
         """
         for check_box in self.groupBox_platforms.findChildren(QCheckBox):
             check_box.setChecked(checked)
 
 class WorkerThread(QThread):
+
     """
-    This class is responsible for accessing the P2P platforms
-    and preparing the results.
+    Worker thread to offload calls to p2p_webdriver, p2p_parser, p2p_results.
+
+    This class is responsible for accessing the P2P platform methods in
+    p2p_webdriver and to prepare the results. The main reason for separating
+    the calls to p2p_webdriver, p2p_parser and p2p_results from the main thread
+    is to keep the GUI responsive while the webdriver is working.
+
     """
+
     # Signals for communicating with the MainWindow
     updateProgressBar = pyqtSignal(float)
     updateProgressText = pyqtSignal(str)
@@ -340,17 +367,20 @@ class WorkerThread(QThread):
 
         Keyword Args:
         parent (QThread): reference to the parent thread
+
         """
         super(WorkerThread, self).__init__(parent)
         self.abort = False
 
     def run(self):
         """
-        Iterates over all selected P2P platforms,
-        gets the results from p2p_webdriver and
-        outputs the results.
-        """
+        Gets and outputs results from all selected P2P platforms.
 
+        Iterates over all selected P2P platforms, gets the results from
+        p2p_webdriver and outputs the results. After each platform the progress
+        bar is increased.
+
+        """
         list_of_dfs = []
         progress = 0
         # Distribute 95% evenly across all selected platforms
