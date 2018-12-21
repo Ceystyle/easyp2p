@@ -11,6 +11,8 @@ import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
+from xlrd.biffh import XLRDError
+
 from .Ui_main_window import Ui_MainWindow
 
 
@@ -408,7 +410,6 @@ class WorkerThread(QThread):
             self.updateProgressText.emit(error_message)
             return None
         else:
-            print(type(func))
             return func
 
     def get_p2p_parser(self, platform):
@@ -477,14 +478,28 @@ class WorkerThread(QThread):
                 if parser is None:
                     return
 
-                df = parser()[0]
-                list_of_dfs.append(df)
-
-                if len(parser()[1]) > 0:
-                    warning_message = ('{0}: unbekannter Cashflow-Typ '
-                        'wird im Ergebnis ignoriert: {1}'.format(
-                            platform, parser()[1]))
+                try:
+                    df = parser()[0]
+                    list_of_dfs.append(df)
+                except FileNotFoundError:
+                    error_message = ('Der heruntergeladene {0}-Kontoauszug '
+                        'konnte nicht gefunden werden!'.format(platform))
+                    self.updateProgressText.emit(error_message)
+                    warning_message = '{0} wird ignoriert!'.format(platform)
                     self.updateProgressText.emit(warning_message)
+                    return
+                except XLRDError:
+                    error_message = ('Der heruntergeladene {0}-Kontoauszug '
+                        'ist beschädigt!'.format(platform))
+                    self.updateProgressText.emit(error_message)
+                    warning_message = '{0} wird ignoriert!'.format(platform)
+                    self.updateProgressText.emit(warning_message)
+                else:
+                    if len(parser()[1]) > 0:
+                        warning_message = ('{0}: unbekannter Cashflow-Typ '
+                            'wird im Ergebnis ignoriert: {1}'.format(
+                                platform, parser()[1]))
+                        self.updateProgressText.emit(warning_message)
 
         if self.abort:
             return

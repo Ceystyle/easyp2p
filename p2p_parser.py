@@ -2,7 +2,6 @@
 
 import locale
 import pandas as pd
-import xlrd
 
 interest_payment = 'Zinszahlungen'
 buyback_interest_payment = 'Zinszahlungen aus Rückkäufen'
@@ -15,20 +14,6 @@ outgoing_payment = 'Auszahlungen'
 default_payment = 'Ausfälle'
 start_balance_name = 'Startguthaben'
 end_balance_name = 'Endsaldo'
-
-def read_excel(p2p_name,  filename):
-    try:
-        df = pd.read_excel(filename)
-    except xlrd.biffh.XLRDError:
-        print('Der heruntergeladene {0}-Kontoauszug ist beschädigt '
-              'und wird daher ignoriert.'.format(p2p_name))
-        return None
-    except FileNotFoundError:
-        print('Der heruntergeladene {0}-Kontoauszug konnte nicht '
-              'gefunden werden.'.format(p2p_name))
-        return None
-
-    return df
 
 
 def check_missing_cf_types(df, orig_cf_type_name):
@@ -82,7 +67,7 @@ def bondora():
 
 
 def mintos():
-    df = read_excel('Mintos', 'p2p_downloads/mintos_statement.xlsx')
+    df = pd.read_excel('p2p_downloads/mintos_statement.xlsx')
 
     if df is None:
         return None
@@ -127,7 +112,7 @@ def mintos():
 
 
 def robocash():
-    df = read_excel('Robo.cash', 'p2p_downloads/robocash_statement.xls')
+    df = pd.read_excel('p2p_downloads/robocash_statement.xls')
 
     if df is None:
         return None
@@ -162,7 +147,7 @@ def robocash():
 
 
 def swaper():
-    df = read_excel('Swaper', 'p2p_downloads/swaper_statement.xlsx')
+    df = pd.read_excel('p2p_downloads/swaper_statement.xlsx')
 
     if df is None:
         return None
@@ -317,7 +302,7 @@ def iuvo():
 
 
 def grupeer():
-    df = read_excel('Grupeer', 'p2p_downloads/grupeer_statement.xlsx')
+    df = pd.read_excel('p2p_downloads/grupeer_statement.xlsx')
 
     if df is None:
         return None
@@ -353,7 +338,7 @@ def grupeer():
 
 
 def dofinance():
-    df = read_excel('DoFinance', 'p2p_downloads/dofinance_statement.xlsx')
+    df = pd.read_excel('p2p_downloads/dofinance_statement.xlsx')
 
     if df is None:
         return None
@@ -388,7 +373,7 @@ def dofinance():
 
 
 def twino():
-    df = read_excel('Twino', 'p2p_downloads/twino_statement.xlsx')
+    df = pd.read_excel('p2p_downloads/twino_statement.xlsx')
 
     if df is None:
         return None
