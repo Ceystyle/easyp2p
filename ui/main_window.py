@@ -381,11 +381,58 @@ class WorkerThread(QThread):
         Constructor.
 
         Keyword Args:
-        parent (QThread): reference to the parent thread
+            parent (QThread): reference to the parent thread
 
         """
         super(WorkerThread, self).__init__(parent)
         self.abort = False
+
+    def get_p2p_function(self, platform):
+        """
+        Helper method to get the name of the appropriate webdriver function.
+
+        Args:
+            platform (str): name of the P2P platform
+
+        Returns:
+            function: p2p_webdriver.open_selenium_* function for handling this
+            P2P platform or None if the function cannot be found
+
+        """
+        try:
+            func = getattr(wd, 'open_selenium_'+platform.lower())
+        except AttributeError:
+            error_message = (
+                'Funktion zum Öffnen von {0} konnte nicht gefunden werden. '
+                'Ist p2p_webdriver.py vorhanden?'.format(platform))
+            self.updateProgressText.emit(error_message)
+            return None
+        else:
+            print(type(func))
+            return func
+
+    def get_p2p_parser(self, platform):
+        """
+        Helper method to get the name of the appropriate parser.
+
+        Args:
+            platform (str): name of the P2P platform
+
+        Returns:
+            function: p2p_parser.* function for parsing this P2P platform or
+            None if the function cannot be found
+
+        """
+        try:
+            parser = getattr(p2p_parser, platform.lower())
+        except AttributeError:
+            error_message = (
+                'Parser für {0} konnte nicht gefunden werden. '
+                'Ist p2p_parser.py vorhanden?'.format(platform))
+            self.updateProgressText.emit(error_message)
+            return None
+        else:
+            return parser
 
     def run(self):
         """
@@ -403,45 +450,41 @@ class WorkerThread(QThread):
         step = 95/len(self.platforms)
 
         for platform in self.platforms:
-            try:
-                func = getattr(wd, 'open_selenium_'+platform.lower())
-            except AttributeError:
-                error_message = ('Funktion zum Öffnen von {0} konnte nicht '
-                                 'gefunden werden. Ist p2p_webdriver.py '
-                                 'vorhanden?'.format(platform))
+            if self.abort:
+                return
+
+            func = self.get_p2p_function(platform)
+            if func is None:
+                return
+
+            self.updateProgressText.emit(
+                'Start der Auswertung von {0}...'.format(platform))
+            if func(self.start_date,  self.end_date) < 0:
+                error_message = ('Es ist ein Fehler aufgetreten! {0} wird '
+                                 'nicht im Ergebnis berücksichtigt'
+                                 ''.format(platform))
                 self.updateProgressText.emit(error_message)
             else:
                 if self.abort:
                     return
 
+                progress += step
+                self.updateProgressBar.emit(progress)
                 self.updateProgressText.emit(
-                    'Start der Auswertung von {0}...'.format(platform))
-                if func(self.start_date,  self.end_date) < 0:
-                    error_message = ('Es ist ein Fehler aufgetreten! {0} wird '
-                                     'nicht im Ergebnis berücksichtigt'
-                                     ''.format(platform))
-                    self.updateProgressText.emit(error_message)
-                else:
-                    progress += step
-                    self.updateProgressBar.emit(progress)
-                    self.updateProgressText.emit(
-                        '{0} erfolgreich ausgewertet!'.format(platform))
-                    try:
-                        parser = getattr(p2p_parser, platform.lower())
-                    except AttributeError:
-                        error_message = ('Parser für {0} konnte nicht '
-                                         'gefunden werden. Ist p2p_parser.py '
-                                         'vorhanden?'.format(platform))
-                        self.updateProgressText.emit(error_message)
-                    else:
-                        df = parser()[0]
-                        list_of_dfs.append(df)
+                    '{0} erfolgreich ausgewertet!'.format(platform))
 
-                        if len(parser()[1]) > 0:
-                            warning_message = ('{0}: unbekannter Cashflow-Typ '
-                                'wird im Ergebnis ignoriert: {1}'.format(
-                                    platform, parser()[1]))
-                            self.updateProgressText.emit(warning_message)
+                parser = self.get_p2p_parser(platform)
+                if parser is None:
+                    return
+
+                df = parser()[0]
+                list_of_dfs.append(df)
+
+                if len(parser()[1]) > 0:
+                    warning_message = ('{0}: unbekannter Cashflow-Typ '
+                        'wird im Ergebnis ignoriert: {1}'.format(
+                            platform, parser()[1]))
+                    self.updateProgressText.emit(warning_message)
 
         if self.abort:
             return
