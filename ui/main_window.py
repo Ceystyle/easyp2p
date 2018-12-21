@@ -478,6 +478,9 @@ class WorkerThread(QThread):
             except RuntimeError as e:
                 self.ignore_platform(platform, str(e))
                 continue
+            except RuntimeWarning as w:
+                self.updateProgressText.emit(str(w))
+                # Continue anyway
 
             if success >= 0:
                 if self.abort:

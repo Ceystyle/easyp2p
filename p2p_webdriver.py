@@ -220,7 +220,9 @@ class P2P:
                 (check_by, element_to_check)))
             assert title in self.driver.title
         except (AssertionError,  TimeoutException):
-            print("{0} Kontoauszugsseite konnte nicht geladen werden.".format(self.name))
+            raise RuntimeError(
+                '{0}-Kontoauszugsseite konnte nicht geladen werden!'
+                ''.format(self.name))
             return -1
 
         return 0
@@ -258,7 +260,8 @@ class P2P:
             self.driver.find_element(logout_elem_by, logout_elem).click()
             self.wdwait(wait_until)
         except TimeoutException:
-            print('{0}-Logout war nicht erfolgreich!'.format(self.name))
+            raise RuntimeWarning(
+                '{0}-Logout war nicht erfolgreich!'.format(self.name))
             # Continue anyway
 
     def logout_by_url(self, wait_until):
@@ -274,7 +277,9 @@ class P2P:
             self.driver.get(self.logout_url)
             self.wdwait(wait_until)
         except TimeoutException:
-            print("{0}-Logout war nicht erfolgreich!".format(self.name))
+            raise RuntimeWarning(
+                '{0}-Logout war nicht erfolgreich!'.format(self.name))
+            # Continue anyway
 
     def generate_statement_direct(
             self, start_date, end_date,
@@ -341,10 +346,12 @@ class P2P:
             if wait_until is not None:
                 self.wdwait(wait_until)
         except NoSuchElementException:
-            print('Generierung des {0} Kontoauszugs konnte nicht gestartet werden.'.format(self.name))
+            raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
+                'gestartet werden.'.format(self.name))
             return -1
         except TimeoutException:
-            print('Generierung des {0} Kontoauszugs hat zu lange gedauert.'.format(self.name))
+            raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
+                'gedauert.'.format(self.name))
             return -1
 
         return 0
@@ -395,7 +402,8 @@ class P2P:
                 end_calendar = datepicker[1]
             else:
                 # This should never happen
-                print('Keine ID für Kalender übergeben')
+                raise RuntimeError(
+                    '{0}: Keine ID für Kalender übergeben'.format(self.name))
                 return -1
 
             # How many clicks on the arrow buttons are necessary?
@@ -472,8 +480,13 @@ class P2P:
                             and elem.get_attribute('class')
                             == current_day_identifier):
                         elem.click()
-        except (NoSuchElementException,  TimeoutException):
-            print('{0}: Konnte die gewünschten Daten für den Kontoauszug nicht setzen.'.format(self.name))
+        except NoSuchElementException:
+            raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
+                'gestartet werden.'.format(self.name))
+            return -1
+        except TimeoutException:
+            raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
+                'gedauert.'.format(self.name))
             return -1
 
         return 0
@@ -507,7 +520,9 @@ class P2P:
                 action.move_to_element(download_button).perform()
             download_button.click()
         except NoSuchElementException:
-            print('Download des {0} Kontoauszugs konnte nicht gestartet werden.'.format(self.name))
+            raise RuntimeError(
+                'Download des {0} Kontoauszugs konnte nicht gestartet werden.'
+                ''.format(self.name))
             return -1
 
         download_finished = False
@@ -523,7 +538,11 @@ class P2P:
                     'p2p_downloads/{0}.{1}.crdownload'.format(
                         self.default_file_name, self.file_format))
                 if len(file_list) < 1 and duration > 1:
-                    print('Download des {0} Kontoauszugs abgebrochen.'.format(self.name))
+                    # Duration ensures that at least one second has gone by
+                    # since starting the download
+                    raise RuntimeError(
+                        'Download des {0} Kontoauszugs abgebrochen.'
+                        ''.format(self.name))
                     return -1
                 elif duration < 1:
                     time.sleep(1)
@@ -592,11 +611,14 @@ class P2P:
                 file_list[0], 'p2p_downloads/{0}_statement.{1}'.format(
                     self.name.lower(), self.file_format))
         elif len(file_list) == 0:
-            print('{0} Kontoauszug konnte nicht im Downloadverzeichnis gefunden werden.'.format(self.name))
+            raise RuntimeError(
+                '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
+                'werden.'.format(self.name))
             return -1
         else:
             # This should never happen
-            print('Alte {0} Downloads in ./p2p_downloads entdeckt. Bitte zuerst entfernen.'.format(self.name))
+            raise RuntimeError('Alte {0} Downloads in ./p2p_downloads '
+                'entdeckt. Bitte zuerst entfernen.'.format(self.name))
             return -1
 
         return 0
@@ -837,7 +859,9 @@ def open_selenium_robocash(start_date,  end_date):
     try:
         robocash.driver.find_element_by_id('new_statement').click()
     except NoSuchElementException:
-        print('Generierung des Robocash Kontoauszugs konnte nicht gestartet werden.')
+        raise RuntimeError(
+            'Generierung des Robocash-Kontoauszugs konnte nicht gestartet '
+            'werden.')
         return -1
 
     if robocash.generate_statement_direct(
@@ -857,10 +881,10 @@ def open_selenium_robocash(start_date,  end_date):
         except TimeoutException:
             wait += 1
             if wait > 10:  # Roughly 10*delay=30 seconds
-                print('Generierung des Robocash Kontoauszugs abgebrochen.')
+                raise RuntimeError(
+                    'Generierung des Robocash-Kontoauszugs hat zu lange '
+                    'gedauert!')
                 return -1
-
-            print('Generierung des Robocash Kontoauszugs noch in Arbeit...')
 
     download_url = robocash.driver.find_element_by_id(
         'download_statement').get_attribute('href')
@@ -994,18 +1018,25 @@ def open_selenium_peerberry(start_date,  end_date):
         return -1
 
     # Generate account statement
-    start_balance_xpath = ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
-                           'div[2]/div/div/div[1]')
-    statement_button_xpath = ('/html/body/div[1]/div/div/div/div[2]/div/'
-                              'div[2]/div[1]/div/div[2]/div/div[2]/div/span')
+    start_balance_xpath = (
+        '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/div/div/'
+        'div[1]')
+    statement_button_xpath = (
+        '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/div[2]/'
+        'div/div[2]/div/span')
     try:
         peerberry.driver.find_element_by_xpath(statement_button_xpath).click()
         peerberry.wdwait(
             EC.text_to_be_present_in_element(
                 ((By.XPATH, start_balance_xpath)),
                 'Eröffnungssaldo '+str(start_date).format('%Y-%m-%d')))
-    except (NoSuchElementException,  TimeoutException):
-        print('Die Generierung des Peerberry-Kontoauszugs konnte nicht gestartet werden.')
+    except NoSuchElementException:
+        raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
+            'gestartet werden.'.format(peerberry.name))
+        return -1
+    except TimeoutException:
+        raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
+            'gedauert.'.format(peerberry.name))
         return -1
 
     if peerberry.download_statement(
@@ -1113,7 +1144,6 @@ def open_selenium_iuvo(start_date,  end_date):
     try:
         driver.find_element_by_id(
             'CybotCookiebotDialogBodyButtonAccept').click()
-        print('Iuvo: Cookies wurden akzeptiert')
     except NoSuchElementException:
         pass
 
