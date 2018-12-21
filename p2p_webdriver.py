@@ -111,12 +111,14 @@ class P2P:
         try:
             self.driver.get(self.login_url)
             self.wdwait(wait_until)
-            assert title_check in self.driver.title
-        except AssertionError:
-            print('Die {0} Webseite konnte nicht geladen werden.'.format(self.name))
-            return -1
+            # Additional check that the correct page was loaded
+            if title_check not in self.driver.title:
+                raise RuntimeError('Die {0} Webseite konnte nicht geladen '
+                    'werden.'.format(self.name))
+                return -1
         except TimeoutException:
-            print('Das Laden der {0} Webseite hat zu lange gedauert.'.format(self.name))
+            raise RuntimeError('Das Laden der {0} Webseite hat zu lange '
+                'gedauert.'.format(self.name))
             return -1
 
         return 0

@@ -473,11 +473,13 @@ class WorkerThread(QThread):
 
             self.updateProgressText.emit(
                 'Start der Auswertung von {0}...'.format(platform))
-            if func(self.start_date,  self.end_date) < 0:
-                error_msg = ('Es ist ein Fehler aufgetreten! {0} wird '
-                    'nicht im Ergebnis berücksichtigt'.format(platform))
-                self.updateProgressText.emit(error_msg)
-            else:
+            try:
+                success = func(self.start_date,  self.end_date)
+            except RuntimeError as e:
+                self.ignore_platform(platform, str(e))
+                continue
+
+            if success >= 0:
                 if self.abort:
                     return
 
