@@ -159,8 +159,9 @@ class P2P:
             getattr(credentials, self.name)['username']
             getattr(credentials, self.name)['password']
         except AttributeError:
-            print('Username/Passwort für {0} sind nicht vorhanden. Bitte manuell zu credentials.py hinzufügen.'
-                  .format(self.name))
+            raise RuntimeError('Username/Passwort für {0} sind nicht '
+                'vorhanden. Bitte manuell zu credentials.py hinzufügen.'
+                  ''.format(self.name))
             return -1
 
         try:
@@ -178,10 +179,12 @@ class P2P:
             elem.send_keys(Keys.RETURN)
             self.wdwait(wait_until)
         except NoSuchElementException:
-            print("{0}-Loginseite konnte leider nicht geladen werden.".format(self.name))
+            raise RuntimeError('Benutzername/Passwort-Felder konnten nicht auf'
+                'der {0}-Loginseite gefunden werden!'.format(self.name))
             return -1
         except TimeoutException:
-            print("{0}-Login war leider nicht erfolgreich. Passwort korrekt?".format(self.name))
+            raise RuntimeError('{0}-Login war leider nicht erfolgreich. '
+                'Passwort korrekt?'.format(self.name))
             return -1
 
         return 0
