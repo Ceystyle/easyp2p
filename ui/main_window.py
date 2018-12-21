@@ -435,6 +435,19 @@ class WorkerThread(QThread):
         else:
             return parser
 
+    def ignore_platform(self, platform, error_msg):
+        """
+        Helper method for printing ignore and error message to GUI.
+
+        Args:
+            platform (str): name of the P2P platform
+            error_msg (str): error message
+
+        """
+        self.updateProgressText.emit(error_msg)
+        msg = '{0} wird ignoriert!'.format(platform)
+        self.updateProgressText.emit(msg)
+
     def run(self):
         """
         Gets and outputs results from all selected P2P platforms.
@@ -461,9 +474,9 @@ class WorkerThread(QThread):
             self.updateProgressText.emit(
                 'Start der Auswertung von {0}...'.format(platform))
             if func(self.start_date,  self.end_date) < 0:
-                error_message = ('Es ist ein Fehler aufgetreten! {0} wird '
+                error_msg = ('Es ist ein Fehler aufgetreten! {0} wird '
                     'nicht im Ergebnis berücksichtigt'.format(platform))
-                self.updateProgressText.emit(error_message)
+                self.updateProgressText.emit(error_msg)
             else:
                 if self.abort:
                     return
@@ -481,25 +494,21 @@ class WorkerThread(QThread):
                     df = parser()[0]
                     list_of_dfs.append(df)
                 except FileNotFoundError:
-                    error_message = ('Der heruntergeladene {0}-Kontoauszug '
+                    error_msg = ('Der heruntergeladene {0}-Kontoauszug '
                         'konnte nicht gefunden werden!'.format(platform))
-                    self.updateProgressText.emit(error_message)
-                    warning_message = '{0} wird ignoriert!'.format(platform)
-                    self.updateProgressText.emit(warning_message)
+                    self.ignore_platform(platform, error_msg)
                     continue
                 except XLRDError:
-                    error_message = ('Der heruntergeladene {0}-Kontoauszug '
+                    error_msg = ('Der heruntergeladene {0}-Kontoauszug '
                         'ist beschädigt!'.format(platform))
-                    self.updateProgressText.emit(error_message)
-                    warning_message = '{0} wird ignoriert!'.format(platform)
-                    self.updateProgressText.emit(warning_message)
+                    self.ignore_platform(platform, error_msg)
                     continue
                 else:
                     if len(parser()[1]) > 0:
-                        warning_message = ('{0}: unbekannter Cashflow-Typ '
+                        warning_msg = ('{0}: unbekannter Cashflow-Typ '
                             'wird im Ergebnis ignoriert: {1}'.format(
                                 platform, parser()[1]))
-                        self.updateProgressText.emit(warning_message)
+                        self.updateProgressText.emit(warning_msg)
 
         if self.abort:
             return
@@ -509,7 +518,7 @@ class WorkerThread(QThread):
         if p2p_results.show_results(
                 df_result, self.start_date,
                 self.end_date, self.output_file) < 0:
-            error_message = ('Keine Ergebnisse vorhanden')
-            self.updateProgressText.emit(error_message)
+            error_msg = ('Keine Ergebnisse vorhanden')
+            self.updateProgressText.emit(error_msg)
 
         self.updateProgressBar.emit(100)
