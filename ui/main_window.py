@@ -456,14 +456,13 @@ class WorkerThread(QThread):
 
             func = self.get_p2p_function(platform)
             if func is None:
-                return
+                continue
 
             self.updateProgressText.emit(
                 'Start der Auswertung von {0}...'.format(platform))
             if func(self.start_date,  self.end_date) < 0:
                 error_message = ('Es ist ein Fehler aufgetreten! {0} wird '
-                                 'nicht im Ergebnis berücksichtigt'
-                                 ''.format(platform))
+                    'nicht im Ergebnis berücksichtigt'.format(platform))
                 self.updateProgressText.emit(error_message)
             else:
                 if self.abort:
@@ -476,7 +475,7 @@ class WorkerThread(QThread):
 
                 parser = self.get_p2p_parser(platform)
                 if parser is None:
-                    return
+                    continue
 
                 try:
                     df = parser()[0]
@@ -487,13 +486,14 @@ class WorkerThread(QThread):
                     self.updateProgressText.emit(error_message)
                     warning_message = '{0} wird ignoriert!'.format(platform)
                     self.updateProgressText.emit(warning_message)
-                    return
+                    continue
                 except XLRDError:
                     error_message = ('Der heruntergeladene {0}-Kontoauszug '
                         'ist beschädigt!'.format(platform))
                     self.updateProgressText.emit(error_message)
                     warning_message = '{0} wird ignoriert!'.format(platform)
                     self.updateProgressText.emit(warning_message)
+                    continue
                 else:
                     if len(parser()[1]) > 0:
                         warning_message = ('{0}: unbekannter Cashflow-Typ '
