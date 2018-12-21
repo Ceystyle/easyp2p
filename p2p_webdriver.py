@@ -568,11 +568,11 @@ class P2P:
 
     def clean_download_location(self):
         """
+        Ensures that there are no old download files in download location.
+
         Makes sure that the download location does not contain
-        old downloads which would be overwritten. In case old
-        downloads are detected they can be automatically deleted
-        or the user has to delete them manually. In the latter case
-        no statement is generated for this P2P platform.
+        old downloads. In case old downloads are detected they will be
+        automatically removed. The user is informed via a warning message.
 
         Returns:
             int: 0 if download location is clean,
@@ -582,16 +582,17 @@ class P2P:
             'p2p_downloads/{0}.{1}'.format(
                 self.default_file_name, self.file_format))
         if len(file_list) > 0:
-            print('Alte {0} Downloads in ./p2p_downloads entdeckt.'.format(self.name))
-            choice = None
-            while choice != 'a' or choice != 'm':
-                choice = input(
-                    '(A)utomatisch löschen oder (M)anuell entfernen?').lower
-            if choice == 'm':
-                return -1
-            else:
-                for file in file_list:
+            for file in file_list:
+                try:
                     os.remove(file)
+                except:
+                    raise RuntimeError('Alte {0}-Downloads in ./p2p_downloads'
+                        ' konnten nicht gelöscht werden. Bitte manuell '
+                        'entfernen!'.format(self.name))
+                    return -1
+
+            raise RuntimeWarning('Alte {0}-Downloads in ./p2p_downloads wurden'
+                'entfernt.'.format(self.name))
 
         return 0
 
