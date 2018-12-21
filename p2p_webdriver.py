@@ -113,12 +113,14 @@ class P2P:
             self.wdwait(wait_until)
             # Additional check that the correct page was loaded
             if title_check not in self.driver.title:
-                raise RuntimeError('Die {0} Webseite konnte nicht geladen '
-                    'werden.'.format(self.name))
+                raise RuntimeError(
+                    'Die {0} Webseite konnte nicht geladen werden.'
+                    ''.format(self.name))
                 return -1
         except TimeoutException:
-            raise RuntimeError('Das Laden der {0} Webseite hat zu lange '
-                'gedauert.'.format(self.name))
+            raise RuntimeError(
+                'Das Laden der {0} Webseite hat zu lange gedauert.'
+                ''.format(self.name))
             return -1
 
         return 0
@@ -159,9 +161,9 @@ class P2P:
             getattr(credentials, self.name)['username']
             getattr(credentials, self.name)['password']
         except AttributeError:
-            raise RuntimeError('Username/Passwort für {0} sind nicht '
-                'vorhanden. Bitte manuell zu credentials.py hinzufügen.'
-                  ''.format(self.name))
+            raise RuntimeError(
+                'Username/Passwort für {0} sind nicht vorhanden. Bitte '
+                'manuell zu credentials.py hinzufügen'.format(self.name))
             return -1
 
         try:
@@ -179,12 +181,14 @@ class P2P:
             elem.send_keys(Keys.RETURN)
             self.wdwait(wait_until)
         except NoSuchElementException:
-            raise RuntimeError('Benutzername/Passwort-Felder konnten nicht auf'
-                'der {0}-Loginseite gefunden werden!'.format(self.name))
+            raise RuntimeError(
+                'Benutzername/Passwort-Felder konnten nicht auf der '
+                '{0}-Loginseite gefunden werden!'.format(self.name))
             return -1
         except TimeoutException:
-            raise RuntimeError('{0}-Login war leider nicht erfolgreich. '
-                'Passwort korrekt?'.format(self.name))
+            raise RuntimeError(
+                '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
+                ''.format(self.name))
             return -1
 
         return 0
