@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 
+"""
+p2p_parser contains methods for parsing the output files of P2P platforms.
+
+    Each P2P platform has a unique format for presenting investment results.
+    The purpose of this module is to provide parser methods to combine them
+    into a single output format.
+
+.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
+
+"""
+
 import locale
 import pandas as pd
 
@@ -17,11 +28,33 @@ end_balance_name = 'Endsaldo'
 
 
 def check_missing_cf_types(df, orig_cf_type_name):
+    """
+    Helper function to identify any unknown cash flow types.
+
+    Args:
+        df (pandas.DataFrame): data frame which contains the results for this
+        P2P platform
+        orig_cf_type_name (str): name of data frame column which contains the
+        cash flow types as reported by the P2P platform
+
+    Returns:
+        set(str): set consisting of all unknown cash flow types
+
+    """
     return set(df[orig_cf_type_name].where(
         df['Cashflow-Typ'].isna()).dropna().tolist())
 
 
 def bondora():
+    """
+    Parser for Bondora.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
 
     df.drop(['Gesamt:'], inplace=True)
@@ -67,6 +100,15 @@ def bondora():
 
 
 def mintos():
+    """
+    Parser for Mintos.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_excel('p2p_downloads/mintos_statement.xlsx')
 
     if df is None:
@@ -112,6 +154,15 @@ def mintos():
 
 
 def robocash():
+    """
+    Parser for Robocash.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_excel('p2p_downloads/robocash_statement.xls')
 
     if df is None:
@@ -147,6 +198,15 @@ def robocash():
 
 
 def swaper():
+    """
+    Parser for Swaper.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_excel('p2p_downloads/swaper_statement.xlsx')
 
     if df is None:
@@ -180,6 +240,15 @@ def swaper():
 
 
 def peerberry():
+    """
+    Parser for Peerberry.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_csv('p2p_downloads/peerberry_statement.csv')
 
     if df is None:
@@ -211,6 +280,15 @@ def peerberry():
 
 
 def estateguru():
+    """
+    Parser for Estateguru.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_csv('p2p_downloads/estateguru_statement.csv')
 
     if df is None:
@@ -256,6 +334,15 @@ def estateguru():
 
 
 def iuvo():
+    """
+    Parser for Iuvo.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_csv('p2p_downloads/iuvo_statement.csv', index_col=-1)
 
     if df is None:
@@ -302,6 +389,15 @@ def iuvo():
 
 
 def grupeer():
+    """
+    Parser for Grupeer.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_excel('p2p_downloads/grupeer_statement.xlsx')
 
     if df is None:
@@ -338,6 +434,15 @@ def grupeer():
 
 
 def dofinance():
+    """
+    Parser for Dofinance.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_excel('p2p_downloads/dofinance_statement.xlsx')
 
     if df is None:
@@ -373,6 +478,15 @@ def dofinance():
 
 
 def twino():
+    """
+    Parser for Twino.
+
+    Returns:
+        list(pandas.DataFrame, set(str)): list with two elements. The first
+        element is the data frame containing the parsed results. The second
+        element is the set containing all unknown cash flow types.
+
+    """
     df = pd.read_excel('p2p_downloads/twino_statement.xlsx')
 
     if df is None:
