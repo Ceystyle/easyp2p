@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-    p2p_results provides two public functions for combining and presenting the
-    investment results of the various P2P platforms.
+p2p_results contains methods for combining and presenting P2P results.
+
+p2p_results provides two public functions for combining and presenting the
+investment results of the various P2P platforms.
 
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
