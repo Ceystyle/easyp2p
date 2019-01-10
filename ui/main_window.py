@@ -34,18 +34,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressWindow = None
         self.worker = None
         self.platforms = set([])
-        self.start_month = date.today().month - 1
+        if date.today().month > 1:
+            self.start_month = date.today().month - 1
+            self.start_year = date.today().year
+        else:
+            self.start_month = 12
+            self.start_year = date.today().year - 1
         self.comboBox_start_month.setCurrentIndex(
             self.comboBox_start_month.findText(
                 wd.nbr_to_short_month(str(self.start_month))))
-        self.start_year = date.today().year
         self.comboBox_start_year.setCurrentIndex(
             self.comboBox_start_year.findText(str(self.start_year)))
-        self.end_month = date.today().month - 1
+        self.end_month = self.start_month
         self.comboBox_end_month.setCurrentIndex(
             self.comboBox_end_month.findText(
                 wd.nbr_to_short_month(str(self.end_month))))
-        self.end_year = date.today().year
+        self.end_year = self.start_year
         self.comboBox_end_year.setCurrentIndex(
             self.comboBox_end_year.findText(str(self.end_year)))
         self.set_start_date()
