@@ -1181,7 +1181,7 @@ def open_selenium_iuvo(start_date,  end_date):
 
         if iuvo.generate_statement_direct(
                 month[0], month[1], 'date_from', 'date_to', '%Y-%m-%d',
-                EC.text_to_be_present_in_element(
+                wait_until=EC.text_to_be_present_in_element(
                     (By.XPATH, start_balance_xpath[0]),
                     'Anfangsbestand'),
                 submit_btn='account_statement_filters_btn',

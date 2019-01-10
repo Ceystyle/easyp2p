@@ -343,7 +343,7 @@ def iuvo():
         element is the set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv('p2p_downloads/iuvo_statement.csv', index_col=-1)
+    df = pd.read_csv('p2p_downloads/iuvo_statement.csv')
 
     if df is None:
         return None
