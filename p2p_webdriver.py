@@ -1069,9 +1069,13 @@ def open_selenium_estateguru(start_date,  end_date):
     Returns:
         int: 0 on success, -1 on failure
     """
+    today = datetime.today()
+    default_file_name = 'payments_{0}-{1}-{2}*'.format(today.year, 
+        today.strftime('%m'), today.strftime('%d'))
     estateguru = P2P(
         'Estateguru', 'https://estateguru.co/portal/login/auth?lang=de',
         'https://estateguru.co/portal/portfolio/account',
+        default_file_name=default_file_name, file_format='csv',
         logout_url='https://estateguru.co/portal/logout/index')
 
     if estateguru.open_start_page(
@@ -1090,21 +1094,14 @@ def open_selenium_estateguru(start_date,  end_date):
             'Übersicht', element_to_check=check_xpath, check_by=By.XPATH) < 0:
         return -1
 
-    # Estateguru currently doesn't offer functionality for downloading
-    # cashflow statements. Therefore they have to be read directly from the
-    # webpage after applying the filter. Since the filter functionality is not
-    # really convenient currently (it takes time and the site needs to be
-    # reloaded) we just import the default table, which shows all cashflows
-    # ever generated for this account
-
-    # Read cashflow data from webpage
-    cashflow_table = estateguru.driver.find_element_by_xpath(
-        '//*[@id="divTransactionList"]/div')
-    df = pd.read_html(
-        cashflow_table.get_attribute("innerHTML"), index_col=0,
-        thousands='.', decimal=',')
-
-    df[0].to_csv('p2p_downloads/estateguru_statement.csv')
+    #Estateguru does not provide functionality for filtering payment
+    #dates. Therefore we download the statement which includes all cashflows
+    #ever generated for this account.
+    select_btn_xpath = ('/html/body/section/div/div/div/div[2]/section[2]/'
+                        'div[1]/div[2]/button')
+    estateguru.driver.find_element_by_xpath(select_btn_xpath).click()
+    estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+    estateguru.download_statement('CSV', By.LINK_TEXT)
 
     estateguru.logout_by_url(EC.title_contains('Einloggen/Registrieren'))
 

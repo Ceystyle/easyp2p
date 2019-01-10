@@ -298,32 +298,30 @@ def estateguru():
     estateguru_dict['Zins'] = interest_payment
     # Treat bonus payments as normal interest payments
     estateguru_dict['Bonus'] = interest_payment
-    estateguru_dict['Investition  (Auto Investieren)'] = investment_payment
+    estateguru_dict['Investition(Auto Investieren)'] = investment_payment
     estateguru_dict['Hauptbetrag'] = redemption_payment
-    estateguru_dict['Einzahlung  (Banktransfer)'] = incoming_payment
+    estateguru_dict['Einzahlung(Banktransfer)'] = incoming_payment
     estateguru_dict['Entschädigung'] = late_fee_payment
 
     df = df[:-1]  # Drop last line which only contains a summary
     df.rename(
         columns={
-            'Bestätigungsdatum': 'Datum',
+            'Zahlungsdatum': 'Datum',
             'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
         },
         inplace=True
     )
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y, %H:%M')
+    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d/%m/%Y %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Estateguru_Cashflow-Typ'].map(estateguru_dict)
     df['Plattform'] = 'Estateguru'
     df['Währung'] = 'EUR'
-    df['Betrag (€)'] = df['Betrag (€)'].\
-        apply(lambda x: x.replace('(', '-').replace(')', '').replace(
-            ',', '.')).astype('float')
+    df['Betrag'] = df['Betrag'].astype('float')
 
     missing_cf_types = check_missing_cf_types(df, 'Estateguru_Cashflow-Typ')
 
     df_result = pd.pivot_table(
-        df, values='Betrag (€)',
+        df, values='Betrag',
         index=['Plattform', 'Datum', 'Währung'],
         columns=['Cashflow-Typ'],
         aggfunc=sum
