@@ -10,6 +10,7 @@ investment results of the various P2P platforms.
 
 """
 
+import datetime
 import pandas as pd
 
 
@@ -35,7 +36,9 @@ def combine_dfs(list_of_dfs):
     return df_result
 
 
-def show_results(df,  start_date,  end_date, output_file):
+def show_results(
+        df,  start_date: datetime.date,  end_date: datetime.date,
+        output_file: str) -> bool:
     """
     Sums up the results and writes them to an Excel file.
 
@@ -51,11 +54,11 @@ def show_results(df,  start_date,  end_date, output_file):
         output_file (str): absolute path to the output file
 
     Returns:
-        int: 0 on success, -1 on failure
+        bool: True on success, False on failure
 
     """
     if df is None:
-        return -1
+        return False
 
     # Calculate total income for each row
     income_columns = [
@@ -118,4 +121,4 @@ def show_results(df,  start_date,  end_date, output_file):
     totals_pivot_table.to_excel(writer, 'Gesamtergebnis')
     writer.save()
 
-    return 0
+    return True

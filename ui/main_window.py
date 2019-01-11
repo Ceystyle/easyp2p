@@ -486,7 +486,7 @@ class WorkerThread(QThread):
                 self.updateProgressText.emit(str(w))
                 # Continue anyway
 
-            if success >= 0:
+            if success:
                 if self.abort:
                     return
 
@@ -524,9 +524,8 @@ class WorkerThread(QThread):
 
         df_result = p2p_results.combine_dfs(list_of_dfs)
 
-        if p2p_results.show_results(
-                df_result, self.start_date,
-                self.end_date, self.output_file) < 0:
+        if not p2p_results.show_results(
+                df_result, self.start_date, self.end_date, self.output_file):
             error_msg = ('Keine Ergebnisse vorhanden')
             self.updateProgressText.emit(error_msg)
 
