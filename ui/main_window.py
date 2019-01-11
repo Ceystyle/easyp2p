@@ -351,6 +351,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self, "Ausgabedatei wählen", self.output_file,
             "MS Excel Dateien (*.xlsx)", options=options)
         if self.output_file:
+            #The file name must include xlsx file format. Otherwise the Excel
+            #writer will crash later.
+            if not self.output_file.endswith('.xlsx'):
+                self.output_file = self.output_file + '.xlsx'
             self.on_lineEdit_output_file_textChanged(self.output_file)
 
     @pyqtSlot(bool)
