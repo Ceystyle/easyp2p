@@ -407,10 +407,10 @@ class P2P:
                 account statement should be generated.
             default_dates (list of datetime.datetime): the two pre-filled
                 default dates of the date pickers.
-            arrows (list (str, str, str)): list with three entries: class name
+            arrows (dict): dictionary with three entries: class name
                 of left arrows, class name of right arrows,
                 tag name of arrows.
-            days_table (list (str, str, str, bool)): list with four entries:
+            days_table (dict): dictionary with four entries:
                 class name of day table, id of day table, id of current day,
                 is day contained in id?.
             calendar_id_by (str): attribute of By class for translating
@@ -446,9 +446,11 @@ class P2P:
 
             # Identify the arrows for both start and end calendar
             left_arrows = self.driver.find_elements_by_xpath(
-                "//{0}[@class='{1}']".format(arrows[2], arrows[0]))
+                "//{0}[@class='{1}']".format(
+                    arrows['arrow_tag'], arrows['left_arrow_class']))
             right_arrows = self.driver.find_elements_by_xpath(
-                "//{0}[@class='{1}']".format(arrows[2], arrows[1]))
+                "//{0}[@class='{1}']".format(
+                    arrows['arrow_tag'], arrows['right_arrow_class']))
 
             # Set start_date
             start_calendar.click()
@@ -461,27 +463,22 @@ class P2P:
                     right_arrows[0].click()
 
             # Get all dates from left calendar and find the start day
-            day_table_class_name = days_table[0]
-            day_table_identifier = days_table[1]
-            current_day_identifier = days_table[2]
-            id_from_calendar = days_table[3]
-
-            if id_from_calendar:
+            if days_table['id_from_calendar']:
                 start_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    day_table_identifier, start_calendar.get_attribute('id'))
+                    days_table['table_id'], start_calendar.get_attribute('id'))
             else:
                 start_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    day_table_identifier, day_table_class_name)
+                    days_table['table_id'], days_table['class_name'])
             all_days = self.driver.find_elements_by_xpath(start_days_xpath)
 
             for elem in all_days:
-                if current_day_identifier == '':
+                if days_table['current_day_id'] == '':
                     if elem.text == str(start_date.day):
                         elem.click()
                 else:
                     if (elem.text == str(start_date.day)
                             and elem.get_attribute('class')
-                            == current_day_identifier):
+                                == days_table['current_day_id']):
                         elem.click()
 
             # Set end_date
@@ -495,22 +492,22 @@ class P2P:
                     right_arrows[1].click()
 
             # Get all dates from right calendar and find the end day
-            if id_from_calendar:
+            if days_table['id_from_calendar']:
                 end_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    day_table_identifier, end_calendar.get_attribute('id'))
+                    days_table['table_id'], end_calendar.get_attribute('id'))
             else:
                 end_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    day_table_identifier, day_table_class_name)
+                    days_table['table_id'], days_table['class_name'])
             all_days = self.driver.find_elements_by_xpath(end_days_xpath)
 
             for elem in all_days:
-                if current_day_identifier == '':
+                if days_table['current_day_id'] == '':
                     if elem.text == str(end_date.day):
                         elem.click()
                 else:
                     if (elem.text == str(end_date.day)
                             and elem.get_attribute('class')
-                            == current_day_identifier):
+                                == days_table['current_day_id']):
                         elem.click()
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
@@ -989,8 +986,13 @@ def open_selenium_swaper(
     calendar_id_by = 'class'
     calendar_id = 'datepicker-container'
     #TODO: change arrows and days_table to dict to make them more transparent
-    arrows = ['icon icon icon-left', 'icon icon icon-right',  'div']
-    days_table = ['', 'id', ' ',  True]
+    arrows = {'left_arrow_class': 'icon icon icon-left',
+              'right_arrow_class': 'icon icon icon-right',
+              'arrow_tag': 'div'}
+    days_table = {'class_name': '',
+                  'table_id': 'id',
+                  'current_day_id': ' ',
+                  'id_from_calendar': True}
     default_dates = [datetime.today().replace(day=1),  datetime.now()]
 
     if not swaper.generate_statement_calendar(
@@ -1053,10 +1055,15 @@ def open_selenium_peerberry(
 
     # Create account statement for given date range
     default_dates = [datetime.now(),  datetime.now()]
-    arrows = ['rdtPrev', 'rdtNext', 'th']
+    arrows = {'left_arrow_class': 'rdtPrev',
+              'right_arrow_class': 'rdtNext',
+              'arrow_tag': 'th'}
     calendar_id_by = 'name'
     calendar_id = ['startDate',  'endDate']
-    days_table = ['rdtDays', 'class', 'rdtDay', False]
+    days_table = {'class_name': 'rdtDays',
+                  'table_id': 'class',
+                  'current_day_id': 'rdtDay',
+                  'id_from_calendar': False}
 
     if not peerberry.generate_statement_calendar(
             start_date, end_date,  default_dates, arrows, days_table,
