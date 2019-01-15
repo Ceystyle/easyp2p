@@ -12,24 +12,10 @@ import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
-from typing import Union
 from xlrd.biffh import XLRDError
 
 from .Ui_main_window import Ui_MainWindow
 
-OpenSelenium = Union[
-                        wd.open_selenium_bondora, wd.open_selenium_dofinance,
-                        wd.open_selenium_estateguru, wd.open_selenium_grupeer,
-                        wd.open_selenium_iuvo, wd.open_selenium_mintos,
-                        wd.open_selenium_peerberry, wd.open_selenium_robocash,
-                        wd.open_selenium_swaper, wd.open_selenium_twino
-                    ]
-Parser = Union[
-                p2p_parser.bondora, p2p_parser.dofinance,
-                p2p_parser.estateguru, p2p_parser.grupeer, p2p_parser.iuvo,
-                p2p_parser.mintos, p2p_parser.peerberry,
-                p2p_parser.robocash, p2p_parser.swaper, p2p_parser.twino
-              ]
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -412,7 +398,7 @@ class WorkerThread(QThread):
         super(WorkerThread, self).__init__(parent)
         self.abort = False
 
-    def get_p2p_function(self, platform: str) -> OpenSelenium:
+    def get_p2p_function(self, platform: str) -> wd.OpenSelenium:
         """
         Helper method to get the name of the appropriate webdriver function.
 
@@ -435,7 +421,7 @@ class WorkerThread(QThread):
         else:
             return func
 
-    def get_p2p_parser(self, platform: str) -> Parser:
+    def get_p2p_parser(self, platform: str) -> p2p_parser.Parser:
         """
         Helper method to get the name of the appropriate parser.
 
@@ -472,13 +458,14 @@ class WorkerThread(QThread):
         self.updateProgressText.emit(msg)
 
     def parse_result(
-            self, platform: str, parser: Parser, list_of_dfs: list) -> list:
+            self, platform: str, parser: p2p_parser.Parser,
+            list_of_dfs: list) -> list:
         """
         Helper method for calling the parser and appending the dataframe list.
 
         Args:
             platform (str): name of the P2P platform
-            parser (Parser): parser method for parsing results
+            parser (p2p_parser.Parser): parser method for parsing results
             list_of_dfs (list(pd.DataFrame)): list of DataFrames, one DataFrame
                 for each successfully parsed P2P platform
 
@@ -510,13 +497,13 @@ class WorkerThread(QThread):
 
         return list_of_dfs
 
-    def run_platform(self, platform: str, func: OpenSelenium) -> bool:
+    def run_platform(self, platform: str, func: wd.OpenSelenium) -> bool:
         """
         Helper method for calling the open_selenium_* function.
 
         Args:
             platform (str): name of the P2P platform
-            func (OpenSelenium): function to run
+            func (wd.OpenSelenium): function to run
 
         Returns:
             bool: True if function was run without errors, False otherwise.

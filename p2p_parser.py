@@ -13,6 +13,12 @@ p2p_parser contains methods for parsing the output files of P2P platforms.
 
 import locale
 import pandas as pd
+from typing import Union
+
+Parser = Union[
+                'bondora', 'dofinance', 'estateguru', 'grupeer', 'iuvo',
+                'mintos', 'peerberry', 'robocash', 'swaper', 'twino'
+              ]
 
 interest_payment = 'Zinszahlungen'
 buyback_interest_payment = 'Zinszahlungen aus Rückkäufen'

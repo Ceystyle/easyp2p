@@ -36,8 +36,15 @@ ExpectedCondition = Union[
     EC.element_to_be_clickable('locator'),
     EC.presence_of_element_located('locator'),
     EC.text_to_be_present_in_element('locator', str), EC.title_contains(str),
-    EC.visibility_of('locator')]
-
+    EC.visibility_of('locator')
+                         ]
+OpenSelenium = Union[
+                        'open_selenium_bondora', 'open_selenium_dofinance',
+                        'open_selenium_estateguru', 'open_selenium_grupeer',
+                        'open_selenium_iuvo', 'open_selenium_mintos',
+                        'open_selenium_peerberry', 'open_selenium_robocash',
+                        'open_selenium_swaper', 'open_selenium_twino'
+                    ]
 
 class P2P:
 
