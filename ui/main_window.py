@@ -12,10 +12,24 @@ import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
+from typing import Union
 from xlrd.biffh import XLRDError
 
 from .Ui_main_window import Ui_MainWindow
 
+OpenSelenium = Union[
+                        wd.open_selenium_bondora, wd.open_selenium_dofinance,
+                        wd.open_selenium_estateguru, wd.open_selenium_grupeer,
+                        wd.open_selenium_iuvo, wd.open_selenium_mintos,
+                        wd.open_selenium_peerberry, wd.open_selenium_robocash,
+                        wd.open_selenium_swaper, wd.open_selenium_twino
+                    ]
+Parser = Union[
+                p2p_parser.bondora, p2p_parser.dofinance,
+                p2p_parser.estateguru, p2p_parser.grupeer, p2p_parser.iuvo,
+                p2p_parser.mintos, p2p_parser.peerberry,
+                p2p_parser.robocash, p2p_parser.swaper, p2p_parser.twino
+              ]
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -387,7 +401,7 @@ class WorkerThread(QThread):
     updateProgressBar = pyqtSignal(float)
     updateProgressText = pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         """
         Constructor.
 
@@ -398,7 +412,7 @@ class WorkerThread(QThread):
         super(WorkerThread, self).__init__(parent)
         self.abort = False
 
-    def get_p2p_function(self, platform):
+    def get_p2p_function(self, platform: str) -> OpenSelenium:
         """
         Helper method to get the name of the appropriate webdriver function.
 
@@ -406,8 +420,8 @@ class WorkerThread(QThread):
             platform (str): name of the P2P platform
 
         Returns:
-            function: p2p_webdriver.open_selenium_* function for handling this
-            P2P platform or None if the function cannot be found
+            OpenSelenium: p2p_webdriver.open_selenium_* function for handling
+                this P2P platform or None if the function cannot be found
 
         """
         try:
@@ -421,7 +435,7 @@ class WorkerThread(QThread):
         else:
             return func
 
-    def get_p2p_parser(self, platform):
+    def get_p2p_parser(self, platform: str) -> Parser:
         """
         Helper method to get the name of the appropriate parser.
 
@@ -429,8 +443,8 @@ class WorkerThread(QThread):
             platform (str): name of the P2P platform
 
         Returns:
-            function: p2p_parser.* function for parsing this P2P platform or
-            None if the function cannot be found
+            Parser: p2p_parser.* function for parsing this P2P platform or
+                None if the function cannot be found
 
         """
         try:
@@ -444,7 +458,7 @@ class WorkerThread(QThread):
         else:
             return parser
 
-    def ignore_platform(self, platform, error_msg):
+    def ignore_platform(self, platform: str, error_msg: str) -> None:
         """
         Helper method for printing ignore and error message to GUI.
 
@@ -456,6 +470,71 @@ class WorkerThread(QThread):
         self.updateProgressText.emit(error_msg)
         msg = '{0} wird ignoriert!'.format(platform)
         self.updateProgressText.emit(msg)
+
+    def parse_result(
+            self, platform: str, parser: Parser, list_of_dfs: list) -> list:
+        """
+        Helper method for calling the parser and appending the dataframe list.
+
+        Args:
+            platform (str): name of the P2P platform
+            parser (Parser): parser method for parsing results
+            list_of_dfs (list(pd.DataFrame)): list of DataFrames, one DataFrame
+                for each successfully parsed P2P platform
+
+        Returns:
+            list(pd.DataFrame): if successful the provided list_of_dfs with one
+                DataFrame appended, if not then the original list_of_dfs is
+                returned
+
+        """
+        try:
+            df = parser()[0]
+            list_of_dfs.append(df)
+        except FileNotFoundError:
+            error_msg = ('Der heruntergeladene {0}-Kontoauszug konnte nicht '
+                         'gefunden werden!'.format(platform))
+            self.ignore_platform(platform, error_msg)
+            return list_of_dfs
+        except XLRDError:
+            error_msg = ('Der heruntergeladene {0}-Kontoauszug ist beschädigt!'
+                         ''.format(platform))
+            self.ignore_platform(platform, error_msg)
+            return list_of_dfs
+        else:
+            if len(parser()[1]) > 0:
+                warning_msg = ('{0}: unbekannter Cashflow-Typ wird im '
+                               'Ergebnis ignoriert: {1}'
+                               ''.format(platform, parser()[1]))
+                self.updateProgressText.emit(warning_msg)
+
+        return list_of_dfs
+
+    def run_platform(self, platform: str, func: OpenSelenium) -> bool:
+        """
+        Helper method for calling the open_selenium_* function.
+
+        Args:
+            platform (str): name of the P2P platform
+            func (OpenSelenium): function to run
+
+        Returns:
+            bool: True if function was run without errors, False otherwise.
+
+        """
+        success = False
+        self.updateProgressText.emit(
+            'Start der Auswertung von {0}...'.format(platform))
+        try:
+            success = func(self.start_date,  self.end_date)
+        except RuntimeError as e:
+            self.ignore_platform(platform, str(e))
+            return False
+        except RuntimeWarning as w:
+            self.updateProgressText.emit(str(w))
+            # Continue anyway
+
+        return success
 
     def run(self):
         """
@@ -480,16 +559,7 @@ class WorkerThread(QThread):
             if func is None:
                 continue
 
-            self.updateProgressText.emit(
-                'Start der Auswertung von {0}...'.format(platform))
-            try:
-                success = func(self.start_date,  self.end_date)
-            except RuntimeError as e:
-                self.ignore_platform(platform, str(e))
-                continue
-            except RuntimeWarning as w:
-                self.updateProgressText.emit(str(w))
-                # Continue anyway
+            success = self.run_platform(platform, func)
 
             if success:
                 if self.abort:
@@ -504,26 +574,7 @@ class WorkerThread(QThread):
                 if parser is None:
                     continue
 
-                try:
-                    df = parser()[0]
-                    list_of_dfs.append(df)
-                except FileNotFoundError:
-                    error_msg = ('Der heruntergeladene {0}-Kontoauszug '
-                                 'konnte nicht gefunden werden!'
-                                 ''.format(platform))
-                    self.ignore_platform(platform, error_msg)
-                    continue
-                except XLRDError:
-                    error_msg = ('Der heruntergeladene {0}-Kontoauszug '
-                                 'ist beschädigt!'.format(platform))
-                    self.ignore_platform(platform, error_msg)
-                    continue
-                else:
-                    if len(parser()[1]) > 0:
-                        warning_msg = ('{0}: unbekannter Cashflow-Typ '
-                                       'wird im Ergebnis ignoriert: {1}'
-                                       ''.format(platform, parser()[1]))
-                        self.updateProgressText.emit(warning_msg)
+                list_of_dfs = self.parse_result(platform, parser, list_of_dfs)
 
         if self.abort:
             return
