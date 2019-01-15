@@ -177,12 +177,10 @@ class P2P:
                 raise RuntimeError(
                     'Die {0} Webseite konnte nicht geladen werden.'
                     ''.format(self.name))
-                return False
         except TimeoutException:
             raise RuntimeError(
                 'Das Laden der {0} Webseite hat zu lange gedauert.'
                 ''.format(self.name))
-            return False
 
         return True
 
@@ -235,7 +233,6 @@ class P2P:
             raise RuntimeError(
                 'Username/Passwort für {0} sind nicht vorhanden. Bitte '
                 'manuell zu credentials.py hinzufügen'.format(self.name))
-            return False
 
         try:
             if login_field is not None:
@@ -255,12 +252,10 @@ class P2P:
             raise RuntimeError(
                 'Benutzername/Passwort-Felder konnten nicht auf der '
                 '{0}-Loginseite gefunden werden!'.format(self.name))
-            return False
         except TimeoutException:
             raise RuntimeError(
                 '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
                 ''.format(self.name))
-            return False
 
         return True
 
@@ -301,7 +296,6 @@ class P2P:
             raise RuntimeError(
                 '{0}-Kontoauszugsseite konnte nicht geladen werden!'
                 ''.format(self.name))
-            return False
 
         return True
 
@@ -445,11 +439,9 @@ class P2P:
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
                                'gestartet werden.'.format(self.name))
-            return False
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
                                'gedauert.'.format(self.name))
-            return False
 
         return True
 
@@ -505,7 +497,6 @@ class P2P:
                 # This should never happen
                 raise RuntimeError(
                     '{0}: Keine ID für Kalender übergeben'.format(self.name))
-                return False
 
             # How many clicks on the arrow buttons are necessary?
             start_calendar_clicks = get_calendar_clicks(
@@ -581,11 +572,9 @@ class P2P:
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
                                'gestartet werden.'.format(self.name))
-            return False
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
                                'gedauert.'.format(self.name))
-            return False
 
         return True
 
@@ -625,7 +614,6 @@ class P2P:
             raise RuntimeError(
                 'Download des {0} Kontoauszugs konnte nicht gestartet werden.'
                 ''.format(self.name))
-            return False
 
         download_finished = False
         duration = 0
@@ -645,7 +633,6 @@ class P2P:
                     raise RuntimeError(
                         'Download des {0} Kontoauszugs abgebrochen.'
                         ''.format(self.name))
-                    return -1
                 elif duration < 1:
                     time.sleep(1)
                     duration += 1
@@ -694,10 +681,9 @@ class P2P:
                 try:
                     os.remove(file)
                 except:
-                    raise RuntimeError('Alte {0}-Downloads in ./p2p_downloads'
-                                       ' konnten nicht gelöscht werden. Bitte '
+                    raise RuntimeError('Alte {0}-Downloads in ./p2p_downloads '
+                                       'konnten nicht gelöscht werden. Bitte '
                                        'manuell entfernen!'.format(self.name))
-                    return False
 
             raise RuntimeWarning('Alte {0}-Downloads in ./p2p_downloads wurden'
                                  'entfernt.'.format(self.name))
@@ -729,13 +715,11 @@ class P2P:
             raise RuntimeError(
                 '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
                 'werden.'.format(self.name))
-            return False
         else:
             # This should never happen
             raise RuntimeError('Alte {0} Downloads in ./p2p_downloads '
                                'entdeckt. Bitte zuerst entfernen.'
                                ''.format(self.name))
-            return False
 
         return True
 
@@ -1029,7 +1013,6 @@ def open_selenium_robocash(
             raise RuntimeError(
                 'Generierung des Robocash-Kontoauszugs konnte nicht gestartet '
                 'werden.')
-            return False
 
         if not robocash.generate_statement_direct(
                 start_date, end_date, 'date-after', 'date-before', '%Y-%m-%d'):
@@ -1051,7 +1034,6 @@ def open_selenium_robocash(
                     raise RuntimeError(
                         'Generierung des Robocash-Kontoauszugs hat zu lange '
                         'gedauert!')
-                    return -1
 
         # Robocash creates the download names randomly, therefore the default
         # name is not known like for the other P2P sites. Thus we don't use the
@@ -1227,11 +1209,9 @@ def open_selenium_peerberry(
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
                                'gestartet werden.'.format(peerberry.name))
-            return False
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
                                'gedauert.'.format(peerberry.name))
-            return False
 
         success = peerberry.download_statement(
             xpaths['download_btn'], By.XPATH, actions='move_to_element')
