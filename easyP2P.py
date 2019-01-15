@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
 
 """
     easyP2P gets investment results from various P2P platforms.
@@ -10,6 +11,10 @@
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
 """
+__author__ = 'Niko Sandschneider'
+__copyright__ = 'Copyright (C) 2018-19 Niko Sandschneider'
+__license__ = 'MIT'
+__version__ = '0.1'
 
 from PyQt5 import QtWidgets
 import sys
