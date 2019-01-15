@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
 
 """Module implementing MainWindow, the main window of easyP2P."""
 
@@ -304,7 +305,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def updateProgressBar(self, value):
         """
-        Updates the progress bar in ProgressWindow to new value.
+        Update the progress bar in ProgressWindow to new value.
 
         Args:
             value (float): value of the progress bar, between 0 and 100
@@ -321,7 +322,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def updateProgressText(self, txt):
         """
-        Appends a new line to the progress text in ProgressWindow.
+        Append a new line to the progress text in ProgressWindow.
 
         Args:
             txt (str): string to add to progress text
@@ -351,8 +352,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self, "Ausgabedatei wählen", self.output_file,
             "MS Excel Dateien (*.xlsx)", options=options)
         if self.output_file:
-            #The file name must include xlsx file format. Otherwise the Excel
-            #writer will crash later.
+            # The file name must include xlsx file format. Otherwise the Excel
+            # writer will crash later.
             if not self.output_file.endswith('.xlsx'):
                 self.output_file = self.output_file + '.xlsx'
             self.on_lineEdit_output_file_textChanged(self.output_file)
@@ -458,7 +459,7 @@ class WorkerThread(QThread):
 
     def run(self):
         """
-        Gets and outputs results from all selected P2P platforms.
+        Get and output results from all selected P2P platforms.
 
         Iterates over all selected P2P platforms, gets the results from
         p2p_webdriver and outputs the results. After each platform the progress
@@ -508,19 +509,20 @@ class WorkerThread(QThread):
                     list_of_dfs.append(df)
                 except FileNotFoundError:
                     error_msg = ('Der heruntergeladene {0}-Kontoauszug '
-                        'konnte nicht gefunden werden!'.format(platform))
+                                 'konnte nicht gefunden werden!'
+                                 ''.format(platform))
                     self.ignore_platform(platform, error_msg)
                     continue
                 except XLRDError:
                     error_msg = ('Der heruntergeladene {0}-Kontoauszug '
-                        'ist beschädigt!'.format(platform))
+                                 'ist beschädigt!'.format(platform))
                     self.ignore_platform(platform, error_msg)
                     continue
                 else:
                     if len(parser()[1]) > 0:
                         warning_msg = ('{0}: unbekannter Cashflow-Typ '
-                            'wird im Ergebnis ignoriert: {1}'.format(
-                                platform, parser()[1]))
+                                       'wird im Ergebnis ignoriert: {1}'
+                                       ''.format(platform, parser()[1]))
                         self.updateProgressText.emit(warning_msg)
 
         if self.abort:
