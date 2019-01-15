@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
 
 """Module implementing ProgressWindow."""
 
@@ -17,7 +18,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
 
     def __init__(self, parent=None):
         """
-        Constructor
+        Constructor.
 
         Keyword Args:
             parent (QWidget): reference to the parent widget
@@ -29,17 +30,23 @@ class ProgressWindow(QDialog, Ui_Dialog):
     @pyqtSlot()
     def on_pushButton_ok_clicked(self):
         """
-        Closes the progress window. Only clickable after the
-        progress bar reaches 100%, i.e. after all selected
-        P2P platforms were evaluated.
+        Close the progress window.
+
+        Only clickable after the progress bar reaches 100%, i.e. after all
+        selected P2P platforms were evaluated.
+
         """
         self.accept()
 
     @pyqtSlot()
     def on_pushButton_abort_clicked(self):
         """
-        Aborts the evaluation of the selected P2P platforms
-        and returns to the main window.
+        Abort the evaluation of the selected P2P platforms.
+
+        If the abort button is clicked, the worker thread will finish the
+        processing of the current platform and then stop. It does not abort
+        immediately to ensure a clean logout of the P2P site.
+
         """
         self.reject()
 
@@ -50,6 +57,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
 
         Args:
             value (int): Value of the progress bar, between 0 and 100
+
         """
         if value == 100:
             self.pushButton_ok.setEnabled(True)
