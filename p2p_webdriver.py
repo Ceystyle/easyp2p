@@ -761,6 +761,29 @@ def get_calendar_clicks(
 
     return clicks
 
+def get_list_of_months(
+        start_date: datetime.date, end_date: datetime.date) -> list:
+    """
+    Get list of months between (including) start and end date.
+
+    Args:
+        start_date (datetime.date): start date
+        end_date (datetime.date): end_date
+
+    Returns:
+        list (datetime.date): List of months
+    """
+    months = []
+    m = start_date
+    while m < end_date:
+        start_of_month = date(m.year, m.month, 1)
+        end_of_month = date(m.year, m.month, calendar.monthrange(
+            m.year, m.month)[1])
+        months.append([start_of_month, end_of_month])
+        m = m + timedelta(days=31)
+
+    return months
+
 def short_month_to_nbr(short_name: str) -> str:
     """
     Helper method for translating month short names to numbers.
@@ -1329,14 +1352,7 @@ def open_selenium_iuvo(
         # each month in date range
 
         # Get all required monthly date ranges
-        months = []
-        m = start_date
-        while m < end_date:
-            start_of_month = date(m.year, m.month, 1)
-            end_of_month = date(m.year, m.month, calendar.monthrange(
-                m.year, m.month)[1])
-            months.append([start_of_month, end_of_month])
-            m = m + timedelta(days=31)
+        months = get_list_of_months(start_date, end_date)
 
         df_result = None
 
