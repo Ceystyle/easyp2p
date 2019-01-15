@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
 
 """
 p2p_webdriver contains the main code for handling the P2P platforms.
@@ -41,14 +42,17 @@ ExpectedCondition = Union[
 class P2P:
 
     """
+    Representation of P2P platform including required methods for interaction.
+
     Represents a P2P platform and the required methods for login/logout,
     generating and downloading account statements.
+
     """
 
     def __init__(
             self,  name: str, login_url: str, statement_url: str,
-            logout_func: str, *logout_args, default_file_name: str=None,
-            file_format: str=None, **logout_kwargs) -> None:
+            logout_func: str, *logout_args, default_file_name: str = None,
+            file_format: str = None, **logout_kwargs) -> None:
         """
         Constructor of P2P class.
 
@@ -79,7 +83,13 @@ class P2P:
         self.delay = 5  # delay in seconds, input for WebDriverWait
 
     def __enter__(self) -> 'P2P':
-        """Start of context management protocol."""
+        """
+        Start of context management protocol.
+
+        Returns:
+            self (P2P): instance of P2P class
+
+        """
         self.init_webdriver()
         return self
 
@@ -94,8 +104,8 @@ class P2P:
                 raise RuntimeError(
                     'Unbekannte Logout-Methode: ', self.logout_func)
         except NoSuchElementException:
-            #If an error occurs before login, the logout button is not present
-            #yet, which leads to this error. It can be ignored.
+            # If an error occurs before login, the logout button is not present
+            # yet, which leads to this error. It can be ignored.
             pass
         self.driver.close()
         if exc_type:
@@ -103,6 +113,8 @@ class P2P:
 
     def init_webdriver(self) -> None:
         """
+        Initialize Chromedriver as webdriver.
+
         This function initializes Chromedriver as webdriver, sets the
         default download location to p2p_downloads relative to the current
         working directory and opens a new maximized browser window.
@@ -120,9 +132,11 @@ class P2P:
         self.driver = driver
 
     def open_start_page(
-        self, wait_until: ExpectedCondition, 
-        title_check: str=None) -> bool:
+            self, wait_until: ExpectedCondition,
+            title_check: str = None) -> bool:
         """
+        Open start page of P2P platform.
+
         This function will open the login/start page of the P2P platform
         in the webdriver. It will check the title of the window to make
         sure the page was loaded correctly.
@@ -141,6 +155,7 @@ class P2P:
         Throws:
             RuntimeError: if the expected web page title is not found or if
                 loading the page takes too long
+
         """
         # Most platforms use their name in the title
         # title_check will handle the few cases where they don't
@@ -166,9 +181,11 @@ class P2P:
 
     def log_into_page(
             self, name_field: str, password_field: str,
-            wait_until: ExpectedCondition, login_field: str=None,
-            find_login_by: str=By.XPATH, fill_delay: float=0) -> bool:
+            wait_until: ExpectedCondition, login_field: str = None,
+            find_login_by: str = By.XPATH, fill_delay: float = 0) -> bool:
         """
+        Log into the P2P platform with provided user name/password.
+
         This function performs the login procedure for the P2P site.
         It fills in user name and password. Some P2P sites only show
         the user name and password field after clicking a button.
@@ -202,6 +219,7 @@ class P2P:
                             in credentials.py
                           - if login or password fields cannot be found
                           - if loading the page takes too long
+
         """
         try:
             getattr(credentials, self.name)['username']
@@ -241,8 +259,10 @@ class P2P:
 
     def open_account_statement_page(
             self, title: str, element_to_check: str,
-            check_by: str=By.ID) -> bool:
+            check_by: str = By.ID) -> bool:
         """
+        Open account statement page of the P2P platform.
+
         This function opens the account statement page of the P2P site.
         The URL of the account statement page is provided as an
         attribute of the P2P class.
@@ -263,6 +283,7 @@ class P2P:
         Throws:
             RuntimeError: - if title of the page is not equal to provided one
                           - if loading of page takes too long
+
         """
         try:
             self.driver.get(self.statement_url)
@@ -279,9 +300,11 @@ class P2P:
 
     def logout_by_button(
             self, logout_elem: str,  logout_elem_by: str,
-            wait_until: ExpectedCondition, hover_elem: str=None,
-            hover_elem_by: str=None) -> None:
+            wait_until: ExpectedCondition, hover_elem: str = None,
+            hover_elem_by: str = None) -> None:
         """
+        Logout of P2P platform using the provided logout button.
+
         This function performs the logout procedure for P2P sites
         where a button needs to be clicked to logout. For some sites the
         button only becomes clickable after hovering over a certain element.
@@ -302,6 +325,7 @@ class P2P:
 
         Throws:
             RuntimeError: if loading of page takes too long
+
         """
         try:
             if hover_elem is not None:
@@ -321,6 +345,8 @@ class P2P:
     def logout_by_url(
             self, logout_url: str, wait_until: ExpectedCondition) -> None:
         """
+        Logout of P2P platform using the provided URL.
+
         This function performs the logout procedure for P2P sites
         where the logout page has an URL. The URL itself is provided
         as an attribute of the P2P class.
@@ -332,6 +358,7 @@ class P2P:
 
         Throws:
             RuntimeError: if loading of page takes too long
+
         """
         try:
             self.driver.get(logout_url)
@@ -344,9 +371,11 @@ class P2P:
     def generate_statement_direct(
             self, start_date: datetime.date, end_date: datetime.date,
             start_element: str, end_element: str, date_format: str,
-            find_elem_by: str=By.ID, wait_until: ExpectedCondition=None,
-            submit_btn: str=None, find_submit_btn_by: str=None) -> bool:
+            find_elem_by: str = By.ID, wait_until: ExpectedCondition = None,
+            submit_btn: str = None, find_submit_btn_by: str = None) -> bool:
         """
+        Generate acc. statement for platforms where date fields can be edited.
+
         For P2P sites where the two date range fields for account statement
         generation can be edited directly. The function will locate the two
         date fields, enter start and end date and then start the account
@@ -375,6 +404,7 @@ class P2P:
 
         Returns:
             bool: True on success, False on failure.
+
         """
         try:
             date_from = self.driver.find_element(find_elem_by, start_element)
@@ -407,11 +437,11 @@ class P2P:
                 self.wdwait(wait_until)
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
-                'gestartet werden.'.format(self.name))
+                               'gestartet werden.'.format(self.name))
             return False
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
-                'gedauert.'.format(self.name))
+                               'gedauert.'.format(self.name))
             return False
 
         return True
@@ -422,6 +452,8 @@ class P2P:
             arrows: Sequence[str], days_table,
             calendar_id_by: str, calendar_id: str) -> bool:
         """
+        Generate account statement by clicking days in a calendar.
+
         For P2P sites where the two date range fields for account
         statement generation cannot be edited directly, but must be
         clicked in a calendar. The function will locate the two calendars,
@@ -448,6 +480,7 @@ class P2P:
 
         Returns:
             bool: True on success, False on failure.
+
         """
         try:
             # Identify the two calendars
@@ -507,7 +540,7 @@ class P2P:
                 else:
                     if (elem.text == str(start_date.day)
                             and elem.get_attribute('class')
-                                == days_table['current_day_id']):
+                            == days_table['current_day_id']):
                         elem.click()
 
             # Set end_date
@@ -536,15 +569,15 @@ class P2P:
                 else:
                     if (elem.text == str(end_date.day)
                             and elem.get_attribute('class')
-                                == days_table['current_day_id']):
+                            == days_table['current_day_id']):
                         elem.click()
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
-                'gestartet werden.'.format(self.name))
+                               'gestartet werden.'.format(self.name))
             return False
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
-                'gedauert.'.format(self.name))
+                               'gedauert.'.format(self.name))
             return False
 
         return True
@@ -552,6 +585,8 @@ class P2P:
     def download_statement(
             self, download_btn: str, find_btn_by: str, actions=None) -> bool:
         """
+        Download account statement by clicking the provided button.
+
         Downloads the generated account statement and checks
         if the download was successful. If the download was successful,
         it will also call the rename_statement function to rename
@@ -569,6 +604,7 @@ class P2P:
 
         Returns:
             bool: True on success, False on failure.
+
         """
         try:
             download_button = self.driver.find_element(
@@ -622,12 +658,13 @@ class P2P:
 
         Returns:
             WebElement: WebElement which WebDriverWait waited for.
+
         """
         return WebDriverWait(self.driver, self.delay).until(wait_until)
 
     def clean_download_location(self) -> bool:
         """
-        Ensures that there are no old download files in download location.
+        Ensure that there are no old download files in download location.
 
         Makes sure that the download location does not contain
         old downloads. In case old downloads are detected they will be
@@ -639,7 +676,8 @@ class P2P:
 
         Throws:
             RuntimeError: if old download files with the same default name
-                          cannot be deleted
+                          cannot be deleted.
+
         """
         file_list = glob.glob(
             'p2p_downloads/{0}.{1}'.format(
@@ -650,17 +688,19 @@ class P2P:
                     os.remove(file)
                 except:
                     raise RuntimeError('Alte {0}-Downloads in ./p2p_downloads'
-                        ' konnten nicht gelöscht werden. Bitte manuell '
-                        'entfernen!'.format(self.name))
+                                       ' konnten nicht gelöscht werden. Bitte '
+                                       'manuell entfernen!'.format(self.name))
                     return False
 
             raise RuntimeWarning('Alte {0}-Downloads in ./p2p_downloads wurden'
-                'entfernt.'.format(self.name))
+                                 'entfernt.'.format(self.name))
 
         return True
 
     def rename_statement(self) -> bool:
         """
+        Rename downloaded statement to platform_name_statement.file_format.
+
         Will rename the downloaded statement from the
         default name chosen by the P2P platform to
         platform_name_statement.file_format.
@@ -670,6 +710,7 @@ class P2P:
 
         Throws:
             RuntimeError: if the downloaded statement cannot be found
+
         """
         file_list = glob.glob('p2p_downloads/{0}.{1}'.format(
             self.default_file_name, self.file_format))
@@ -685,7 +726,8 @@ class P2P:
         else:
             # This should never happen
             raise RuntimeError('Alte {0} Downloads in ./p2p_downloads '
-                'entdeckt. Bitte zuerst entfernen.'.format(self.name))
+                               'entdeckt. Bitte zuerst entfernen.'
+                               ''.format(self.name))
             return False
 
         return True
@@ -693,6 +735,8 @@ class P2P:
 def get_calendar_clicks(
         target_date: datetime.date,  start_date: datetime.date) -> int:
     """
+    Get number of calendar clicks necessary to get from start to target month.
+
     This function will determine how many months in the
     past/future the target date is compared to a given
     start date. Positive numbers mean months into the
@@ -705,6 +749,7 @@ def get_calendar_clicks(
     Returns:
         int: number of months between start and
             target date.
+
     """
     if target_date.year != start_date.year:
         clicks = 12 * (target_date.year - start_date.year)
@@ -718,10 +763,11 @@ def get_calendar_clicks(
 
 def short_month_to_nbr(short_name: str) -> str:
     """
-    Helper method for translating month short names to numbers
+    Helper method for translating month short names to numbers.
 
     Returns:
         str: two-digit month number padded with 0
+
     """
     short_month_to_nbr = {
         'Jan': '01',  'Feb': '02', 'Mrz': '03', 'Mar': '03',
@@ -734,10 +780,11 @@ def short_month_to_nbr(short_name: str) -> str:
 
 def nbr_to_short_month(nbr: str) -> str:
     """
-    Helper method for translating numbers to month short names
+    Helper method for translating numbers to month short names.
 
     Returns:
         str: month short name
+
     """
     # Only German locale is used so far
     nbr_to_short_month = {
@@ -751,7 +798,7 @@ def nbr_to_short_month(nbr: str) -> str:
 def open_selenium_bondora(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Bondora account statement for given date range.
+    Generate and download the Bondora account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -761,6 +808,7 @@ def open_selenium_bondora(
 
     Returns:
         bool: True on success, False on failure
+
     """
     with P2P(
             'Bondora', 'https://www.bondora.com/de/login',
@@ -831,7 +879,7 @@ def open_selenium_bondora(
 def open_selenium_mintos(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Mintos account statement for given date range.
+    Generate and download the Mintos account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which
@@ -841,6 +889,7 @@ def open_selenium_mintos(
 
     Returns:
         bool: True on success, False on failure.
+
     """
     today = datetime.today()
     default_file_name = '{0}{1}{2}-account-statement'.format(
@@ -885,7 +934,7 @@ def open_selenium_mintos(
 def open_selenium_robocash(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Robocash account statement for given date range.
+    Generate and download the Robocash account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -899,6 +948,7 @@ def open_selenium_robocash(
     Throws:
         RuntimeError: - if the statement button cannot be found
                       - if the download of the statement takes too long
+
     """
     with P2P(
             'Robocash', 'https://robo.cash/de',
@@ -954,9 +1004,9 @@ def open_selenium_robocash(
                         'gedauert!')
                     return -1
 
-        #Robocash creates the download names randomly, therefore the default
-        #name is not known like for the other P2P sites. Thus we don't use the
-        #download button, but the download URL to get the statement.
+        # Robocash creates the download names randomly, therefore the default
+        # name is not known like for the other P2P sites. Thus we don't use the
+        # download button, but the download URL to get the statement.
         download_url = robocash.driver.find_element_by_id(
             'download_statement').get_attribute('href')
         driver_cookies = robocash.driver.get_cookies()
@@ -972,7 +1022,7 @@ def open_selenium_robocash(
 def open_selenium_swaper(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Swaper account statement for given date range.
+    Generate and download the Swaper account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -982,6 +1032,7 @@ def open_selenium_swaper(
 
     Returns:
         bool: True on success, False on failure
+
     """
     with P2P(
             'Swaper', 'https://www.swaper.com/#/dashboard',
@@ -1009,13 +1060,13 @@ def open_selenium_swaper(
 
         calendar_id_by = 'class'
         calendar_id = 'datepicker-container'
-        arrows = {'left_arrow_class': 'icon icon icon-left',
-                  'right_arrow_class': 'icon icon icon-right',
-                  'arrow_tag': 'div'}
+        arrows = {'arrow_tag': 'div',
+                  'left_arrow_class': 'icon icon icon-left',
+                  'right_arrow_class': 'icon icon icon-right'}
         days_table = {'class_name': '',
-                      'table_id': 'id',
                       'current_day_id': ' ',
-                      'id_from_calendar': True}
+                      'id_from_calendar': True,
+                      'table_id': 'id'}
         default_dates = [datetime.today().replace(day=1),  datetime.now()]
 
         if not swaper.generate_statement_calendar(
@@ -1024,7 +1075,7 @@ def open_selenium_swaper(
             return False
 
         download_button_xpath = ('//*[@id="account-statement"]/div[3]/div[4]/'
-                                'div/div[1]/a/div[1]/div/span[2]')
+                                 'div/div[1]/a/div[1]/div/span[2]')
         success = swaper.download_statement(download_button_xpath, By.XPATH)
 
     return success
@@ -1032,7 +1083,7 @@ def open_selenium_swaper(
 def open_selenium_peerberry(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the PeerBerry account statement for given date range.
+    Generate and download the PeerBerry account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -1042,6 +1093,7 @@ def open_selenium_peerberry(
 
     Returns:
         bool: True on success, False on failure
+
     """
     logout_button_xpath = ('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/'
                            'div[2]/div')
@@ -1079,15 +1131,15 @@ def open_selenium_peerberry(
 
         # Create account statement for given date range
         default_dates = [datetime.now(),  datetime.now()]
-        arrows = {'left_arrow_class': 'rdtPrev',
-                  'right_arrow_class': 'rdtNext',
-                  'arrow_tag': 'th'}
+        arrows = {'arrow_tag': 'th',
+                  'left_arrow_class': 'rdtPrev',
+                  'right_arrow_class': 'rdtNext'}
         calendar_id_by = 'name'
         calendar_id = ['startDate',  'endDate']
         days_table = {'class_name': 'rdtDays',
-                      'table_id': 'class',
                       'current_day_id': 'rdtDay',
-                      'id_from_calendar': False}
+                      'id_from_calendar': False,
+                      'table_id': 'class'}
 
         if not peerberry.generate_statement_calendar(
                 start_date, end_date,  default_dates, arrows, days_table,
@@ -1110,11 +1162,11 @@ def open_selenium_peerberry(
                     'Eröffnungssaldo '+str(start_date).format('%Y-%m-%d')))
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
-                'gestartet werden.'.format(peerberry.name))
+                               'gestartet werden.'.format(peerberry.name))
             return -1
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
-                'gedauert.'.format(peerberry.name))
+                               'gedauert.'.format(peerberry.name))
             return -1
 
         success = peerberry.download_statement(
@@ -1126,7 +1178,7 @@ def open_selenium_peerberry(
 def open_selenium_estateguru(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Estateguru account statement for given date range.
+    Generate and download Estateguru account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -1136,10 +1188,12 @@ def open_selenium_estateguru(
 
     Returns:
         bool: True on success, False on failure
+
     """
     today = datetime.today()
-    default_file_name = 'payments_{0}-{1}-{2}*'.format(today.year, 
-        today.strftime('%m'), today.strftime('%d'))
+    default_file_name = 'payments_{0}-{1}-{2}*'.format(today.year,
+                                                       today.strftime('%m'),
+                                                       today.strftime('%d'))
     with P2P(
             'Estateguru', 'https://estateguru.co/portal/login/auth?lang=de',
             'https://estateguru.co/portal/portfolio/account',
@@ -1164,9 +1218,9 @@ def open_selenium_estateguru(
                 'Übersicht', element_to_check=check_xpath, check_by=By.XPATH):
             return False
 
-        #Estateguru does not provide functionality for filtering payment
-        #dates. Therefore we download the statement which includes all
-        #cashflows ever generated for this account.
+        # Estateguru does not provide functionality for filtering payment
+        # dates. Therefore we download the statement which includes all
+        # cashflows ever generated for this account.
         select_btn_xpath = ('/html/body/section/div/div/div/div[2]/section[2]/'
                             'div[1]/div[2]/button')
         estateguru.driver.find_element_by_xpath(select_btn_xpath).click()
@@ -1178,7 +1232,7 @@ def open_selenium_estateguru(
 def open_selenium_iuvo(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Iuvo account statement for given date range.
+    Generate and download the Iuvo account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -1188,6 +1242,7 @@ def open_selenium_iuvo(
 
     Returns:
         bool: True on success, False on failure
+
     """
     with P2P(
             'Iuvo',
@@ -1207,7 +1262,6 @@ def open_selenium_iuvo(
                 'login', 'password',
                 EC.element_to_be_clickable(
                     (By.ID, 'p2p_btn_deposit_page_add_funds'))):
-            print('login failed')
             return False
 
         # Click away cookie policy, if present
@@ -1263,7 +1317,8 @@ def open_selenium_iuvo(
             if new_start_balance == start_balance:
                 # If the start balance didn't change, the calculation is most
                 # likely not finished yet
-                # TODO: find better way to wait until new statement is generated
+                # TODO: find better way to wait until new statement is
+                # generated
                 time.sleep(3)
             statement_table = driver.find_element_by_class_name(
                 'table-responsive')
@@ -1284,7 +1339,7 @@ def open_selenium_iuvo(
 def open_selenium_grupeer(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Grupeer account statement for given date range.
+    Generate and download the Grupeer account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -1294,6 +1349,7 @@ def open_selenium_grupeer(
 
     Returns:
         bool: True on success, False on failure
+
     """
     with P2P(
             'Grupeer',
@@ -1318,14 +1374,16 @@ def open_selenium_grupeer(
                     (By.LINK_TEXT, 'Meine Investments'))):
             return False
 
-        if not grupeer.open_account_statement_page('Account Statement', 'from'):
+        if not grupeer.open_account_statement_page(
+                'Account Statement', 'from'):
             return False
 
         if not grupeer.generate_statement_direct(
                 start_date, end_date, 'from', 'to', '%d.%m.%Y',
                 wait_until=EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'balance-block'),
-                    'Bilanz geöffnet am '+str(start_date.strftime('%d.%m.%Y'))),
+                    'Bilanz geöffnet am '
+                    + str(start_date.strftime('%d.%m.%Y'))),
                 submit_btn='submit', find_submit_btn_by=By.NAME):
             return False
 
@@ -1336,7 +1394,7 @@ def open_selenium_grupeer(
 def open_selenium_dofinance(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Dofinance account statement for given date range.
+    Generate and download the Dofinance account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -1346,6 +1404,7 @@ def open_selenium_dofinance(
 
     Returns:
         bool: True on success, False on failure
+
     """
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(
         start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
@@ -1386,7 +1445,7 @@ def open_selenium_dofinance(
 def open_selenium_twino(
         start_date: datetime.date, end_date: datetime.date) -> bool:
     """
-    Generates the Twino account statement for given date range.
+    Generate and download the Twino account statement for given date range.
 
     Args:
         start_date (datetime.date): Start of date range for which account
@@ -1396,6 +1455,7 @@ def open_selenium_twino(
 
     Returns:
         bool: True on success, False on failure
+
     """
     statement_url = ('https://www.twino.eu/de/profile/investor/my-investments/'
                      'account-transactions')
