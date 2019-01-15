@@ -810,10 +810,19 @@ def open_selenium_bondora(
         bool: True on success, False on failure
 
     """
+    urls = {
+            'login': 'https://www.bondora.com/de/login',
+            'logout': 'https://www.bondora.com/de/authorize/logout',
+            'statement': 'https://www.bondora.com/de/cashflow'
+           }
+    xpaths = {
+              'search_btn': ('//*[@id="page-content-wrapper"]/div/div/div[1]/'
+                             'form/div[3]/button'),
+              'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/'
+                             'tbody/tr[2]/td[1]/a')
+             }
     with P2P(
-            'Bondora', 'https://www.bondora.com/de/login',
-            'https://www.bondora.com/de/cashflow', 'url',
-            'https://www.bondora.com/de/authorize/logout',
+            'Bondora', urls['login'], urls['statement'], 'url', urls['logout'],
             EC.title_contains('Einloggen')) as bondora:
 
         driver = bondora.driver
@@ -858,14 +867,10 @@ def open_selenium_bondora(
             select.select_by_visible_text(nbr_to_short_month(
                 end_date.strftime('%m')))
 
-        search_button_xpath = ('//*[@id="page-content-wrapper"]/div/div/'
-                               'div[1]/form/div[3]/button')
-        start_date_xpath = ('/html/body/div[1]/div/div/div/div[3]/div/table/'
-                            'tbody/tr[2]/td[1]/a')
-        driver.find_element_by_xpath(search_button_xpath).click()
+        driver.find_element_by_xpath(xpaths['search_btn']).click()
         bondora.wdwait(
             EC.text_to_be_present_in_element(
-                (By.XPATH, start_date_xpath),
+                (By.XPATH, xpaths['start_date']),
                 '{0} {1}'.format(start_date.strftime('%b'), start_date.year)))
 
         cashflow_table = driver.find_element_by_id('cashflow-content')
@@ -891,14 +896,20 @@ def open_selenium_mintos(
         bool: True on success, False on failure.
 
     """
+    urls = {
+            'login': 'https://www.mintos.com/de/',
+            'statement': 'https://www.mintos.com/de/kontoauszug/'
+           }
+    xpaths = {
+              'logout_btn': "//a[contains(@href,'logout')]"
+             }
     today = datetime.today()
     default_file_name = '{0}{1}{2}-account-statement'.format(
         today.year,  today.strftime('%m'), today.strftime('%d'))
 
     with P2P(
-            'Mintos', 'https://www.mintos.com/de/',
-            'https://www.mintos.com/de/kontoauszug/',
-            'button', "//a[contains(@href,'logout')]",
+            'Mintos', urls['login'], urls['statement'],
+            'button', xpaths['logout_btn'],
             By.XPATH, EC.title_contains('Vielen Dank'),
             default_file_name=default_file_name, file_format='xlsx') as mintos:
 
@@ -950,24 +961,32 @@ def open_selenium_robocash(
                       - if the download of the statement takes too long
 
     """
+    urls = {
+            'login': 'https://robo.cash/de',
+            'logout': 'https://robo.cash/de/logout',
+            'statement': 'https://robo.cash/de/cabinet/statement'
+           }
+    xpaths = {
+              'login_check': '/html/body/header/div/div/div[2]/nav/ul/li[3]/a',
+              'login_field': '/html/body/header/div/div/div[3]/a[1]',
+              'start_page_check': '/html/body/header/div/div/div[3]/a[1]'
+             }
+
     with P2P(
-            'Robocash', 'https://robo.cash/de',
-            'https://robo.cash/de/cabinet/statement',
-            'url', 'https://robo.cash/de/logout',
+            'Robocash', urls['login'], urls['statement'],
+            'url', urls['logout'],
             EC.title_contains('Willkommen')) as robocash:
 
         if not robocash.open_start_page(
                 EC.presence_of_element_located(
-                    (By.XPATH, '/html/body/header/div/div/div[3]/a[1]')),
+                    (By.XPATH, xpaths['start_page_check'])),
                 'Robo.cash'):
             return False
 
         if not robocash.log_into_page(
-                name_field='email', password_field='password',
-                wait_until=EC.element_to_be_clickable(
-                    (By.XPATH,
-                        '/html/body/header/div/div/div[2]/nav/ul/li[3]/a')),
-                login_field='/html/body/header/div/div/div[3]/a[1]'):
+                'email', 'password',
+                EC.element_to_be_clickable((By.XPATH, xpaths['login_check'])),
+                login_field=xpaths['login_field']):
             return False
 
         if not robocash.open_account_statement_page(
@@ -1034,10 +1053,19 @@ def open_selenium_swaper(
         bool: True on success, False on failure
 
     """
+    urls = {
+            'login': 'https://www.swaper.com/#/dashboard',
+            'statement': 'https://www.swaper.com/#/overview/account-statement'
+           }
+    xpaths = {
+              'download_btn': ('//*[@id="account-statement"]/div[3]/div[4]/'
+                               'div/div[1]/a/div[1]/div/span[2]'),
+              'logout_btn': '//*[@id="logout"]/span[1]/span'
+             }
+
     with P2P(
-            'Swaper', 'https://www.swaper.com/#/dashboard',
-            'https://www.swaper.com/#/overview/account-statement',
-            'button', '//*[@id="logout"]/span[1]/span', By.XPATH,
+            'Swaper', urls['login'], urls['statement'],
+            'button', xpaths['logout_btn'], By.XPATH,
             EC.presence_of_element_located((By.ID, 'about')),
             default_file_name='excel-storage*', file_format='xlsx') as swaper:
 
@@ -1074,9 +1102,7 @@ def open_selenium_swaper(
                 calendar_id_by,  calendar_id):
             return False
 
-        download_button_xpath = ('//*[@id="account-statement"]/div[3]/div[4]/'
-                                 'div/div[1]/a/div[1]/div/span[2]')
-        success = swaper.download_statement(download_button_xpath, By.XPATH)
+        success = swaper.download_statement(xpaths['download_btn'], By.XPATH)
 
     return success
 
@@ -1095,13 +1121,26 @@ def open_selenium_peerberry(
         bool: True on success, False on failure
 
     """
-    logout_button_xpath = ('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/'
-                           'div[2]/div')
+    urls = {
+            'login': 'https://peerberry.com/de/login',
+            'statement': 'https://peerberry.com/de/statement'
+           }
+    xpaths = {
+              'cookie_policy': ('//*[@id="app"]/div/div/div/div[4]/div/div/'
+                                'div[1]'),
+              'download_btn': ('//*[@id="app"]/div/div/div/div[2]/div/div[2]/'
+                               'div[3]/div[2]/div'),
+              'logout_btn': ('//*[@id="app"]/div/div/div/div[1]/div[1]/div/'
+                             'div/div[2]/div'),
+              'start_balance': ('/html/body/div[1]/div/div/div/div[2]/div/'
+                                'div[2]/div[2]/div/div/div[1]'),
+              'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/'
+                                'div[2]/div[1]/div/div[2]/div/div[2]/div/span')
+             }
 
     with P2P(
-            'PeerBerry', 'https://peerberry.com/de/login',
-            'https://peerberry.com/de/statement',
-            'button', logout_button_xpath, By.XPATH,
+            'PeerBerry', urls['login'], urls['statement'],
+            'button', xpaths['logout_btn'], By.XPATH,
             EC.title_contains('Einloggen'),
             default_file_name='transactions', file_format='csv') as peerberry:
 
@@ -1125,7 +1164,7 @@ def open_selenium_peerberry(
         # Close the cookie policy, if present
         try:
             peerberry.driver.find_element_by_xpath(
-                '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]').click()
+                xpaths['cookie_policy']).click()
         except NoSuchElementException:
             pass
 
@@ -1146,32 +1185,26 @@ def open_selenium_peerberry(
                 calendar_id_by, calendar_id):
             return True
 
-        # Generate account statement
-        start_balance_xpath = (
-            '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/div/div/'
-            'div[1]')
-        statement_button_xpath = (
-            '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/'
-            'div[2]/div/div[2]/div/span')
+        # After setting the dates, the statement button needs to be clicked in
+        # order to actually generate the statement
         try:
             peerberry.driver.find_element_by_xpath(
-                statement_button_xpath).click()
+                xpaths['statement_btn']).click()
             peerberry.wdwait(
                 EC.text_to_be_present_in_element(
-                    ((By.XPATH, start_balance_xpath)),
+                    ((By.XPATH, xpaths['start_balance'])),
                     'Eröffnungssaldo '+str(start_date).format('%Y-%m-%d')))
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
                                'gestartet werden.'.format(peerberry.name))
-            return -1
+            return False
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
                                'gedauert.'.format(peerberry.name))
-            return -1
+            return False
 
         success = peerberry.download_statement(
-                ('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]/'
-                 'div'), By.XPATH, actions='move_to_element')
+            xpaths['download_btn'], By.XPATH, actions='move_to_element')
 
     return success
 
@@ -1190,15 +1223,25 @@ def open_selenium_estateguru(
         bool: True on success, False on failure
 
     """
+    urls = {
+            'login': 'https://estateguru.co/portal/login/auth?lang=de',
+            'logout': 'https://estateguru.co/portal/logout/index',
+            'statement': 'https://estateguru.co/portal/portfolio/account'
+           }
+    xpaths = {
+              'account_statement_check': ('/html/body/section/div/div/div/'
+                                          'div[2]/section[1]/div/div/div[2]/'
+                                          'div/form/div[2]/ul/li[5]/a'),
+              'select_btn': ('/html/body/section/div/div/div/div[2]/'
+                             'section[2]/div[1]/div[2]/button')
+             }
     today = datetime.today()
     default_file_name = 'payments_{0}-{1}-{2}*'.format(today.year,
                                                        today.strftime('%m'),
                                                        today.strftime('%d'))
     with P2P(
-            'Estateguru', 'https://estateguru.co/portal/login/auth?lang=de',
-            'https://estateguru.co/portal/portfolio/account',
-            'url', 'https://estateguru.co/portal/logout/index',
-            EC.title_contains('Einloggen/Registrieren'),
+            'Estateguru', urls['login'], urls['statement'],
+            'url', urls['logout'], EC.title_contains('Einloggen/Registrieren'),
             default_file_name=default_file_name,
             file_format='csv') as estateguru:
 
@@ -1212,18 +1255,14 @@ def open_selenium_estateguru(
                 EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND'))):
             return -1
 
-        check_xpath = ('/html/body/section/div/div/div/div[2]/section[1]/div/'
-                       'div/div[2]/div/form/div[2]/ul/li[5]/a')
         if not estateguru.open_account_statement_page(
-                'Übersicht', element_to_check=check_xpath, check_by=By.XPATH):
+                'Übersicht', xpaths['account_statement_check'], By.XPATH):
             return False
 
         # Estateguru does not provide functionality for filtering payment
         # dates. Therefore we download the statement which includes all
         # cashflows ever generated for this account.
-        select_btn_xpath = ('/html/body/section/div/div/div/div[2]/section[2]/'
-                            'div[1]/div[2]/button')
-        estateguru.driver.find_element_by_xpath(select_btn_xpath).click()
+        estateguru.driver.find_element_by_xpath(xpaths['select_btn']).click()
         estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
         estateguru.download_statement('CSV', By.LINK_TEXT)
 
@@ -1244,10 +1283,20 @@ def open_selenium_iuvo(
         bool: True on success, False on failure
 
     """
+    urls = {
+            'login': 'https://www.iuvo-group.com/de/login/',
+            'statement': 'https://www.iuvo-group.com/de/account-statement/'
+           }
+    xpaths = {
+              'start_balance_name': ('/html/body/div[5]/main/div/div/div/'
+                                     'div[4]/div/table/thead/tr[1]/td[1]/'
+                                     'strong'),
+              'start_balance_value': ('/html/body/div[5]/main/div/div/div/'
+                                      'div[4]/div/table/thead/tr[1]/td[2]/'
+                                      'strong')
+             }
     with P2P(
-            'Iuvo',
-            'https://www.iuvo-group.com/de/login/',
-            'https://www.iuvo-group.com/de/account-statement/',
+            'Iuvo', urls['login'], urls['statement'],
             'button', 'p2p_logout', By.ID,
             EC.title_contains('Investieren Sie in Kredite'),
             hover_elem='User name', hover_elem_by=By.LINK_TEXT) as iuvo:
@@ -1290,22 +1339,15 @@ def open_selenium_iuvo(
             m = m + timedelta(days=31)
 
         df_result = None
-        # First entry: name of start balance -> "Anfangsbestand"
-        # Second entry: actual start balance
-        start_balance_xpath = [
-            ('/html/body/div[5]/main/div/div/div/div[4]/div/table/thead/tr[1]/'
-             'td[1]/strong'),
-            ('/html/body/div[5]/main/div/div/div/div[4]/div/table/thead/tr[1]/'
-             'td[2]/strong')
-        ]
+
         for month in months:
             start_balance = driver.find_element_by_xpath(
-                start_balance_xpath[1]).text
+                xpaths['start_balance_value']).text
 
             if not iuvo.generate_statement_direct(
                     month[0], month[1], 'date_from', 'date_to', '%Y-%m-%d',
                     wait_until=EC.text_to_be_present_in_element(
-                        (By.XPATH, start_balance_xpath[0]),
+                        (By.XPATH, xpaths['start_balance_name']),
                         'Anfangsbestand'),
                     submit_btn='account_statement_filters_btn',
                     find_submit_btn_by=By.ID):
@@ -1313,7 +1355,7 @@ def open_selenium_iuvo(
 
             # Read statement from page
             new_start_balance = driver.find_element_by_xpath(
-                start_balance_xpath[1]).text
+                xpaths['start_balance_value']).text
             if new_start_balance == start_balance:
                 # If the start balance didn't change, the calculation is most
                 # likely not finished yet
@@ -1351,14 +1393,20 @@ def open_selenium_grupeer(
         bool: True on success, False on failure
 
     """
+    urls = {
+            'login': 'https://www.grupeer.com/de/login',
+            'statement': 'https://www.grupeer.com/de/account-statement'
+           }
+    xpaths = {
+              'logout_btn': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
+                             'div/div/ul/li/a/span')
+             }
     with P2P(
-            'Grupeer',
-            'https://www.grupeer.com/de/login',
-            'https://www.grupeer.com/de/account-statement',
+            'Grupeer', urls['login'], urls['statement'],
             'button', 'Ausloggen', By.LINK_TEXT,
             EC.title_contains('P2P Investitionsplattform Grupeer'),
-            ('/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li/a/'
-             'span'), By.XPATH, default_file_name='Account statement',
+            xpaths['logout_btn'], By.XPATH,
+            default_file_name='Account statement',
             file_format='xlsx') as grupeer:
 
         if not grupeer.clean_download_location():
@@ -1406,12 +1454,16 @@ def open_selenium_dofinance(
         bool: True on success, False on failure
 
     """
+    urls = {
+            'login': 'https://www.dofinance.eu/de/users/login',
+            'logout': 'https://www.dofinance.eu/de/users/logout',
+            'statement': 'https://www.dofinance.eu/de/users/statement'
+           }
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(
         start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
     with P2P(
-            'DoFinance', 'https://www.dofinance.eu/de/users/login',
-            'https://www.dofinance.eu/de/users/statement',
-            'url', 'https://www.dofinance.eu/de/users/logout',
+            'DoFinance', urls['login'], urls['statement'],
+            'url', urls['logout'],
             EC.title_contains('Kreditvergabe Plattform'),
             default_file_name=default_file_name,
             file_format='xlsx') as dofinance:
@@ -1457,42 +1509,49 @@ def open_selenium_twino(
         bool: True on success, False on failure
 
     """
-    statement_url = ('https://www.twino.eu/de/profile/investor/my-investments/'
-                     'account-transactions')
-    login_btn_xpath = ('/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/div/'
-                       'div[1]/button')
+    urls = {
+            'login': 'https://www.twino.eu/de/',
+            'statement': ('https://www.twino.eu/de/profile/investor/'
+                          'my-investments/account-transactions')
+           }
+    xpaths = {
+              'end_date': '//*[@date-picker="filterData.processingDateTo"]',
+              'login_btn': ('/html/body/div[1]/div[2]/div[1]/header[1]/div/'
+                            'nav/div/div[1]/button'),
+              'logout_btn': '//a[@href="/logout"]',
+              'start_date': ('//*[@date-picker='
+                             '"filterData.processingDateFrom"]'),
+              'statement': ('//a[@href="/de/profile/investor/my-investments/'
+                            'individual-investments"]')
+             }
+
     with P2P(
-            'Twino', 'https://www.twino.eu/de/',
-            statement_url, 'button', '//a[@href="/logout"]',
-            By.XPATH, EC.element_to_be_clickable((By.XPATH, login_btn_xpath)),
+            'Twino', urls['login'], urls['statement'],
+            'button', xpaths['logout_btn'], By.XPATH,
+            EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             default_file_name='account_statement_*',
             file_format='xlsx') as twino:
 
         if not twino.clean_download_location():
             return False
 
-        start_date_xpath = '//*[@date-picker="filterData.processingDateFrom"]'
-        end_date_xpath = '//*[@date-picker="filterData.processingDateTo"]'
-
         if not twino.open_start_page(
-                EC.element_to_be_clickable((By.XPATH, login_btn_xpath)),
+                EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
                 title_check='TWINO'):
             return False
 
-        statement_xpath = ('//a[@href="/de/profile/investor/my-investments/'
-                           'individual-investments"]')
         if not twino.log_into_page(
                 'email', 'login-password',
-                EC.element_to_be_clickable((By.XPATH, statement_xpath)),
-                login_field=login_btn_xpath, find_login_by=By.XPATH):
+                EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
+                login_field=xpaths['login_btn'], find_login_by=By.XPATH):
             return False
 
         if not twino.open_account_statement_page(
-                'TWINO', start_date_xpath, check_by=By.XPATH):
+                'TWINO', xpaths['start_date'], check_by=By.XPATH):
             return False
 
         if not twino.generate_statement_direct(
-                start_date, end_date, start_date_xpath, end_date_xpath,
+                start_date, end_date, xpaths['start_date'], xpaths['end_date'],
                 '%d.%m.%Y', find_elem_by=By.XPATH,
                 wait_until=EC.element_to_be_clickable(
                     (By.CSS_SELECTOR, '.accStatement__pdf'))):
