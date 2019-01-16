@@ -85,11 +85,11 @@ class P2P:
         self.logout_kwargs = logout_kwargs
         self.delay = 5  # delay in seconds, input for WebDriverWait
 
-        #Make sure URLs for login and statement page are provided
-        if not 'login' in urls:
+        # Make sure URLs for login and statement page are provided
+        if 'login' not in urls:
             raise RuntimeError('Keine Login-URL für {0} '
                                'vorhanden!'.format(self.name))
-        if not 'statement' in urls:
+        if 'statement' not in urls:
             raise RuntimeError('Keine Kontoauszug-URLs für {0} '
                                'vorhanden!'.format(self.name))
 
