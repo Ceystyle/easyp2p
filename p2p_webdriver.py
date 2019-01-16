@@ -57,19 +57,17 @@ class P2P:
     """
 
     def __init__(
-            self,  name: str, login_url: str, statement_url: str,
-            logout_func: str, *logout_args, default_file_name: str = None,
-            file_format: str = None, **logout_kwargs) -> None:
+            self,  name: str, urls: dict, *logout_args,
+            default_file_name: str = None, file_format: str = None,
+            **logout_kwargs) -> None:
         """
         Constructor of P2P class.
 
         Args:
             name (str): Name of the P2P platform
-            login_url (str): Login URL of the P2P platform
-            statement_url (str): URL of the account statement page of the
-                P2P platform
-            logout_func (str): either 'url' or 'button' to determine which
-                logout method must be used
+            urls (dict): Dictionary with URLs for login page (key: 'login'),
+                account statement page (key: 'statement') and optionally
+                logout page (key: 'logout')
             logout_args: further arguments for the logout method
 
         Keyword Args:
@@ -80,21 +78,27 @@ class P2P:
 
         """
         self.name = name
-        self.login_url = login_url
-        self.statement_url = statement_url
+        self.urls = urls
         self.default_file_name = default_file_name
         self.file_format = file_format
-        self.logout_func = logout_func
         self.logout_args = logout_args
         self.logout_kwargs = logout_kwargs
         self.delay = 5  # delay in seconds, input for WebDriverWait
+
+        #Make sure URLs for login and statement page are provided
+        if not 'login' in urls:
+            raise RuntimeError('Keine Login-URL für {0} '
+                               'vorhanden!'.format(self.name))
+        if not 'statement' in urls:
+            raise RuntimeError('Keine Kontoauszug-URLs für {0} '
+                               'vorhanden!'.format(self.name))
 
     def __enter__(self) -> 'P2P':
         """
         Start of context management protocol.
 
         Returns:
-            self (P2P): instance of P2P class
+            P2P: instance of P2P class
 
         """
         self.init_webdriver()
@@ -102,18 +106,15 @@ class P2P:
 
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         """End of context management protocol."""
-        try:
-            if self.logout_func == 'url':
-                self.logout_by_url(*self.logout_args)
-            elif self.logout_func == 'button':
+        if 'logout' in self.urls:
+            self.logout_by_url(*self.logout_args)
+        else:
+            try:
                 self.logout_by_button(*self.logout_args, **self.logout_kwargs)
-            else:
-                raise RuntimeError(
-                    'Unbekannte Logout-Methode: ', self.logout_func)
-        except NoSuchElementException:
-            # If an error occurs before login, the logout button is not present
-            # yet, which leads to this error. It can be ignored.
-            pass
+            except NoSuchElementException:
+                # If an error occurs before login, the logout button is not
+                # present yet, which leads to this error. It can be ignored.
+                pass
         self.driver.close()
         if exc_type:
             raise exc_type(exc_value)
@@ -170,7 +171,7 @@ class P2P:
             title_check = self.name
 
         try:
-            self.driver.get(self.login_url)
+            self.driver.get(self.urls['login'])
             self.wdwait(wait_until)
             # Additional check that the correct page was loaded
             if title_check not in self.driver.title:
@@ -288,7 +289,7 @@ class P2P:
 
         """
         try:
-            self.driver.get(self.statement_url)
+            self.driver.get(self.urls['statement'])
             self.wdwait(EC.presence_of_element_located(
                 (check_by, element_to_check)))
             assert title in self.driver.title
@@ -344,16 +345,15 @@ class P2P:
             # Continue anyway
 
     def logout_by_url(
-            self, logout_url: str, wait_until: ExpectedCondition) -> None:
+            self, wait_until: ExpectedCondition) -> None:
         """
         Logout of P2P platform using the provided URL.
 
         This function performs the logout procedure for P2P sites
-        where the logout page has an URL. The URL itself is provided
-        as an attribute of the P2P class.
+        where the logout page can by accessed by URL. The URL itself is
+        provided in the urls dict attribute of the P2P class.
 
         Args:
-            logout_url (str): URL of the logout page
             wait_until (ExpectedCondition): Expected condition in case of
                 successful logout
 
@@ -362,7 +362,7 @@ class P2P:
 
         """
         try:
-            self.driver.get(logout_url)
+            self.driver.get(self.urls['logout'])
             self.wdwait(wait_until)
         except TimeoutException:
             raise RuntimeWarning(
@@ -835,9 +835,8 @@ def open_selenium_bondora(
               'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/'
                              'tbody/tr[2]/td[1]/a')
              }
-    with P2P(
-            'Bondora', urls['login'], urls['statement'], 'url', urls['logout'],
-            EC.title_contains('Einloggen')) as bondora:
+
+    with P2P('Bondora', urls, EC.title_contains('Einloggen')) as bondora:
 
         driver = bondora.driver
 
@@ -922,8 +921,7 @@ def open_selenium_mintos(
         today.year,  today.strftime('%m'), today.strftime('%d'))
 
     with P2P(
-            'Mintos', urls['login'], urls['statement'],
-            'button', xpaths['logout_btn'],
+            'Mintos', urls, xpaths['logout_btn'],
             By.XPATH, EC.title_contains('Vielen Dank'),
             default_file_name=default_file_name, file_format='xlsx') as mintos:
 
@@ -986,10 +984,7 @@ def open_selenium_robocash(
               'start_page_check': '/html/body/header/div/div/div[3]/a[1]'
              }
 
-    with P2P(
-            'Robocash', urls['login'], urls['statement'],
-            'url', urls['logout'],
-            EC.title_contains('Willkommen')) as robocash:
+    with P2P('Robocash', urls, EC.title_contains('Willkommen')) as robocash:
 
         if not robocash.open_start_page(
                 EC.presence_of_element_located(
@@ -1024,7 +1019,7 @@ def open_selenium_robocash(
         wait = 0
         while not present:
             try:
-                robocash.driver.get(robocash.statement_url)
+                robocash.driver.get(robocash.urls['statement'])
                 robocash.wdwait(
                     EC.element_to_be_clickable((By.ID, 'download_statement')))
                 present = True
@@ -1076,8 +1071,7 @@ def open_selenium_swaper(
              }
 
     with P2P(
-            'Swaper', urls['login'], urls['statement'],
-            'button', xpaths['logout_btn'], By.XPATH,
+            'Swaper', urls, xpaths['logout_btn'], By.XPATH,
             EC.presence_of_element_located((By.ID, 'about')),
             default_file_name='excel-storage*', file_format='xlsx') as swaper:
 
@@ -1151,8 +1145,7 @@ def open_selenium_peerberry(
              }
 
     with P2P(
-            'PeerBerry', urls['login'], urls['statement'],
-            'button', xpaths['logout_btn'], By.XPATH,
+            'PeerBerry', urls, xpaths['logout_btn'], By.XPATH,
             EC.title_contains('Einloggen'),
             default_file_name='transactions', file_format='csv') as peerberry:
 
@@ -1250,8 +1243,7 @@ def open_selenium_estateguru(
                                                        today.strftime('%m'),
                                                        today.strftime('%d'))
     with P2P(
-            'Estateguru', urls['login'], urls['statement'],
-            'url', urls['logout'], EC.title_contains('Einloggen/Registrieren'),
+            'Estateguru', urls, EC.title_contains('Einloggen/Registrieren'),
             default_file_name=default_file_name,
             file_format='csv') as estateguru:
 
@@ -1306,8 +1298,7 @@ def open_selenium_iuvo(
                                       'strong')
              }
     with P2P(
-            'Iuvo', urls['login'], urls['statement'],
-            'button', 'p2p_logout', By.ID,
+            'Iuvo', urls, 'p2p_logout', By.ID,
             EC.title_contains('Investieren Sie in Kredite'),
             hover_elem='User name', hover_elem_by=By.LINK_TEXT) as iuvo:
 
@@ -1405,8 +1396,7 @@ def open_selenium_grupeer(
                              'div/div/ul/li/a/span')
              }
     with P2P(
-            'Grupeer', urls['login'], urls['statement'],
-            'button', 'Ausloggen', By.LINK_TEXT,
+            'Grupeer', urls, 'Ausloggen', By.LINK_TEXT,
             EC.title_contains('P2P Investitionsplattform Grupeer'),
             xpaths['logout_btn'], By.XPATH,
             default_file_name='Account statement',
@@ -1465,9 +1455,7 @@ def open_selenium_dofinance(
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(
         start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
     with P2P(
-            'DoFinance', urls['login'], urls['statement'],
-            'url', urls['logout'],
-            EC.title_contains('Kreditvergabe Plattform'),
+            'DoFinance', urls, EC.title_contains('Kreditvergabe Plattform'),
             default_file_name=default_file_name,
             file_format='xlsx') as dofinance:
 
@@ -1529,8 +1517,7 @@ def open_selenium_twino(
              }
 
     with P2P(
-            'Twino', urls['login'], urls['statement'],
-            'button', xpaths['logout_btn'], By.XPATH,
+            'Twino', urls, xpaths['logout_btn'], By.XPATH,
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             default_file_name='account_statement_*',
             file_format='xlsx') as twino:
