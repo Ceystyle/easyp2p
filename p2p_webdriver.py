@@ -221,19 +221,11 @@ class P2P:
             bool: True on success, False on failure.
 
         Throws:
-            RuntimeError: - if username/password cannot be found
-                            in credentials.py
-                          - if login or password fields cannot be found
+            RuntimeError: - if login or password fields cannot be found
                           - if loading the page takes too long
 
         """
-        try:
-            getattr(credentials, self.name)['username']
-            getattr(credentials, self.name)['password']
-        except AttributeError:
-            raise RuntimeError(
-                'Username/Passwort für {0} sind nicht vorhanden. Bitte '
-                'manuell zu credentials.py hinzufügen'.format(self.name))
+        credentials = get_credentials_from_file(self.name)
 
         try:
             if login_field is not None:
@@ -242,11 +234,11 @@ class P2P:
             self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
             elem = self.driver.find_element_by_name(name_field)
             elem.clear()
-            elem.send_keys(getattr(credentials, self.name)['username'])
+            elem.send_keys(credentials[0])
             time.sleep(fill_delay)
             elem = self.driver.find_element_by_name(password_field)
             elem.clear()
-            elem.send_keys(getattr(credentials, self.name)['password'])
+            elem.send_keys(credentials[1])
             elem.send_keys(Keys.RETURN)
             self.wdwait(wait_until)
         except NoSuchElementException:
@@ -751,6 +743,30 @@ def get_calendar_clicks(
         clicks += target_date.month - start_date.month
 
     return clicks
+
+def get_credentials_from_file(platform: str) -> tuple:
+    """
+    Get username and password from credentials.py.
+
+    Args:
+        platform (str): name of the P2P platform
+
+    Returns:
+        tuple: tuple with two elements: (username, password)
+
+    Throws:
+        RuntimeError: if username/password cannot be found in credentials.py
+
+    """
+    try:
+        username = getattr(credentials, platform)['username']
+        password = getattr(credentials, platform)['password']
+    except AttributeError:
+        raise RuntimeError(
+            'Username/Passwort für {0} sind nicht vorhanden. Bitte '
+            'manuell zu credentials.py hinzufügen'.format(platform))
+
+    return (username, password)
 
 def get_list_of_months(
         start_date: datetime.date, end_date: datetime.date) -> list:
