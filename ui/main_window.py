@@ -12,6 +12,7 @@ import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
+from ui.progress_window import ProgressWindow
 from xlrd.biffh import XLRDError
 
 from .Ui_main_window import Ui_MainWindow
@@ -296,7 +297,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker.start()
 
         # Open progress window
-        from ui.progress_window import ProgressWindow
         self.progressWindow = ProgressWindow()
         self.progressWindow.exec_()
 
