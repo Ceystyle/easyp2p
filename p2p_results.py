@@ -29,7 +29,7 @@ def combine_dfs(list_of_dfs):
     df_result = None
     for df in list_of_dfs:
         if df_result is not None:
-            df_result = df_result.append(df,  sort=False).fillna(0)
+            df_result = df_result.append(df, sort=False).fillna(0)
         else:
             df_result = df
 
@@ -37,7 +37,7 @@ def combine_dfs(list_of_dfs):
 
 
 def show_results(
-        df,  start_date: datetime.date,  end_date: datetime.date,
+        df, start_date: datetime.date, end_date: datetime.date,
         output_file: str) -> bool:
     """
     Sums up the results and writes them to an Excel file.

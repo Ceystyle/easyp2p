@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
 
-"""
-Module implementing CredentialsWindow.
-"""
+"""Module implementing CredentialsWindow."""
 
 import keyring
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QDialog, QMessageBox,  QWidget
+from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
 from .Ui_credentials_window import Ui_CredentialsWindow
 
 
 class CredentialsWindow(QDialog, Ui_CredentialsWindow):
+
     """
+    Class for getting P2P platform login credentials from user or keyring.
+
     CredentialWindow defines a dialog for getting P2P platform credentials
     from a keyring or by user input if the credentials cannot be found in the
     keyring.
+
     """
+
     def __init__(self, platform: str, parent: QWidget = None) -> None:
         """
         Constructor.
@@ -32,12 +36,12 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         self.setupUi(self)
         self.label_platform.setText('Bitte geben Sie Benutzername und '
                                     'Passwort für {0} ein:'.format(platform))
-    
+
     @pyqtSlot()
     def on_buttonBox_accepted(self) -> None:
         """Send accept() signal if OK button is clicked."""
         self.accept()
-    
+
     @pyqtSlot()
     def on_buttonBox_rejected(self) -> None:
         """Send reject() signal if Cancel button is clicked."""
@@ -56,13 +60,14 @@ def get_credentials(platform: str) -> tuple:
         platform (str): name of the P2P platform
 
     Returns:
-        tuple: (username, password) on success, None if user clicks Cancel
+        tuple: (username, password) on success, None if user clicks Cancel.
+
     """
     _done = False
     _ask_for_credentials = False
 
     while not _done:
-        
+
         if keyring.get_keyring():
             try:
                 username = keyring.get_password(platform, 'username')
@@ -75,24 +80,24 @@ def get_credentials(platform: str) -> tuple:
             _ask_for_credentials = True
 
         if _ask_for_credentials:
-            credentialsWindow = CredentialsWindow(platform)
-            if not credentialsWindow.exec_():
+            credentials_window = CredentialsWindow(platform)
+            if not credentials_window.exec_():
                 # User clicked the Cancel button
                 return None
-            username = credentialsWindow.lineEdit_username.text()
-            password = credentialsWindow.lineEdit_password.text()
+            username = credentials_window.lineEdit_username.text()
+            password = credentials_window.lineEdit_password.text()
 
             if not username or not password:
                 QMessageBox.warning(
-                    credentialsWindow, 'Felder nicht ausgefüllt', 'Bitte '
+                    credentials_window, 'Felder nicht ausgefüllt', 'Bitte '
                     'füllen Sie die Felder für Benutzername und Passwort aus!')
             else:
                 _done = True
 
-    if credentialsWindow.checkBox_save_in_keyring.isChecked():
+    if credentials_window.checkBox_save_in_keyring.isChecked():
         if not save_credentials(platform, username, password):
             QMessageBox.warning(
-                credentialsWindow, 'Speichern im Keyring fehlgeschlagen!',
+                credentials_window, 'Speichern im Keyring fehlgeschlagen!',
                 'Speichern des Passworts im Keyring war leider nicht '
                 'erfolgreich!')
 

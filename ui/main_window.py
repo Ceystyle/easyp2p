@@ -6,18 +6,19 @@
 import calendar
 from datetime import date
 import os
-import p2p_parser
-import p2p_results
-import p2p_webdriver as wd
+
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
-from ui.credentials_window import get_credentials
-from ui.progress_window import ProgressWindow
 from xlrd.biffh import XLRDError
 
 from .Ui_main_window import Ui_MainWindow
+import p2p_parser
+import p2p_results
+import p2p_webdriver as wd
+from ui.credentials_window import get_credentials
+from ui.progress_window import ProgressWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -35,7 +36,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
-        self.progressWindow = None
+        self.progress_window = None
         self.worker = None
         self.platforms = set([])
         self.credentials = dict()
@@ -300,17 +301,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker.start_date = self.start_date
         self.worker.end_date = self.end_date
         self.worker.output_file = self.output_file
-        self.abort = False
+        self.worker.abort = False
         self.worker.updateProgressBar.connect(self.updateProgressBar)
         self.worker.updateProgressText.connect(self.updateProgressText)
         self.worker.start()
 
         # Open progress window
-        self.progressWindow = ProgressWindow()
-        self.progressWindow.exec_()
+        self.progress_window = ProgressWindow()
+        self.progress_window.exec_()
 
         # Abort the worker thread if user clicked the cancel button
-        if self.progressWindow.result() == 0:
+        if self.progress_window.result() == 0:
             self.worker.abort = True
 
     def updateProgressBar(self, value):
@@ -536,7 +537,7 @@ class WorkerThread(QThread):
             'Start der Auswertung von {0}...'.format(platform), self.BLACK)
         try:
             success = func(
-                self.start_date,  self.end_date, self.credentials[platform])
+                self.start_date, self.end_date, self.credentials[platform])
         except RuntimeError as e:
             self.ignore_platform(platform, str(e))
             return False
@@ -578,7 +579,8 @@ class WorkerThread(QThread):
                 progress += step
                 self.updateProgressBar.emit(progress)
                 self.updateProgressText.emit(
-                    '{0} erfolgreich ausgewertet!'.format(platform), self.BLACK)
+                    '{0} erfolgreich ausgewertet!'.format(platform),
+                    self.BLACK)
 
                 parser = self.get_p2p_parser(platform)
                 if parser is None:
@@ -593,7 +595,7 @@ class WorkerThread(QThread):
 
         if not p2p_results.show_results(
                 df_result, self.start_date, self.end_date, self.output_file):
-            error_msg = ('Keine Ergebnisse vorhanden')
-            self.updateProgressText.emit(error_msg, self.RED)
+            self.updateProgressText.emit(
+                'Keine Ergebnisse vorhanden', self.RED)
 
         self.updateProgressBar.emit(100)
