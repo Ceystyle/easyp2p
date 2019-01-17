@@ -13,9 +13,12 @@ webdriver. easyP2P uses Chromedriver as webdriver.
 """
 
 import calendar
-from datetime import datetime,  date,  timedelta
+from datetime import datetime, date, timedelta
 import glob
 import os
+import time
+from typing import Sequence, Union
+
 import pandas as pd
 import requests
 from selenium import webdriver
@@ -28,22 +31,19 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
-import time
-from typing import Sequence, Union
 
 ExpectedCondition = Union[
     EC.element_to_be_clickable('locator'),
     EC.presence_of_element_located('locator'),
     EC.text_to_be_present_in_element('locator', str), EC.title_contains(str),
-    EC.visibility_of('locator')
-                         ]
+    EC.visibility_of('locator')]
+
 OpenSelenium = Union[
-                        'open_selenium_bondora', 'open_selenium_dofinance',
-                        'open_selenium_estateguru', 'open_selenium_grupeer',
-                        'open_selenium_iuvo', 'open_selenium_mintos',
-                        'open_selenium_peerberry', 'open_selenium_robocash',
-                        'open_selenium_swaper', 'open_selenium_twino'
-                    ]
+    'open_selenium_bondora', 'open_selenium_dofinance',
+    'open_selenium_estateguru', 'open_selenium_grupeer',
+    'open_selenium_iuvo', 'open_selenium_mintos',
+    'open_selenium_peerberry', 'open_selenium_robocash',
+    'open_selenium_swaper', 'open_selenium_twino']
 
 class P2P:
 
@@ -56,7 +56,7 @@ class P2P:
     """
 
     def __init__(
-            self,  name: str, urls: dict, *logout_args,
+            self, name: str, urls: dict, *logout_args,
             default_file_name: str = None, file_format: str = None,
             **logout_kwargs) -> None:
         """
@@ -83,6 +83,7 @@ class P2P:
         self.logout_args = logout_args
         self.logout_kwargs = logout_kwargs
         self.delay = 5  # delay in seconds, input for WebDriverWait
+        self.driver = None
 
         # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
@@ -127,7 +128,7 @@ class P2P:
         working directory and opens a new maximized browser window.
 
         """
-        # TODO. handle error cases
+        # TODO: handle error cases
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
         options.add_argument("--window-size=1920,1200")
@@ -283,7 +284,7 @@ class P2P:
             self.wdwait(EC.presence_of_element_located(
                 (check_by, element_to_check)))
             assert title in self.driver.title
-        except (AssertionError,  TimeoutException):
+        except (AssertionError, TimeoutException):
             raise RuntimeError(
                 '{0}-Kontoauszugsseite konnte nicht geladen werden!'
                 ''.format(self.name))
@@ -291,7 +292,7 @@ class P2P:
         return True
 
     def logout_by_button(
-            self, logout_elem: str,  logout_elem_by: str,
+            self, logout_elem: str, logout_elem_by: str,
             wait_until: ExpectedCondition, hover_elem: str = None,
             hover_elem_by: str = None) -> None:
         """
@@ -403,7 +404,7 @@ class P2P:
             date_from.send_keys(datetime.strftime(start_date, date_format))
 
             try:
-                date_to = self.driver.find_element(find_elem_by,  end_element)
+                date_to = self.driver.find_element(find_elem_by, end_element)
                 date_to.click()
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
@@ -411,7 +412,7 @@ class P2P:
             except StaleElementReferenceException:
                 # Some P2P sites refresh the page after a change
                 # which leads to this exception
-                date_to = self.driver.find_element(find_elem_by,  end_element)
+                date_to = self.driver.find_element(find_elem_by, end_element)
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
 
@@ -490,9 +491,9 @@ class P2P:
 
             # How many clicks on the arrow buttons are necessary?
             start_calendar_clicks = get_calendar_clicks(
-                start_date,  default_dates[0])
+                start_date, default_dates[0])
             end_calendar_clicks = get_calendar_clicks(
-                end_date,  default_dates[1])
+                end_date, default_dates[1])
 
             # Identify the arrows for both start and end calendar
             left_arrows = self.driver.find_elements_by_xpath(
@@ -714,7 +715,7 @@ class P2P:
         return True
 
 def get_calendar_clicks(
-        target_date: datetime.date,  start_date: datetime.date) -> int:
+        target_date: datetime.date, start_date: datetime.date) -> int:
     """
     Get number of calendar clicks necessary to get from start to target month.
 
@@ -773,14 +774,13 @@ def short_month_to_nbr(short_name: str) -> str:
         str: two-digit month number padded with 0
 
     """
-    short_month_to_nbr = {
-        'Jan': '01',  'Feb': '02', 'Mrz': '03', 'Mar': '03',
+    map_short_month_to_nbr = {
+        'Jan': '01', 'Feb': '02', 'Mrz': '03', 'Mar': '03',
         'Apr': '04', 'Mai': '05', 'May': '05', 'Jun': '06', 'Jul': '07',
         'Aug': '08', 'Sep': '09', 'Okt': '10', 'Oct': '10', 'Nov': '11',
-        'Dez': '12', 'Dec': '12'
-    }
+        'Dez': '12', 'Dec': '12'}
 
-    return short_month_to_nbr[short_name]
+    return map_short_month_to_nbr[short_name]
 
 def nbr_to_short_month(nbr: str) -> str:
     """
@@ -791,13 +791,12 @@ def nbr_to_short_month(nbr: str) -> str:
 
     """
     # Only German locale is used so far
-    nbr_to_short_month = {
+    map_nbr_to_short_month = {
         '01': 'Jan', '02': 'Feb', '03': 'Mrz', '04': 'Apr', '05': 'Mai',
         '06': 'Jun', '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Okt',
-        '11': 'Nov', '12': 'Dez'
-    }
+        '11': 'Nov', '12': 'Dez'}
 
-    return nbr_to_short_month[nbr]
+    return map_nbr_to_short_month[nbr]
 
 def open_selenium_bondora(
         start_date: datetime.date, end_date: datetime.date,
@@ -817,16 +816,14 @@ def open_selenium_bondora(
 
     """
     urls = {
-            'login': 'https://www.bondora.com/de/login',
-            'logout': 'https://www.bondora.com/de/authorize/logout',
-            'statement': 'https://www.bondora.com/de/cashflow'
-           }
+        'login': 'https://www.bondora.com/de/login',
+        'logout': 'https://www.bondora.com/de/authorize/logout',
+        'statement': 'https://www.bondora.com/de/cashflow'}
     xpaths = {
-              'search_btn': ('//*[@id="page-content-wrapper"]/div/div/div[1]/'
-                             'form/div[3]/button'),
-              'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/'
-                             'tbody/tr[2]/td[1]/a')
-             }
+        'search_btn': ('//*[@id="page-content-wrapper"]/div/div/div[1]/form/'
+                       'div[3]/button'),
+        'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/tbody/'
+                       'tr[2]/td[1]/a')}
 
     with P2P('Bondora', urls, EC.title_contains('Einloggen')) as bondora:
 
@@ -880,7 +877,7 @@ def open_selenium_bondora(
 
         cashflow_table = driver.find_element_by_id('cashflow-content')
         df = pd.read_html(
-            cashflow_table.get_attribute("innerHTML"),  index_col=0,
+            cashflow_table.get_attribute("innerHTML"), index_col=0,
             thousands='.', decimal=',')
         df[0].to_csv('p2p_downloads/bondora_statement.csv')
 
@@ -904,15 +901,13 @@ def open_selenium_mintos(
 
     """
     urls = {
-            'login': 'https://www.mintos.com/de/',
-            'statement': 'https://www.mintos.com/de/kontoauszug/'
-           }
+        'login': 'https://www.mintos.com/de/',
+        'statement': 'https://www.mintos.com/de/kontoauszug/'}
     xpaths = {
-              'logout_btn': "//a[contains(@href,'logout')]"
-             }
+        'logout_btn': "//a[contains(@href,'logout')]"}
     today = datetime.today()
     default_file_name = '{0}{1}{2}-account-statement'.format(
-        today.year,  today.strftime('%m'), today.strftime('%d'))
+        today.year, today.strftime('%m'), today.strftime('%d'))
 
     with P2P(
             'Mintos', urls, xpaths['logout_btn'],
@@ -929,7 +924,7 @@ def open_selenium_mintos(
         if not mintos.log_into_page(
                 '_username', '_password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
-                login_field='MyAccountButton',  find_login_by=By.NAME):
+                login_field='MyAccountButton', find_login_by=By.NAME):
             return False
 
         if not mintos.open_account_statement_page(
@@ -969,15 +964,13 @@ def open_selenium_robocash(
 
     """
     urls = {
-            'login': 'https://robo.cash/de',
-            'logout': 'https://robo.cash/de/logout',
-            'statement': 'https://robo.cash/de/cabinet/statement'
-           }
+        'login': 'https://robo.cash/de',
+        'logout': 'https://robo.cash/de/logout',
+        'statement': 'https://robo.cash/de/cabinet/statement'}
     xpaths = {
-              'login_check': '/html/body/header/div/div/div[2]/nav/ul/li[3]/a',
-              'login_field': '/html/body/header/div/div/div[3]/a[1]',
-              'start_page_check': '/html/body/header/div/div/div[3]/a[1]'
-             }
+        'login_check': '/html/body/header/div/div/div[2]/nav/ul/li[3]/a',
+        'login_field': '/html/body/header/div/div/div[3]/a[1]',
+        'start_page_check': '/html/body/header/div/div/div[3]/a[1]'}
 
     with P2P('Robocash', urls, EC.title_contains('Willkommen')) as robocash:
 
@@ -1058,14 +1051,12 @@ def open_selenium_swaper(
 
     """
     urls = {
-            'login': 'https://www.swaper.com/#/dashboard',
-            'statement': 'https://www.swaper.com/#/overview/account-statement'
-           }
+        'login': 'https://www.swaper.com/#/dashboard',
+        'statement': 'https://www.swaper.com/#/overview/account-statement'}
     xpaths = {
-              'download_btn': ('//*[@id="account-statement"]/div[3]/div[4]/'
-                               'div/div[1]/a/div[1]/div/span[2]'),
-              'logout_btn': '//*[@id="logout"]/span[1]/span'
-             }
+        'download_btn': ('//*[@id="account-statement"]/div[3]/div[4]/div/'
+                         'div[1]/a/div[1]/div/span[2]'),
+        'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
     with P2P(
             'Swaper', urls, xpaths['logout_btn'], By.XPATH,
@@ -1098,11 +1089,11 @@ def open_selenium_swaper(
                       'current_day_id': ' ',
                       'id_from_calendar': True,
                       'table_id': 'id'}
-        default_dates = [datetime.today().replace(day=1),  datetime.now()]
+        default_dates = [datetime.today().replace(day=1), datetime.now()]
 
         if not swaper.generate_statement_calendar(
                 start_date, end_date, default_dates, arrows, days_table,
-                calendar_id_by,  calendar_id):
+                calendar_id_by, calendar_id):
             return False
 
         success = swaper.download_statement(xpaths['download_btn'], By.XPATH)
@@ -1127,21 +1118,18 @@ def open_selenium_peerberry(
 
     """
     urls = {
-            'login': 'https://peerberry.com/de/login',
-            'statement': 'https://peerberry.com/de/statement'
-           }
+        'login': 'https://peerberry.com/de/login',
+        'statement': 'https://peerberry.com/de/statement'}
     xpaths = {
-              'cookie_policy': ('//*[@id="app"]/div/div/div/div[4]/div/div/'
-                                'div[1]'),
-              'download_btn': ('//*[@id="app"]/div/div/div/div[2]/div/div[2]/'
-                               'div[3]/div[2]/div'),
-              'logout_btn': ('//*[@id="app"]/div/div/div/div[1]/div[1]/div/'
-                             'div/div[2]/div'),
-              'start_balance': ('/html/body/div[1]/div/div/div/div[2]/div/'
-                                'div[2]/div[2]/div/div/div[1]'),
-              'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/'
-                                'div[2]/div[1]/div/div[2]/div/div[2]/div/span')
-             }
+        'cookie_policy': '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]',
+        'download_btn': ('//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/'
+                         'div[2]/div'),
+        'logout_btn': ('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/'
+                       'div[2]/div'),
+        'start_balance': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
+                          'div[2]/div/div/div[1]'),
+        'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
+                          'div[1]/div/div[2]/div/div[2]/div/span')}
 
     with P2P(
             'PeerBerry', urls, xpaths['logout_btn'], By.XPATH,
@@ -1173,19 +1161,19 @@ def open_selenium_peerberry(
             pass
 
         # Create account statement for given date range
-        default_dates = [datetime.now(),  datetime.now()]
+        default_dates = [datetime.now(), datetime.now()]
         arrows = {'arrow_tag': 'th',
                   'left_arrow_class': 'rdtPrev',
                   'right_arrow_class': 'rdtNext'}
         calendar_id_by = 'name'
-        calendar_id = ['startDate',  'endDate']
+        calendar_id = ['startDate', 'endDate']
         days_table = {'class_name': 'rdtDays',
                       'current_day_id': 'rdtDay',
                       'id_from_calendar': False,
                       'table_id': 'class'}
 
         if not peerberry.generate_statement_calendar(
-                start_date, end_date,  default_dates, arrows, days_table,
+                start_date, end_date, default_dates, arrows, days_table,
                 calendar_id_by, calendar_id):
             return True
 
@@ -1218,9 +1206,9 @@ def open_selenium_estateguru(
 
     Args:
         start_date (datetime.date): Start of date range for which account
-            statement must be generated.
+            statement must be generated, is not used for Estateguru.
         end_date (datetime.date): End of date range for which account
-            statement must be generated.
+            statement must be generated, is not used for Estateguru.
         credentials (tuple): (username, password) for Estateguru
 
     Returns:
@@ -1228,17 +1216,15 @@ def open_selenium_estateguru(
 
     """
     urls = {
-            'login': 'https://estateguru.co/portal/login/auth?lang=de',
-            'logout': 'https://estateguru.co/portal/logout/index',
-            'statement': 'https://estateguru.co/portal/portfolio/account'
-           }
+        'login': 'https://estateguru.co/portal/login/auth?lang=de',
+        'logout': 'https://estateguru.co/portal/logout/index',
+        'statement': 'https://estateguru.co/portal/portfolio/account'}
     xpaths = {
-              'account_statement_check': ('/html/body/section/div/div/div/'
-                                          'div[2]/section[1]/div/div/div[2]/'
-                                          'div/form/div[2]/ul/li[5]/a'),
-              'select_btn': ('/html/body/section/div/div/div/div[2]/'
-                             'section[2]/div[1]/div[2]/button')
-             }
+        'account_statement_check': ('/html/body/section/div/div/div/div[2]/'
+                                    'section[1]/div/div/div[2]/div/form/'
+                                    'div[2]/ul/li[5]/a'),
+        'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
+                       'div[1]/div[2]/button')}
     today = datetime.today()
     default_file_name = 'payments_{0}-{1}-{2}*'.format(today.year,
                                                        today.strftime('%m'),
@@ -1289,17 +1275,13 @@ def open_selenium_iuvo(
 
     """
     urls = {
-            'login': 'https://www.iuvo-group.com/de/login/',
-            'statement': 'https://www.iuvo-group.com/de/account-statement/'
-           }
+        'login': 'https://www.iuvo-group.com/de/login/',
+        'statement': 'https://www.iuvo-group.com/de/account-statement/'}
     xpaths = {
-              'start_balance_name': ('/html/body/div[5]/main/div/div/div/'
-                                     'div[4]/div/table/thead/tr[1]/td[1]/'
-                                     'strong'),
-              'start_balance_value': ('/html/body/div[5]/main/div/div/div/'
-                                      'div[4]/div/table/thead/tr[1]/td[2]/'
-                                      'strong')
-             }
+        'start_balance_name': ('/html/body/div[5]/main/div/div/div/div[4]/div/'
+                               'table/thead/tr[1]/td[1]/strong'),
+        'start_balance_value': ('/html/body/div[5]/main/div/div/div/div[4]/'
+                                'div/table/thead/tr[1]/td[2]/strong')}
     with P2P(
             'Iuvo', urls, 'p2p_logout', By.ID,
             EC.title_contains('Investieren Sie in Kredite'),
@@ -1392,13 +1374,11 @@ def open_selenium_grupeer(
 
     """
     urls = {
-            'login': 'https://www.grupeer.com/de/login',
-            'statement': 'https://www.grupeer.com/de/account-statement'
-           }
+        'login': 'https://www.grupeer.com/de/login',
+        'statement': 'https://www.grupeer.com/de/account-statement'}
     xpaths = {
-              'logout_btn': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
-                             'div/div/ul/li/a/span')
-             }
+        'logout_btn': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
+                       'div/div/ul/li/a/span')}
     with P2P(
             'Grupeer', urls, 'Ausloggen', By.LINK_TEXT,
             EC.title_contains('P2P Investitionsplattform Grupeer'),
@@ -1454,10 +1434,9 @@ def open_selenium_dofinance(
 
     """
     urls = {
-            'login': 'https://www.dofinance.eu/de/users/login',
-            'logout': 'https://www.dofinance.eu/de/users/logout',
-            'statement': 'https://www.dofinance.eu/de/users/statement'
-           }
+        'login': 'https://www.dofinance.eu/de/users/login',
+        'logout': 'https://www.dofinance.eu/de/users/logout',
+        'statement': 'https://www.dofinance.eu/de/users/statement'}
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(
         start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
     with P2P(
@@ -1509,20 +1488,17 @@ def open_selenium_twino(
 
     """
     urls = {
-            'login': 'https://www.twino.eu/de/',
-            'statement': ('https://www.twino.eu/de/profile/investor/'
-                          'my-investments/account-transactions')
-           }
+        'login': 'https://www.twino.eu/de/',
+        'statement': ('https://www.twino.eu/de/profile/investor/'
+                      'my-investments/account-transactions')}
     xpaths = {
-              'end_date': '//*[@date-picker="filterData.processingDateTo"]',
-              'login_btn': ('/html/body/div[1]/div[2]/div[1]/header[1]/div/'
-                            'nav/div/div[1]/button'),
-              'logout_btn': '//a[@href="/logout"]',
-              'start_date': ('//*[@date-picker='
-                             '"filterData.processingDateFrom"]'),
-              'statement': ('//a[@href="/de/profile/investor/my-investments/'
-                            'individual-investments"]')
-             }
+        'end_date': '//*[@date-picker="filterData.processingDateTo"]',
+        'login_btn': ('/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/div/'
+                      'div[1]/button'),
+        'logout_btn': '//a[@href="/logout"]',
+        'start_date': '//*[@date-picker="filterData.processingDateFrom"]',
+        'statement': ('//a[@href="/de/profile/investor/my-investments/'
+                      'individual-investments"]')}
 
     with P2P(
             'Twino', urls, xpaths['logout_btn'], By.XPATH,
