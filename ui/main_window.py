@@ -306,7 +306,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.progress_window.result() == 0:
             worker.abort = True
 
-    def setup_worker_thread(self):
+    def setup_worker_thread(self) -> 'WorkerThread':
+        """
+        Setup the worker thread and its attributes.
+
+        Returns:
+            WorkerThread: handle of the worker thread
+
+        """
         worker = WorkerThread()
         worker.platforms = self.platforms
         worker.credentials = self.credentials
