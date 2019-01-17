@@ -65,6 +65,7 @@ def get_credentials(platform: str) -> tuple:
     """
     _done = False
     _ask_for_credentials = False
+    _save_in_keyring = False
 
     while not _done:
 
@@ -93,8 +94,10 @@ def get_credentials(platform: str) -> tuple:
                     'füllen Sie die Felder für Benutzername und Passwort aus!')
             else:
                 _done = True
+                _save_in_keyring = (credentials_window.
+                    checkBox_save_in_keyring.isChecked())
 
-    if credentials_window.checkBox_save_in_keyring.isChecked():
+    if _save_in_keyring:
         if not save_credentials(platform, username, password):
             QMessageBox.warning(
                 credentials_window, 'Speichern im Keyring fehlgeschlagen!',
