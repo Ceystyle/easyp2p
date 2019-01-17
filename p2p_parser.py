@@ -20,17 +20,17 @@ Parser = Union[
                 'mintos', 'peerberry', 'robocash', 'swaper', 'twino'
               ]
 
-interest_payment = 'Zinszahlungen'
-buyback_interest_payment = 'Zinszahlungen aus Rückkäufen'
-buyback_payment = 'Rückkäufe'
-investment_payment = 'Investitionen'
-redemption_payment = 'Tilgungszahlungen'
-late_fee_payment = 'Verzugsgebühren'
-incoming_payment = 'Einzahlungen'
-outgoing_payment = 'Auszahlungen'
-default_payment = 'Ausfälle'
-start_balance_name = 'Startguthaben'
-end_balance_name = 'Endsaldo'
+INTEREST_PAYMENT = 'Zinszahlungen'
+BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
+BUYBACK_PAYMENT = 'Rückkäufe'
+INVESTMENT_PAYMENT = 'Investitionen'
+REDEMPTION_PAYMENT = 'Tilgungszahlungen'
+LATE_FEE_PAYMENT = 'Verzugsgebühren'
+INCOMING_PAYMENT = 'Einzahlungen'
+OUTGOING_PAYMENT = 'Auszahlungen'
+DEFAULT_PAYMENT = 'Ausfälle'
+START_BALANCE_NAME = 'Startguthaben'
+END_BALANCE_NAME = 'Endsaldo'
 
 
 def check_missing_cf_types(df, orig_cf_type_name):
@@ -68,10 +68,10 @@ def bondora():
     df.rename_axis('Datum', inplace=True)
     df.rename(
         columns={
-            'Eingesetztes Kapital (netto)': incoming_payment,
-            'Erhaltene Zinsen - gesamt': interest_payment,
-            'Erhaltener Kapitalbetrag - gesamt': redemption_payment,
-            'Investitionen (netto)': investment_payment,
+            'Eingesetztes Kapital (netto)': INCOMING_PAYMENT,
+            'Erhaltene Zinsen - gesamt': INTEREST_PAYMENT,
+            'Erhaltener Kapitalbetrag - gesamt': REDEMPTION_PAYMENT,
+            'Investitionen (netto)': INVESTMENT_PAYMENT,
         },
         inplace=True
     )
@@ -90,7 +90,7 @@ def bondora():
 
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Bondora'
-    df[default_payment] = (df['Tilgungszahlungen']
+    df[DEFAULT_PAYMENT] = (df['Tilgungszahlungen']
                            - df['Geplante Tilgungszahlungen'])
 
     df.reset_index(level=0, inplace=True)
@@ -121,17 +121,17 @@ def mintos():
         return None
 
     mintos_dict = dict()
-    mintos_dict['Interest income'] = interest_payment
-    mintos_dict['Interest income on rebuy'] = buyback_interest_payment
-    mintos_dict['Delayed interest income on rebuy'] = buyback_interest_payment
-    mintos_dict['Investment principal rebuy'] = buyback_payment
-    mintos_dict['Investment principal increase'] = investment_payment
-    mintos_dict['Investment principal repayment'] = redemption_payment
-    mintos_dict['Late payment fee income'] = late_fee_payment
-    mintos_dict['Incoming client payment'] = incoming_payment
+    mintos_dict['Interest income'] = INTEREST_PAYMENT
+    mintos_dict['Interest income on rebuy'] = BUYBACK_INTEREST_PAYMENT
+    mintos_dict['Delayed interest income on rebuy'] = BUYBACK_INTEREST_PAYMENT
+    mintos_dict['Investment principal rebuy'] = BUYBACK_PAYMENT
+    mintos_dict['Investment principal increase'] = INVESTMENT_PAYMENT
+    mintos_dict['Investment principal repayment'] = REDEMPTION_PAYMENT
+    mintos_dict['Late payment fee income'] = LATE_FEE_PAYMENT
+    mintos_dict['Incoming client payment'] = INCOMING_PAYMENT
     # Treat bonus/cashback payments as normal interest payments
-    mintos_dict['Cashback bonus'] = interest_payment
-    mintos_dict['Reversed incoming client payment'] = outgoing_payment
+    mintos_dict['Cashback bonus'] = INTEREST_PAYMENT
+    mintos_dict['Reversed incoming client payment'] = OUTGOING_PAYMENT
 
     df.rename(columns={'Date': 'Datum',  'Currency': 'Währung'},  inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'])
@@ -151,7 +151,7 @@ def mintos():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     # TODO: get start and end balance
     # TODO: find better way for handing over missing_cf_types to worker thread
@@ -175,11 +175,11 @@ def robocash():
         return None
 
     robocash_dict = dict()
-    robocash_dict['Zinsenzahlung'] = interest_payment
-    robocash_dict['Darlehenskauf'] = investment_payment
-    robocash_dict['Kreditrückzahlung'] = redemption_payment
-    robocash_dict['Die Geldauszahlung'] = outgoing_payment
-    robocash_dict['Geldeinzahlung'] = incoming_payment
+    robocash_dict['Zinsenzahlung'] = INTEREST_PAYMENT
+    robocash_dict['Darlehenskauf'] = INVESTMENT_PAYMENT
+    robocash_dict['Kreditrückzahlung'] = REDEMPTION_PAYMENT
+    robocash_dict['Die Geldauszahlung'] = OUTGOING_PAYMENT
+    robocash_dict['Geldeinzahlung'] = INCOMING_PAYMENT
 
     df = df[df.Operation != 'Die Geldauszahlung aus dem Portfolio']
     df = df[df.Operation != 'Portfolio auffüllen']
@@ -198,7 +198,7 @@ def robocash():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     return [df_result, missing_cf_types]
 
@@ -219,12 +219,12 @@ def swaper():
         return None
 
     swaper_dict = dict()
-    swaper_dict['REPAYMENT_INTEREST'] = interest_payment
-    swaper_dict['EXTENSION_INTEREST'] = interest_payment
-    swaper_dict['INVESTMENT'] = investment_payment
-    swaper_dict['REPAYMENT_PRINCIPAL'] = redemption_payment
-    swaper_dict['BUYBACK_INTEREST'] = buyback_interest_payment
-    swaper_dict['BUYBACK_PRINCIPAL'] = buyback_payment
+    swaper_dict['REPAYMENT_INTEREST'] = INTEREST_PAYMENT
+    swaper_dict['EXTENSION_INTEREST'] = INTEREST_PAYMENT
+    swaper_dict['INVESTMENT'] = INVESTMENT_PAYMENT
+    swaper_dict['REPAYMENT_PRINCIPAL'] = REDEMPTION_PAYMENT
+    swaper_dict['BUYBACK_INTEREST'] = BUYBACK_INTEREST_PAYMENT
+    swaper_dict['BUYBACK_PRINCIPAL'] = BUYBACK_PAYMENT
 
     df.rename(columns={'Booking date': 'Datum'},  inplace=True)
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
@@ -240,7 +240,7 @@ def swaper():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     return [df_result, missing_cf_types]
 
@@ -261,9 +261,9 @@ def peerberry():
         return None
 
     peerberry_dict = dict()
-    peerberry_dict['Amount of interest payment received'] = interest_payment
-    peerberry_dict['Investment'] = 'Investitionen'
-    peerberry_dict['Amount of principal payment received'] = redemption_payment
+    peerberry_dict['Amount of interest payment received'] = INTEREST_PAYMENT
+    peerberry_dict['Investment'] = INVESTMENT_PAYMENT
+    peerberry_dict['Amount of principal payment received'] = REDEMPTION_PAYMENT
 
     df.rename(
         columns={'Date': 'Datum', 'Currency Id': 'Währung'}, inplace=True)
@@ -280,7 +280,7 @@ def peerberry():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     return [df_result, missing_cf_types]
 
@@ -301,22 +301,21 @@ def estateguru():
         return None
 
     estateguru_dict = dict()
-    estateguru_dict['Zins'] = interest_payment
+    estateguru_dict['Zins'] = INTEREST_PAYMENT
     # Treat bonus payments as normal interest payments
-    estateguru_dict['Bonus'] = interest_payment
-    estateguru_dict['Investition(Auto Investieren)'] = investment_payment
-    estateguru_dict['Hauptbetrag'] = redemption_payment
-    estateguru_dict['Einzahlung(Banktransfer)'] = incoming_payment
-    estateguru_dict['Entschädigung'] = late_fee_payment
+    estateguru_dict['Bonus'] = INTEREST_PAYMENT
+    estateguru_dict['Investition(Auto Investieren)'] = INVESTMENT_PAYMENT
+    estateguru_dict['Hauptbetrag'] = REDEMPTION_PAYMENT
+    estateguru_dict['Einzahlung(Banktransfer)'] = INCOMING_PAYMENT
+    estateguru_dict['Entschädigung'] = LATE_FEE_PAYMENT
 
     df = df[:-1]  # Drop last line which only contains a summary
     df.rename(
         columns={
             'Zahlungsdatum': 'Datum',
             'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
-        },
-        inplace=True
-    )
+        }, inplace=True)
+
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%d/%m/%Y %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Estateguru_Cashflow-Typ'].map(estateguru_dict)
@@ -332,7 +331,7 @@ def estateguru():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     return [df_result, missing_cf_types]
 
@@ -352,32 +351,32 @@ def iuvo():
     if df is None:
         return None
 
-    df[interest_payment] = 0
-    df[redemption_payment] = 0
+    df[INTEREST_PAYMENT] = 0
+    df[REDEMPTION_PAYMENT] = 0
     # Date column will raise an error which can be ignored:
     df = df.astype('float64', errors='ignore')
 
     interest_types = ['Zins erhalten', 'Vorzeitige Zinstilgung']
     for it in interest_types:
         if it in df.columns:
-            df[interest_payment] += df[it]
+            df[INTEREST_PAYMENT] += df[it]
             del df[it]
 
     redemption_types = [
         'Vorzeitige Kreditbetragtilgung', 'Kreditbetrag erhalten']
     for rt in redemption_types:
         if rt in df.columns:
-            df[redemption_payment] += df[rt]
+            df[REDEMPTION_PAYMENT] += df[rt]
             del df[rt]
 
     df.rename(
         columns={
-            'Anfangsbestand': start_balance_name,
+            'Anfangsbestand': START_BALANCE_NAME,
             'Automatische Kapitalanlage auf dem Primärmarkt':
-                investment_payment,
-            'Endbestand': end_balance_name,
-            'Kreditbetrag bei Rückkauf erhalten': buyback_payment,
-            'Verzugsstrafen erhalten': late_fee_payment
+                INVESTMENT_PAYMENT,
+            'Endbestand': END_BALANCE_NAME,
+            'Kreditbetrag bei Rückkauf erhalten': BUYBACK_PAYMENT,
+            'Verzugsstrafen erhalten': LATE_FEE_PAYMENT
         }, inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
@@ -408,14 +407,14 @@ def grupeer():
         return None
 
     grupeer_dict = dict()
-    grupeer_dict['Interest'] = interest_payment
-    grupeer_dict['Investment'] = investment_payment
-    grupeer_dict['Deposit'] = incoming_payment
+    grupeer_dict['Interest'] = INTEREST_PAYMENT
+    grupeer_dict['Investment'] = INVESTMENT_PAYMENT
+    grupeer_dict['Deposit'] = INCOMING_PAYMENT
     # Treat cashback as interest payment:
-    grupeer_dict['Cashback'] = interest_payment
-    grupeer_dict['Principal'] = redemption_payment
+    grupeer_dict['Cashback'] = INTEREST_PAYMENT
+    grupeer_dict['Principal'] = REDEMPTION_PAYMENT
 
-    df.rename(columns={'Date': 'Datum'},  inplace=True)
+    df.rename(columns={'Date': 'Datum'}, inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format="%d.%m.%Y")
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Type'].map(grupeer_dict)
@@ -432,7 +431,7 @@ def grupeer():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     return [df_result, missing_cf_types]
 
@@ -453,15 +452,15 @@ def dofinance():
         return None
 
     dofinance_dict = dict()
-    dofinance_dict['Verdienter Gewinn'] = interest_payment
-    dofinance_dict['Auszahlung auf Bankkonto'] = outgoing_payment
+    dofinance_dict['Verdienter Gewinn'] = INTEREST_PAYMENT
+    dofinance_dict['Auszahlung auf Bankkonto'] = OUTGOING_PAYMENT
     dofinance_dict[
         'Abgeschlossene Investition\nRate: 12% Typ: automatisch'] = \
-        redemption_payment
-    dofinance_dict['Anlage\nRate: 12% Typ: automatisch'] = investment_payment
+        REDEMPTION_PAYMENT
+    dofinance_dict['Anlage\nRate: 12% Typ: automatisch'] = INVESTMENT_PAYMENT
 
     df = df[:-2]  # drop the last two rows
-    df.rename(columns={'Bearbeitungsdatum': 'Datum'},  inplace=True)
+    df.rename(columns={'Bearbeitungsdatum': 'Datum'}, inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Art der Transaktion'].map(dofinance_dict)
@@ -476,7 +475,7 @@ def dofinance():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     return [df_result, missing_cf_types]
 
@@ -497,15 +496,15 @@ def twino():
         return None
 
     twino_dict = dict()
-    twino_dict['EXTENSION INTEREST'] = 'Zinszahlungen'
-    twino_dict['REPAYMENT INTEREST'] = 'Zinszahlungen'
-    twino_dict['SCHEDULE INTEREST'] = 'Zinszahlungen'
-    twino_dict['BUYBACK INTEREST'] = 'Zinszahlungen aus Rückkäufen'
-    twino_dict['REPURCHASE INTEREST'] = 'Zinszahlungen aus Rückkäufen'
-    twino_dict['BUYBACK PRINCIPAL'] = 'Rückkäufe'
-    twino_dict['REPURCHASE PRINCIPAL'] = 'Rückkäufe'
-    twino_dict['REPAYMENT PRINCIPAL'] = 'Tilgungszahlungen'
-    twino_dict['BUY_SHARES PRINCIPAL'] = 'Investitionen'
+    twino_dict['EXTENSION INTEREST'] = INTEREST_PAYMENT
+    twino_dict['REPAYMENT INTEREST'] = INTEREST_PAYMENT
+    twino_dict['SCHEDULE INTEREST'] = INTEREST_PAYMENT
+    twino_dict['BUYBACK INTEREST'] = BUYBACK_INTEREST_PAYMENT
+    twino_dict['REPURCHASE INTEREST'] = BUYBACK_INTEREST_PAYMENT
+    twino_dict['BUYBACK PRINCIPAL'] = BUYBACK_PAYMENT
+    twino_dict['REPURCHASE PRINCIPAL'] = BUYBACK_PAYMENT
+    twino_dict['REPAYMENT PRINCIPAL'] = REDEMPTION_PAYMENT
+    twino_dict['BUY_SHARES PRINCIPAL'] = INVESTMENT_PAYMENT
 
     df = df[1:]  # drop first two rows
     df.columns = df.iloc[0]  # the first row now contains header names
@@ -526,6 +525,6 @@ def twino():
         columns=['Cashflow-Typ'],
         aggfunc=sum
     )
-    df_result.fillna(0,  inplace=True)
+    df_result.fillna(0, inplace=True)
 
     return [df_result, missing_cf_types]
