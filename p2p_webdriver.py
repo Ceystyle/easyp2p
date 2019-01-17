@@ -13,7 +13,6 @@ webdriver. easyP2P uses Chromedriver as webdriver.
 """
 
 import calendar
-import credentials
 from datetime import datetime,  date,  timedelta
 import glob
 import os
@@ -186,7 +185,7 @@ class P2P:
         return True
 
     def log_into_page(
-            self, name_field: str, password_field: str,
+            self, name_field: str, password_field: str, credentials: tuple,
             wait_until: ExpectedCondition, login_field: str = None,
             find_login_by: str = By.XPATH, fill_delay: float = 0) -> bool:
         """
@@ -206,6 +205,7 @@ class P2P:
                 has to be entered.
             password_field (str): name of web element where the password
                 has to be entered.
+            credentials (tuple): login information: (username, password)
             wait_until (ExpectedCondition): Expected condition in case of
                 success.
 
@@ -225,8 +225,6 @@ class P2P:
                           - if loading the page takes too long
 
         """
-        credentials = get_credentials_from_file(self.name)
-
         try:
             if login_field is not None:
                 self.driver.find_element(find_login_by, login_field).click()
@@ -744,30 +742,6 @@ def get_calendar_clicks(
 
     return clicks
 
-def get_credentials_from_file(platform: str) -> tuple:
-    """
-    Get username and password from credentials.py.
-
-    Args:
-        platform (str): name of the P2P platform
-
-    Returns:
-        tuple: tuple with two elements: (username, password)
-
-    Throws:
-        RuntimeError: if username/password cannot be found in credentials.py
-
-    """
-    try:
-        username = getattr(credentials, platform)['username']
-        password = getattr(credentials, platform)['password']
-    except AttributeError:
-        raise RuntimeError(
-            'Username/Passwort für {0} sind nicht vorhanden. Bitte '
-            'manuell zu credentials.py hinzufügen'.format(platform))
-
-    return (username, password)
-
 def get_list_of_months(
         start_date: datetime.date, end_date: datetime.date) -> list:
     """
@@ -826,7 +800,8 @@ def nbr_to_short_month(nbr: str) -> str:
     return nbr_to_short_month[nbr]
 
 def open_selenium_bondora(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials: tuple) -> bool:
     """
     Generate and download the Bondora account statement for given date range.
 
@@ -835,6 +810,7 @@ def open_selenium_bondora(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for Bondora
 
     Returns:
         bool: True on success, False on failure
@@ -861,7 +837,7 @@ def open_selenium_bondora(
             return False
 
         if not bondora.log_into_page(
-                'Email', 'Password',
+                'Email', 'Password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow'))):
             return False
 
@@ -911,7 +887,8 @@ def open_selenium_bondora(
     return True
 
 def open_selenium_mintos(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the Mintos account statement for given date range.
 
@@ -920,6 +897,7 @@ def open_selenium_mintos(
             account statement must be generated.
         end_date (datetime.date): End of date range for which
             account statement must be generated.
+        credentials (tuple): (username, password) for Mintos
 
     Returns:
         bool: True on success, False on failure.
@@ -949,9 +927,8 @@ def open_selenium_mintos(
             return False
 
         if not mintos.log_into_page(
-                name_field='_username', password_field='_password',
-                wait_until=EC.element_to_be_clickable(
-                    (By.LINK_TEXT, 'Kontoauszug')),
+                '_username', '_password', credentials,
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
                 login_field='MyAccountButton',  find_login_by=By.NAME):
             return False
 
@@ -971,7 +948,8 @@ def open_selenium_mintos(
     return success
 
 def open_selenium_robocash(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the Robocash account statement for given date range.
 
@@ -980,6 +958,7 @@ def open_selenium_robocash(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for Robocash
 
     Returns:
         bool: True on success, False on failure
@@ -1009,7 +988,7 @@ def open_selenium_robocash(
             return False
 
         if not robocash.log_into_page(
-                'email', 'password',
+                'email', 'password', credentials,
                 EC.element_to_be_clickable((By.XPATH, xpaths['login_check'])),
                 login_field=xpaths['login_field']):
             return False
@@ -1062,7 +1041,8 @@ def open_selenium_robocash(
     return True
 
 def open_selenium_swaper(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the Swaper account statement for given date range.
 
@@ -1071,6 +1051,7 @@ def open_selenium_swaper(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for Swaper
 
     Returns:
         bool: True on success, False on failure
@@ -1099,7 +1080,7 @@ def open_selenium_swaper(
             return False
 
         if not swaper.log_into_page(
-                'email', 'password',
+                'email', 'password', credentials,
                 EC.presence_of_element_located((By.ID, 'open-investments')),
                 fill_delay=0.5):
             return False
@@ -1129,7 +1110,8 @@ def open_selenium_swaper(
     return success
 
 def open_selenium_peerberry(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the PeerBerry account statement for given date range.
 
@@ -1138,6 +1120,7 @@ def open_selenium_peerberry(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for PeerBerry
 
     Returns:
         bool: True on success, False on failure
@@ -1174,7 +1157,7 @@ def open_selenium_peerberry(
             return False
 
         if not peerberry.log_into_page(
-                'email', 'password',
+                'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))):
             return False
 
@@ -1228,7 +1211,8 @@ def open_selenium_peerberry(
     return success
 
 def open_selenium_estateguru(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download Estateguru account statement for given date range.
 
@@ -1237,6 +1221,7 @@ def open_selenium_estateguru(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for Estateguru
 
     Returns:
         bool: True on success, False on failure
@@ -1269,7 +1254,7 @@ def open_selenium_estateguru(
             return False
 
         if not estateguru.log_into_page(
-                'username', 'password',
+                'username', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND'))):
             return -1
 
@@ -1287,7 +1272,8 @@ def open_selenium_estateguru(
     return True
 
 def open_selenium_iuvo(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the Iuvo account statement for given date range.
 
@@ -1296,6 +1282,7 @@ def open_selenium_iuvo(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for Iuvo
 
     Returns:
         bool: True on success, False on failure
@@ -1325,7 +1312,7 @@ def open_selenium_iuvo(
             return False
 
         if not iuvo.log_into_page(
-                'login', 'password',
+                'login', 'password', credentials,
                 EC.element_to_be_clickable(
                     (By.ID, 'p2p_btn_deposit_page_add_funds'))):
             return False
@@ -1389,7 +1376,8 @@ def open_selenium_iuvo(
     return True
 
 def open_selenium_grupeer(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the Grupeer account statement for given date range.
 
@@ -1426,7 +1414,7 @@ def open_selenium_grupeer(
             return False
 
         if not grupeer.log_into_page(
-                'email', 'password',
+                'email', 'password', credentials,
                 EC.element_to_be_clickable(
                     (By.LINK_TEXT, 'Meine Investments'))):
             return False
@@ -1449,7 +1437,8 @@ def open_selenium_grupeer(
     return success
 
 def open_selenium_dofinance(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the Dofinance account statement for given date range.
 
@@ -1458,6 +1447,7 @@ def open_selenium_dofinance(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for DoFinance
 
     Returns:
         bool: True on success, False on failure
@@ -1484,7 +1474,7 @@ def open_selenium_dofinance(
             return False
 
         if not dofinance.log_into_page(
-                'email', 'password',
+                'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN'))):
             return False
 
@@ -1502,7 +1492,8 @@ def open_selenium_dofinance(
     return success
 
 def open_selenium_twino(
-        start_date: datetime.date, end_date: datetime.date) -> bool:
+        start_date: datetime.date, end_date: datetime.date,
+        credentials) -> bool:
     """
     Generate and download the Twino account statement for given date range.
 
@@ -1511,6 +1502,7 @@ def open_selenium_twino(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
+        credentials (tuple): (username, password) for Twino
 
     Returns:
         bool: True on success, False on failure
@@ -1547,7 +1539,7 @@ def open_selenium_twino(
             return False
 
         if not twino.log_into_page(
-                'email', 'login-password',
+                'email', 'login-password', credentials,
                 EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
                 login_field=xpaths['login_btn'], find_login_by=By.XPATH):
             return False

@@ -12,6 +12,7 @@ import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
+from ui.credentials_window import get_credentials
 from ui.progress_window import ProgressWindow
 from xlrd.biffh import XLRDError
 
@@ -36,6 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressWindow = None
         self.worker = None
         self.platforms = set([])
+        self.credentials = dict()
         if date.today().month > 1:
             self.start_month = date.today().month - 1
             self.start_year = date.today().year
@@ -286,8 +288,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not os.path.isdir(dl_location):
             os.makedirs(dl_location)
 
+        # Get credentials from user/keyring for all selected platforms
+        for platform in self.platforms:
+            self.credentials[platform] = get_credentials(platform)
+
+        # Set up worker thread
         self.worker = WorkerThread()
         self.worker.platforms = self.platforms
+        self.worker.credentials = self.credentials
         self.worker.start_date = self.start_date
         self.worker.end_date = self.end_date
         self.worker.output_file = self.output_file
@@ -300,6 +308,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressWindow = ProgressWindow()
         self.progressWindow.exec_()
 
+        # Abort the worker thread if user clicked the cancel button
         if self.progressWindow.result() == 0:
             self.worker.abort = True
 
@@ -510,10 +519,16 @@ class WorkerThread(QThread):
 
         """
         success = False
+        if self.credentials[platform] is None:
+            self.updateProgressText.emit(
+                'Keine Zugangsdaten für {0} vorhanden!'.format(platform))
+            return False
+
         self.updateProgressText.emit(
             'Start der Auswertung von {0}...'.format(platform))
         try:
-            success = func(self.start_date,  self.end_date)
+            success = func(
+                self.start_date,  self.end_date, self.credentials[platform])
         except RuntimeError as e:
             self.ignore_platform(platform, str(e))
             return False
