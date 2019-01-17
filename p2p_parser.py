@@ -12,13 +12,13 @@ p2p_parser contains methods for parsing the output files of P2P platforms.
 """
 
 import locale
-import pandas as pd
 from typing import Union
 
+import pandas as pd
+
 Parser = Union[
-                'bondora', 'dofinance', 'estateguru', 'grupeer', 'iuvo',
-                'mintos', 'peerberry', 'robocash', 'swaper', 'twino'
-              ]
+    'bondora', 'dofinance', 'estateguru', 'grupeer', 'iuvo', 'mintos',
+    'peerberry', 'robocash', 'swaper', 'twino']
 
 INTEREST_PAYMENT = 'Zinszahlungen'
 BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
@@ -64,7 +64,7 @@ def bondora():
     df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
 
     df.drop(['Gesamt:'], inplace=True)
-    df.replace({'\.': '',  ',': '.',  '€': ''},  inplace=True,  regex=True)
+    df.replace({'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
     df.rename_axis('Datum', inplace=True)
     df.rename(
         columns={
@@ -133,7 +133,7 @@ def mintos():
     mintos_dict['Cashback bonus'] = INTEREST_PAYMENT
     mintos_dict['Reversed incoming client payment'] = OUTGOING_PAYMENT
 
-    df.rename(columns={'Date': 'Datum',  'Currency': 'Währung'},  inplace=True)
+    df.rename(columns={'Date': 'Datum', 'Currency': 'Währung'}, inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'])
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Mintos_Cashflow-Typ'], df['Loan ID'] = df['Details'].str.split(
@@ -183,8 +183,8 @@ def robocash():
 
     df = df[df.Operation != 'Die Geldauszahlung aus dem Portfolio']
     df = df[df.Operation != 'Portfolio auffüllen']
-    df.rename(columns={'Datum und Laufzeit': 'Datum'},  inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%Y-%m-%d %H:%M:%S')
+    df.rename(columns={'Datum und Laufzeit': 'Datum'}, inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%Y-%m-%d %H:%M:%S')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Operation'].map(robocash_dict)
     df['Währung'] = 'EUR'
@@ -226,7 +226,7 @@ def swaper():
     swaper_dict['BUYBACK_INTEREST'] = BUYBACK_INTEREST_PAYMENT
     swaper_dict['BUYBACK_PRINCIPAL'] = BUYBACK_PAYMENT
 
-    df.rename(columns={'Booking date': 'Datum'},  inplace=True)
+    df.rename(columns={'Booking date': 'Datum'}, inplace=True)
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
     df['Währung'] = 'EUR'
@@ -267,7 +267,7 @@ def peerberry():
 
     df.rename(
         columns={'Date': 'Datum', 'Currency Id': 'Währung'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%Y-%m-%d')
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%Y-%m-%d')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Type'].map(peerberry_dict)
     df['Plattform'] = 'Peerberry'
@@ -316,7 +316,7 @@ def estateguru():
             'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
         }, inplace=True)
 
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d/%m/%Y %H:%M')
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%d/%m/%Y %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Estateguru_Cashflow-Typ'].map(estateguru_dict)
     df['Plattform'] = 'Estateguru'
@@ -415,7 +415,7 @@ def grupeer():
     grupeer_dict['Principal'] = REDEMPTION_PAYMENT
 
     df.rename(columns={'Date': 'Datum'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'],  format="%d.%m.%Y")
+    df['Datum'] = pd.to_datetime(df['Datum'], format="%d.%m.%Y")
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Type'].map(grupeer_dict)
     df['Plattform'] = 'Grupeer'
@@ -461,7 +461,7 @@ def dofinance():
 
     df = df[:-2]  # drop the last two rows
     df.rename(columns={'Bearbeitungsdatum': 'Datum'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y')
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Cashflow-Typ'] = df['Art der Transaktion'].map(dofinance_dict)
     df['Plattform'] = 'DoFinance'
@@ -509,8 +509,8 @@ def twino():
     df = df[1:]  # drop first two rows
     df.columns = df.iloc[0]  # the first row now contains header names
     df = df[1:]
-    df.rename(columns={'Booking Date': 'Datum'},  inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'],  format='%d.%m.%Y %H:%M')
+    df.rename(columns={'Booking Date': 'Datum'}, inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Twino_Cashflow-Typ'] = df['Type'] + ' ' + df['Description']
     df['Cashflow-Typ'] = df['Twino_Cashflow-Typ'].map(twino_dict)
