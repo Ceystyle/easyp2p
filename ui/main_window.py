@@ -10,6 +10,7 @@ import p2p_parser
 import p2p_results
 import p2p_webdriver as wd
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
 from ui.credentials_window import get_credentials
@@ -329,14 +330,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.progressWindow.progressBar.setValue(value)
 
-    def updateProgressText(self, txt):
+    def updateProgressText(self, txt, color):
         """
         Append a new line to the progress text in ProgressWindow.
 
         Args:
             txt (str): string to add to progress text
+            color (QColor): color in which the message should be displayed
 
         """
+        self.progressWindow.progressText.setTextColor(color)
         self.progressWindow.progressText.append(txt)
 
     @pyqtSlot(str)
@@ -394,7 +397,11 @@ class WorkerThread(QThread):
 
     # Signals for communicating with the MainWindow
     updateProgressBar = pyqtSignal(float)
-    updateProgressText = pyqtSignal(str)
+    updateProgressText = pyqtSignal(str, QColor)
+
+    # Colors for text output
+    BLACK = QColor(0, 0, 0)
+    RED = QColor(100, 0, 0)
 
     def __init__(self, parent=None) -> None:
         """
@@ -425,7 +432,7 @@ class WorkerThread(QThread):
             error_message = (
                 'Funktion zum Öffnen von {0} konnte nicht gefunden werden. '
                 'Ist p2p_webdriver.py vorhanden?'.format(platform))
-            self.updateProgressText.emit(error_message)
+            self.updateProgressText.emit(error_message, self.RED)
             return None
         else:
             return func
@@ -448,7 +455,7 @@ class WorkerThread(QThread):
             error_message = (
                 'Parser für {0} konnte nicht gefunden werden. '
                 'Ist p2p_parser.py vorhanden?'.format(platform))
-            self.updateProgressText.emit(error_message)
+            self.updateProgressText.emit(error_message, self.RED)
             return None
         else:
             return parser
@@ -462,9 +469,9 @@ class WorkerThread(QThread):
             error_msg (str): error message
 
         """
-        self.updateProgressText.emit(error_msg)
-        msg = '{0} wird ignoriert!'.format(platform)
-        self.updateProgressText.emit(msg)
+        self.updateProgressText.emit(error_msg, self.RED)
+        self.updateProgressText.emit(
+            '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_result(
             self, platform: str, parser: p2p_parser.Parser,
@@ -502,7 +509,7 @@ class WorkerThread(QThread):
                 warning_msg = ('{0}: unbekannter Cashflow-Typ wird im '
                                'Ergebnis ignoriert: {1}'
                                ''.format(platform, parser()[1]))
-                self.updateProgressText.emit(warning_msg)
+                self.updateProgressText.emit(warning_msg, self.RED)
 
         return list_of_dfs
 
@@ -521,11 +528,12 @@ class WorkerThread(QThread):
         success = False
         if self.credentials[platform] is None:
             self.updateProgressText.emit(
-                'Keine Zugangsdaten für {0} vorhanden!'.format(platform))
+                'Keine Zugangsdaten für {0} vorhanden!'.format(platform),
+                self.RED)
             return False
 
         self.updateProgressText.emit(
-            'Start der Auswertung von {0}...'.format(platform))
+            'Start der Auswertung von {0}...'.format(platform), self.BLACK)
         try:
             success = func(
                 self.start_date,  self.end_date, self.credentials[platform])
@@ -533,7 +541,7 @@ class WorkerThread(QThread):
             self.ignore_platform(platform, str(e))
             return False
         except RuntimeWarning as w:
-            self.updateProgressText.emit(str(w))
+            self.updateProgressText.emit(str(w), self.RED)
             # Continue anyway
 
         return success
@@ -570,7 +578,7 @@ class WorkerThread(QThread):
                 progress += step
                 self.updateProgressBar.emit(progress)
                 self.updateProgressText.emit(
-                    '{0} erfolgreich ausgewertet!'.format(platform))
+                    '{0} erfolgreich ausgewertet!'.format(platform), self.BLACK)
 
                 parser = self.get_p2p_parser(platform)
                 if parser is None:
@@ -586,6 +594,6 @@ class WorkerThread(QThread):
         if not p2p_results.show_results(
                 df_result, self.start_date, self.end_date, self.output_file):
             error_msg = ('Keine Ergebnisse vorhanden')
-            self.updateProgressText.emit(error_msg)
+            self.updateProgressText.emit(error_msg, self.RED)
 
         self.updateProgressBar.emit(100)
