@@ -333,7 +333,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self, 'Fehler!', error_message)
             return
 
-        self.progressWindow.progressBar.setValue(value)
+        self.progress_window.progressBar.setValue(value)
 
     def updateProgressText(self, txt, color):
         """
@@ -344,8 +344,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             color (QColor): color in which the message should be displayed
 
         """
-        self.progressWindow.progressText.setTextColor(color)
-        self.progressWindow.progressText.append(txt)
+        self.progress_window.progressText.setTextColor(color)
+        self.progress_window.progressText.append(txt)
 
     @pyqtSlot(str)
     def on_lineEdit_output_file_textChanged(self, p0):
