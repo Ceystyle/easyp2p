@@ -294,17 +294,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for platform in self.platforms:
             self.credentials[platform] = get_credentials(platform)
 
-        # Set up worker thread
-        self.worker = WorkerThread()
-        self.worker.platforms = self.platforms
-        self.worker.credentials = self.credentials
-        self.worker.start_date = self.start_date
-        self.worker.end_date = self.end_date
-        self.worker.output_file = self.output_file
-        self.worker.abort = False
-        self.worker.updateProgressBar.connect(self.updateProgressBar)
-        self.worker.updateProgressText.connect(self.updateProgressText)
-        self.worker.start()
+        # Set up and start worker thread
+        worker = self.setup_worker_thread()
+        worker.start()
 
         # Open progress window
         self.progress_window = ProgressWindow()
@@ -312,7 +304,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Abort the worker thread if user clicked the cancel button
         if self.progress_window.result() == 0:
-            self.worker.abort = True
+            worker.abort = True
+
+    def setup_worker_thread(self):
+        worker = WorkerThread()
+        worker.platforms = self.platforms
+        worker.credentials = self.credentials
+        worker.start_date = self.start_date
+        worker.end_date = self.end_date
+        worker.output_file = self.output_file
+        worker.abort = False
+        worker.updateProgressBar.connect(self.updateProgressBar)
+        worker.updateProgressText.connect(self.updateProgressText)
+        return worker
 
     def updateProgressBar(self, value):
         """
