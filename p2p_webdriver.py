@@ -17,7 +17,7 @@ from datetime import datetime, date, timedelta
 import glob
 import os
 import time
-from typing import Sequence, Union
+from typing import Mapping, Sequence, Tuple, Union
 
 import pandas as pd
 import requests
@@ -56,7 +56,7 @@ class P2P:
     """
 
     def __init__(
-            self, name: str, urls: dict, *logout_args,
+            self, name: str, urls: Mapping[str, str], *logout_args,
             default_file_name: str = None, file_format: str = None,
             **logout_kwargs) -> None:
         """
@@ -64,9 +64,9 @@ class P2P:
 
         Args:
             name (str): Name of the P2P platform
-            urls (dict): Dictionary with URLs for login page (key: 'login'),
-                account statement page (key: 'statement') and optionally
-                logout page (key: 'logout')
+            urls (dict[str, str]): Dictionary with URLs for login page
+                (key: 'login'), account statement page (key: 'statement')
+                and optionally logout page (key: 'logout')
             logout_args: further arguments for the logout method
 
         Keyword Args:
@@ -186,9 +186,10 @@ class P2P:
         return True
 
     def log_into_page(
-            self, name_field: str, password_field: str, credentials: tuple,
-            wait_until: ExpectedCondition, login_field: str = None,
-            find_login_by: str = By.XPATH, fill_delay: float = 0) -> bool:
+            self, name_field: str, password_field: str,
+            credentials: Tuple[str, str], wait_until: ExpectedCondition,
+            login_field: str = None, find_login_by: str = By.XPATH,
+            fill_delay: float = 0) -> bool:
         """
         Log into the P2P platform with provided user name/password.
 
@@ -206,7 +207,8 @@ class P2P:
                 has to be entered.
             password_field (str): name of web element where the password
                 has to be entered.
-            credentials (tuple): login information: (username, password)
+            credentials (tuple[str, str]): login information: (username,
+                password)
             wait_until (ExpectedCondition): Expected condition in case of
                 success.
 
@@ -438,8 +440,8 @@ class P2P:
 
     def generate_statement_calendar(
             self, start_date: datetime.date, end_date: datetime.date,
-            default_dates: Sequence[datetime.date],
-            arrows: Sequence[str], days_table,
+            default_dates: Sequence[datetime.date], arrows: Mapping[str, str],
+            days_table: Mapping[str, Union[str, bool]],
             calendar_id_by: str, calendar_id: str) -> bool:
         """
         Generate account statement by clicking days in a calendar.
@@ -456,12 +458,12 @@ class P2P:
                 account statement should be generated.
             end_date (datetime.date): end of date range for which the
                 account statement should be generated.
-            default_dates (list of datetime.datetime): the two pre-filled
+            default_dates (list[datetime.datetime]): the two pre-filled
                 default dates of the date pickers.
-            arrows (dict): dictionary with three entries: class name
+            arrows (dict[str, str]): dictionary with three entries: class name
                 of left arrows, class name of right arrows,
                 tag name of arrows.
-            days_table (dict): dictionary with four entries:
+            days_table (dict[str, {str, bool}]): dictionary with four entries:
                 class name of day table, id of day table, id of current day,
                 is day contained in id?.
             calendar_id_by (str): attribute of By class for translating
@@ -800,7 +802,7 @@ def nbr_to_short_month(nbr: str) -> str:
 
 def open_selenium_bondora(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: tuple) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the Bondora account statement for given date range.
 
@@ -809,7 +811,7 @@ def open_selenium_bondora(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-        credentials (tuple): (username, password) for Bondora
+        credentials (tuple[str, str]): (username, password) for Bondora
 
     Returns:
         bool: True on success, False on failure
@@ -885,7 +887,7 @@ def open_selenium_bondora(
 
 def open_selenium_mintos(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the Mintos account statement for given date range.
 
@@ -894,7 +896,7 @@ def open_selenium_mintos(
             account statement must be generated.
         end_date (datetime.date): End of date range for which
             account statement must be generated.
-        credentials (tuple): (username, password) for Mintos
+        credentials (tuple[str, str]): (username, password) for Mintos
 
     Returns:
         bool: True on success, False on failure.
@@ -944,7 +946,7 @@ def open_selenium_mintos(
 
 def open_selenium_robocash(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the Robocash account statement for given date range.
 
@@ -953,7 +955,7 @@ def open_selenium_robocash(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-        credentials (tuple): (username, password) for Robocash
+        credentials (tuple[str, str]): (username, password) for Robocash
 
     Returns:
         bool: True on success, False on failure
@@ -1035,7 +1037,7 @@ def open_selenium_robocash(
 
 def open_selenium_swaper(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the Swaper account statement for given date range.
 
@@ -1044,7 +1046,7 @@ def open_selenium_swaper(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-        credentials (tuple): (username, password) for Swaper
+        credentials (tuple[str, str]): (username, password) for Swaper
 
     Returns:
         bool: True on success, False on failure
@@ -1102,7 +1104,7 @@ def open_selenium_swaper(
 
 def open_selenium_peerberry(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the PeerBerry account statement for given date range.
 
@@ -1111,7 +1113,7 @@ def open_selenium_peerberry(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-        credentials (tuple): (username, password) for PeerBerry
+        credentials (tuple[str, str]): (username, password) for PeerBerry
 
     Returns:
         bool: True on success, False on failure
@@ -1200,7 +1202,7 @@ def open_selenium_peerberry(
 
 def open_selenium_estateguru(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download Estateguru account statement for given date range.
 
@@ -1209,7 +1211,7 @@ def open_selenium_estateguru(
             statement must be generated, is not used for Estateguru.
         end_date (datetime.date): End of date range for which account
             statement must be generated, is not used for Estateguru.
-        credentials (tuple): (username, password) for Estateguru
+        credentials (tuple[str, str]): (username, password) for Estateguru
 
     Returns:
         bool: True on success, False on failure
@@ -1259,7 +1261,7 @@ def open_selenium_estateguru(
 
 def open_selenium_iuvo(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the Iuvo account statement for given date range.
 
@@ -1268,7 +1270,7 @@ def open_selenium_iuvo(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-        credentials (tuple): (username, password) for Iuvo
+        credentials (tuple[str, str]): (username, password) for Iuvo
 
     Returns:
         bool: True on success, False on failure
@@ -1418,7 +1420,7 @@ def open_selenium_grupeer(
 
 def open_selenium_dofinance(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the Dofinance account statement for given date range.
 
@@ -1427,7 +1429,7 @@ def open_selenium_dofinance(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-        credentials (tuple): (username, password) for DoFinance
+        credentials (tuple[str, str]): (username, password) for DoFinance
 
     Returns:
         bool: True on success, False on failure
@@ -1472,7 +1474,7 @@ def open_selenium_dofinance(
 
 def open_selenium_twino(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials: Tuple[str, str]) -> bool:
     """
     Generate and download the Twino account statement for given date range.
 
@@ -1481,7 +1483,7 @@ def open_selenium_twino(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-        credentials (tuple): (username, password) for Twino
+        credentials (tuple[str, str]): (username, password) for Twino
 
     Returns:
         bool: True on success, False on failure
