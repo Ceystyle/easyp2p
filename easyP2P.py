@@ -16,8 +16,8 @@ __copyright__ = 'Copyright (C) 2018-19 Niko Sandschneider'
 __license__ = 'MIT'
 __version__ = '0.1'
 
-from PyQt5 import QtWidgets
 import sys
+from PyQt5 import QtWidgets
 from ui.main_window import MainWindow
 
 if __name__ == "__main__":

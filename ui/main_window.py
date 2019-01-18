@@ -6,6 +6,7 @@
 import calendar
 from datetime import date
 import os
+from typing import AbstractSet, Mapping, Tuple
 
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtGui import QColor
@@ -13,12 +14,12 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
 from xlrd.biffh import XLRDError
 
-from .Ui_main_window import Ui_MainWindow
 import p2p_parser
 import p2p_results
 import p2p_webdriver as wd
 from ui.credentials_window import get_credentials
 from ui.progress_window import ProgressWindow
+from .Ui_main_window import Ui_MainWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -215,51 +216,51 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.platforms.remove('Twino')
 
     @pyqtSlot(str)
-    def on_comboBox_start_month_activated(self, p0):
+    def on_comboBox_start_month_activated(self, month):
         """
         Update start date if the user changed start month in the combo box.
 
         Args:
-            p0 (str): short month name chosen by the user in the combo box
+            month (str): short month name chosen by the user in the combo box
 
         """
-        self.start_month = int(wd.short_month_to_nbr(p0))
+        self.start_month = int(wd.short_month_to_nbr(month))
         self.set_start_date()
 
     @pyqtSlot(str)
-    def on_comboBox_start_year_activated(self, p0):
+    def on_comboBox_start_year_activated(self, year):
         """
         Update start date if the user changed start year in the combo box.
 
         Args:
-            p0 (str): year chosen by the user in the combo box
+            year (str): year chosen by the user in the combo box
 
         """
-        self.start_year = int(p0)
+        self.start_year = int(year)
         self.set_start_date()
 
     @pyqtSlot(str)
-    def on_comboBox_end_month_activated(self, p0):
+    def on_comboBox_end_month_activated(self, month):
         """
         Update end date if the user changed end month in the combo box.
 
         Args:
-            p0 (str): short month name chosen by the user in the combo box
+            month (str): short month name chosen by the user in the combo box
 
         """
-        self.end_month = int(wd.short_month_to_nbr(p0))
+        self.end_month = int(wd.short_month_to_nbr(month))
         self.set_end_date()
 
     @pyqtSlot(str)
-    def on_comboBox_end_year_activated(self, p0):
+    def on_comboBox_end_year_activated(self, year):
         """
         Update end date if the user changed end year in the combo box.
 
         Args:
-            p0 (str): year chosen by the user in the combo box
+            year (str): year chosen by the user in the combo box
 
         """
-        self.end_year = int(p0)
+        self.end_year = int(year)
         self.set_end_date()
 
     @pyqtSlot()
@@ -279,7 +280,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         # Check that at least one platform is selected
-        if len(self.platforms) == 0:
+        if not self.platforms:
             QMessageBox.warning(
                 self, 'Keine P2P Plattform ausgewählt!',
                 'Bitte wähle mindestens eine P2P Plattform aus')
@@ -314,18 +315,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             WorkerThread: handle of the worker thread
 
         """
-        worker = WorkerThread()
-        worker.platforms = self.platforms
-        worker.credentials = self.credentials
-        worker.start_date = self.start_date
-        worker.end_date = self.end_date
-        worker.output_file = self.output_file
-        worker.abort = False
-        worker.updateProgressBar.connect(self.updateProgressBar)
-        worker.updateProgressText.connect(self.updateProgressText)
+        worker = WorkerThread(
+            self.platforms, self.credentials, self.start_date, self.end_date,
+            self.output_file)
+        worker.update_progress_bar.connect(self.update_progress_bar)
+        worker.update_progress_text.connect(self.update_progress_text)
         return worker
 
-    def updateProgressBar(self, value):
+    def update_progress_bar(self, value):
         """
         Update the progress bar in ProgressWindow to new value.
 
@@ -333,7 +330,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             value (float): value of the progress bar, between 0 and 100
 
         """
-        if not (value >= 0 and value <= 100):
+        if not 0 <= value <= 100:
             error_message = ('Fortschrittsindikator beträgt: {0}. Er muss '
                              'zwischen 0 und 100 liegen!'.format(value))
             QMessageBox.warning(
@@ -342,7 +339,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.progress_window.progressBar.setValue(value)
 
-    def updateProgressText(self, txt, color):
+    def update_progress_text(self, txt, color):
         """
         Append a new line to the progress text in ProgressWindow.
 
@@ -355,15 +352,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progress_window.progressText.append(txt)
 
     @pyqtSlot(str)
-    def on_lineEdit_output_file_textChanged(self, p0):
+    def on_lineEdit_output_file_textChanged(self, file_name):
         """
         Update location where the results file should be saved.
 
         Args:
-            p0 (str): file name entered by the user
+            file_name (str): file name entered by the user
 
         """
-        QLineEdit.setText(self.lineEdit_output_file, p0)
+        QLineEdit.setText(self.lineEdit_output_file, file_name)
 
     @pyqtSlot()
     def on_pushButton_file_chooser_clicked(self):
@@ -408,22 +405,43 @@ class WorkerThread(QThread):
     """
 
     # Signals for communicating with the MainWindow
-    updateProgressBar = pyqtSignal(float)
-    updateProgressText = pyqtSignal(str, QColor)
+    update_progress_bar = pyqtSignal(float)
+    update_progress_text = pyqtSignal(str, QColor)
 
     # Colors for text output
     BLACK = QColor(0, 0, 0)
     RED = QColor(100, 0, 0)
 
-    def __init__(self, parent=None) -> None:
+    def __init__(
+            self, platforms: AbstractSet[str],
+            credentials: Mapping[str, Tuple[str, str]],
+            start_date: date, end_date: date, output_file: str,
+            parent=None) -> None:
         """
         Constructor.
+
+        Args:
+            platforms (set[str]): set containing the names of all selected P2P
+                platforms
+            credentials (dict[str, tuple[str, str]]): keys are the names of the
+                P2P platforms, values are tuples with (username, password)
+            start_date (datetime.date): start of date range for which the
+                account statements should be generated.
+            end_date (datetime.date): end of date range for which the
+                account statements should be generated.
+            output_file (str): name of the Excel file (including absolute path)
+                to which the results should be written.
 
         Keyword Args:
             parent (QThread): reference to the parent thread
 
         """
         super(WorkerThread, self).__init__(parent)
+        self.platforms = platforms
+        self.credentials = credentials
+        self.start_date = start_date
+        self.end_date = end_date
+        self.output_file = output_file
         self.abort = False
 
     def get_p2p_function(self, platform: str) -> wd.OpenSelenium:
@@ -444,7 +462,7 @@ class WorkerThread(QThread):
             error_message = (
                 'Funktion zum Öffnen von {0} konnte nicht gefunden werden. '
                 'Ist p2p_webdriver.py vorhanden?'.format(platform))
-            self.updateProgressText.emit(error_message, self.RED)
+            self.update_progress_text.emit(error_message, self.RED)
             return None
         else:
             return func
@@ -467,7 +485,7 @@ class WorkerThread(QThread):
             error_message = (
                 'Parser für {0} konnte nicht gefunden werden. '
                 'Ist p2p_parser.py vorhanden?'.format(platform))
-            self.updateProgressText.emit(error_message, self.RED)
+            self.update_progress_text.emit(error_message, self.RED)
             return None
         else:
             return parser
@@ -481,8 +499,8 @@ class WorkerThread(QThread):
             error_msg (str): error message
 
         """
-        self.updateProgressText.emit(error_msg, self.RED)
-        self.updateProgressText.emit(
+        self.update_progress_text.emit(error_msg, self.RED)
+        self.update_progress_text.emit(
             '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_result(
@@ -517,11 +535,11 @@ class WorkerThread(QThread):
             self.ignore_platform(platform, error_msg)
             return list_of_dfs
         else:
-            if len(parser()[1]) > 0:
+            if parser()[1]:
                 warning_msg = ('{0}: unbekannter Cashflow-Typ wird im '
                                'Ergebnis ignoriert: {1}'
                                ''.format(platform, parser()[1]))
-                self.updateProgressText.emit(warning_msg, self.RED)
+                self.update_progress_text.emit(warning_msg, self.RED)
 
         return list_of_dfs
 
@@ -539,21 +557,21 @@ class WorkerThread(QThread):
         """
         success = False
         if self.credentials[platform] is None:
-            self.updateProgressText.emit(
+            self.update_progress_text.emit(
                 'Keine Zugangsdaten für {0} vorhanden!'.format(platform),
                 self.RED)
             return False
 
-        self.updateProgressText.emit(
+        self.update_progress_text.emit(
             'Start der Auswertung von {0}...'.format(platform), self.BLACK)
         try:
             success = func(
                 self.start_date, self.end_date, self.credentials[platform])
-        except RuntimeError as e:
-            self.ignore_platform(platform, str(e))
+        except RuntimeError as err:
+            self.ignore_platform(platform, str(err))
             return False
-        except RuntimeWarning as w:
-            self.updateProgressText.emit(str(w), self.RED)
+        except RuntimeWarning as warning:
+            self.update_progress_text.emit(str(warning), self.RED)
             # Continue anyway
 
         return success
@@ -588,8 +606,8 @@ class WorkerThread(QThread):
                     return
 
                 progress += step
-                self.updateProgressBar.emit(progress)
-                self.updateProgressText.emit(
+                self.update_progress_bar.emit(progress)
+                self.update_progress_text.emit(
                     '{0} erfolgreich ausgewertet!'.format(platform),
                     self.BLACK)
 
@@ -606,7 +624,7 @@ class WorkerThread(QThread):
 
         if not p2p_results.show_results(
                 df_result, self.start_date, self.end_date, self.output_file):
-            self.updateProgressText.emit(
+            self.update_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
 
-        self.updateProgressBar.emit(100)
+        self.update_progress_bar.emit(100)

@@ -17,7 +17,7 @@ from datetime import datetime, date, timedelta
 import glob
 import os
 import time
-from typing import Mapping, Tuple, Union
+from typing import List, Mapping, Tuple, Union
 
 import pandas as pd
 import requests
@@ -627,11 +627,11 @@ class P2P:
                     self.default_file_name, self.file_format))
             if len(file_list) == 1:
                 download_finished = True
-            elif len(file_list) == 0:
+            elif not file_list:
                 file_list = glob.glob(
                     'p2p_downloads/{0}.{1}.crdownload'.format(
                         self.default_file_name, self.file_format))
-                if len(file_list) < 1 and duration > 1:
+                if not file_list and duration > 1:
                     # Duration ensures that at least one second has gone by
                     # since starting the download
                     raise RuntimeError(
@@ -680,7 +680,7 @@ class P2P:
         file_list = glob.glob(
             'p2p_downloads/{0}.{1}'.format(
                 self.default_file_name, self.file_format))
-        if len(file_list) > 0:
+        if file_list:
             for file in file_list:
                 try:
                     os.remove(file)
@@ -715,7 +715,7 @@ class P2P:
             os.rename(
                 file_list[0], 'p2p_downloads/{0}_statement.{1}'.format(
                     self.name.lower(), self.file_format))
-        elif len(file_list) == 0:
+        elif not file_list:
             raise RuntimeError(
                 '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
                 'werden.'.format(self.name))
@@ -757,7 +757,8 @@ def get_calendar_clicks(
     return clicks
 
 def get_list_of_months(
-        start_date: datetime.date, end_date: datetime.date) -> list:
+        start_date: datetime.date,
+        end_date: datetime.date) -> List[Tuple[datetime.date, datetime.date]]:
     """
     Get list of months between (including) start and end date.
 
@@ -766,16 +767,18 @@ def get_list_of_months(
         end_date (datetime.date): end_date
 
     Returns:
-        list (datetime.date): List of months
+        list[tuple[datetime.date, datetime.date]]: List of tuples
+            (start_of_month, end_of_month)
     """
     months = []
-    m = start_date
-    while m < end_date:
-        start_of_month = date(m.year, m.month, 1)
-        end_of_month = date(m.year, m.month, calendar.monthrange(
-            m.year, m.month)[1])
-        months.append([start_of_month, end_of_month])
-        m = m + timedelta(days=31)
+    current_date = start_date
+    while current_date < end_date:
+        start_of_month = date(current_date.year, current_date.month, 1)
+        end_of_month = date(
+            current_date.year, current_date.month, calendar.monthrange(
+                current_date.year, current_date.month)[1])
+        months.append((start_of_month, end_of_month))
+        current_date += timedelta(days=31)
 
     return months
 
@@ -1040,9 +1043,9 @@ def open_selenium_robocash(
         cookies_copy = {}
         for driver_cookie in driver_cookies:
             cookies_copy[driver_cookie["name"]] = driver_cookie["value"]
-        r = requests.get(download_url, cookies=cookies_copy)
+        data = requests.get(download_url, cookies=cookies_copy)
         with open('p2p_downloads/robocash_statement.xls', 'wb') as output:
-            output.write(r.content)
+            output.write(data.content)
 
     return True
 

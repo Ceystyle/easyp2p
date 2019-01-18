@@ -109,13 +109,13 @@ def show_results(
         index=['Plattform', 'Währung'], aggfunc=sum)
 
     if 'Startguthaben' in totals_pivot_table.columns:
-        for pl in month_pivot_table.index.levels[0]:
-            start_balance = month_pivot_table.loc[pl]['Startguthaben'][0]
-            totals_pivot_table.loc[pl]['Startguthaben'] = start_balance
+        for index in month_pivot_table.index.levels[0]:
+            start_balance = month_pivot_table.loc[index]['Startguthaben'][0]
+            totals_pivot_table.loc[index]['Startguthaben'] = start_balance
     if 'Endsaldo' in totals_pivot_table.columns:
-        for pl in month_pivot_table.index.levels[0]:
-            end_balance = month_pivot_table.loc[pl]['Endsaldo'][0]
-            totals_pivot_table.loc[pl]['Endsaldo'] = end_balance
+        for index in month_pivot_table.index.levels[0]:
+            end_balance = month_pivot_table.loc[index]['Endsaldo'][0]
+            totals_pivot_table.loc[index]['Endsaldo'] = end_balance
 
     # Write total results to file
     totals_pivot_table.to_excel(writer, 'Gesamtergebnis')

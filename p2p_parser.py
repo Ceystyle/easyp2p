@@ -357,17 +357,17 @@ def iuvo():
     df = df.astype('float64', errors='ignore')
 
     interest_types = ['Zins erhalten', 'Vorzeitige Zinstilgung']
-    for it in interest_types:
-        if it in df.columns:
-            df[INTEREST_PAYMENT] += df[it]
-            del df[it]
+    for elem in interest_types:
+        if elem in df.columns:
+            df[INTEREST_PAYMENT] += df[elem]
+            del df[elem]
 
     redemption_types = [
         'Vorzeitige Kreditbetragtilgung', 'Kreditbetrag erhalten']
-    for rt in redemption_types:
-        if rt in df.columns:
-            df[REDEMPTION_PAYMENT] += df[rt]
-            del df[rt]
+    for elem in redemption_types:
+        if elem in df.columns:
+            df[REDEMPTION_PAYMENT] += df[elem]
+            del df[elem]
 
     df.rename(
         columns={

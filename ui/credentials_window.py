@@ -94,8 +94,8 @@ def get_credentials(platform: str) -> tuple:
                     'füllen Sie die Felder für Benutzername und Passwort aus!')
             else:
                 _done = True
-                _save_in_keyring = (credentials_window.
-                    checkBox_save_in_keyring.isChecked())
+                _save_in_keyring = (
+                    credentials_window.checkBox_save_in_keyring.isChecked())
 
     if _save_in_keyring:
         if not save_credentials(platform, username, password):
