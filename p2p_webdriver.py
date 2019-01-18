@@ -23,6 +23,7 @@ import pandas as pd
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -506,62 +507,15 @@ class P2P:
                     arrows['arrow_tag'], arrows['right_arrow_class']))
 
             # Set start_date
-            start_calendar.click()
-            self.wdwait(EC.visibility_of(left_arrows[0]))
-            if start_calendar_clicks < 0:
-                for _ in range(0, abs(start_calendar_clicks)):
-                    left_arrows[0].click()
-            elif start_calendar_clicks > 0:
-                for _ in range(0, start_calendar_clicks):
-                    right_arrows[0].click()
-
-            # Get all dates from left calendar and find the start day
-            if days_table['id_from_calendar']:
-                start_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    days_table['table_id'], start_calendar.get_attribute('id'))
-            else:
-                start_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    days_table['table_id'], days_table['class_name'])
-            all_days = self.driver.find_elements_by_xpath(start_days_xpath)
-
-            for elem in all_days:
-                if days_table['current_day_id'] == '':
-                    if elem.text == str(start_date.day):
-                        elem.click()
-                else:
-                    if (elem.text == str(start_date.day)
-                            and elem.get_attribute('class')
-                            == days_table['current_day_id']):
-                        elem.click()
+            self.set_date_in_calendar(
+                start_calendar, start_date.day, start_calendar_clicks,
+                left_arrows[0], right_arrows[0], days_table)
 
             # Set end_date
-            end_calendar.click()
-            self.wdwait(EC.visibility_of(left_arrows[1]))
-            if end_calendar_clicks < 0:
-                for _ in range(0, abs(end_calendar_clicks)):
-                    left_arrows[1].click()
-            elif end_calendar_clicks > 0:
-                for _ in range(0, end_calendar_clicks):
-                    right_arrows[1].click()
+            self.set_date_in_calendar(
+                end_calendar, end_date.day, end_calendar_clicks,
+                left_arrows[1], right_arrows[1], days_table)
 
-            # Get all dates from right calendar and find the end day
-            if days_table['id_from_calendar']:
-                end_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    days_table['table_id'], end_calendar.get_attribute('id'))
-            else:
-                end_days_xpath = "//*[@{0}='{1}']//table//td".format(
-                    days_table['table_id'], days_table['class_name'])
-            all_days = self.driver.find_elements_by_xpath(end_days_xpath)
-
-            for elem in all_days:
-                if days_table['current_day_id'] == '':
-                    if elem.text == str(end_date.day):
-                        elem.click()
-                else:
-                    if (elem.text == str(end_date.day)
-                            and elem.get_attribute('class')
-                            == days_table['current_day_id']):
-                        elem.click()
         except NoSuchElementException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
                                'gestartet werden.'.format(self.name))
@@ -570,6 +524,62 @@ class P2P:
                                'gedauert.'.format(self.name))
 
         return True
+
+    def set_date_in_calendar(
+            self, calendar_: WebElement, day: int, months: int,
+            previous_month: WebElement, next_month: WebElement,
+            days_table: Mapping[str, Union[str, bool]]) -> None:
+        """
+        Find and click the given day in the provided calendar.
+
+        Args:
+            calendar_ (WebElement): web element which needs to be clicked
+                in order to open the calendar
+            day (int): day number of the target date
+            months (int): how many months in the past/future
+                (negative/positive) is the target date
+            previous_month (WebElement): web element to switch calendar to the
+                previous month
+            next_month (WebElement): web element to switch calendar to the
+                next month
+            days_table (dict[str, {str, bool}]): dictionary with four entries:
+                class name of day table, id of day table, id of current day,
+                is day contained in id?.
+
+        """
+        # Open the calendar and wait until the buttons for changing the month
+        # are visible
+        calendar_.click()
+        self.wdwait(EC.visibility_of(previous_month))
+
+        # Switch the calendar to the given target month
+        if months < 0:
+            for _ in range(0, abs(months)):
+                previous_month.click()
+        elif months > 0:
+            for _ in range(0, months):
+                next_month.click()
+
+        # Get table with all days of the selected month
+        # If id_from_calendar is True the day number is contained in the id tag
+        # Otherwise the days will be identified by the provided class name
+        if days_table['id_from_calendar']:
+            days_xpath = "//*[@{0}='{1}']//table//td".format(
+                days_table['table_id'], calendar_.get_attribute('id'))
+        else:
+            days_xpath = "//*[@{0}='{1}']//table//td".format(
+                days_table['table_id'], days_table['class_name'])
+        all_days = self.driver.find_elements_by_xpath(days_xpath)
+
+        # Find and click the target day
+        for elem in all_days:
+            if days_table['current_day_id'] == '':
+                if elem.text == str(day):
+                    elem.click()
+            else:
+                if (elem.text == str(day) and elem.get_attribute('class')
+                        == days_table['current_day_id']):
+                    elem.click()
 
     def download_statement(
             self, download_btn: str, find_btn_by: str, actions=None) -> bool:
@@ -635,7 +645,7 @@ class P2P:
 
         return True
 
-    def wdwait(self, wait_until: ExpectedCondition):
+    def wdwait(self, wait_until: ExpectedCondition) -> WebElement:
         """
         Shorthand for WebDriverWait.
 
