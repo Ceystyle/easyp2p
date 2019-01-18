@@ -17,7 +17,7 @@ from datetime import datetime, date, timedelta
 import glob
 import os
 import time
-from typing import Mapping, Sequence, Tuple, Union
+from typing import Mapping, Tuple, Union
 
 import pandas as pd
 import requests
@@ -441,7 +441,8 @@ class P2P:
 
     def generate_statement_calendar(
             self, start_date: datetime.date, end_date: datetime.date,
-            default_dates: Sequence[datetime.date], arrows: Mapping[str, str],
+            default_dates: Tuple[datetime.date, datetime.date],
+            arrows: Mapping[str, str],
             days_table: Mapping[str, Union[str, bool]],
             calendar_id_by: str, calendar_id: str) -> bool:
         """
@@ -459,8 +460,8 @@ class P2P:
                 account statement should be generated.
             end_date (datetime.date): end of date range for which the
                 account statement should be generated.
-            default_dates (list[datetime.datetime]): the two pre-filled
-                default dates of the date pickers.
+            default_dates (tuple[datetime.date, datetime.date]): the pre-filled
+                default dates of the two date pickers.
             arrows (dict[str, str]): dictionary with three entries: class name
                 of left arrows, class name of right arrows,
                 tag name of arrows.
@@ -1101,7 +1102,7 @@ def open_selenium_swaper(
                       'current_day_id': ' ',
                       'id_from_calendar': True,
                       'table_id': 'id'}
-        default_dates = [datetime.today().replace(day=1), datetime.now()]
+        default_dates = (datetime.today().replace(day=1), datetime.now())
 
         if not swaper.generate_statement_calendar(
                 start_date, end_date, default_dates, arrows, days_table,
@@ -1173,7 +1174,7 @@ def open_selenium_peerberry(
             pass
 
         # Create account statement for given date range
-        default_dates = [datetime.now(), datetime.now()]
+        default_dates = (datetime.now(), datetime.now())
         arrows = {'arrow_tag': 'th',
                   'left_arrow_class': 'rdtPrev',
                   'right_arrow_class': 'rdtNext'}
