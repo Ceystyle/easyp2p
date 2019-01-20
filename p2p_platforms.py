@@ -152,8 +152,8 @@ def open_selenium_mintos(
         today.year, today.strftime('%m'), today.strftime('%d'))
 
     with P2P(
-            'Mintos', urls, xpaths['logout_btn'],
-            By.XPATH, EC.title_contains('Vielen Dank'),
+            'Mintos', urls, EC.title_contains('Vielen Dank'),
+            logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name=default_file_name, file_format='xlsx') as mintos:
 
         if not mintos.clean_download_location():
@@ -301,8 +301,8 @@ def open_selenium_swaper(
         'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
     with P2P(
-            'Swaper', urls, xpaths['logout_btn'], By.XPATH,
-            EC.presence_of_element_located((By.ID, 'about')),
+            'Swaper', urls, EC.presence_of_element_located((By.ID, 'about')),
+            logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='excel-storage*', file_format='xlsx') as swaper:
 
         if not swaper.clean_download_location():
@@ -374,8 +374,8 @@ def open_selenium_peerberry(
                           'div[1]/div/div[2]/div/div[2]/div/span')}
 
     with P2P(
-            'PeerBerry', urls, xpaths['logout_btn'], By.XPATH,
-            EC.title_contains('Einloggen'),
+            'PeerBerry', urls, EC.title_contains('Einloggen'),
+            logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='transactions', file_format='csv') as peerberry:
 
         if not peerberry.clean_download_location():
@@ -525,9 +525,9 @@ def open_selenium_iuvo(
         'start_balance_value': ('/html/body/div[5]/main/div/div/div/div[4]/'
                                 'div/table/thead/tr[1]/td[2]/strong')}
     with P2P(
-            'Iuvo', urls, 'p2p_logout', By.ID,
-            EC.title_contains('Investieren Sie in Kredite'),
-            hover_elem='User name', hover_elem_by=By.LINK_TEXT) as iuvo:
+            'Iuvo', urls, EC.title_contains('Investieren Sie in Kredite'),
+            logout_locator=(By.ID, 'p2p_logout'),
+            hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
         driver = iuvo.driver
 
@@ -619,14 +619,15 @@ def open_selenium_grupeer(
         'login': 'https://www.grupeer.com/de/login',
         'statement': 'https://www.grupeer.com/de/account-statement'}
     xpaths = {
-        'logout_btn': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
+        'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
                        'div/div/ul/li/a/span')}
+
     with P2P(
-            'Grupeer', urls, 'Ausloggen', By.LINK_TEXT,
+            'Grupeer', urls,
             EC.title_contains('P2P Investitionsplattform Grupeer'),
-            xpaths['logout_btn'], By.XPATH,
-            default_file_name='Account statement',
-            file_format='xlsx') as grupeer:
+            (By.LINK_TEXT, 'Ausloggen'),
+            default_file_name='Account statement', file_format='xlsx',
+            hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
         if not grupeer.clean_download_location():
             return False
@@ -743,8 +744,9 @@ def open_selenium_twino(
                       'individual-investments"]')}
 
     with P2P(
-            'Twino', urls, xpaths['logout_btn'], By.XPATH,
+            'Twino', urls,
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
+            logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='account_statement_*',
             file_format='xlsx') as twino:
 

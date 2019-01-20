@@ -47,9 +47,11 @@ class P2P:
     """
 
     def __init__(
-            self, name: str, urls: Mapping[str, str], *logout_args,
+            self, name: str, urls: Mapping[str, str],
+            logout_wait_until: ExpectedCondition,
+            logout_locator: Tuple[str, str] = None,
             default_file_name: str = None, file_format: str = None,
-            **logout_kwargs) -> None:
+            hover_locator: Tuple[str, str] = None) -> None:
         """
         Constructor of P2P class.
 
@@ -58,21 +60,25 @@ class P2P:
             urls (dict[str, str]): Dictionary with URLs for login page
                 (key: 'login'), account statement page (key: 'statement')
                 and optionally logout page (key: 'logout')
-            logout_args: further arguments for the logout method
+            logout_wait_until (ExpectedCondition): Expected condition in case
+                of successful logout.
 
         Keyword Args:
+            logout_locator (tuple[str, str]): locator of logout web element.
             default_file_name (str): default name for account statement
                 downloads, chosen by the P2P platform
             file_format (str): format of the download file
-            logout_kwargs: keyword arguments for the logout method
+            hover_locator (tuple[str, str]): locator of web element where the
+                mouse needs to hover in order to make logout button visible.
 
         """
         self.name = name
         self.urls = urls
         self.default_file_name = default_file_name
         self.file_format = file_format
-        self.logout_args = logout_args
-        self.logout_kwargs = logout_kwargs
+        self.logout_wait_until = logout_wait_until
+        self.logout_locator = logout_locator
+        self.hover_locator = hover_locator
         self.delay = 5  # delay in seconds, input for WebDriverWait
         self.driver = None
 
@@ -98,10 +104,12 @@ class P2P:
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         """End of context management protocol."""
         if 'logout' in self.urls:
-            self.logout_by_url(*self.logout_args)
+            self.logout_by_url(self.logout_wait_until)
         else:
             try:
-                self.logout_by_button(*self.logout_args, **self.logout_kwargs)
+                self.logout_by_button(
+                    self.logout_locator, self.logout_wait_until,
+                    hover_locator=self.hover_locator)
             except NoSuchElementException:
                 # If an error occurs before login, the logout button is not
                 # present yet, which leads to this error. It can be ignored.
@@ -285,9 +293,9 @@ class P2P:
         return True
 
     def logout_by_button(
-            self, logout_elem: str, logout_elem_by: str,
-            wait_until: ExpectedCondition, hover_elem: str = None,
-            hover_elem_by: str = None) -> None:
+            self, logout_locator: Tuple[str, str],
+            wait_until: ExpectedCondition,
+            hover_locator: Tuple[str, str] = None) -> None:
         """
         Logout of P2P platform using the provided logout button.
 
@@ -297,31 +305,26 @@ class P2P:
         This element is provided by the optional hover_elem variable.
 
         Args:
-            logout_elem (str): id of logout button.
-            logout_elem_by (str): attribute of By class for translating
-                logout_elem into web element.
+            logout_locator (tuple[str, str]): locator of logout button.
             wait_until (ExpectedCondition): Expected condition in case of
                 successful logout.
 
         Keyword Args:
-            hover_elem (str): id of web element over which the mouse needs
-                to be hovered in order to make the logout button visible.
-            hover_elem_by (str): attribute of By class for translating
-                hover_elem into web element.
+            hover_locator (str): locator of web element over which the mouse
+                needs to hover in order to make the logout button visible.
 
         Throws:
             RuntimeError: if loading of page takes too long
 
         """
         try:
-            if hover_elem is not None:
-                elem = self.driver.find_element(hover_elem_by, hover_elem)
+            if hover_locator is not None:
+                elem = self.driver.find_element(*hover_locator)
                 hover = ActionChains(self.driver).move_to_element(elem)
                 hover.perform()
-                self.wdwait(EC.element_to_be_clickable(
-                    (logout_elem_by, logout_elem)))
+                self.wdwait(EC.element_to_be_clickable(logout_locator))
 
-            self.driver.find_element(logout_elem_by, logout_elem).click()
+            self.driver.find_element(*logout_locator).click()
             self.wdwait(wait_until)
         except TimeoutException:
             raise RuntimeWarning(
