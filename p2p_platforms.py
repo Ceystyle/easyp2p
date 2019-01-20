@@ -166,7 +166,7 @@ def open_selenium_mintos(
         if not mintos.log_into_page(
                 '_username', '_password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
-                login_field='MyAccountButton', find_login_by=By.NAME):
+                login_locator=(By.NAME, 'MyAccountButton')):
             return False
 
         if not mintos.open_account_statement_page(
@@ -225,7 +225,7 @@ def open_selenium_robocash(
         if not robocash.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.XPATH, xpaths['login_check'])),
-                login_field=xpaths['login_field']):
+                login_locator=(By.XPATH, xpaths['login_field'])):
             return False
 
         if not robocash.open_account_statement_page(
@@ -759,7 +759,7 @@ def open_selenium_twino(
         if not twino.log_into_page(
                 'email', 'login-password', credentials,
                 EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
-                login_field=xpaths['login_btn'], find_login_by=By.XPATH):
+                login_locator=(By.XPATH, xpaths['login_btn'])):
             return False
 
         if not twino.open_account_statement_page(

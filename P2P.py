@@ -179,7 +179,7 @@ class P2P:
     def log_into_page(
             self, name_field: str, password_field: str,
             credentials: Tuple[str, str], wait_until: ExpectedCondition,
-            login_field: str = None, find_login_by: str = By.XPATH,
+            login_locator: Tuple[str, str] = None,
             fill_delay: float = 0) -> bool:
         """
         Log into the P2P platform with provided user name/password.
@@ -204,8 +204,8 @@ class P2P:
                 success.
 
         Keyword Args:
-            login_field (str): id of web element which has to be clicked
-                in order to open login form.
+            login_locator (tuple[str, str]): locator of web element which has
+                to be clicked in order to open login form.
             find_login_by (str): attribute of By class for translating
                 login_field into web element.
             fill_delay (float): a small delay between filling in password
@@ -220,8 +220,8 @@ class P2P:
 
         """
         try:
-            if login_field is not None:
-                self.driver.find_element(find_login_by, login_field).click()
+            if login_locator is not None:
+                self.driver.find_element(*login_locator).click()
 
             self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
             elem = self.driver.find_element_by_name(name_field)
