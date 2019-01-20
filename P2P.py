@@ -1,0 +1,718 @@
+# -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
+
+"""
+Module implementing P2P, a class representing a P2P platform.
+
+This module defines the P2P class and contains code for accessing and handling
+supported P2P sites. It relies mainly on functionality provided by the Selenium
+webdriver. easyP2P uses Chromedriver as webdriver.
+
+"""
+
+from datetime import datetime
+import glob
+import os
+import time
+from typing import Mapping, Tuple, Union
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.common.action_chains import ActionChains
+
+import p2p_helper
+
+ExpectedCondition = Union[
+    EC.element_to_be_clickable('locator'),
+    EC.presence_of_element_located('locator'),
+    EC.text_to_be_present_in_element('locator', str), EC.title_contains(str),
+    EC.visibility_of('locator')]
+
+
+class P2P:
+
+    """
+    Representation of P2P platform including required methods for interaction.
+
+    Represents a P2P platform and the required methods for login/logout,
+    generating and downloading account statements.
+
+    """
+
+    def __init__(
+            self, name: str, urls: Mapping[str, str], *logout_args,
+            default_file_name: str = None, file_format: str = None,
+            **logout_kwargs) -> None:
+        """
+        Constructor of P2P class.
+
+        Args:
+            name (str): Name of the P2P platform
+            urls (dict[str, str]): Dictionary with URLs for login page
+                (key: 'login'), account statement page (key: 'statement')
+                and optionally logout page (key: 'logout')
+            logout_args: further arguments for the logout method
+
+        Keyword Args:
+            default_file_name (str): default name for account statement
+                downloads, chosen by the P2P platform
+            file_format (str): format of the download file
+            logout_kwargs: keyword arguments for the logout method
+
+        """
+        self.name = name
+        self.urls = urls
+        self.default_file_name = default_file_name
+        self.file_format = file_format
+        self.logout_args = logout_args
+        self.logout_kwargs = logout_kwargs
+        self.delay = 5  # delay in seconds, input for WebDriverWait
+        self.driver = None
+
+        # Make sure URLs for login and statement page are provided
+        if 'login' not in urls:
+            raise RuntimeError('Keine Login-URL für {0} '
+                               'vorhanden!'.format(self.name))
+        if 'statement' not in urls:
+            raise RuntimeError('Keine Kontoauszug-URLs für {0} '
+                               'vorhanden!'.format(self.name))
+
+    def __enter__(self) -> 'P2P':
+        """
+        Start of context management protocol.
+
+        Returns:
+            P2P: instance of P2P class
+
+        """
+        self.init_webdriver()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_trace) -> None:
+        """End of context management protocol."""
+        if 'logout' in self.urls:
+            self.logout_by_url(*self.logout_args)
+        else:
+            try:
+                self.logout_by_button(*self.logout_args, **self.logout_kwargs)
+            except NoSuchElementException:
+                # If an error occurs before login, the logout button is not
+                # present yet, which leads to this error. It can be ignored.
+                pass
+        self.driver.close()
+        if exc_type:
+            raise exc_type(exc_value)
+
+    def init_webdriver(self) -> None:
+        """
+        Initialize Chromedriver as webdriver.
+
+        This function initializes Chromedriver as webdriver, sets the
+        default download location to p2p_downloads relative to the current
+        working directory and opens a new maximized browser window.
+
+        """
+        # TODO: handle error cases
+        options = webdriver.ChromeOptions()
+#        options.add_argument("--headless")
+#        options.add_argument("--window-size=1920,1200")
+        dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
+        prefs = {"download.default_directory": dl_location}
+        options.add_experimental_option("prefs", prefs)
+        driver = webdriver.Chrome(options=options)
+        driver.maximize_window()
+        self.driver = driver
+
+    def open_start_page(
+            self, wait_until: ExpectedCondition,
+            title_check: str = None) -> bool:
+        """
+        Open start page of P2P platform.
+
+        This function will open the login/start page of the P2P platform
+        in the webdriver. It will check the title of the window to make
+        sure the page was loaded correctly.
+
+        Args:
+            wait_until (ExpectedCondition): Expected condition in case of
+                success, in general the clickability of the user name field.
+
+        Keyword Args:
+            title_check (str): used to check if the correct page was loaded.
+                Defaults to name of P2P platform if None is provided.
+
+        Returns:
+            bool: True on success, False on failure.
+
+        Throws:
+            RuntimeError: if the expected web page title is not found or if
+                loading the page takes too long
+
+        """
+        # Most platforms use their name in the title
+        # title_check will handle the few cases where they don't
+        if title_check is None:
+            title_check = self.name
+
+        try:
+            self.driver.get(self.urls['login'])
+            self.wdwait(wait_until)
+            # Additional check that the correct page was loaded
+            if title_check not in self.driver.title:
+                raise RuntimeError(
+                    'Die {0} Webseite konnte nicht geladen werden.'
+                    ''.format(self.name))
+        except TimeoutException:
+            raise RuntimeError(
+                'Das Laden der {0} Webseite hat zu lange gedauert.'
+                ''.format(self.name))
+
+        return True
+
+    def log_into_page(
+            self, name_field: str, password_field: str,
+            credentials: Tuple[str, str], wait_until: ExpectedCondition,
+            login_field: str = None, find_login_by: str = By.XPATH,
+            fill_delay: float = 0) -> bool:
+        """
+        Log into the P2P platform with provided user name/password.
+
+        This function performs the login procedure for the P2P site.
+        It fills in user name and password. Some P2P sites only show
+        the user name and password field after clicking a button.
+        The id of the button can be provided by the optional login_field.
+        Some P2P sites (e.g. Swaper) also require a small delay
+        between filling in name and password. Otherwise it can
+        sometimes happen that the password is mistakenly written
+        to the name field, too.
+
+        Args:
+            name_field (str): name of web element where the user name
+                has to be entered.
+            password_field (str): name of web element where the password
+                has to be entered.
+            credentials (tuple[str, str]): login information: (username,
+                password)
+            wait_until (ExpectedCondition): Expected condition in case of
+                success.
+
+        Keyword Args:
+            login_field (str): id of web element which has to be clicked
+                in order to open login form.
+            find_login_by (str): attribute of By class for translating
+                login_field into web element.
+            fill_delay (float): a small delay between filling in password
+                and user name fields.
+
+        Returns:
+            bool: True on success, False on failure.
+
+        Throws:
+            RuntimeError: - if login or password fields cannot be found
+                          - if loading the page takes too long
+
+        """
+        try:
+            if login_field is not None:
+                self.driver.find_element(find_login_by, login_field).click()
+
+            self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
+            elem = self.driver.find_element_by_name(name_field)
+            elem.clear()
+            elem.send_keys(credentials[0])
+            time.sleep(fill_delay)
+            elem = self.driver.find_element_by_name(password_field)
+            elem.clear()
+            elem.send_keys(credentials[1])
+            elem.send_keys(Keys.RETURN)
+            self.wdwait(wait_until)
+        except NoSuchElementException:
+            raise RuntimeError(
+                'Benutzername/Passwort-Felder konnten nicht auf der '
+                '{0}-Loginseite gefunden werden!'.format(self.name))
+        except TimeoutException:
+            raise RuntimeError(
+                '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
+                ''.format(self.name))
+
+        return True
+
+    def open_account_statement_page(
+            self, title: str, element_to_check: str,
+            check_by: str = By.ID) -> bool:
+        """
+        Open account statement page of the P2P platform.
+
+        This function opens the account statement page of the P2P site.
+        The URL of the account statement page is provided as an
+        attribute of the P2P class.
+
+        Args:
+            title (str): (part of the) window title of the account statement
+                page.
+            element_to_check (str): id of web element which must be present
+                on the account statement page.
+
+        Keyword Args:
+            check_by (str): attribute of By class for translating
+                element_to_check into web element.
+
+        Returns:
+            bool: True on success, False on failure.
+
+        Throws:
+            RuntimeError: - if title of the page is not equal to provided one
+                          - if loading of page takes too long
+
+        """
+        try:
+            self.driver.get(self.urls['statement'])
+            self.wdwait(EC.presence_of_element_located(
+                (check_by, element_to_check)))
+            assert title in self.driver.title
+        except (AssertionError, TimeoutException):
+            raise RuntimeError(
+                '{0}-Kontoauszugsseite konnte nicht geladen werden!'
+                ''.format(self.name))
+
+        return True
+
+    def logout_by_button(
+            self, logout_elem: str, logout_elem_by: str,
+            wait_until: ExpectedCondition, hover_elem: str = None,
+            hover_elem_by: str = None) -> None:
+        """
+        Logout of P2P platform using the provided logout button.
+
+        This function performs the logout procedure for P2P sites
+        where a button needs to be clicked to logout. For some sites the
+        button only becomes clickable after hovering over a certain element.
+        This element is provided by the optional hover_elem variable.
+
+        Args:
+            logout_elem (str): id of logout button.
+            logout_elem_by (str): attribute of By class for translating
+                logout_elem into web element.
+            wait_until (ExpectedCondition): Expected condition in case of
+                successful logout.
+
+        Keyword Args:
+            hover_elem (str): id of web element over which the mouse needs
+                to be hovered in order to make the logout button visible.
+            hover_elem_by (str): attribute of By class for translating
+                hover_elem into web element.
+
+        Throws:
+            RuntimeError: if loading of page takes too long
+
+        """
+        try:
+            if hover_elem is not None:
+                elem = self.driver.find_element(hover_elem_by, hover_elem)
+                hover = ActionChains(self.driver).move_to_element(elem)
+                hover.perform()
+                self.wdwait(EC.element_to_be_clickable(
+                    (logout_elem_by, logout_elem)))
+
+            self.driver.find_element(logout_elem_by, logout_elem).click()
+            self.wdwait(wait_until)
+        except TimeoutException:
+            raise RuntimeWarning(
+                '{0}-Logout war nicht erfolgreich!'.format(self.name))
+            # Continue anyway
+
+    def logout_by_url(
+            self, wait_until: ExpectedCondition) -> None:
+        """
+        Logout of P2P platform using the provided URL.
+
+        This function performs the logout procedure for P2P sites
+        where the logout page can by accessed by URL. The URL itself is
+        provided in the urls dict attribute of the P2P class.
+
+        Args:
+            wait_until (ExpectedCondition): Expected condition in case of
+                successful logout
+
+        Throws:
+            RuntimeError: if loading of page takes too long
+
+        """
+        try:
+            self.driver.get(self.urls['logout'])
+            self.wdwait(wait_until)
+        except TimeoutException:
+            raise RuntimeWarning(
+                '{0}-Logout war nicht erfolgreich!'.format(self.name))
+            # Continue anyway
+
+    def generate_statement_direct(
+            self, start_date: datetime.date, end_date: datetime.date,
+            start_element: str, end_element: str, date_format: str,
+            find_elem_by: str = By.ID, wait_until: ExpectedCondition = None,
+            submit_btn: str = None, find_submit_btn_by: str = None) -> bool:
+        """
+        Generate acc. statement for platforms where date fields can be edited.
+
+        For P2P sites where the two date range fields for account statement
+        generation can be edited directly. The function will locate the two
+        date fields, enter start and end date and then start the account
+        statement generation.
+
+        Args:
+            start_date (datetime.date): start of date range for which the
+                account statement should be generated.
+            end_date (datetime.date): end of date range for which the
+                account statement should be generated.
+            start_element (str): id of field where the start date needs
+                to be entered.
+            end_element (str): id of field where the end date needs
+                to be entered.
+            date_format (str): date format.
+
+        Keyword Args:
+            find_elem_by (str): attribute of By class for translating
+                start_element and end_element into web elements.
+            wait_until (ExpectedCondition): Expected condition in case of
+                successful account statement generation.
+            submit_btn (str): id of button which needs to clicked to start
+                account statement generation. Not all P2P require this.
+            find_submit_btn_by (str): attribute of By class for translating
+                submit_btn into web element.
+
+        Returns:
+            bool: True on success, False on failure.
+
+        """
+        try:
+            date_from = self.driver.find_element(find_elem_by, start_element)
+            date_from.send_keys(Keys.CONTROL + 'a')
+            date_from.send_keys(datetime.strftime(start_date, date_format))
+
+            try:
+                date_to = self.driver.find_element(find_elem_by, end_element)
+                date_to.click()
+                date_to.send_keys(Keys.CONTROL + 'a')
+                date_to.send_keys(datetime.strftime(end_date, date_format))
+                date_to.send_keys(Keys.RETURN)
+            except StaleElementReferenceException:
+                # Some P2P sites refresh the page after a change
+                # which leads to this exception
+                date_to = self.driver.find_element(find_elem_by, end_element)
+                date_to.send_keys(Keys.CONTROL + 'a')
+                date_to.send_keys(datetime.strftime(end_date, date_format))
+
+            if submit_btn is not None:
+                button = self.wdwait(EC.element_to_be_clickable(
+                    (find_submit_btn_by, submit_btn)))
+                if self.name == 'Mintos':
+                    # Mintos needs some time until the button really works
+                    # TODO: find better fix
+                    time.sleep(1)
+                button.click()
+
+            if wait_until is not None:
+                self.wdwait(wait_until)
+        except NoSuchElementException:
+            raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
+                               'gestartet werden.'.format(self.name))
+        except TimeoutException:
+            raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
+                               'gedauert.'.format(self.name))
+
+        return True
+
+    def generate_statement_calendar(
+            self, start_date: datetime.date, end_date: datetime.date,
+            default_dates: Tuple[datetime.date, datetime.date],
+            arrows: Mapping[str, str],
+            days_table: Mapping[str, Union[str, bool]],
+            calendar_id_by: str, calendar_id: str) -> bool:
+        """
+        Generate account statement by clicking days in a calendar.
+
+        For P2P sites where the two date range fields for account
+        statement generation cannot be edited directly, but must be
+        clicked in a calendar. The function will locate the two calendars,
+        determine how many clicks are necessary to get to the
+        correct month, perform the clicks and finally locate and click
+        the chosen day.
+
+        Args:
+            start_date (datetime.date): start of date range for which the
+                account statement should be generated.
+            end_date (datetime.date): end of date range for which the
+                account statement should be generated.
+            default_dates (tuple[datetime.date, datetime.date]): the pre-filled
+                default dates of the two date pickers.
+            arrows (dict[str, str]): dictionary with three entries: class name
+                of left arrows, class name of right arrows,
+                tag name of arrows.
+            days_table (dict[str, {str, bool}]): dictionary with four entries:
+                class name of day table, id of day table, id of current day,
+                is day contained in id?.
+            calendar_id_by (str): attribute of By class for translating
+                calendar_id to web element.
+            calendar_id (str): id of the two calendars.
+
+        Returns:
+            bool: True on success, False on failure.
+
+        """
+        try:
+            # Identify the two calendars
+            if calendar_id_by == 'name':
+                start_calendar = self.driver.find_element_by_name(
+                    calendar_id[0])
+                end_calendar = self.driver.find_element_by_name(
+                    calendar_id[1])
+            elif calendar_id_by == 'class':
+                datepicker = self.driver.find_elements_by_xpath(
+                    "//div[@class='{0}']".format(calendar_id))
+                start_calendar = datepicker[0]
+                end_calendar = datepicker[1]
+            else:
+                # This should never happen
+                raise RuntimeError(
+                    '{0}: Keine ID für Kalender übergeben'.format(self.name))
+
+            # How many clicks on the arrow buttons are necessary?
+            start_calendar_clicks = p2p_helper.get_calendar_clicks(
+                start_date, default_dates[0])
+            end_calendar_clicks = p2p_helper.get_calendar_clicks(
+                end_date, default_dates[1])
+
+            # Identify the arrows for both start and end calendar
+            left_arrows = self.driver.find_elements_by_xpath(
+                "//{0}[@class='{1}']".format(
+                    arrows['arrow_tag'], arrows['left_arrow_class']))
+            right_arrows = self.driver.find_elements_by_xpath(
+                "//{0}[@class='{1}']".format(
+                    arrows['arrow_tag'], arrows['right_arrow_class']))
+
+            # Set start_date
+            self.set_date_in_calendar(
+                start_calendar, start_date.day, start_calendar_clicks,
+                left_arrows[0], right_arrows[0], days_table)
+
+            # Set end_date
+            self.set_date_in_calendar(
+                end_calendar, end_date.day, end_calendar_clicks,
+                left_arrows[1], right_arrows[1], days_table)
+
+        except NoSuchElementException:
+            raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
+                               'gestartet werden.'.format(self.name))
+        except TimeoutException:
+            raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
+                               'gedauert.'.format(self.name))
+
+        return True
+
+    def set_date_in_calendar(
+            self, calendar_: WebElement, day: int, months: int,
+            previous_month: WebElement, next_month: WebElement,
+            days_table: Mapping[str, Union[str, bool]]) -> None:
+        """
+        Find and click the given day in the provided calendar.
+
+        Args:
+            calendar_ (WebElement): web element which needs to be clicked
+                in order to open the calendar
+            day (int): day number of the target date
+            months (int): how many months in the past/future
+                (negative/positive) is the target date
+            previous_month (WebElement): web element to switch calendar to the
+                previous month
+            next_month (WebElement): web element to switch calendar to the
+                next month
+            days_table (dict[str, {str, bool}]): dictionary with four entries:
+                class name of day table, id of day table, id of current day,
+                is day contained in id?.
+
+        """
+        # Open the calendar and wait until the buttons for changing the month
+        # are visible
+        calendar_.click()
+        self.wdwait(EC.visibility_of(previous_month))
+
+        # Switch the calendar to the given target month
+        if months < 0:
+            for _ in range(0, abs(months)):
+                previous_month.click()
+        elif months > 0:
+            for _ in range(0, months):
+                next_month.click()
+
+        # Get table with all days of the selected month
+        # If id_from_calendar is True the day number is contained in the id tag
+        # Otherwise the days will be identified by the provided class name
+        if days_table['id_from_calendar']:
+            days_xpath = "//*[@{0}='{1}']//table//td".format(
+                days_table['table_id'], calendar_.get_attribute('id'))
+        else:
+            days_xpath = "//*[@{0}='{1}']//table//td".format(
+                days_table['table_id'], days_table['class_name'])
+        all_days = self.driver.find_elements_by_xpath(days_xpath)
+
+        # Find and click the target day
+        for elem in all_days:
+            if days_table['current_day_id'] == '':
+                if elem.text == str(day):
+                    elem.click()
+            else:
+                if (elem.text == str(day) and elem.get_attribute('class')
+                        == days_table['current_day_id']):
+                    elem.click()
+
+    def download_statement(
+            self, download_btn: str, find_btn_by: str, actions=None) -> bool:
+        """
+        Download account statement by clicking the provided button.
+
+        Downloads the generated account statement and checks
+        if the download was successful. If the download was successful,
+        it will also call the rename_statement function to rename
+        the downloaded file to the file name chosen by the user.
+
+        Args:
+            download_btn (str): id of the download button.
+            find_btn_by (str): attribute of By class for translating
+                download_btn into web element.
+
+        Keyword Args:
+            actions (str): 'move to element' or None: some P2P sites
+                require that the mouse hovers over a certain element
+                in order to make the download button clickable.
+
+        Returns:
+            bool: True on success, False on failure.
+
+        """
+        try:
+            download_button = self.driver.find_element(
+                find_btn_by, download_btn)
+
+            if actions == 'move_to_element':
+                action = ActionChains(self.driver)
+                action.move_to_element(download_button).perform()
+            download_button.click()
+        except NoSuchElementException:
+            raise RuntimeError(
+                'Download des {0} Kontoauszugs konnte nicht gestartet werden.'
+                ''.format(self.name))
+
+        download_finished = False
+        duration = 0
+        while not download_finished:
+            file_list = glob.glob(
+                'p2p_downloads/{0}.{1}'.format(
+                    self.default_file_name, self.file_format))
+            if len(file_list) == 1:
+                download_finished = True
+            elif not file_list:
+                file_list = glob.glob(
+                    'p2p_downloads/{0}.{1}.crdownload'.format(
+                        self.default_file_name, self.file_format))
+                if not file_list and duration > 1:
+                    # Duration ensures that at least one second has gone by
+                    # since starting the download
+                    raise RuntimeError(
+                        'Download des {0} Kontoauszugs abgebrochen.'
+                        ''.format(self.name))
+                elif duration < 1:
+                    time.sleep(1)
+                    duration += 1
+
+        if not self.rename_statement():
+            return False
+
+        return True
+
+    def wdwait(self, wait_until: ExpectedCondition) -> WebElement:
+        """
+        Shorthand for WebDriverWait.
+
+        Args:
+            wait_until (ExpectedCondition): expected condition for which the
+                webdriver should wait.
+
+        Returns:
+            WebElement: WebElement which WebDriverWait waited for.
+
+        """
+        return WebDriverWait(self.driver, self.delay).until(wait_until)
+
+    def clean_download_location(self) -> bool:
+        """
+        Ensure that there are no old download files in download location.
+
+        Makes sure that the download location does not contain
+        old downloads. In case old downloads are detected they will be
+        automatically removed. The user is informed via a warning message.
+
+        Returns:
+            bool: True if download location is clean, False if user needs to
+                  manually delete the files.
+
+        Throws:
+            RuntimeError: if old download files with the same default name
+                          cannot be deleted.
+
+        """
+        file_list = glob.glob(
+            'p2p_downloads/{0}.{1}'.format(
+                self.default_file_name, self.file_format))
+        if file_list:
+            for file in file_list:
+                try:
+                    os.remove(file)
+                except:
+                    raise RuntimeError('Alte {0}-Downloads in ./p2p_downloads '
+                                       'konnten nicht gelöscht werden. Bitte '
+                                       'manuell entfernen!'.format(self.name))
+
+            raise RuntimeWarning('Alte {0}-Downloads in ./p2p_downloads wurden'
+                                 'entfernt.'.format(self.name))
+
+        return True
+
+    def rename_statement(self) -> bool:
+        """
+        Rename downloaded statement to platform_name_statement.file_format.
+
+        Will rename the downloaded statement from the
+        default name chosen by the P2P platform to
+        platform_name_statement.file_format.
+
+        Returns:
+            bool: True on success, False on failure.
+
+        Throws:
+            RuntimeError: if the downloaded statement cannot be found
+
+        """
+        file_list = glob.glob('p2p_downloads/{0}.{1}'.format(
+            self.default_file_name, self.file_format))
+        if len(file_list) == 1:
+            os.rename(
+                file_list[0], 'p2p_downloads/{0}_statement.{1}'.format(
+                    self.name.lower(), self.file_format))
+        elif not file_list:
+            raise RuntimeError(
+                '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
+                'werden.'.format(self.name))
+        else:
+            # This should never happen
+            raise RuntimeError('Alte {0} Downloads in ./p2p_downloads '
+                               'entdeckt. Bitte zuerst entfernen.'
+                               ''.format(self.name))
+
+        return True

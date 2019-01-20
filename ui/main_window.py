@@ -11,7 +11,7 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
 
-import p2p_webdriver as wd
+import p2p_helper
 from p2p_worker import WorkerThread
 from ui.credentials_window import get_credentials
 from ui.progress_window import ProgressWindow
@@ -45,13 +45,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.start_year = date.today().year - 1
         self.comboBox_start_month.setCurrentIndex(
             self.comboBox_start_month.findText(
-                wd.nbr_to_short_month(str(self.start_month))))
+                p2p_helper.nbr_to_short_month(str(self.start_month))))
         self.comboBox_start_year.setCurrentIndex(
             self.comboBox_start_year.findText(str(self.start_year)))
         self.end_month = self.start_month
         self.comboBox_end_month.setCurrentIndex(
             self.comboBox_end_month.findText(
-                wd.nbr_to_short_month(str(self.end_month))))
+                p2p_helper.nbr_to_short_month(str(self.end_month))))
         self.end_year = self.start_year
         self.comboBox_end_year.setCurrentIndex(
             self.comboBox_end_year.findText(str(self.end_year)))
@@ -220,7 +220,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             month (str): short month name chosen by the user in the combo box
 
         """
-        self.start_month = int(wd.short_month_to_nbr(month))
+        self.start_month = int(p2p_helper.short_month_to_nbr(month))
         self.set_start_date()
 
     @pyqtSlot(str)
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             month (str): short month name chosen by the user in the combo box
 
         """
-        self.end_month = int(wd.short_month_to_nbr(month))
+        self.end_month = int(p2p_helper.short_month_to_nbr(month))
         self.set_end_date()
 
     @pyqtSlot(str)

@@ -12,7 +12,7 @@ from xlrd.biffh import XLRDError
 
 import p2p_parser
 import p2p_results
-import p2p_webdriver as wd
+import p2p_platforms
 
 
 class WorkerThread(QThread):
@@ -67,7 +67,7 @@ class WorkerThread(QThread):
         self.output_file = output_file
         self.abort = False
 
-    def get_p2p_function(self, platform: str) -> wd.OpenSelenium:
+    def get_p2p_function(self, platform: str) -> p2p_platforms.OpenSelenium:
         """
         Helper method to get the name of the appropriate webdriver function.
 
@@ -80,7 +80,7 @@ class WorkerThread(QThread):
 
         """
         try:
-            func = getattr(wd, 'open_selenium_'+platform.lower())
+            func = getattr(p2p_platforms, 'open_selenium_'+platform.lower())
         except AttributeError:
             error_message = (
                 'Funktion zum Öffnen von {0} konnte nicht gefunden werden. '
@@ -166,7 +166,8 @@ class WorkerThread(QThread):
 
         return list_of_dfs
 
-    def run_platform(self, platform: str, func: wd.OpenSelenium) -> bool:
+    def run_platform(
+            self, platform: str, func: p2p_platforms.OpenSelenium) -> bool:
         """
         Helper method for calling the open_selenium_* function.
 
