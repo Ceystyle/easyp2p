@@ -79,7 +79,6 @@ class P2P:
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
-        self.delay = 5  # delay in seconds, input for WebDriverWait
         self.driver = None
 
         # Make sure URLs for login and statement page are provided
@@ -651,7 +650,8 @@ class P2P:
             WebElement: WebElement which WebDriverWait waited for.
 
         """
-        return WebDriverWait(self.driver, self.delay).until(wait_until)
+        delay = 5
+        return WebDriverWait(self.driver, delay).until(wait_until)
 
     def clean_download_location(self) -> bool:
         """
