@@ -160,8 +160,7 @@ def open_selenium_mintos(
             return False
 
         if not mintos.open_start_page(
-                EC.element_to_be_clickable((By.NAME, '_username')),
-                'Einloggen'):
+                EC.element_to_be_clickable((By.NAME, '_username'))):
             return False
 
         if not mintos.log_into_page(
@@ -219,8 +218,7 @@ def open_selenium_robocash(
 
         if not robocash.open_start_page(
                 EC.presence_of_element_located(
-                    (By.XPATH, xpaths['start_page_check'])),
-                'Robo.cash'):
+                    (By.XPATH, xpaths['start_page_check']))):
             return False
 
         if not robocash.log_into_page(
@@ -384,8 +382,7 @@ def open_selenium_peerberry(
             return False
 
         if not peerberry.open_start_page(
-                EC.element_to_be_clickable(
-                    (By.NAME, 'email')), 'PeerBerry.com'):
+                EC.element_to_be_clickable((By.NAME, 'email'))):
             return False
 
         if not peerberry.log_into_page(
@@ -479,8 +476,7 @@ def open_selenium_estateguru(
             file_format='csv') as estateguru:
 
         if not estateguru.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'username')),
-                'Sign in/Register'):
+                EC.element_to_be_clickable((By.NAME, 'username'))):
             return False
 
         if not estateguru.log_into_page(
@@ -695,8 +691,7 @@ def open_selenium_dofinance(
             return False
 
         if not dofinance.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'email')),
-                title_check='Anmeldung'):
+                EC.element_to_be_clickable((By.NAME, 'email'))):
             return False
 
         if not dofinance.log_into_page(
@@ -759,8 +754,7 @@ def open_selenium_twino(
             return False
 
         if not twino.open_start_page(
-                EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
-                title_check='TWINO'):
+                EC.element_to_be_clickable((By.XPATH, xpaths['login_btn']))):
             return False
 
         if not twino.log_into_page(

@@ -143,22 +143,16 @@ class P2P:
         self.driver = driver
 
     def open_start_page(
-            self, wait_until: ExpectedCondition,
-            title_check: str = None) -> bool:
+            self, wait_until: ExpectedCondition) -> bool:
         """
-        Open start page of P2P platform.
+        Open start/login page of P2P platform.
 
-        This function will open the login/start page of the P2P platform
-        in the webdriver. It will check the title of the window to make
-        sure the page was loaded correctly.
+        This function will open the start/login page of the P2P platform
+        in the webdriver.
 
         Args:
             wait_until (ExpectedCondition): Expected condition in case of
                 success, in general the clickability of the user name field.
-
-        Keyword Args:
-            title_check (str): used to check if the correct page was loaded.
-                Defaults to name of P2P platform if None is provided.
 
         Returns:
             bool: True on success, False on failure.
@@ -168,18 +162,14 @@ class P2P:
                 loading the page takes too long
 
         """
-        # Most platforms use their name in the title
-        # title_check will handle the few cases where they don't
-        if title_check is None:
-            title_check = self.name
-
         try:
             self.driver.get(self.urls['login'])
             self.wdwait(wait_until)
-            # Additional check that the correct page was loaded
-            if title_check not in self.driver.title:
+
+            # Make sure that the correct URL was loaded
+            if self.driver.current_url != self.urls['login']:
                 raise RuntimeError(
-                    'Die {0} Webseite konnte nicht geladen werden.'
+                    'Die {0}-Webseite konnte nicht geladen werden.'
                     ''.format(self.name))
         except TimeoutException:
             raise RuntimeError(
