@@ -209,21 +209,18 @@ def open_selenium_robocash(
         'login': 'https://robo.cash/de',
         'logout': 'https://robo.cash/de/logout',
         'statement': 'https://robo.cash/de/cabinet/statement'}
-    xpaths = {
-        'login_check': '/html/body/header/div/div/div[2]/nav/ul/li[3]/a',
-        'login_field': '/html/body/header/div/div/div[3]/a[1]',
-        'start_page_check': '/html/body/header/div/div/div[3]/a[1]'}
+    xpaths = {'login_field': '/html/body/header/div/div[2]/a'}
 
     with P2P('Robocash', urls, EC.title_contains('Willkommen')) as robocash:
 
         if not robocash.open_start_page(
-                EC.presence_of_element_located(
-                    (By.XPATH, xpaths['start_page_check']))):
+                EC.element_to_be_clickable(
+                    (By.XPATH, xpaths['login_field']))):
             return False
 
         if not robocash.log_into_page(
                 'email', 'password', credentials,
-                EC.element_to_be_clickable((By.XPATH, xpaths['login_check'])),
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
                 login_locator=(By.XPATH, xpaths['login_field'])):
             return False
 
