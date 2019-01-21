@@ -258,8 +258,7 @@ class P2P:
         return True
 
     def open_account_statement_page(
-            self, title: str, element_to_check: str,
-            check_by: str = By.ID) -> bool:
+            self, title: str, check_locator: Tuple[str, str]) -> bool:
         """
         Open account statement page of the P2P platform.
 
@@ -270,12 +269,9 @@ class P2P:
         Args:
             title (str): (part of the) window title of the account statement
                 page.
-            element_to_check (str): id of web element which must be present
-                on the account statement page.
-
-        Keyword Args:
-            check_by (str): attribute of By class for translating
-                element_to_check into web element.
+            check_locator (tuple[str, str]): locator of a web element which
+                must be present if the account statement page loaded
+                successfully.
 
         Returns:
             bool: True on success, False on failure.
@@ -287,8 +283,7 @@ class P2P:
         """
         try:
             self.driver.get(self.urls['statement'])
-            self.wdwait(EC.presence_of_element_located(
-                (check_by, element_to_check)))
+            self.wdwait(EC.presence_of_element_located(check_locator))
             assert title in self.driver.title
         except (AssertionError, TimeoutException):
             raise RuntimeError(

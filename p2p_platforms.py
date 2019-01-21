@@ -80,7 +80,7 @@ def open_selenium_bondora(
             return False
 
         if not bondora.open_account_statement_page(
-                title='Cashflow', element_to_check='StartYear'):
+                'Cashflow', (By.ID, 'StartYear')):
             return False
 
         start_year = Select(
@@ -170,7 +170,7 @@ def open_selenium_mintos(
             return False
 
         if not mintos.open_account_statement_page(
-                'Account Statement', 'period-from'):
+                'Account Statement', (By.ID, 'period-from')):
             return False
 
         if not mintos.generate_statement_direct(
@@ -230,7 +230,7 @@ def open_selenium_robocash(
             return False
 
         if not robocash.open_account_statement_page(
-                title='Kontoauszug', element_to_check='new_statement'):
+                'Kontoauszug', (By.ID, 'new_statement')):
             return False
 
         try:
@@ -321,7 +321,7 @@ def open_selenium_swaper(
             return False
 
         if not swaper.open_account_statement_page(
-                title='Swaper', element_to_check='account-statement'):
+                'Swaper', (By.ID, 'account-statement')):
             return False
 
         calendar_id_by = 'class'
@@ -394,7 +394,7 @@ def open_selenium_peerberry(
             return False
 
         if not peerberry.open_account_statement_page(
-                'Kontoauszug', 'startDate', check_by=By.NAME):
+                'Kontoauszug', (By.NAME, 'startDate')):
             return False
 
         # Close the cookie policy, if present
@@ -489,7 +489,7 @@ def open_selenium_estateguru(
             return False
 
         if not estateguru.open_account_statement_page(
-                'Übersicht', xpaths['account_statement_check'], By.XPATH):
+                'Übersicht', (By.XPATH, xpaths['account_statement_check'])):
             return False
 
         # Estateguru does not provide functionality for filtering payment
@@ -550,7 +550,8 @@ def open_selenium_iuvo(
         except NoSuchElementException:
             pass
 
-        if not iuvo.open_account_statement_page('Kontoauszug', 'date_from'):
+        if not iuvo.open_account_statement_page(
+                'Kontoauszug', (By.ID, 'date_from')):
             return False
 
         # Since Dec 2018 Iuvo only provides aggregated cashflows
@@ -573,8 +574,8 @@ def open_selenium_iuvo(
                     wait_until=EC.text_to_be_present_in_element(
                         (By.XPATH, xpaths['start_balance_name']),
                         'Anfangsbestand'),
-                    submit_btn_locator=(By.ID,
-                        'account_statement_filters_btn')):
+                    submit_btn_locator=(
+                        By.ID, 'account_statement_filters_btn')):
                 return False
 
             # Read statement from page
@@ -623,7 +624,7 @@ def open_selenium_grupeer(
         'statement': 'https://www.grupeer.com/de/account-statement'}
     xpaths = {
         'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
-                       'div/div/ul/li/a/span')}
+                         'div/div/ul/li/a/span')}
 
     with P2P(
             'Grupeer', urls,
@@ -646,7 +647,7 @@ def open_selenium_grupeer(
             return False
 
         if not grupeer.open_account_statement_page(
-                'Account Statement', 'from'):
+                'Account Statement', (By.ID, 'from')):
             return False
 
         if not grupeer.generate_statement_direct(
@@ -704,7 +705,7 @@ def open_selenium_dofinance(
             return False
 
         if not dofinance.open_account_statement_page(
-                'Transaktionen', 'date-from'):
+                'Transaktionen', (By.ID, 'date-from')):
             return False
 
         if not dofinance.generate_statement_direct(
@@ -769,7 +770,7 @@ def open_selenium_twino(
             return False
 
         if not twino.open_account_statement_page(
-                'TWINO', xpaths['start_date'], check_by=By.XPATH):
+                'TWINO', (By.XPATH, xpaths['start_date'])):
             return False
 
         if not twino.generate_statement_direct(
