@@ -174,10 +174,11 @@ def open_selenium_mintos(
             return False
 
         if not mintos.generate_statement_direct(
-                start_date, end_date, 'period-from', 'period-to', '%d.%m.%Y',
+                start_date, end_date, (By.ID, 'period-from'),
+                (By.ID, 'period-to'), '%d.%m.%Y',
                 wait_until=EC.presence_of_element_located(
                     (By.ID, 'export-button')),
-                submit_btn='filter-button', find_submit_btn_by=By.ID):
+                submit_btn_locator=(By.ID, 'filter-button')):
             return False
 
         success = mintos.download_statement('export-button', By.ID)
@@ -240,7 +241,8 @@ def open_selenium_robocash(
                 'werden.')
 
         if not robocash.generate_statement_direct(
-                start_date, end_date, 'date-after', 'date-before', '%Y-%m-%d'):
+                start_date, end_date, (By.ID, 'date-after'),
+                (By.ID, 'date-before'), '%Y-%m-%d'):
             return False
 
         # Robocash does not automatically show download button after statement
@@ -484,7 +486,7 @@ def open_selenium_estateguru(
         if not estateguru.log_into_page(
                 'username', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND'))):
-            return -1
+            return False
 
         if not estateguru.open_account_statement_page(
                 'Übersicht', xpaths['account_statement_check'], By.XPATH):
@@ -566,12 +568,13 @@ def open_selenium_iuvo(
                 xpaths['start_balance_value']).text
 
             if not iuvo.generate_statement_direct(
-                    month[0], month[1], 'date_from', 'date_to', '%Y-%m-%d',
+                    month[0], month[1], (By.ID, 'date_from'),
+                    (By.ID, 'date_to'), '%Y-%m-%d',
                     wait_until=EC.text_to_be_present_in_element(
                         (By.XPATH, xpaths['start_balance_name']),
                         'Anfangsbestand'),
-                    submit_btn='account_statement_filters_btn',
-                    find_submit_btn_by=By.ID):
+                    submit_btn_locator=(By.ID,
+                        'account_statement_filters_btn')):
                 return False
 
             # Read statement from page
@@ -647,12 +650,12 @@ def open_selenium_grupeer(
             return False
 
         if not grupeer.generate_statement_direct(
-                start_date, end_date, 'from', 'to', '%d.%m.%Y',
-                wait_until=EC.text_to_be_present_in_element(
+                start_date, end_date, (By.ID, 'from'), (By.ID, 'to'),
+                '%d.%m.%Y', wait_until=EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'balance-block'),
                     'Bilanz geöffnet am '
                     + str(start_date.strftime('%d.%m.%Y'))),
-                submit_btn='submit', find_submit_btn_by=By.NAME):
+                submit_btn_locator=(By.NAME, 'submit')):
             return False
 
         success = grupeer.download_statement('excel', By.NAME)
@@ -705,7 +708,8 @@ def open_selenium_dofinance(
             return False
 
         if not dofinance.generate_statement_direct(
-                start_date, end_date, 'date-from', 'date-to', '%d.%m.%Y',
+                start_date, end_date, (By.ID, 'date-from'), (By.ID, 'date-to'),
+                '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable((By.NAME, 'xls'))):
             return False
 
@@ -769,8 +773,8 @@ def open_selenium_twino(
             return False
 
         if not twino.generate_statement_direct(
-                start_date, end_date, xpaths['start_date'], xpaths['end_date'],
-                '%d.%m.%Y', find_elem_by=By.XPATH,
+                start_date, end_date, (By.XPATH, xpaths['start_date']),
+                (By.XPATH, xpaths['end_date']), '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable(
                     (By.CSS_SELECTOR, '.accStatement__pdf'))):
             return False

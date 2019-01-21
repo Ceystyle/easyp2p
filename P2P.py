@@ -372,9 +372,9 @@ class P2P:
 
     def generate_statement_direct(
             self, start_date: datetime.date, end_date: datetime.date,
-            start_element: str, end_element: str, date_format: str,
-            find_elem_by: str = By.ID, wait_until: ExpectedCondition = None,
-            submit_btn: str = None, find_submit_btn_by: str = None) -> bool:
+            start_locator: Tuple[str, str], end_locator: Tuple[str, str],
+            date_format: str, wait_until: ExpectedCondition = None,
+            submit_btn_locator: Tuple[str, str] = None) -> bool:
         """
         Generate acc. statement for platforms where date fields can be edited.
 
@@ -388,33 +388,30 @@ class P2P:
                 account statement should be generated.
             end_date (datetime.date): end of date range for which the
                 account statement should be generated.
-            start_element (str): id of field where the start date needs
-                to be entered.
-            end_element (str): id of field where the end date needs
-                to be entered.
+            start_locator (tuple[str, str]): locator of field where the start
+                date needs to be entered.
+            end_element (tuple[str, str]): locator of field where the end date
+                needs to be entered.
             date_format (str): date format.
 
         Keyword Args:
-            find_elem_by (str): attribute of By class for translating
-                start_element and end_element into web elements.
             wait_until (ExpectedCondition): Expected condition in case of
                 successful account statement generation.
-            submit_btn (str): id of button which needs to clicked to start
-                account statement generation. Not all P2P require this.
-            find_submit_btn_by (str): attribute of By class for translating
-                submit_btn into web element.
+            submit_btn_locator (tuple[str, str]): locator of button which needs
+                to clicked to start account statement generation. Not all P2P
+                platforms require this.
 
         Returns:
             bool: True on success, False on failure.
 
         """
         try:
-            date_from = self.driver.find_element(find_elem_by, start_element)
+            date_from = self.driver.find_element(*start_locator)
             date_from.send_keys(Keys.CONTROL + 'a')
             date_from.send_keys(datetime.strftime(start_date, date_format))
 
             try:
-                date_to = self.driver.find_element(find_elem_by, end_element)
+                date_to = self.driver.find_element(*end_locator)
                 date_to.click()
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
@@ -422,13 +419,13 @@ class P2P:
             except StaleElementReferenceException:
                 # Some P2P sites refresh the page after a change
                 # which leads to this exception
-                date_to = self.driver.find_element(find_elem_by, end_element)
+                date_to = self.driver.find_element(*end_locator)
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(datetime.strftime(end_date, date_format))
 
-            if submit_btn is not None:
+            if submit_btn_locator is not None:
                 button = self.wdwait(EC.element_to_be_clickable(
-                    (find_submit_btn_by, submit_btn)))
+                    submit_btn_locator))
                 if self.name == 'Mintos':
                     # Mintos needs some time until the button really works
                     # TODO: find better fix
