@@ -2,11 +2,13 @@
 # Copyright 2018-19 Niko Sandschneider
 
 from datetime import date
-import keyring
+from pathlib import Path
 import sys
 from typing import Tuple
 import unittest
 
+import keyring
+import pandas as pd
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
@@ -121,16 +123,47 @@ class P2PTests(unittest.TestCase):
         self.start_date = date(2018, 9, 1)
         self.end_date = date(2018, 12, 31)
 
+    def are_files_equal(self, file1: str, file2: str) -> bool:
+        """
+        Helper method to determine if two files are equal.
+
+        Args:
+            file1 (str): Name including path of first file
+            file2 (str): Name including path of second file
+
+        Returns:
+            bool: True if the files are equal, False if not or if at least one
+            of the files does not exist
+
+        """
+        if Path(file1).suffix == Path(file2).suffix:
+            file_format = Path(file1).suffix
+        else:
+            return False
+
+        try:
+            if file_format == '.csv':
+                df1 = pd.read_csv(file1)
+                df2 = pd.read_csv(file2)
+            elif file_format == '.xlsx':
+                df1 = pd.read_excel(file1)
+                df2 = pd.read_excel(file2)
+            else:
+                raise TypeError('Unknown file format!')
+        except FileNotFoundError:
+            return False
+
+        return df1.equals(df2)
+
     def get_credentials_from_keyring(self, platform: str) -> Tuple[str, str]:
         """
-        Helper function to get credentials from the keyring.
+        Helper method to get credentials from the keyring.
 
         Args:
             platform (str): Name of the P2P platform
 
         Returns:
-            Tuple[str, str]: (username, password) for the P2P platform or None
-                if the platform was not found in the keyring.
+            Tuple[str, str]: (username, password) for the P2P platform
 
         """
         if keyring.get_keyring():
