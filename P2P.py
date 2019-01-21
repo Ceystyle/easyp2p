@@ -71,6 +71,9 @@ class P2P:
             hover_locator (tuple[str, str]): locator of web element where the
                 mouse needs to hover in order to make logout button visible.
 
+        Throws:
+            RuntimeError: if no URL for login or statement page is provided.
+
         """
         self.name = name
         self.urls = urls
@@ -80,6 +83,7 @@ class P2P:
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
         self.driver = None
+        self.logged_in = False
 
         # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
@@ -102,17 +106,18 @@ class P2P:
 
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         """End of context management protocol."""
-        if 'logout' in self.urls:
-            self.logout_by_url(self.logout_wait_until)
-        else:
-            try:
-                self.logout_by_button(
+
+        if self.logged_in:
+            if 'logout' in self.urls:
+                success = self.logout_by_url(self.logout_wait_until)
+            else:
+                success = self.logout_by_button(
                     self.logout_locator, self.logout_wait_until,
                     hover_locator=self.hover_locator)
-            except NoSuchElementException:
-                # If an error occurs before login, the logout button is not
-                # present yet, which leads to this error. It can be ignored.
-                pass
+
+            if success:
+                self.logged_in = False
+
         self.driver.close()
         if exc_type:
             raise exc_type(exc_value)
@@ -181,6 +186,7 @@ class P2P:
                 'Das Laden der {0} Webseite hat zu lange gedauert.'
                 ''.format(self.name))
 
+        self.logged_in = True
         return True
 
     def log_into_page(
@@ -294,7 +300,7 @@ class P2P:
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
             wait_until: ExpectedCondition,
-            hover_locator: Tuple[str, str] = None) -> None:
+            hover_locator: Tuple[str, str] = None) -> bool:
         """
         Logout of P2P platform using the provided logout button.
 
@@ -312,8 +318,12 @@ class P2P:
             hover_locator (str): locator of web element over which the mouse
                 needs to hover in order to make the logout button visible.
 
+        Returns:
+            bool: True if logout was successful.
+
         Throws:
-            RuntimeError: if loading of page takes too long
+            RuntimeWarning: if loading of page takes too long or the download
+                button cannot be found.
 
         """
         try:
@@ -325,13 +335,14 @@ class P2P:
 
             self.driver.find_element(*logout_locator).click()
             self.wdwait(wait_until)
-        except TimeoutException:
+        except (NoSuchElementException, TimeoutException):
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
-            # Continue anyway
+
+        return True
 
     def logout_by_url(
-            self, wait_until: ExpectedCondition) -> None:
+            self, wait_until: ExpectedCondition) -> bool:
         """
         Logout of P2P platform using the provided URL.
 
@@ -343,8 +354,11 @@ class P2P:
             wait_until (ExpectedCondition): Expected condition in case of
                 successful logout
 
+        Returns:
+            bool: True if logout was successful.
+
         Throws:
-            RuntimeError: if loading of page takes too long
+            RuntimeWarning: if loading of page takes too long
 
         """
         try:
@@ -353,7 +367,8 @@ class P2P:
         except TimeoutException:
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
-            # Continue anyway
+
+        return True
 
     def generate_statement_direct(
             self, start_date: datetime.date, end_date: datetime.date,
