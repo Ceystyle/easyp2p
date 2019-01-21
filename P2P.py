@@ -650,7 +650,9 @@ class P2P:
 
         return True
 
-    def wdwait(self, wait_until: ExpectedCondition) -> WebElement:
+    def wdwait(
+            self, wait_until: ExpectedCondition,
+            delay: float = 5.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
 
@@ -658,11 +660,13 @@ class P2P:
             wait_until (ExpectedCondition): expected condition for which the
                 webdriver should wait.
 
+        Keyword Args:
+            delay (float): maximal waiting time in seconds
+
         Returns:
             WebElement: WebElement which WebDriverWait waited for.
 
         """
-        delay = 5
         return WebDriverWait(self.driver, delay).until(wait_until)
 
     def clean_download_location(self) -> bool:
