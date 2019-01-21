@@ -64,7 +64,7 @@ def bondora():
     df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
 
     df.drop(['Gesamt:'], inplace=True)
-    df.replace({'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
+    df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
     df.rename_axis('Datum', inplace=True)
     df.rename(
         columns={
