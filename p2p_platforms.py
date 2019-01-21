@@ -148,13 +148,13 @@ def open_selenium_mintos(
     xpaths = {
         'logout_btn': "//a[contains(@href,'logout')]"}
     today = datetime.today()
-    default_file_name = '{0}{1}{2}-account-statement'.format(
+    default_file_name = '{0}{1}{2}-account-statement.xlsx'.format(
         today.year, today.strftime('%m'), today.strftime('%d'))
 
     with P2P(
             'Mintos', urls, EC.title_contains('Vielen Dank'),
             logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name=default_file_name, file_format='xlsx') as mintos:
+            default_file_name=default_file_name) as mintos:
 
         if not mintos.clean_download_location():
             return False
@@ -300,7 +300,7 @@ def open_selenium_swaper(
     with P2P(
             'Swaper', urls, EC.presence_of_element_located((By.ID, 'about')),
             logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name='excel-storage*', file_format='xlsx') as swaper:
+            default_file_name='excel-storage*.xlsx') as swaper:
 
         if not swaper.clean_download_location():
             return False
@@ -373,7 +373,7 @@ def open_selenium_peerberry(
     with P2P(
             'PeerBerry', urls, EC.title_contains('Einloggen'),
             logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name='transactions', file_format='csv') as peerberry:
+            default_file_name='transactions.csv') as peerberry:
 
         if not peerberry.clean_download_location():
             return False
@@ -464,14 +464,12 @@ def open_selenium_estateguru(
         'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
                        'div[1]/div[2]/button')}
     today = datetime.today()
-    default_file_name = 'payments_{0}-{1}-{2}*'.format(today.year,
-                                                       today.strftime('%m'),
-                                                       today.strftime('%d'))
+    default_file_name = 'payments_{0}-{1}-{2}*.csv'.format(
+        today.year, today.strftime('%m'), today.strftime('%d'))
     with P2P(
             'Estateguru', urls,
             EC.element_to_be_clickable((By.NAME, 'username')),
-            default_file_name=default_file_name,
-            file_format='csv') as estateguru:
+            default_file_name=default_file_name) as estateguru:
 
         if not estateguru.open_start_page(
                 EC.element_to_be_clickable((By.NAME, 'username'))):
@@ -624,7 +622,7 @@ def open_selenium_grupeer(
             'Grupeer', urls,
             EC.title_contains('P2P Investitionsplattform Grupeer'),
             (By.LINK_TEXT, 'Ausloggen'),
-            default_file_name='Account statement', file_format='xlsx',
+            default_file_name='Account statement.xlsx',
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
         if not grupeer.clean_download_location():
@@ -678,12 +676,11 @@ def open_selenium_dofinance(
         'login': 'https://www.dofinance.eu/de/users/login',
         'logout': 'https://www.dofinance.eu/de/users/logout',
         'statement': 'https://www.dofinance.eu/de/users/statement'}
-    default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59'.format(
+    default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59.xlsx'.format(
         start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
     with P2P(
             'DoFinance', urls, EC.title_contains('Kreditvergabe Plattform'),
-            default_file_name=default_file_name,
-            file_format='xlsx') as dofinance:
+            default_file_name=default_file_name) as dofinance:
 
         if not dofinance.clean_download_location():
             return False
@@ -745,8 +742,7 @@ def open_selenium_twino(
             'Twino', urls,
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name='account_statement_*',
-            file_format='xlsx') as twino:
+            default_file_name='account_statement_*.xlsx') as twino:
 
         if not twino.clean_download_location():
             return False

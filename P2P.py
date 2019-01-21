@@ -12,6 +12,7 @@ webdriver. easyP2P uses Chromedriver as webdriver.
 
 from datetime import datetime
 import glob
+from pathlib import Path
 import os
 import time
 from typing import Mapping, Tuple, Union
@@ -50,7 +51,7 @@ class P2P:
             self, name: str, urls: Mapping[str, str],
             logout_wait_until: ExpectedCondition,
             logout_locator: Tuple[str, str] = None,
-            default_file_name: str = None, file_format: str = None,
+            default_file_name: str = None,
             hover_locator: Tuple[str, str] = None) -> None:
         """
         Constructor of P2P class.
@@ -65,9 +66,8 @@ class P2P:
 
         Keyword Args:
             logout_locator (tuple[str, str]): locator of logout web element.
-            default_file_name (str): default name for account statement
-                downloads, chosen by the P2P platform
-            file_format (str): format of the download file
+            default_file_name (str): default name including path for account
+                statement downloads, chosen by the P2P platform
             hover_locator (tuple[str, str]): locator of web element where the
                 mouse needs to hover in order to make logout button visible.
 
@@ -78,7 +78,6 @@ class P2P:
         self.name = name
         self.urls = urls
         self.default_file_name = default_file_name
-        self.file_format = file_format
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
@@ -610,14 +609,13 @@ class P2P:
         duration = 0
         while not download_finished:
             file_list = glob.glob(
-                'p2p_downloads/{0}.{1}'.format(
-                    self.default_file_name, self.file_format))
+                'p2p_downloads/' + self.default_file_name)
             if len(file_list) == 1:
                 download_finished = True
             elif not file_list:
                 file_list = glob.glob(
-                    'p2p_downloads/{0}.{1}.crdownload'.format(
-                        self.default_file_name, self.file_format))
+                    'p2p_downloads/{0}.crdownload'.format(
+                        self.default_file_name))
                 if not file_list and duration > 1:
                     # Duration ensures that at least one second has gone by
                     # since starting the download
@@ -670,8 +668,7 @@ class P2P:
 
         """
         file_list = glob.glob(
-            'p2p_downloads/{0}.{1}'.format(
-                self.default_file_name, self.file_format))
+            'p2p_downloads/' + self.default_file_name)
         if file_list:
             for file in file_list:
                 try:
@@ -688,11 +685,11 @@ class P2P:
 
     def rename_statement(self) -> bool:
         """
-        Rename downloaded statement to platform_name_statement.file_format.
+        Rename downloaded statement to default_file_name.
 
         Will rename the downloaded statement from the
         default name chosen by the P2P platform to
-        platform_name_statement.file_format.
+        default_file_name.
 
         Returns:
             bool: True on success, False on failure.
@@ -701,12 +698,11 @@ class P2P:
             RuntimeError: if the downloaded statement cannot be found
 
         """
-        file_list = glob.glob('p2p_downloads/{0}.{1}'.format(
-            self.default_file_name, self.file_format))
+        file_list = glob.glob('p2p_downloads/' + self.default_file_name)
         if len(file_list) == 1:
             os.rename(
                 file_list[0], 'p2p_downloads/{0}_statement.{1}'.format(
-                    self.name.lower(), self.file_format))
+                    self.name.lower(), Path(self.default_file_name).suffix))
         elif not file_list:
             raise RuntimeError(
                 '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
