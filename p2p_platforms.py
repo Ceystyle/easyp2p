@@ -471,7 +471,8 @@ def open_selenium_estateguru(
                                                        today.strftime('%m'),
                                                        today.strftime('%d'))
     with P2P(
-            'Estateguru', urls, EC.title_contains('Einloggen/Registrieren'),
+            'Estateguru', urls,
+            EC.element_to_be_clickable((By.NAME, 'username')),
             default_file_name=default_file_name,
             file_format='csv') as estateguru:
 
