@@ -181,60 +181,91 @@ class P2PTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Bondora')
         self.assertTrue(p2p_platforms.open_selenium_bondora(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/bondora_statement.csv',
+            'tests/results/result_test_open_selenium_bondora.csv'))
 
     def test_open_selenium_dofinance(self):
         """Test open_selenium_dofinance function"""
         credentials = self.get_credentials_from_keyring('DoFinance')
         self.assertTrue(p2p_platforms.open_selenium_dofinance(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/dofinance_statement.xlsx',
+            'tests/results/result_test_open_selenium_dofinance.xlsx'))
 
     def test_open_selenium_estateguru(self):
         """Test open_selenium_estateguru function"""
         credentials = self.get_credentials_from_keyring('Estateguru')
         self.assertTrue(p2p_platforms.open_selenium_estateguru(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/estateguru_statement.csv',
+            'tests/results/result_test_open_selenium_estateguru.csv'))
 
     def test_open_selenium_grupeer(self):
         """Test open_selenium_grupeer function"""
         credentials = self.get_credentials_from_keyring('Grupeer')
         self.assertTrue(p2p_platforms.open_selenium_grupeer(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/grupeer_statement.xlsx',
+            'tests/results/result_test_open_selenium_grupeer.xlsx'))
 
     def test_open_selenium_iuvo(self):
         """Test open_selenium_iuvo function"""
         credentials = self.get_credentials_from_keyring('Iuvo')
         self.assertTrue(p2p_platforms.open_selenium_iuvo(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/iuvo_statement.csv',
+            'tests/results/result_test_open_selenium_iuvo.csv'))
 
     def test_open_selenium_mintos(self):
         """Test open_selenium_mintos function"""
         credentials = self.get_credentials_from_keyring('Mintos')
         self.assertTrue(p2p_platforms.open_selenium_mintos(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/mintos_statement.xlsx',
+            'tests/results/result_test_open_selenium_mintos.xlsx'))
 
     def test_open_selenium_peerberry(self):
         """Test open_selenium_peerberry function"""
         credentials = self.get_credentials_from_keyring('PeerBerry')
         self.assertTrue(p2p_platforms.open_selenium_peerberry(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/peerberry_statement.csv',
+            'tests/results/result_test_open_selenium_peerberry.csv'))
 
     def test_open_selenium_robocash(self):
         """Test open_selenium_robocash function"""
         credentials = self.get_credentials_from_keyring('Robocash')
         self.assertTrue(p2p_platforms.open_selenium_robocash(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/robocash_statement.xlsx',
+            'tests/results/result_test_open_selenium_robocash.xlsx'))
 
     def test_open_selenium_swaper(self):
         """Test open_selenium_swaper function"""
         credentials = self.get_credentials_from_keyring('Swaper')
         self.assertTrue(p2p_platforms.open_selenium_swaper(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/swaper_statement.xlsx',
+            'tests/results/result_test_open_selenium_swaper.xlsx'))
 
     def test_open_selenium_twino(self):
         """Test open_selenium_twino function"""
         credentials = self.get_credentials_from_keyring('Twino')
         self.assertTrue(p2p_platforms.open_selenium_twino(
             self.start_date, self.end_date, credentials))
+        self.assertTrue(self.are_files_equal(
+            'p2p_downloads/twino_statement.xlsx',
+            'tests/results/result_test_open_selenium_twino.xlsx'))
+
 
 if __name__ == "__main__":
     unittest.main()

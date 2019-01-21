@@ -267,7 +267,7 @@ def open_selenium_robocash(
         for driver_cookie in driver_cookies:
             cookies_copy[driver_cookie["name"]] = driver_cookie["value"]
         data = requests.get(download_url, cookies=cookies_copy)
-        with open('p2p_downloads/robocash_statement.xls', 'wb') as output:
+        with open('p2p_downloads/robocash_statement.xlsx', 'wb') as output:
             output.write(data.content)
 
     return True

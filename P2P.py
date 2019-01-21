@@ -701,7 +701,7 @@ class P2P:
         file_list = glob.glob('p2p_downloads/' + self.default_file_name)
         if len(file_list) == 1:
             os.rename(
-                file_list[0], 'p2p_downloads/{0}_statement.{1}'.format(
+                file_list[0], 'p2p_downloads/{0}_statement{1}'.format(
                     self.name.lower(), Path(self.default_file_name).suffix))
         elif not file_list:
             raise RuntimeError(
