@@ -143,7 +143,7 @@ def open_selenium_mintos(
 
     """
     urls = {
-        'login': 'https://www.mintos.com/de/',
+        'login': 'https://www.mintos.com/de/login',
         'statement': 'https://www.mintos.com/de/kontoauszug/'}
     xpaths = {
         'logout_btn': "//a[contains(@href,'logout')]"}
@@ -160,13 +160,13 @@ def open_selenium_mintos(
             return False
 
         if not mintos.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'MyAccountButton'))):
+                EC.element_to_be_clickable((By.NAME, '_username')),
+                'Einloggen'):
             return False
 
         if not mintos.log_into_page(
                 '_username', '_password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
-                login_locator=(By.NAME, 'MyAccountButton')):
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))):
             return False
 
         if not mintos.open_account_statement_page(

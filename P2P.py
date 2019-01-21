@@ -219,8 +219,6 @@ class P2P:
         Keyword Args:
             login_locator (tuple[str, str]): locator of web element which has
                 to be clicked in order to open login form.
-            find_login_by (str): attribute of By class for translating
-                login_field into web element.
             fill_delay (float): a small delay between filling in password
                 and user name fields.
 
