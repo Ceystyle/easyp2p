@@ -2,19 +2,18 @@
 # Copyright 2018-19 Niko Sandschneider
 
 from datetime import date
-from pathlib import Path
 import sys
 from typing import Mapping, Tuple, Union
 import unittest
 
 import keyring
-import pandas as pd
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
 
 from ui.main_window import MainWindow
 from ui.progress_window import ProgressWindow
+import p2p_parser
 import p2p_platforms
 
 app = QApplication(sys.argv)
@@ -142,21 +141,10 @@ class P2PPlatformsTests(unittest.TestCase):
             of the files does not exist
 
         """
-        if Path(file1).suffix == Path(file2).suffix:
-            file_format = Path(file1).suffix
-        else:
-            return False
-
         try:
-            if file_format == '.csv':
-                df1 = pd.read_csv(file1)
-                df2 = pd.read_csv(file2)
-            elif file_format == '.xlsx':
-                df1 = pd.read_excel(file1)
-                df2 = pd.read_excel(file2)
-            else:
-                raise TypeError('Unknown file format!')
-        except FileNotFoundError:
+            df1 = p2p_parser.get_df_from_file(file1)
+            df2 = p2p_parser.get_df_from_file(file2)
+        except RuntimeError:
             return False
 
         if drop_lines is not None:
