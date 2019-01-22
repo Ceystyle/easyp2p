@@ -287,11 +287,11 @@ class P2PParserTests(unittest.TestCase):
             + 'result_test_open_selenium_{0}.{1}'
             ''.format(platform, file_format))
         with open(
-                RESULT_PATH + 'result_test_{0}_parser.csv'.format(platform)) \
+                RESULT_PATH + 'result_parser_test_{0}.csv'.format(platform)) \
                 as csvfile:
             content = csvfile.read()
 
-        self.assertEqual(str((df, unknown_cf_types)), content)
+        self.assertEqual(str((df.to_string(), unknown_cf_types)), content)
 
     def test_bondora(self):
         self.run_parser_test('bondora', 'csv')
