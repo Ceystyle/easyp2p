@@ -557,9 +557,11 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
     twino_dict['REPAYMENT PRINCIPAL'] = REDEMPTION_PAYMENT
     twino_dict['BUY_SHARES PRINCIPAL'] = INVESTMENT_PAYMENT
 
-    df = df[1:]  # drop first two rows
-    df.columns = df.iloc[0]  # the first row now contains header names
-    df = df[1:]
+    df = df[1:]  # The first row only contains a generic header
+    new_header = df.iloc[0] # Get the new first row as header
+    df = df[1:] # Remove the header row
+    df.columns = new_header # Set the header row as the df header
+
     df.rename(columns={'Booking Date': 'Datum'}, inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
