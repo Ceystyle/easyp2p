@@ -4,7 +4,7 @@
 p2p_parser contains methods for parsing the output files of P2P platforms.
 
     Each P2P platform has a unique format for presenting investment results.
-    The purpose of this module is to provide parser methods to combine them
+    The purpose of this module is to provide parser methods to transform them
     into a single output format.
 
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
@@ -52,9 +52,14 @@ def check_unknown_cf_types(
         df['Cashflow-Typ'].isna()).dropna().tolist())
 
 
-def bondora() -> Tuple[pd.DataFrame, Set[str]]:
+def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Bondora.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Bondora web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -62,7 +67,8 @@ def bondora() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
+    #TODO: check that the file exists
+    df = pd.read_csv(input_file, index_col=0)
 
     df.drop(['Gesamt:'], inplace=True)
     df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
@@ -106,9 +112,14 @@ def bondora() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def mintos() -> Tuple[pd.DataFrame, Set[str]]:
+def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Mintos.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Mintos web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -116,7 +127,7 @@ def mintos() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel('p2p_downloads/mintos_statement.xlsx')
+    df = pd.read_excel(input_file)
 
     if df is None:
         return None
@@ -159,9 +170,14 @@ def mintos() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def robocash() -> Tuple[pd.DataFrame, Set[str]]:
+def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Robocash.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Robocash web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -169,7 +185,7 @@ def robocash() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel('p2p_downloads/robocash_statement.xls')
+    df = pd.read_excel(input_file)
 
     if df is None:
         return None
@@ -203,9 +219,14 @@ def robocash() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def swaper() -> Tuple[pd.DataFrame, Set[str]]:
+def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Swaper.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Swaper web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -213,7 +234,7 @@ def swaper() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel('p2p_downloads/swaper_statement.xlsx')
+    df = pd.read_excel(input_file)
 
     if df is None:
         return None
@@ -245,9 +266,14 @@ def swaper() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def peerberry() -> Tuple[pd.DataFrame, Set[str]]:
+def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Peerberry.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the PeerBerry web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -255,7 +281,7 @@ def peerberry() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv('p2p_downloads/peerberry_statement.csv')
+    df = pd.read_csv(input_file)
 
     if df is None:
         return None
@@ -285,9 +311,14 @@ def peerberry() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def estateguru() -> Tuple[pd.DataFrame, Set[str]]:
+def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Estateguru.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Estateguru web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -295,7 +326,7 @@ def estateguru() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv('p2p_downloads/estateguru_statement.csv')
+    df = pd.read_csv(input_file)
 
     if df is None:
         return None
@@ -336,9 +367,14 @@ def estateguru() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def iuvo() -> Tuple[pd.DataFrame, Set[str]]:
+def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Iuvo.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Iuvo web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -346,7 +382,7 @@ def iuvo() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv('p2p_downloads/iuvo_statement.csv')
+    df = pd.read_csv(input_file)
 
     if df is None:
         return None
@@ -391,9 +427,14 @@ def iuvo() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def grupeer() -> Tuple[pd.DataFrame, Set[str]]:
+def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Grupeer.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Grupeer web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -401,7 +442,7 @@ def grupeer() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel('p2p_downloads/grupeer_statement.xlsx')
+    df = pd.read_excel(input_file)
 
     if df is None:
         return None
@@ -436,9 +477,14 @@ def grupeer() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def dofinance() -> Tuple[pd.DataFrame, Set[str]]:
+def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
-    Parser for Dofinance.
+    Parser for DoFinance.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the DoFinance web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -446,7 +492,7 @@ def dofinance() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel('p2p_downloads/dofinance_statement.xlsx')
+    df = pd.read_excel(input_file)
 
     if df is None:
         return None
@@ -480,9 +526,14 @@ def dofinance() -> Tuple[pd.DataFrame, Set[str]]:
     return (df_result, unknown_cf_types)
 
 
-def twino() -> Tuple[pd.DataFrame, Set[str]]:
+def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
+        -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Twino.
+
+    Keyword Args:
+        input_file (str): file name including path of the account statement
+            downloaded from the Twino web site
 
     Returns:
         tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
@@ -490,7 +541,7 @@ def twino() -> Tuple[pd.DataFrame, Set[str]]:
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel('p2p_downloads/twino_statement.xlsx')
+    df = pd.read_excel(input_file)
 
     if df is None:
         return None
