@@ -4,7 +4,7 @@
 from datetime import date
 from pathlib import Path
 import sys
-from typing import Tuple
+from typing import Mapping, Tuple, Union
 import unittest
 
 import keyring
@@ -116,20 +116,26 @@ class ProgressWindowTests(unittest.TestCase):
         self.assertEqual(self.form.pushButton_abort.isEnabled(), True)
 
 
-class P2PTests(unittest.TestCase):
+class P2PPlatformsTests(unittest.TestCase):
     """Test p2p_platforms"""
     def setUp(self):
         """Initializes the default arguments for p2p_platforms."""
         self.start_date = date(2018, 9, 1)
         self.end_date = date(2018, 12, 31)
 
-    def are_files_equal(self, file1: str, file2: str) -> bool:
+    def are_files_equal(
+        self, file1: str, file2: str,
+        drop_lines: Union[int, Mapping[int]] = None) -> bool:
         """
         Helper method to determine if two files are equal.
 
         Args:
             file1 (str): Name including path of first file
             file2 (str): Name including path of second file
+
+        Keyword Args:
+            drop_lines (int or list[int]): lines in the files by row number
+                or range which should not be compared
 
         Returns:
             bool: True if the files are equal, False if not or if at least one
@@ -152,6 +158,10 @@ class P2PTests(unittest.TestCase):
                 raise TypeError('Unknown file format!')
         except FileNotFoundError:
             return False
+
+        if drop_lines is not None:
+            df1.drop(df1.index[drop_lines])
+            df2.drop(df2.index[drop_lines])
 
         return df1.equals(df2)
 
@@ -264,7 +274,7 @@ class P2PTests(unittest.TestCase):
             self.start_date, self.end_date, credentials))
         self.assertTrue(self.are_files_equal(
             'p2p_downloads/twino_statement.xlsx',
-            'tests/results/result_test_open_selenium_twino.xlsx'))
+            'tests/results/result_test_open_selenium_twino.xlsx'), drop_lines=0)
 
 
 if __name__ == "__main__":
