@@ -8,7 +8,6 @@ from typing import AbstractSet, Mapping, Tuple
 
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
-from xlrd.biffh import XLRDError
 
 import p2p_parser
 import p2p_results
@@ -147,22 +146,14 @@ class WorkerThread(QThread):
         try:
             (df, unknown_cf_types) = parser()
             list_of_dfs.append(df)
-        except FileNotFoundError:
-            error_msg = ('Der heruntergeladene {0}-Kontoauszug konnte nicht '
-                         'gefunden werden!'.format(platform))
-            self.ignore_platform(platform, error_msg)
+        except RuntimeError as err:
+            self.ignore_platform(platform, err)
             return list_of_dfs
-        except XLRDError:
-            error_msg = ('Der heruntergeladene {0}-Kontoauszug ist beschädigt!'
-                         ''.format(platform))
-            self.ignore_platform(platform, error_msg)
-            return list_of_dfs
-        else:
-            if unknown_cf_types:
-                warning_msg = ('{0}: unbekannter Cashflow-Typ wird im '
-                               'Ergebnis ignoriert: {1}'
-                               ''.format(platform, unknown_cf_types))
-                self.update_progress_text.emit(warning_msg, self.RED)
+
+        if unknown_cf_types:
+            warning_msg = ('{0}: unbekannter Cashflow-Typ wird im Ergebnis '
+                'ignoriert: {1}'.format(platform, unknown_cf_types))
+            self.update_progress_text.emit(warning_msg, self.RED)
 
         return list_of_dfs
 

@@ -12,9 +12,11 @@ p2p_parser contains methods for parsing the output files of P2P platforms.
 """
 
 import locale
+from pathlib import Path
 from typing import Set, Tuple, Union
 
 import pandas as pd
+from xlrd.biffh import XLRDError
 
 Parser = Union[
     'bondora', 'dofinance', 'estateguru', 'grupeer', 'iuvo', 'mintos',
@@ -52,6 +54,42 @@ def check_unknown_cf_types(
         df['Cashflow-Typ'].isna()).dropna().tolist())
 
 
+def get_df_from_file(input_file):
+    """
+    Read a pandas.DataFrame from input_file.
+
+    Args:
+        input_file (str): file name including path
+
+    Returns:
+        pandas.DataFrame: data frame which was read from the file
+
+    Throws:
+        RuntimeError: if input_file does not exist, cannot be read or if the
+            file format is neither csv or xlsx
+
+    """
+
+    file_format = Path(input_file).suffix
+
+    try:
+        if file_format == '.csv':
+            df = pd.read_csv(input_file)
+        elif file_format == '.xlsx':
+            df = pd.read_excel(input_file)
+        else:
+            raise RuntimeError(
+                'Unbekanntes Dateiformat im Parser: ', input_file)
+    except FileNotFoundError:
+        raise RuntimeError(
+                '{0} konnte nicht gefunden werden!'.format(input_file))
+    except XLRDError:
+        raise RuntimeError('Die Datei {0} ist beschädigt und kann nicht '
+            'verwendet werden!'.format(input_file))
+
+    return df
+
+
 def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
         -> Tuple[pd.DataFrame, Set[str]]:
     """
@@ -67,8 +105,7 @@ def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: check that the file exists
-    df = pd.read_csv(input_file, index_col=0)
+    df = get_df_from_file(input_file)
 
     df.drop(['Gesamt:'], inplace=True)
     df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
@@ -127,10 +164,7 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     mintos_dict = dict()
     mintos_dict['Interest income'] = INTEREST_PAYMENT
@@ -185,10 +219,7 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     robocash_dict = dict()
     robocash_dict['Zinsenzahlung'] = INTEREST_PAYMENT
@@ -234,10 +265,7 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     swaper_dict = dict()
     swaper_dict['REPAYMENT_INTEREST'] = INTEREST_PAYMENT
@@ -281,10 +309,7 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     peerberry_dict = dict()
     peerberry_dict['Amount of interest payment received'] = INTEREST_PAYMENT
@@ -326,10 +351,7 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     estateguru_dict = dict()
     estateguru_dict['Zins'] = INTEREST_PAYMENT
@@ -382,10 +404,7 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_csv(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     df[INTEREST_PAYMENT] = 0
     df[REDEMPTION_PAYMENT] = 0
@@ -442,10 +461,7 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     grupeer_dict = dict()
     grupeer_dict['Interest'] = INTEREST_PAYMENT
@@ -492,10 +508,7 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     dofinance_dict = dict()
     dofinance_dict['Verdienter Gewinn'] = INTEREST_PAYMENT
@@ -505,7 +518,8 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
         REDEMPTION_PAYMENT
     dofinance_dict['Anlage\nRate: 12% Typ: automatisch'] = INVESTMENT_PAYMENT
 
-    df = df[:-2]  # drop the last two rows
+    # The last two rows only contain a summary, drop them
+    df = df[:-2]
     df.rename(columns={'Bearbeitungsdatum': 'Datum'}, inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
@@ -541,10 +555,7 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = pd.read_excel(input_file)
-
-    if df is None:
-        return None
+    df = get_df_from_file(input_file)
 
     twino_dict = dict()
     twino_dict['EXTENSION INTEREST'] = INTEREST_PAYMENT
