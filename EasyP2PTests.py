@@ -16,8 +16,9 @@ from ui.progress_window import ProgressWindow
 import p2p_parser
 import p2p_platforms
 
-app = QApplication(sys.argv)
+RESULT_PATH = 'tests/results/'
 
+app = QApplication(sys.argv)
 
 class MainWindowTests(unittest.TestCase):
     """Test the main window of easyP2P"""
@@ -124,7 +125,7 @@ class P2PPlatformsTests(unittest.TestCase):
 
     def are_files_equal(
         self, file1: str, file2: str,
-        drop_lines: Union[int, Mapping[int]] = None) -> bool:
+        drop_lines: Union[int, Mapping[int, int]] = None) -> bool:
         """
         Helper method to determine if two files are equal.
 
@@ -264,6 +265,63 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/twino_statement.xlsx',
             'tests/results/result_test_open_selenium_twino.xlsx'), drop_lines=0)
 
+
+class P2PParserTests(unittest.TestCase):
+    """Test p2p_parser"""
+
+    def run_parser_test(self, platform: str, file_format: str) -> None:
+        """
+        Test the parser of the given platform.
+
+        In order to run these tests the known correct results need to be saved
+        in RESULT_PATH/result_"platform_name"_parser.csv first.
+
+        Args:
+            platform (str): Name of the P2P platform
+            file_format (str): format of file with known correct result
+
+        """
+        func = getattr(p2p_parser, platform.lower())
+        (df, unknown_cf_types) = func(
+            RESULT_PATH
+            + 'result_test_open_selenium_{0}.{1}'
+            ''.format(platform, file_format))
+        with open(
+                RESULT_PATH + 'result_test_{0}_parser.csv'.format(platform)) \
+                as csvfile:
+            content = csvfile.read()
+
+        self.assertEqual(str((df, unknown_cf_types)), content)
+
+    def test_bondora(self):
+        self.run_parser_test('bondora', 'csv')
+
+    def test_dofinance(self):
+        self.run_parser_test('dofinance', 'xlsx')
+
+    def test_estateguru(self):
+        self.run_parser_test('estateguru', 'csv')
+
+    def test_grupeer(self):
+        self.run_parser_test('grupeer', 'xlsx')
+
+    def test_iuvo(self):
+        self.run_parser_test('iuvo', 'csv')
+
+    def test_mintos(self):
+        self.run_parser_test('mintos', 'xlsx')
+
+    def test_peerberry(self):
+        self.run_parser_test('peerberry', 'csv')
+
+    def test_robocash(self):
+        self.run_parser_test('robocash', 'xlsx')
+
+    def test_swaper(self):
+        self.run_parser_test('swaper', 'xlsx')
+
+    def test_twino(self):
+        self.run_parser_test('twino', 'xlsx')
 
 if __name__ == "__main__":
     unittest.main()
