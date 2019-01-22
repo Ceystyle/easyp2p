@@ -107,6 +107,7 @@ def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
     """
     df = get_df_from_file(input_file)
 
+    df.set_index('Zeitraum', inplace=True)
     df.drop(['Gesamt:'], inplace=True)
     df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
     df.rename_axis('Datum', inplace=True)
