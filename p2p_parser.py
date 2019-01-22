@@ -33,7 +33,7 @@ START_BALANCE_NAME = 'Startguthaben'
 END_BALANCE_NAME = 'Endsaldo'
 
 
-def check_missing_cf_types(df, orig_cf_type_name):
+def check_unknown_cf_types(df, orig_cf_type_name):
     """
     Helper function to identify any unknown cash flow types.
 
@@ -100,9 +100,9 @@ def bondora():
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
-    # Since we define the column names, Bondora cannot have missing CF types
-    missing_cf_types = set()
-    return [df_result, missing_cf_types]
+    # Since we define the column names, Bondora cannot have unknown CF types
+    unknown_cf_types = set()
+    return [df_result, unknown_cf_types]
 
 
 def mintos():
@@ -143,7 +143,7 @@ def mintos():
     df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
     df['Plattform'] = 'Mintos'
 
-    missing_cf_types = check_missing_cf_types(df, 'Mintos_Cashflow-Typ')
+    unknown_cf_types = check_unknown_cf_types(df, 'Mintos_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Turnover',
@@ -154,9 +154,9 @@ def mintos():
     df_result.fillna(0, inplace=True)
 
     # TODO: get start and end balance
-    # TODO: find better way for handing over missing_cf_types to worker thread
+    # TODO: find better way for handing over unknown_cf_types to worker thread
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
 
 
 def robocash():
@@ -190,7 +190,7 @@ def robocash():
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Robocash'
 
-    missing_cf_types = check_missing_cf_types(df, 'Operation')
+    unknown_cf_types = check_unknown_cf_types(df, 'Operation')
 
     df_result = pd.pivot_table(
         df, values='Betrag',
@@ -200,7 +200,7 @@ def robocash():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
 
 
 def swaper():
@@ -232,7 +232,7 @@ def swaper():
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Swaper'
 
-    missing_cf_types = check_missing_cf_types(df, 'Transaction type')
+    unknown_cf_types = check_unknown_cf_types(df, 'Transaction type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -242,7 +242,7 @@ def swaper():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
 
 
 def peerberry():
@@ -272,7 +272,7 @@ def peerberry():
     df['Cashflow-Typ'] = df['Type'].map(peerberry_dict)
     df['Plattform'] = 'Peerberry'
 
-    missing_cf_types = check_missing_cf_types(df, 'Type')
+    unknown_cf_types = check_unknown_cf_types(df, 'Type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -282,7 +282,7 @@ def peerberry():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
 
 
 def estateguru():
@@ -323,7 +323,7 @@ def estateguru():
     df['Währung'] = 'EUR'
     df['Betrag'] = df['Betrag'].astype('float')
 
-    missing_cf_types = check_missing_cf_types(df, 'Estateguru_Cashflow-Typ')
+    unknown_cf_types = check_unknown_cf_types(df, 'Estateguru_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Betrag',
@@ -333,7 +333,7 @@ def estateguru():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
 
 
 def iuvo():
@@ -387,8 +387,8 @@ def iuvo():
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
     # Since we set the column names, there cannot be unknown CF types
-    missing_cf_types = set()
-    return [df_result, missing_cf_types]
+    unknown_cf_types = set()
+    return [df_result, unknown_cf_types]
 
 
 def grupeer():
@@ -423,7 +423,7 @@ def grupeer():
     df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype(
         'float')
 
-    missing_cf_types = check_missing_cf_types(df, 'Type')
+    unknown_cf_types = check_unknown_cf_types(df, 'Type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -433,7 +433,7 @@ def grupeer():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
 
 
 def dofinance():
@@ -467,7 +467,7 @@ def dofinance():
     df['Plattform'] = 'DoFinance'
     df['Währung'] = 'EUR'
 
-    missing_cf_types = check_missing_cf_types(df, 'Art der Transaktion')
+    unknown_cf_types = check_unknown_cf_types(df, 'Art der Transaktion')
 
     df_result = pd.pivot_table(
         df, values='Betrag, €',
@@ -477,7 +477,7 @@ def dofinance():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
 
 
 def twino():
@@ -517,7 +517,7 @@ def twino():
     df['Plattform'] = 'Twino'
     df['Währung'] = 'EUR'
 
-    missing_cf_types = check_missing_cf_types(df, 'Twino_Cashflow-Typ')
+    unknown_cf_types = check_unknown_cf_types(df, 'Twino_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Amount, EUR',
@@ -527,4 +527,4 @@ def twino():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, missing_cf_types]
+    return [df_result, unknown_cf_types]
