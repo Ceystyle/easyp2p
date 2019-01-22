@@ -12,7 +12,7 @@ p2p_parser contains methods for parsing the output files of P2P platforms.
 """
 
 import locale
-from typing import Union
+from typing import Set, Tuple, Union
 
 import pandas as pd
 
@@ -33,7 +33,8 @@ START_BALANCE_NAME = 'Startguthaben'
 END_BALANCE_NAME = 'Endsaldo'
 
 
-def check_unknown_cf_types(df, orig_cf_type_name):
+def check_unknown_cf_types(
+        df: pd.DataFrame, orig_cf_type_name: str) -> Set[str]:
     """
     Helper function to identify any unknown cash flow types.
 
@@ -51,14 +52,14 @@ def check_unknown_cf_types(df, orig_cf_type_name):
         df['Cashflow-Typ'].isna()).dropna().tolist())
 
 
-def bondora():
+def bondora() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Bondora.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_csv('p2p_downloads/bondora_statement.csv', index_col=0)
@@ -102,17 +103,17 @@ def bondora():
 
     # Since we define the column names, Bondora cannot have unknown CF types
     unknown_cf_types = set()
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def mintos():
+def mintos() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Mintos.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_excel('p2p_downloads/mintos_statement.xlsx')
@@ -154,19 +155,18 @@ def mintos():
     df_result.fillna(0, inplace=True)
 
     # TODO: get start and end balance
-    # TODO: find better way for handing over unknown_cf_types to worker thread
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def robocash():
+def robocash() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Robocash.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_excel('p2p_downloads/robocash_statement.xls')
@@ -200,17 +200,17 @@ def robocash():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def swaper():
+def swaper() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Swaper.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_excel('p2p_downloads/swaper_statement.xlsx')
@@ -242,17 +242,17 @@ def swaper():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def peerberry():
+def peerberry() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Peerberry.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_csv('p2p_downloads/peerberry_statement.csv')
@@ -282,17 +282,17 @@ def peerberry():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def estateguru():
+def estateguru() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Estateguru.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_csv('p2p_downloads/estateguru_statement.csv')
@@ -333,17 +333,17 @@ def estateguru():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def iuvo():
+def iuvo() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Iuvo.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_csv('p2p_downloads/iuvo_statement.csv')
@@ -388,17 +388,17 @@ def iuvo():
 
     # Since we set the column names, there cannot be unknown CF types
     unknown_cf_types = set()
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def grupeer():
+def grupeer() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Grupeer.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_excel('p2p_downloads/grupeer_statement.xlsx')
@@ -433,17 +433,17 @@ def grupeer():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def dofinance():
+def dofinance() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Dofinance.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_excel('p2p_downloads/dofinance_statement.xlsx')
@@ -477,17 +477,17 @@ def dofinance():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)
 
 
-def twino():
+def twino() -> Tuple[pd.DataFrame, Set[str]]:
     """
     Parser for Twino.
 
     Returns:
-        list(pandas.DataFrame, set(str)): list with two elements. The first
+        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
         element is the data frame containing the parsed results. The second
-        element is the set containing all unknown cash flow types.
+        element is a set containing all unknown cash flow types.
 
     """
     df = pd.read_excel('p2p_downloads/twino_statement.xlsx')
@@ -527,4 +527,4 @@ def twino():
     )
     df_result.fillna(0, inplace=True)
 
-    return [df_result, unknown_cf_types]
+    return (df_result, unknown_cf_types)

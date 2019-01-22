@@ -145,7 +145,7 @@ class WorkerThread(QThread):
 
         """
         try:
-            df = parser()[0]
+            (df, unknown_cf_types) = parser()
             list_of_dfs.append(df)
         except FileNotFoundError:
             error_msg = ('Der heruntergeladene {0}-Kontoauszug konnte nicht '
@@ -158,10 +158,10 @@ class WorkerThread(QThread):
             self.ignore_platform(platform, error_msg)
             return list_of_dfs
         else:
-            if parser()[1]:
+            if unknown_cf_types:
                 warning_msg = ('{0}: unbekannter Cashflow-Typ wird im '
                                'Ergebnis ignoriert: {1}'
-                               ''.format(platform, parser()[1]))
+                               ''.format(platform, unknown_cf_types))
                 self.update_progress_text.emit(warning_msg, self.RED)
 
         return list_of_dfs
