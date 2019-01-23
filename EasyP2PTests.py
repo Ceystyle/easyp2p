@@ -3,10 +3,11 @@
 
 from datetime import date
 import sys
-from typing import Mapping, Tuple, Union
+from typing import AbstractSet, Mapping, Tuple, Union
 import unittest
 
 import keyring
+import pandas as pd
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
@@ -269,7 +270,10 @@ class P2PPlatformsTests(unittest.TestCase):
 class P2PParserTests(unittest.TestCase):
     """Test p2p_parser"""
 
-    def run_parser_test(self, platform: str, file_format: str) -> None:
+    def run_parser_test(
+            self, platform: str, input_file: str,
+            exp_result_file: str,
+            unknown_cf_types_exp: AbstractSet[str] = set()) -> None:
         """
         Test the parser of the given platform.
 
@@ -278,50 +282,93 @@ class P2PParserTests(unittest.TestCase):
 
         Args:
             platform (str): Name of the P2P platform
-            file_format (str): format of file with known correct result
+            input_file (str): input file for the parser
+            exp_result_file (str): file with expected results
+
+        Keyword Args:
+            unknown_cf_types_exp (set[str]): a set containing all expected
+                unknown cashflow types
 
         """
         func = getattr(p2p_parser, platform.lower())
-        (df, unknown_cf_types) = func(
-            RESULT_PATH
-            + 'result_test_open_selenium_{0}.{1}'
-            ''.format(platform, file_format))
-        with open(
-                RESULT_PATH + 'result_parser_test_{0}.csv'.format(platform)) \
-                as csvfile:
-            content = csvfile.read()
+        (df, unknown_cf_types) = func(RESULT_PATH + input_file)
+        df_exp = pd.read_csv(
+            RESULT_PATH + exp_result_file, index_col=[0, 1, 2])
 
-        self.assertEqual(str((df.to_string(), unknown_cf_types)), content)
+        # Round both data frames to two digits to avoid minor rounding errors
+        # during the comparison
+        df = df.round(2)
+        df_exp = df_exp.round(2)
 
-    def test_bondora(self):
-        self.run_parser_test('bondora', 'csv')
+        # If df is empty, df.equals() will not work since we imported df_exp
+        # with non-empty index_cols
+        if df.empty:
+            self.assertTrue(df_exp.empty)
+        else:
+            self.assertTrue(df.equals(df_exp))
+        self.assertEqual(unknown_cf_types, unknown_cf_types_exp)
 
-    def test_dofinance(self):
-        self.run_parser_test('dofinance', 'xlsx')
+    def test_bondora_parser(self):
+        self.run_parser_test(
+            'bondora', 'result_test_open_selenium_bondora.csv',
+            'result_test_bondora_parser.csv')
 
-    def test_estateguru(self):
-        self.run_parser_test('estateguru', 'csv')
+    def test_dofinance_parser(self):
+        self.run_parser_test(
+            'dofinance', 'result_test_open_selenium_dofinance.xlsx',
+            'result_test_dofinance_parser.csv')
 
-    def test_grupeer(self):
-        self.run_parser_test('grupeer', 'xlsx')
+    def test_estateguru_parser(self):
+        self.run_parser_test(
+            'estateguru', 'result_test_open_selenium_estateguru.csv',
+            'result_test_estateguru_parser.csv')
 
-    def test_iuvo(self):
-        self.run_parser_test('iuvo', 'csv')
+    def test_grupeer_parser(self):
+        self.run_parser_test(
+            'grupeer', 'result_test_open_selenium_grupeer.xlsx',
+            'result_test_grupeer_parser.csv')
 
-    def test_mintos(self):
-        self.run_parser_test('mintos', 'xlsx')
+    def test_iuvo_parser(self):
+        self.run_parser_test(
+            'iuvo', 'result_test_open_selenium_iuvo.csv',
+            'result_test_iuvo_parser.csv')
 
-    def test_peerberry(self):
-        self.run_parser_test('peerberry', 'csv')
+    def test_mintos_parser(self):
+        self.run_parser_test(
+            'mintos', 'result_test_open_selenium_mintos.xlsx',
+            'result_test_mintos_parser.csv')
 
-    def test_robocash(self):
-        self.run_parser_test('robocash', 'xlsx')
+    def test_peerberry_parser(self):
+        self.run_parser_test(
+            'peerberry', 'result_test_open_selenium_peerberry.csv',
+            'result_test_peerberry_parser.csv')
 
-    def test_swaper(self):
-        self.run_parser_test('swaper', 'xlsx')
+    def test_robocash_parser(self):
+        self.run_parser_test(
+            'robocash', 'result_test_open_selenium_robocash.xlsx',
+            'result_test_robocash_parser.csv')
 
-    def test_twino(self):
-        self.run_parser_test('twino', 'xlsx')
+    def test_swaper_parser(self):
+        self.run_parser_test(
+            'swaper', 'result_test_open_selenium_swaper.xlsx',
+            'result_test_swaper_parser.csv')
+
+    def test_twino_parser(self):
+        self.run_parser_test(
+            'twino', 'result_test_open_selenium_twino.xlsx',
+            'result_test_twino_parser.csv')
+
+    def test_estateguru_unknown_cf_parser(self):
+        self.run_parser_test(
+            'estateguru', 'result_test_open_selenium_estateguru_unknown_cf.csv',
+            'result_test_estateguru_parser_unknown_cf.csv',
+            {'Investition(AutoInvestieren)', 'TestCF1', 'TestCF2'})
+
+    def test_mintos_unknown_cf_parser(self):
+        self.run_parser_test(
+            'mintos', 'result_test_open_selenium_mintos_unknown_cf.xlsx',
+            'result_test_mintos_parser_unknown_cf.csv',
+            {'Interestincome', 'TestCF1', 'TestCF2'})
 
 if __name__ == "__main__":
     unittest.main()
