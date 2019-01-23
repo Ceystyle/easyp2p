@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
 """
-p2p_parser contains methods for parsing the output files of P2P platforms.
+Module for parsing output files of P2P platforms and printing combined results.
 
     Each P2P platform has a unique format for presenting investment results.
     The purpose of this module is to provide parser methods to transform them
-    into a single output format.
+    into a single output format. The combined output is aggregated and
+    written to an Excel file.
 
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
 """
-
+import datetime
 import locale
 from pathlib import Path
-from typing import Set, Tuple, Union
+from typing import Sequence, Set, Tuple, Union
 
 import pandas as pd
 from xlrd.biffh import XLRDError
@@ -108,6 +109,28 @@ def _create_df_result(df, value_column):
         df, values=value_column, index=['Plattform', 'Datum', 'Währung'],
         columns=['Cashflow-Typ'], aggfunc=sum)
     df_result.fillna(0, inplace=True)
+
+    return df_result
+
+
+def _combine_dfs(list_of_dfs: Sequence[pd.DataFrame]) -> pd.DataFrame:
+    """
+    Helper method for combining pandas data frames.
+
+    Args:
+        list_of_dfs (list[pd.DataFrame]): a list of data frames which need
+            to be combined
+
+    Returns:
+        pd.DataFrame: the combined data frame
+
+    """
+    df_result = None
+    for df in list_of_dfs:
+        if df_result is not None:
+            df_result = df_result.append(df, sort=False).fillna(0)
+        else:
+            df_result = df
 
     return df_result
 
@@ -559,3 +582,93 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
     df_result = _create_df_result(df, 'Amount, EUR')
 
     return (df_result, unknown_cf_types)
+
+
+def show_results(
+        list_of_dfs: Sequence[pd.DataFrame], start_date: datetime.date,
+        end_date: datetime.date, output_file: str) -> bool:
+    """
+    Sum up the results contained in data frames and write them to an Excel file.
+
+    The results are presented in two ways: on a monthly basis (in the Excel tab
+    'Monatsergebnisse') and the total sums (in tab 'Gesamtergebnis') for the
+    period between start and end date.
+
+    Args:
+        df (pandas.DataFrame): data frame containing the combined data from
+            the P2P platforms
+        start_date (datetime.date): start of the evaluation period
+        end_date (datetime.date): end of the evaluation period
+        output_file (str): absolute path to the output file
+
+    Returns:
+        bool: True on success, False on failure
+
+    """
+    df = _combine_dfs(list_of_dfs)
+
+    if df is None:
+        return False
+
+    # Calculate total income for each row
+    income_columns = [
+        'Zinszahlungen',
+        'Verzugsgebühren',
+        'Zinszahlungen aus Rückkäufen',
+        'Ausfälle'
+    ]
+    df['Gesamteinnahmen'] = 0
+    for col in [col for col in df.columns if col in income_columns]:
+        df['Gesamteinnahmen'] += df[col]
+
+    # Show only existing columns
+    target_columns = [
+        'Startguthaben',
+        'Endsaldo',
+        'Investitionen',
+        'Tilgungszahlungen',
+        'Zinszahlungen',
+        'Verzugsgebühren',
+        'Rückkäufe',
+        'Zinszahlungen aus Rückkäufen',
+        'Ausfälle',
+        'Gesamteinnahmen',
+    ]
+    show_columns = [col for col in df.columns if col in target_columns]
+
+    df.reset_index(level=['Datum', 'Währung'], inplace=True)
+    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
+    df['Monat'] = pd.to_datetime(
+        df['Datum'], format='%d.%m.%Y').dt.to_period('M')
+    df = df.round(2)
+
+    # Make sure we only show results between start and end date
+    start_date = pd.Timestamp(start_date)
+    end_date = pd.Timestamp(end_date)
+    df = df[(df['Datum'] >= start_date) & (df['Datum'] <= end_date)]
+
+    # Write monthly results to file
+    writer = pd.ExcelWriter(output_file)
+    month_pivot_table = pd.pivot_table(
+        df, values=show_columns,
+        index=['Plattform', 'Währung', 'Monat'], aggfunc=sum)
+    month_pivot_table.to_excel(writer, 'Monatsergebnisse')
+
+    totals_pivot_table = pd.pivot_table(
+        df, values=show_columns,
+        index=['Plattform', 'Währung'], aggfunc=sum)
+
+    if 'Startguthaben' in totals_pivot_table.columns:
+        for index in month_pivot_table.index.levels[0]:
+            start_balance = month_pivot_table.loc[index]['Startguthaben'][0]
+            totals_pivot_table.loc[index]['Startguthaben'] = start_balance
+    if 'Endsaldo' in totals_pivot_table.columns:
+        for index in month_pivot_table.index.levels[0]:
+            end_balance = month_pivot_table.loc[index]['Endsaldo'][0]
+            totals_pivot_table.loc[index]['Endsaldo'] = end_balance
+
+    # Write total results to file
+    totals_pivot_table.to_excel(writer, 'Gesamtergebnis')
+    writer.save()
+
+    return True

@@ -10,7 +10,6 @@ from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 
 import p2p_parser
-import p2p_results
 import p2p_platforms
 
 
