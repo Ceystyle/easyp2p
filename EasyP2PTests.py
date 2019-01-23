@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
 
+"""Module containing all tests for easyP2P"""
+
 from datetime import date
 import sys
 from typing import AbstractSet, Mapping, Tuple, Union
@@ -86,7 +88,7 @@ class MainWindowTests(unittest.TestCase):
 
         # Check that the progress window did not open
         self.assertFalse(self.progress_window_open)
-        
+
     def is_message_box_open(self) -> bool:
         """Helper method to determine if a QMessageBox is open."""
         allToplevelWidgets = QApplication.topLevelWidgets()
@@ -124,37 +126,6 @@ class P2PPlatformsTests(unittest.TestCase):
         self.start_date = date(2018, 9, 1)
         self.end_date = date(2018, 12, 31)
 
-    def are_files_equal(
-        self, file1: str, file2: str,
-        drop_lines: Union[int, Mapping[int, int]] = None) -> bool:
-        """
-        Helper method to determine if two files are equal.
-
-        Args:
-            file1 (str): Name including path of first file
-            file2 (str): Name including path of second file
-
-        Keyword Args:
-            drop_lines (int or list[int]): lines in the files by row number
-                or range which should not be compared
-
-        Returns:
-            bool: True if the files are equal, False if not or if at least one
-            of the files does not exist
-
-        """
-        try:
-            df1 = p2p_parser.get_df_from_file(file1)
-            df2 = p2p_parser.get_df_from_file(file2)
-        except RuntimeError:
-            return False
-
-        if drop_lines is not None:
-            df1.drop(df1.index[drop_lines])
-            df2.drop(df2.index[drop_lines])
-
-        return df1.equals(df2)
-
     def get_credentials_from_keyring(self, platform: str) -> Tuple[str, str]:
         """
         Helper method to get credentials from the keyring.
@@ -181,7 +152,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Bondora')
         self.assertTrue(p2p_platforms.open_selenium_bondora(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/bondora_statement.csv',
             'tests/results/result_test_open_selenium_bondora.csv'))
 
@@ -190,7 +161,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('DoFinance')
         self.assertTrue(p2p_platforms.open_selenium_dofinance(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/dofinance_statement.xlsx',
             'tests/results/result_test_open_selenium_dofinance.xlsx'))
 
@@ -199,7 +170,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Estateguru')
         self.assertTrue(p2p_platforms.open_selenium_estateguru(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/estateguru_statement.csv',
             'tests/results/result_test_open_selenium_estateguru.csv'))
 
@@ -208,7 +179,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Grupeer')
         self.assertTrue(p2p_platforms.open_selenium_grupeer(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/grupeer_statement.xlsx',
             'tests/results/result_test_open_selenium_grupeer.xlsx'))
 
@@ -217,7 +188,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Iuvo')
         self.assertTrue(p2p_platforms.open_selenium_iuvo(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/iuvo_statement.csv',
             'tests/results/result_test_open_selenium_iuvo.csv'))
 
@@ -226,7 +197,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Mintos')
         self.assertTrue(p2p_platforms.open_selenium_mintos(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/mintos_statement.xlsx',
             'tests/results/result_test_open_selenium_mintos.xlsx'))
 
@@ -235,7 +206,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('PeerBerry')
         self.assertTrue(p2p_platforms.open_selenium_peerberry(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/peerberry_statement.csv',
             'tests/results/result_test_open_selenium_peerberry.csv'))
 
@@ -244,7 +215,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Robocash')
         self.assertTrue(p2p_platforms.open_selenium_robocash(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/robocash_statement.xlsx',
             'tests/results/result_test_open_selenium_robocash.xlsx'))
 
@@ -253,7 +224,7 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Swaper')
         self.assertTrue(p2p_platforms.open_selenium_swaper(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/swaper_statement.xlsx',
             'tests/results/result_test_open_selenium_swaper.xlsx'))
 
@@ -262,9 +233,10 @@ class P2PPlatformsTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Twino')
         self.assertTrue(p2p_platforms.open_selenium_twino(
             self.start_date, self.end_date, credentials))
-        self.assertTrue(self.are_files_equal(
+        self.assertTrue(are_files_equal(
             'p2p_downloads/twino_statement.xlsx',
-            'tests/results/result_test_open_selenium_twino.xlsx'), drop_lines=0)
+            'tests/results/result_test_open_selenium_twino.xlsx',
+            drop_lines=0))
 
 
 class P2PParserTests(unittest.TestCase):
@@ -369,6 +341,43 @@ class P2PParserTests(unittest.TestCase):
             'mintos', 'result_test_open_selenium_mintos_unknown_cf.xlsx',
             'result_test_mintos_parser_unknown_cf.csv',
             {'Interestincome', 'TestCF1', 'TestCF2'})
+
+
+class P2PResultsTest(unittest.TestCase):
+    """Test p2p_results"""
+
+
+def are_files_equal(
+        file1: str, file2: str,
+        drop_lines: Union[int, Mapping[int, int]] = None) -> bool:
+    """
+    Function to determine if two files are equal.
+
+    Args:
+        file1 (str): Name including path of first file
+        file2 (str): Name including path of second file
+
+    Keyword Args:
+        drop_lines (int or list[int]): lines in the files by row number
+            or range which should not be compared
+
+    Returns:
+        bool: True if the files are equal, False if not or if at least one
+        of the files does not exist
+
+    """
+    try:
+        df1 = p2p_parser.get_df_from_file(file1)
+        df2 = p2p_parser.get_df_from_file(file2)
+    except RuntimeError:
+        return False
+
+    if drop_lines is not None:
+        df1.drop(df1.index[drop_lines])
+        df2.drop(df2.index[drop_lines])
+
+    return df1.equals(df2)
+
 
 if __name__ == "__main__":
     unittest.main()
