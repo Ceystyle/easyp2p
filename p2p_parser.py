@@ -90,6 +90,27 @@ def _get_df_from_file(input_file):
     return df
 
 
+def _create_df_result(df, value_column):
+    """
+    Helper method to aggregate results by platform, date and currency.
+
+    Args:
+        df (pd.DataFrame): data frame which contains the data to be aggregated
+        value_column (str): name of the data frame column which contains the
+            data to be aggregated
+
+    Returns:
+        pd.DataFrame: data frame with the aggregated results
+
+    """
+    df_result = pd.pivot_table(
+        df, values=value_column, index=['Plattform', 'Datum', 'Währung'],
+        columns=['Cashflow-Typ'], aggfunc=sum)
+    df_result.fillna(0, inplace=True)
+
+    return df_result
+
+
 def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
         -> Tuple[pd.DataFrame, Set[str]]:
     """
@@ -191,14 +212,7 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
     df['Plattform'] = 'Mintos'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Mintos_Cashflow-Typ')
-
-    df_result = pd.pivot_table(
-        df, values='Turnover',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Turnover')
 
     # TODO: get start and end balance
 
@@ -239,14 +253,7 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
     df['Plattform'] = 'Robocash'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Operation')
-
-    df_result = pd.pivot_table(
-        df, values='Betrag',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Betrag')
 
     return (df_result, unknown_cf_types)
 
@@ -283,14 +290,7 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
     df['Plattform'] = 'Swaper'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Transaction type')
-
-    df_result = pd.pivot_table(
-        df, values='Amount',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Amount')
 
     return (df_result, unknown_cf_types)
 
@@ -325,14 +325,7 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
     df['Plattform'] = 'Peerberry'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Type')
-
-    df_result = pd.pivot_table(
-        df, values='Amount',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Amount')
 
     return (df_result, unknown_cf_types)
 
@@ -378,14 +371,7 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
     df['Betrag'] = df['Betrag'].astype('float')
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Estateguru_Cashflow-Typ')
-
-    df_result = pd.pivot_table(
-        df, values='Betrag',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Betrag')
 
     return (df_result, unknown_cf_types)
 
@@ -482,14 +468,7 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
         'float')
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Type')
-
-    df_result = pd.pivot_table(
-        df, values='Amount',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Amount')
 
     return (df_result, unknown_cf_types)
 
@@ -529,14 +508,7 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
     df['Währung'] = 'EUR'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Art der Transaktion')
-
-    df_result = pd.pivot_table(
-        df, values='Betrag, €',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Betrag, €')
 
     return (df_result, unknown_cf_types)
 
@@ -583,13 +555,6 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
     df['Währung'] = 'EUR'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Twino_Cashflow-Typ')
-
-    df_result = pd.pivot_table(
-        df, values='Amount, EUR',
-        index=['Plattform', 'Datum', 'Währung'],
-        columns=['Cashflow-Typ'],
-        aggfunc=sum
-    )
-    df_result.fillna(0, inplace=True)
+    df_result = _create_df_result(df, 'Amount, EUR')
 
     return (df_result, unknown_cf_types)
