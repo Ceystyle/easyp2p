@@ -54,7 +54,7 @@ def _check_unknown_cf_types(
         df['Cashflow-Typ'].isna()).dropna().tolist())
 
 
-def _get_df_from_file(input_file):
+def get_df_from_file(input_file):
     """
     Read a pandas.DataFrame from input_file.
 
@@ -82,10 +82,11 @@ def _get_df_from_file(input_file):
                 'Unbekanntes Dateiformat im Parser: ', input_file)
     except FileNotFoundError:
         raise RuntimeError(
-                '{0} konnte nicht gefunden werden!'.format(input_file))
+            '{0} konnte nicht gefunden werden!'.format(input_file))
     except XLRDError:
-        raise RuntimeError('Die Datei {0} ist beschädigt und kann nicht '
-            'verwendet werden!'.format(input_file))
+        raise RuntimeError(
+            ('Die Datei {0} ist beschädigt und kann nicht verwendet werden!'
+             .format(input_file)))
 
     return df
 
@@ -126,7 +127,7 @@ def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     df.set_index('Zeitraum', inplace=True)
     df.drop(['Gesamt:'], inplace=True)
@@ -186,7 +187,7 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     mintos_dict = dict()
     mintos_dict['Interest income'] = INTEREST_PAYMENT
@@ -234,7 +235,7 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     robocash_dict = dict()
     robocash_dict['Zinsenzahlung'] = INTEREST_PAYMENT
@@ -273,7 +274,7 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     swaper_dict = dict()
     swaper_dict['REPAYMENT_INTEREST'] = INTEREST_PAYMENT
@@ -310,7 +311,7 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     peerberry_dict = dict()
     peerberry_dict['Amount of interest payment received'] = INTEREST_PAYMENT
@@ -345,7 +346,7 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     estateguru_dict = dict()
     estateguru_dict['Zins'] = INTEREST_PAYMENT
@@ -391,7 +392,7 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     df[INTEREST_PAYMENT] = 0
     df[REDEMPTION_PAYMENT] = 0
@@ -448,7 +449,7 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     grupeer_dict = dict()
     grupeer_dict['Interest'] = INTEREST_PAYMENT
@@ -488,7 +489,7 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     dofinance_dict = dict()
     dofinance_dict['Verdienter Gewinn'] = INTEREST_PAYMENT
@@ -528,7 +529,7 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = _get_df_from_file(input_file)
+    df = get_df_from_file(input_file)
 
     twino_dict = dict()
     twino_dict['EXTENSION INTEREST'] = INTEREST_PAYMENT
