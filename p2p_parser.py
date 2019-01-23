@@ -35,7 +35,7 @@ START_BALANCE_NAME = 'Startguthaben'
 END_BALANCE_NAME = 'Endsaldo'
 
 
-def check_unknown_cf_types(
+def _check_unknown_cf_types(
         df: pd.DataFrame, orig_cf_type_name: str) -> Set[str]:
     """
     Helper function to identify any unknown cash flow types.
@@ -54,7 +54,7 @@ def check_unknown_cf_types(
         df['Cashflow-Typ'].isna()).dropna().tolist())
 
 
-def get_df_from_file(input_file):
+def _get_df_from_file(input_file):
     """
     Read a pandas.DataFrame from input_file.
 
@@ -105,7 +105,7 @@ def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     df.set_index('Zeitraum', inplace=True)
     df.drop(['Gesamt:'], inplace=True)
@@ -165,7 +165,7 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     mintos_dict = dict()
     mintos_dict['Interest income'] = INTEREST_PAYMENT
@@ -190,7 +190,7 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
     df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
     df['Plattform'] = 'Mintos'
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Mintos_Cashflow-Typ')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Mintos_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Turnover',
@@ -220,7 +220,7 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     robocash_dict = dict()
     robocash_dict['Zinsenzahlung'] = INTEREST_PAYMENT
@@ -238,7 +238,7 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Robocash'
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Operation')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Operation')
 
     df_result = pd.pivot_table(
         df, values='Betrag',
@@ -266,7 +266,7 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     swaper_dict = dict()
     swaper_dict['REPAYMENT_INTEREST'] = INTEREST_PAYMENT
@@ -282,7 +282,7 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
     df['Währung'] = 'EUR'
     df['Plattform'] = 'Swaper'
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Transaction type')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Transaction type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -310,7 +310,7 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     peerberry_dict = dict()
     peerberry_dict['Amount of interest payment received'] = INTEREST_PAYMENT
@@ -324,7 +324,7 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
     df['Cashflow-Typ'] = df['Type'].map(peerberry_dict)
     df['Plattform'] = 'Peerberry'
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Type')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -352,7 +352,7 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     estateguru_dict = dict()
     estateguru_dict['Zins'] = INTEREST_PAYMENT
@@ -377,7 +377,7 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
     df['Währung'] = 'EUR'
     df['Betrag'] = df['Betrag'].astype('float')
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Estateguru_Cashflow-Typ')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Estateguru_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Betrag',
@@ -405,7 +405,7 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     df[INTEREST_PAYMENT] = 0
     df[REDEMPTION_PAYMENT] = 0
@@ -462,7 +462,7 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     grupeer_dict = dict()
     grupeer_dict['Interest'] = INTEREST_PAYMENT
@@ -481,7 +481,7 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
     df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype(
         'float')
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Type')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Type')
 
     df_result = pd.pivot_table(
         df, values='Amount',
@@ -509,7 +509,7 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     dofinance_dict = dict()
     dofinance_dict['Verdienter Gewinn'] = INTEREST_PAYMENT
@@ -528,7 +528,7 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
     df['Plattform'] = 'DoFinance'
     df['Währung'] = 'EUR'
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Art der Transaktion')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Art der Transaktion')
 
     df_result = pd.pivot_table(
         df, values='Betrag, €',
@@ -556,7 +556,7 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    df = _get_df_from_file(input_file)
 
     twino_dict = dict()
     twino_dict['EXTENSION INTEREST'] = INTEREST_PAYMENT
@@ -582,7 +582,7 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
     df['Plattform'] = 'Twino'
     df['Währung'] = 'EUR'
 
-    unknown_cf_types = check_unknown_cf_types(df, 'Twino_Cashflow-Typ')
+    unknown_cf_types = _check_unknown_cf_types(df, 'Twino_Cashflow-Typ')
 
     df_result = pd.pivot_table(
         df, values='Amount, EUR',
