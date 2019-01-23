@@ -150,7 +150,8 @@ class WorkerThread(QThread):
             return list_of_dfs
 
         if unknown_cf_types:
-            warning_msg = ('{0}: unbekannter Cashflow-Typ wird im Ergebnis '
+            warning_msg = (
+                '{0}: unbekannter Cashflow-Typ wird im Ergebnis '
                 'ignoriert: {1}'.format(platform, unknown_cf_types))
             self.update_progress_text.emit(warning_msg, self.RED)
 
@@ -234,10 +235,8 @@ class WorkerThread(QThread):
         if self.abort:
             return
 
-        df_result = p2p_results.combine_dfs(list_of_dfs)
-
-        if not p2p_results.show_results(
-                df_result, self.start_date, self.end_date, self.output_file):
+        if not p2p_parser.show_results(
+                list_of_dfs, self.start_date, self.end_date, self.output_file):
             self.update_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
 
