@@ -6,6 +6,7 @@
 import calendar
 from datetime import date
 import os
+from typing import Callable
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
@@ -61,6 +62,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.start_date.strftime('%d.%m.%Y'),
             self.end_date.strftime('%d.%m.%Y'))
         self.on_lineEdit_output_file_textChanged(self.output_file)
+        self._connect_signals()
+
+    def _connect_signals(self) -> None:
+        """Connect signals to methods."""
+        for check_box in self.groupBox_platforms.findChildren(QCheckBox):
+            check_box.stateChanged.connect(self._bind_box(check_box))
+
+    def _bind_box(self, box: QCheckBox) -> Callable:
+        """Helper method for connecting check boxes to add_platform."""
+        return lambda: self.add_platform(box)
+
+    def add_platform(self, check_box):
+        """Add/remove platform to/from platform list if check_box is checked."""
+        if check_box.isChecked():
+            self.platforms.add(check_box.text().replace('&', ''))
+        else:
+            self.platforms.remove(check_box.text().replace('&', ''))
 
     def set_start_date(self):
         """Helper method to set start date to first day of selected month."""
@@ -70,146 +88,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Helper method to set end date to last day of selected month."""
         end_of_month = calendar.monthrange(self.end_year, self.end_month)[1]
         self.end_date = date(self.end_year, self.end_month, end_of_month)
-
-    @pyqtSlot(bool)
-    def on_checkBox_bondora_toggled(self, checked):
-        """
-        Add/remove Bondora to list of platforms.
-
-        Args:
-            checked (bool): if True add Bondora, if False remove Bondora
-
-        """
-        if checked:
-            self.platforms.add('Bondora')
-        else:
-            self.platforms.remove('Bondora')
-
-    @pyqtSlot(bool)
-    def on_checkBox_grupeer_toggled(self, checked):
-        """
-        Add/remove Grupeer to list of platforms.
-
-        Args:
-            checked (bool): if True add Grupeer, if False remove Grupeer
-
-        """
-        if checked:
-            self.platforms.add('Grupeer')
-        else:
-            self.platforms.remove('Grupeer')
-
-    @pyqtSlot(bool)
-    def on_checkBox_dofinance_toggled(self, checked):
-        """
-        Add/remove Dofinance to list of platforms.
-
-        Args:
-            checked (bool): if True add Dofinance, if False remove Dofinance
-
-        """
-        if checked:
-            self.platforms.add('DoFinance')
-        else:
-            self.platforms.remove('DoFinance')
-
-    @pyqtSlot(bool)
-    def on_checkBox_iuvo_toggled(self, checked):
-        """
-        Add/remove Iuvo to list of platforms.
-
-        Args:
-            checked (bool): if True add Iuvo, if False remove Iuvo
-
-        """
-        if checked:
-            self.platforms.add('Iuvo')
-        else:
-            self.platforms.remove('Iuvo')
-
-    @pyqtSlot(bool)
-    def on_checkBox_peerberry_toggled(self, checked):
-        """
-        Add/remove Peerberry to list of platforms.
-
-        Args:
-            checked (bool): if True add Peerberry, if False remove Peerberry
-
-        """
-        if checked:
-            self.platforms.add('PeerBerry')
-        else:
-            self.platforms.remove('PeerBerry')
-
-    @pyqtSlot(bool)
-    def on_checkBox_mintos_toggled(self, checked):
-        """
-        Add/remove Mintos to list of platforms.
-
-        Args:
-            checked (bool): if True add Mintos, if False remove Mintos
-
-        """
-        if checked:
-            self.platforms.add('Mintos')
-        else:
-            self.platforms.remove('Mintos')
-
-    @pyqtSlot(bool)
-    def on_checkBox_robocash_toggled(self, checked):
-        """
-        Add/remove Robocash to list of platforms.
-
-        Args:
-            checked (bool): if True add Robocash, if False remove Robocash
-
-        """
-        if checked:
-            self.platforms.add('Robocash')
-        else:
-            self.platforms.remove('Robocash')
-
-    @pyqtSlot(bool)
-    def on_checkBox_estateguru_toggled(self, checked):
-        """
-        Add/remove Estateguru to list of platforms.
-
-        Args:
-            checked (bool): if True add Estateguru, if False remove Estateguru
-
-        """
-        if checked:
-            self.platforms.add('Estateguru')
-        else:
-            self.platforms.remove('Estateguru')
-
-    @pyqtSlot(bool)
-    def on_checkBox_swaper_toggled(self, checked):
-        """
-        Add/remove Swaper to list of platforms.
-
-        Args:
-            checked (bool): if True add Swaper, if False remove Swaper
-
-        """
-        if checked:
-            self.platforms.add('Swaper')
-        else:
-            self.platforms.remove('Swaper')
-
-    @pyqtSlot(bool)
-    def on_checkBox_twino_toggled(self, checked):
-        """
-        Add/remove Twino to list of platforms.
-
-        Args:
-            checked (bool): if True add Twino, if False remove Twino
-
-        """
-        if checked:
-            self.platforms.add('Twino')
-        else:
-            self.platforms.remove('Twino')
 
     @pyqtSlot(str)
     def on_comboBox_start_month_activated(self, month):

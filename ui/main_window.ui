@@ -34,70 +34,100 @@
               <item row="0" column="0">
                <widget class="QCheckBox" name="checkBox_bondora">
                 <property name="text">
-                 <string>Bondora</string>
+                 <string notr="true">Bondora</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="2" column="0">
                <widget class="QCheckBox" name="checkBox_grupeer">
                 <property name="text">
-                 <string>Grupeer</string>
+                 <string notr="true">Grupeer</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="1" column="0">
                <widget class="QCheckBox" name="checkBox_dofinance">
                 <property name="text">
-                 <string>DoFinance</string>
+                 <string notr="true">DoFinance</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="4" column="0">
                <widget class="QCheckBox" name="checkBox_iuvo">
                 <property name="text">
-                 <string>Iuvo</string>
+                 <string notr="true">Iuvo</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="1" column="1">
                <widget class="QCheckBox" name="checkBox_peerberry">
                 <property name="text">
-                 <string>PeerBerry</string>
+                 <string notr="true">PeerBerry</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
                <widget class="QCheckBox" name="checkBox_mintos">
                 <property name="text">
-                 <string>Mintos</string>
+                 <string notr="true">Mintos</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="2" column="1">
                <widget class="QCheckBox" name="checkBox_robocash">
                 <property name="text">
-                 <string>Robocash</string>
+                 <string notr="true">Robocash</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="3" column="0">
                <widget class="QCheckBox" name="checkBox_estateguru">
                 <property name="text">
-                 <string>Estateguru</string>
+                 <string notr="true">Estateguru</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="3" column="1">
                <widget class="QCheckBox" name="checkBox_swaper">
                 <property name="text">
-                 <string>Swaper</string>
+                 <string notr="true">Swaper</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
               <item row="4" column="1">
                <widget class="QCheckBox" name="checkBox_twino">
                 <property name="text">
-                 <string>Twino</string>
+                 <string notr="true">Twino</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
