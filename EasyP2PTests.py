@@ -170,6 +170,12 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/bondora_statement.csv',
             'tests/results/result_test_open_selenium_bondora.csv'))
 
+    def test_open_selenium_bondora_no_cfs(self) -> None:
+        """Test open_selenium_bondora when no cashflows exist in date range"""
+        credentials = self.get_credentials_from_keyring('Bondora')
+        self.assertRaises(RuntimeError, p2p_platforms.open_selenium_bondora,
+            date(2016, 12, 1), date(2016, 12, 31), credentials)
+
     def test_open_selenium_dofinance(self):
         """Test open_selenium_dofinance function"""
         credentials = self.get_credentials_from_keyring('DoFinance')
