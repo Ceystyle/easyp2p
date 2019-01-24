@@ -307,11 +307,22 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
     swaper_dict['BUYBACK_INTEREST'] = BUYBACK_INTEREST_PAYMENT
     swaper_dict['BUYBACK_PRINCIPAL'] = BUYBACK_PAYMENT
 
-    df.rename(columns={'Booking date': 'Datum'}, inplace=True)
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
-    df['Währung'] = 'EUR'
-    df['Plattform'] = 'Swaper'
+    try:
+        df.rename(columns={'Booking date': 'Datum'}, inplace=True)
+        df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+        df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
+        df['Währung'] = 'EUR'
+        df['Plattform'] = 'Swaper'
+    except KeyError as err:
+        raise RuntimeError(
+            'Swaper: unbekannte Spalte im Parser: ' + str(err))
+    except AttributeError as err:
+        if df.shape[0] == 0:
+            # TODO: add rows with zeros instead of erroring out
+            raise RuntimeError(
+                'Swaper: keine Zahlungen im angeforderten Zeitraum vorhanden!')
+        else:
+            raise AttributeError(err)
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Transaction type')
     df_result = _create_df_result(df, 'Amount')

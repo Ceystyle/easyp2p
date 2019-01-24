@@ -248,6 +248,12 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/swaper_statement.xlsx',
             'tests/results/result_test_open_selenium_swaper.xlsx'))
 
+    def test_open_selenium_swaper_no_cfs(self) -> None:
+        """Test open_selenium_swaper when no cashflows exist in date range"""
+        credentials = self.get_credentials_from_keyring('Swaper')
+        self.assertRaises(RuntimeError, p2p_platforms.open_selenium_swaper,
+            date(2016, 12, 1), date(2016, 12, 31), credentials)
+
     def test_open_selenium_twino(self):
         """Test open_selenium_twino function"""
         credentials = self.get_credentials_from_keyring('Twino')

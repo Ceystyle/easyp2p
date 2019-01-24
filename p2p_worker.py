@@ -146,7 +146,7 @@ class WorkerThread(QThread):
             (df, unknown_cf_types) = parser()
             list_of_dfs.append(df)
         except RuntimeError as err:
-            self.ignore_platform(platform, err)
+            self.ignore_platform(platform, str(err))
             return list_of_dfs
 
         if unknown_cf_types:
