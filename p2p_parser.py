@@ -570,7 +570,7 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
     df = df[1:] # Remove the header row
     df.columns = new_header # Set the header row as the df header
 
-    df.rename(columns={'Booking Date': 'Datum'}, inplace=True)
+    df.rename(columns={'Processing Date': 'Datum'}, inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y %H:%M')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Twino_Cashflow-Typ'] = df['Type'] + ' ' + df['Description']
