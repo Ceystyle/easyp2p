@@ -4,8 +4,11 @@
 """Module implementing WorkerThread."""
 
 from datetime import date
-from typing import AbstractSet, Mapping, Tuple
+from typing import AbstractSet, Callable, Mapping, Optional, Sequence, Set, \
+    Tuple
 
+
+import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 
@@ -88,7 +91,8 @@ class WorkerThread(QThread):
         else:
             return func
 
-    def get_p2p_parser(self, platform: str) -> p2p_parser.Parser:
+    def get_p2p_parser(self, platform: str) \
+            -> Optional[Callable[[], Tuple[pd.DataFrame, Set[str]]]]:
         """
         Helper method to get the name of the appropriate parser.
 
@@ -125,8 +129,8 @@ class WorkerThread(QThread):
             '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_result(
-            self, platform: str, parser: p2p_parser.Parser,
-            list_of_dfs: list) -> list:
+            self, platform: str, list_of_dfs: Sequence[pd.DataFrame]) \
+            -> Sequence[pd.DataFrame]:
         """
         Helper method for calling the parser and appending the dataframe list.
 
@@ -142,6 +146,11 @@ class WorkerThread(QThread):
                 returned
 
         """
+        parser = self.get_p2p_parser(platform)
+
+        if parser is None:
+            return list_of_dfs
+
         try:
             (df, unknown_cf_types) = parser()
             list_of_dfs.append(df)
@@ -224,11 +233,7 @@ class WorkerThread(QThread):
                     '{0} erfolgreich ausgewertet!'.format(platform),
                     self.BLACK)
 
-                parser = self.get_p2p_parser(platform)
-                if parser is None:
-                    continue
-
-                list_of_dfs = self.parse_result(platform, parser, list_of_dfs)
+                list_of_dfs = self.parse_result(platform, list_of_dfs)
 
         if self.abort:
             return
