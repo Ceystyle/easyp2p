@@ -11,7 +11,6 @@ Each platform is created as an instance of the P2P class.
 """
 
 from datetime import datetime
-import time
 from typing import Tuple, Union
 
 import pandas as pd
@@ -514,12 +513,11 @@ def open_selenium_iuvo(
         'login': 'https://www.iuvo-group.com/de/login/',
         'statement': 'https://www.iuvo-group.com/de/account-statement/'}
     xpaths = {
-        'start_balance_name': ('/html/body/div[5]/main/div/div/div/div[4]/div/'
-                               'table/thead/tr[1]/td[1]/strong'),
-        'start_balance_value': ('/html/body/div[5]/main/div/div/div/div[4]/'
-                                'div/table/thead/tr[1]/td[2]/strong')}
+        'statement_check': ('//*[@id="p2p_cont"]/div/div[6]/div/div/div/'
+                            'strong[3]')}
+
     with P2P(
-            'Iuvo', urls, EC.title_contains('Investieren Sie in Kredite'),
+            'Iuvo', urls, EC.element_to_be_clickable((By.ID, 'einloggen')),
             logout_locator=(By.ID, 'p2p_logout'),
             hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
@@ -556,40 +554,34 @@ def open_selenium_iuvo(
 
         df_result = None
 
+        # Generate statement for each month and scrape it from the web site
         for month in months:
-            start_balance = driver.find_element_by_xpath(
-                xpaths['start_balance_value']).text
-
+            check_txt = '{0} - {1}'.format(
+                month[0].strftime('%Y-%m-%d'), month[1].strftime('%Y-%m-%d'))
             if not iuvo.generate_statement_direct(
                     month[0], month[1], (By.ID, 'date_from'),
                     (By.ID, 'date_to'), '%Y-%m-%d',
                     wait_until=EC.text_to_be_present_in_element(
-                        (By.XPATH, xpaths['start_balance_name']),
-                        'Anfangsbestand'),
+                        (By.XPATH, xpaths['statement_check']), check_txt),
                     submit_btn_locator=(
                         By.ID, 'account_statement_filters_btn')):
                 return False
 
             # Read statement from page
-            new_start_balance = driver.find_element_by_xpath(
-                xpaths['start_balance_value']).text
-            if new_start_balance == start_balance:
-                # If the start balance didn't change, the calculation is most
-                # likely not finished yet
-                # TODO: find better way to wait until new statement is
-                # generated
-                time.sleep(3)
             statement_table = driver.find_element_by_class_name(
                 'table-responsive')
+            # pd.read_html returns a list of one element
             df = pd.read_html(
                 statement_table.get_attribute("innerHTML"), index_col=0)[0]
+            # Transpose table to get the headers at the top
             df = df.T
             df['Datum'] = month[0].strftime('%d.%m.%Y')
+            df.set_index('Datum', inplace=True)
 
             if df_result is None:
                 df_result = df
             else:
-                df_result = df_result.append(df, sort=True)
+                df_result = df_result.append(df, sort=False)
 
         df_result.to_csv('p2p_downloads/iuvo_statement.csv')
 

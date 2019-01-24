@@ -417,19 +417,22 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
     """
     df = get_df_from_file(input_file)
 
+    # Interest and redemption payments are reported in two columns by Iuvo.
+    # For our purposes this is not necessary, so we will add them.
     df[INTEREST_PAYMENT] = 0
     df[REDEMPTION_PAYMENT] = 0
+
     # Date column will raise an error which can be ignored:
     df = df.astype('float64', errors='ignore')
 
-    interest_types = ['Zins erhalten', 'Vorzeitige Zinstilgung']
+    interest_types = ['erhaltene Zinsen', 'vorfristige erhaltene Zinsen']
     for elem in interest_types:
         if elem in df.columns:
             df[INTEREST_PAYMENT] += df[elem]
             del df[elem]
 
     redemption_types = [
-        'Vorzeitige Kreditbetragtilgung', 'Kreditbetrag erhalten']
+        'vorfristiger erhaltener Grundbetrag', 'erhaltener Grundbetrag']
     for elem in redemption_types:
         if elem in df.columns:
             df[REDEMPTION_PAYMENT] += df[elem]
@@ -438,12 +441,12 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
     df.rename(
         columns={
             'Anfangsbestand': START_BALANCE_NAME,
-            'Automatische Kapitalanlage auf dem Primärmarkt':
+            'Investitionen auf dem Primärmarkt mit Autoinvest':
                 INVESTMENT_PAYMENT,
             'Endbestand': END_BALANCE_NAME,
-            'Kreditbetrag bei Rückkauf erhalten': BUYBACK_PAYMENT,
-            'Verzugsstrafen erhalten': LATE_FEE_PAYMENT
-        }, inplace=True)
+            'erhaltener Rückkaufgrundbetrag': BUYBACK_PAYMENT,
+            'erhaltene Verspätungsgebühren': LATE_FEE_PAYMENT},
+        inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
     df['Plattform'] = 'Iuvo'
