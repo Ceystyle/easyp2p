@@ -159,7 +159,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
-            <widget class="QGroupBox" name="groupBox_2">
+            <widget class="QGroupBox" name="groupBox_start_date">
              <property name="title">
               <string>Startdatum</string>
              </property>
@@ -290,7 +290,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox_3">
+            <widget class="QGroupBox" name="groupBox_end_date">
              <property name="title">
               <string>Enddatum</string>
              </property>

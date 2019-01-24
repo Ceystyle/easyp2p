@@ -61,13 +61,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.output_file = os.getcwd() + '/P2P_Ergebnisse_{0}-{1}.xlsx'.format(
             self.start_date.strftime('%d.%m.%Y'),
             self.end_date.strftime('%d.%m.%Y'))
-        self.on_lineEdit_output_file_textChanged(self.output_file)
+        QLineEdit.setText(self.lineEdit_output_file, self.output_file)
         self._connect_signals()
 
     def _connect_signals(self) -> None:
         """Connect signals to methods."""
         for check_box in self.groupBox_platforms.findChildren(QCheckBox):
-            check_box.stateChanged.connect(self._bind_box(check_box))
+            if check_box != self.checkBox_select_all:
+                check_box.stateChanged.connect(self._bind_box(check_box))
 
     def _bind_box(self, box: QCheckBox) -> Callable:
         """Helper method for connecting check boxes to add_platform."""
@@ -136,6 +137,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.end_year = int(year)
         self.set_end_date()
+
+    @pyqtSlot(str)
+    def on_lineEdit_output_file_textChanged(self, file_name):
+        """
+        Update location where the results file should be saved.
+
+        Args:
+            file_name (str): file name entered by the user
+
+        """
+        QLineEdit.setText(self.lineEdit_output_file, file_name)
+
+    @pyqtSlot()
+    def on_pushButton_file_chooser_clicked(self):
+        """
+        Open dialog window for changing the save location of the results file.
+        """
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        self.output_file, _ = QFileDialog.getSaveFileName(
+            self, "Ausgabedatei wählen", self.output_file,
+            "MS Excel Dateien (*.xlsx)", options=options)
+        if self.output_file:
+            # The file name must include xlsx file format. Otherwise the Excel
+            # writer will crash later.
+            if not self.output_file.endswith('.xlsx'):
+                self.output_file = self.output_file + '.xlsx'
+            self.on_lineEdit_output_file_textChanged(self.output_file)
+
+    @pyqtSlot(bool)
+    def on_checkBox_select_all_toggled(self, checked):
+        """
+        Toggle/untoggle all P2P platforms.
+
+        Args:
+            checked (bool): if True toggle all check boxes, if False untoggle
+                all check boxes
+
+        """
+        for check_box in self.groupBox_platforms.findChildren(QCheckBox):
+            check_box.setChecked(checked)
 
     @pyqtSlot()
     def on_pushButton_start_clicked(self):
@@ -224,44 +266,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.progress_window.progressText.setTextColor(color)
         self.progress_window.progressText.append(txt)
-
-    @pyqtSlot(str)
-    def on_lineEdit_output_file_textChanged(self, file_name):
-        """
-        Update location where the results file should be saved.
-
-        Args:
-            file_name (str): file name entered by the user
-
-        """
-        QLineEdit.setText(self.lineEdit_output_file, file_name)
-
-    @pyqtSlot()
-    def on_pushButton_file_chooser_clicked(self):
-        """
-        Open dialog window for changing the save location of the results file.
-        """
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        self.output_file, _ = QFileDialog.getSaveFileName(
-            self, "Ausgabedatei wählen", self.output_file,
-            "MS Excel Dateien (*.xlsx)", options=options)
-        if self.output_file:
-            # The file name must include xlsx file format. Otherwise the Excel
-            # writer will crash later.
-            if not self.output_file.endswith('.xlsx'):
-                self.output_file = self.output_file + '.xlsx'
-            self.on_lineEdit_output_file_textChanged(self.output_file)
-
-    @pyqtSlot(bool)
-    def on_checkBox_select_all_toggled(self, checked):
-        """
-        Toggle/untoggle all P2P platforms.
-
-        Args:
-            checked (bool): if True toggle all check boxes, if False untoggle
-                all check boxes
-
-        """
-        for check_box in self.groupBox_platforms.findChildren(QCheckBox):
-            check_box.setChecked(checked)

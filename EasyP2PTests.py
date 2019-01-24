@@ -19,6 +19,17 @@ from ui.progress_window import ProgressWindow
 import p2p_parser
 import p2p_platforms
 
+PLATFORMS = {
+    'Bondora': 'csv',
+    'DoFinance': 'xlsx',
+    'Estateguru': 'csv',
+    'Grupeer': 'xlsx',
+    'Iuvo': 'csv',
+    'Mintos': 'xlsx',
+    'PeerBerry': 'csv',
+    'Robocash': 'xlsx',
+    'Swaper': 'xlsx',
+    'Twino': 'xlsx'}
 RESULT_PATH = 'tests/results/'
 
 app = QApplication(sys.argv)
@@ -64,7 +75,7 @@ class MainWindowTests(unittest.TestCase):
         # Toggle the 'Select all platforms' checkbox
         self.form.checkBox_select_all.setChecked(True)
 
-        # Test that all platforms are indeed selected
+        # Test that all platform check boxes are checked
         self.assertTrue(self.form.checkBox_bondora.isChecked())
         self.assertTrue(self.form.checkBox_dofinance.isChecked())
         self.assertTrue(self.form.checkBox_estateguru.isChecked())
@@ -76,6 +87,9 @@ class MainWindowTests(unittest.TestCase):
         self.assertTrue(self.form.checkBox_select_all.isChecked())
         self.assertTrue(self.form.checkBox_swaper.isChecked())
         self.assertTrue(self.form.checkBox_twino.isChecked())
+
+        # Test if the platform list is correct
+        self.assertEqual(self.form.platforms, PLATFORMS.keys())
 
     def test_no_platform_selected(self) -> None:
         """Test clicking start without any selected platform"""
