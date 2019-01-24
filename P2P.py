@@ -232,7 +232,13 @@ class P2P:
             elem.clear()
             elem.send_keys(credentials[1])
             elem.send_keys(Keys.RETURN)
-            self.wdwait(wait_until)
+            # Login currently takes a long time for Twino, thus increase the
+            # waiting time for now. They promised an web site update for
+            # 28/01/2018 which should fix this issue.
+            if self.name == 'Twino':
+                self.wdwait(wait_until, delay=10)
+            else:
+                self.wdwait(wait_until)
         except NoSuchElementException:
             raise RuntimeError(
                 'Benutzername/Passwort-Felder konnten nicht auf der '
