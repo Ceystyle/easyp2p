@@ -142,7 +142,7 @@ class P2P:
         self.driver = driver
 
     def open_start_page(
-            self, wait_until: ExpectedCondition) -> bool:
+            self, wait_until: ExpectedCondition) -> None:
         """
         Open start/login page of P2P platform.
 
@@ -152,9 +152,6 @@ class P2P:
         Args:
             wait_until (ExpectedCondition): Expected condition in case of
                 success, in general the clickability of the user name field.
-
-        Returns:
-            bool: True on success, False on failure.
 
         Throws:
             RuntimeError: if the expected web page title is not found or if
@@ -176,13 +173,12 @@ class P2P:
                 ''.format(self.name))
 
         self.logged_in = True
-        return True
 
     def log_into_page(
             self, name_field: str, password_field: str,
             credentials: Tuple[str, str], wait_until: ExpectedCondition,
             login_locator: Tuple[str, str] = None,
-            fill_delay: float = 0) -> bool:
+            fill_delay: float = 0) -> None:
         """
         Log into the P2P platform with provided user name/password.
 
@@ -210,9 +206,6 @@ class P2P:
                 to be clicked in order to open login form.
             fill_delay (float): a small delay between filling in password
                 and user name fields.
-
-        Returns:
-            bool: True on success, False on failure.
 
         Throws:
             RuntimeError: - if login or password fields cannot be found
@@ -248,10 +241,8 @@ class P2P:
                 '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
                 ''.format(self.name))
 
-        return True
-
     def open_account_statement_page(
-            self, title: str, check_locator: Tuple[str, str]) -> bool:
+            self, title: str, check_locator: Tuple[str, str]) -> None:
         """
         Open account statement page of the P2P platform.
 
@@ -265,9 +256,6 @@ class P2P:
             check_locator (tuple[str, str]): locator of a web element which
                 must be present if the account statement page loaded
                 successfully.
-
-        Returns:
-            bool: True on success, False on failure.
 
         Throws:
             RuntimeError: - if title of the page is not equal to provided one
@@ -283,12 +271,10 @@ class P2P:
                 '{0}-Kontoauszugsseite konnte nicht geladen werden!'
                 ''.format(self.name))
 
-        return True
-
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
             wait_until: ExpectedCondition,
-            hover_locator: Tuple[str, str] = None) -> bool:
+            hover_locator: Tuple[str, str] = None) -> None:
         """
         Logout of P2P platform using the provided logout button.
 
@@ -305,9 +291,6 @@ class P2P:
         Keyword Args:
             hover_locator (str): locator of web element over which the mouse
                 needs to hover in order to make the logout button visible.
-
-        Returns:
-            bool: True if logout was successful.
 
         Throws:
             RuntimeWarning: if loading of page takes too long or the download
@@ -327,10 +310,8 @@ class P2P:
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
 
-        return True
-
     def logout_by_url(
-            self, wait_until: ExpectedCondition) -> bool:
+            self, wait_until: ExpectedCondition) -> None:
         """
         Logout of P2P platform using the provided URL.
 
@@ -341,9 +322,6 @@ class P2P:
         Args:
             wait_until (ExpectedCondition): Expected condition in case of
                 successful logout
-
-        Returns:
-            bool: True if logout was successful.
 
         Throws:
             RuntimeWarning: if loading of page takes too long
@@ -356,13 +334,11 @@ class P2P:
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
 
-        return True
-
     def generate_statement_direct(
             self, start_date: datetime.date, end_date: datetime.date,
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
             date_format: str, wait_until: ExpectedCondition = None,
-            submit_btn_locator: Tuple[str, str] = None) -> bool:
+            submit_btn_locator: Tuple[str, str] = None) -> None:
         """
         Generate acc. statement for platforms where date fields can be edited.
 
@@ -389,8 +365,10 @@ class P2P:
                 to clicked to start account statement generation. Not all P2P
                 platforms require this.
 
-        Returns:
-            bool: True on success, False on failure.
+        Throws:
+            RuntimeError: - if a web element cannot be found
+                          - if the generation of the account statement
+                            takes too long
 
         """
         try:
@@ -426,17 +404,16 @@ class P2P:
             raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
                                'gestartet werden.'.format(self.name))
         except TimeoutException:
-            raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
-                               'gedauert.'.format(self.name))
-
-        return True
+            raise RuntimeError(
+                'Generierung des {0}-Kontoauszugs hat zu lange gedauert.'
+                ''.format(self.name))
 
     def generate_statement_calendar(
             self, start_date: datetime.date, end_date: datetime.date,
             default_dates: Tuple[datetime.date, datetime.date],
             arrows: Mapping[str, str],
             days_table: Mapping[str, Union[str, bool]],
-            calendar_id_by: str, calendar_id: str) -> bool:
+            calendar_id_by: str, calendar_id: str) -> None:
         """
         Generate account statement by clicking days in a calendar.
 
@@ -464,8 +441,10 @@ class P2P:
                 calendar_id to web element.
             calendar_id (str): id of the two calendars.
 
-        Returns:
-            bool: True on success, False on failure.
+        Throws:
+            RuntimeError: - if a web element cannot be found
+                          - if the generation of the account statement
+                            takes too long
 
         """
         try:
@@ -515,8 +494,6 @@ class P2P:
         except TimeoutException:
             raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
                                'gedauert.'.format(self.name))
-
-        return True
 
     def set_date_in_calendar(
             self, calendar_: WebElement, day: int, months: int,
@@ -575,7 +552,7 @@ class P2P:
                     elem.click()
 
     def download_statement(
-            self, download_btn: str, find_btn_by: str, actions=None) -> bool:
+            self, download_btn: str, find_btn_by: str, actions=None) -> None:
         """
         Download account statement by clicking the provided button.
 
@@ -594,8 +571,10 @@ class P2P:
                 require that the mouse hovers over a certain element
                 in order to make the download button clickable.
 
-        Returns:
-            bool: True on success, False on failure.
+        Throws:
+            RuntimeError: - if the download button cannot be found
+                          - if the downloaded file cannot be found and there
+                            is no active download
 
         """
         try:
@@ -632,10 +611,7 @@ class P2P:
                     time.sleep(1)
                     duration += 1
 
-        if not self.rename_statement():
-            return False
-
-        return True
+        self.rename_statement()
 
     def wdwait(
             self, wait_until: ExpectedCondition,
@@ -656,7 +632,7 @@ class P2P:
         """
         return WebDriverWait(self.driver, delay).until(wait_until)
 
-    def clean_download_location(self) -> bool:
+    def clean_download_location(self) -> None:
         """
         Ensure that there are no old download files in download location.
 
@@ -664,13 +640,10 @@ class P2P:
         old downloads. In case old downloads are detected they will be
         automatically removed. The user is informed via a warning message.
 
-        Returns:
-            bool: True if download location is clean, False if user needs to
-                  manually delete the files.
-
         Throws:
             RuntimeError: if old download files with the same default name
                           cannot be deleted.
+            RuntimeWarning: if old download files were deleted
 
         """
         file_list = glob.glob(
@@ -687,18 +660,13 @@ class P2P:
             raise RuntimeWarning('Alte {0}-Downloads in ./p2p_downloads wurden'
                                  'entfernt.'.format(self.name))
 
-        return True
-
-    def rename_statement(self) -> bool:
+    def rename_statement(self) -> None:
         """
         Rename downloaded statement to default_file_name.
 
         Will rename the downloaded statement from the
         default name chosen by the P2P platform to
         default_file_name.
-
-        Returns:
-            bool: True on success, False on failure.
 
         Throws:
             RuntimeError: if the downloaded statement cannot be found
@@ -718,5 +686,3 @@ class P2P:
             raise RuntimeError('Alte {0} Downloads in ./p2p_downloads '
                                'entdeckt. Bitte zuerst entfernen.'
                                ''.format(self.name))
-
-        return True

@@ -40,7 +40,7 @@ OpenSelenium = Union[
 
 def open_selenium_bondora(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Bondora account statement for given date range.
 
@@ -50,9 +50,6 @@ def open_selenium_bondora(
         end_date (datetime.date): End of date range for which account
             statement must be generated.
         credentials (tuple[str, str]): (username, password) for Bondora
-
-    Returns:
-        bool: True on success, False on failure
 
     """
     urls = {
@@ -70,18 +67,14 @@ def open_selenium_bondora(
 
         driver = bondora.driver
 
-        if not bondora.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'Email'))):
-            return False
+        bondora.open_start_page(
+            EC.element_to_be_clickable((By.NAME, 'Email')))
 
-        if not bondora.log_into_page(
-                'Email', 'Password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow'))):
-            return False
+        bondora.log_into_page(
+            'Email', 'Password', credentials,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
 
-        if not bondora.open_account_statement_page(
-                'Cashflow', (By.ID, 'StartYear')):
-            return False
+        bondora.open_account_statement_page('Cashflow', (By.ID, 'StartYear'))
 
         # Get the default values for start and end date
         start_year = Select(
@@ -141,11 +134,9 @@ def open_selenium_bondora(
             thousands='.', decimal=',')[0]
         df.to_csv('p2p_downloads/bondora_statement.csv')
 
-    return True
-
 def open_selenium_mintos(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Mintos account statement for given date range.
 
@@ -155,9 +146,6 @@ def open_selenium_mintos(
         end_date (datetime.date): End of date range for which
             account statement must be generated.
         credentials (tuple[str, str]): (username, password) for Mintos
-
-    Returns:
-        bool: True on success, False on failure.
 
     """
     urls = {
@@ -174,37 +162,29 @@ def open_selenium_mintos(
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name=default_file_name) as mintos:
 
-        if not mintos.clean_download_location():
-            return False
+        mintos.clean_download_location()
 
-        if not mintos.open_start_page(
-                EC.element_to_be_clickable((By.NAME, '_username'))):
-            return False
+        mintos.open_start_page(
+            EC.element_to_be_clickable((By.NAME, '_username')))
 
-        if not mintos.log_into_page(
-                '_username', '_password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))):
-            return False
+        mintos.log_into_page(
+            '_username', '_password', credentials,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-        if not mintos.open_account_statement_page(
-                'Account Statement', (By.ID, 'period-from')):
-            return False
+        mintos.open_account_statement_page(
+            'Account Statement', (By.ID, 'period-from'))
 
-        if not mintos.generate_statement_direct(
-                start_date, end_date, (By.ID, 'period-from'),
-                (By.ID, 'period-to'), '%d.%m.%Y',
-                wait_until=EC.presence_of_element_located(
-                    (By.ID, 'export-button')),
-                submit_btn_locator=(By.ID, 'filter-button')):
-            return False
+        mintos.generate_statement_direct(
+            start_date, end_date, (By.ID, 'period-from'),
+            (By.ID, 'period-to'), '%d.%m.%Y',
+            wait_until=EC.presence_of_element_located((By.ID, 'export-button')),
+            submit_btn_locator=(By.ID, 'filter-button'))
 
-        success = mintos.download_statement('export-button', By.ID)
-
-    return success
+        mintos.download_statement('export-button', By.ID)
 
 def open_selenium_robocash(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Robocash account statement for given date range.
 
@@ -214,9 +194,6 @@ def open_selenium_robocash(
         end_date (datetime.date): End of date range for which account
             statement must be generated.
         credentials (tuple[str, str]): (username, password) for Robocash
-
-    Returns:
-        bool: True on success, False on failure
 
     Throws:
         RuntimeError: - if the statement button cannot be found
@@ -231,20 +208,16 @@ def open_selenium_robocash(
 
     with P2P('Robocash', urls, EC.title_contains('Willkommen')) as robocash:
 
-        if not robocash.open_start_page(
-                EC.element_to_be_clickable(
-                    (By.XPATH, xpaths['login_field']))):
-            return False
+        robocash.open_start_page(
+            EC.element_to_be_clickable((By.XPATH, xpaths['login_field'])))
 
-        if not robocash.log_into_page(
-                'email', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
-                login_locator=(By.XPATH, xpaths['login_field'])):
-            return False
+        robocash.log_into_page(
+            'email', 'password', credentials,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
+            login_locator=(By.XPATH, xpaths['login_field']))
 
-        if not robocash.open_account_statement_page(
-                'Kontoauszug', (By.ID, 'new_statement')):
-            return False
+        robocash.open_account_statement_page(
+            'Kontoauszug', (By.ID, 'new_statement'))
 
         try:
             robocash.driver.find_element_by_id('new_statement').click()
@@ -253,10 +226,9 @@ def open_selenium_robocash(
                 'Generierung des Robocash-Kontoauszugs konnte nicht gestartet '
                 'werden.')
 
-        if not robocash.generate_statement_direct(
-                start_date, end_date, (By.ID, 'date-after'),
-                (By.ID, 'date-before'), '%Y-%m-%d'):
-            return False
+        robocash.generate_statement_direct(
+            start_date, end_date, (By.ID, 'date-after'),
+            (By.ID, 'date-before'), '%Y-%m-%d')
 
         # Robocash does not automatically show download button after statement
         # generation is done. An explicit reload of the page is needed.
@@ -270,7 +242,7 @@ def open_selenium_robocash(
                 present = True
             except TimeoutException:
                 wait += 1
-                if wait > 10:  # Roughly 10*delay=30 seconds
+                if wait > 10:  # Roughly 10*delay seconds
                     raise RuntimeError(
                         'Generierung des Robocash-Kontoauszugs hat zu lange '
                         'gedauert!')
@@ -288,11 +260,9 @@ def open_selenium_robocash(
         with open('p2p_downloads/robocash_statement.xlsx', 'wb') as output:
             output.write(data.content)
 
-    return True
-
 def open_selenium_swaper(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Swaper account statement for given date range.
 
@@ -302,9 +272,6 @@ def open_selenium_swaper(
         end_date (datetime.date): End of date range for which account
             statement must be generated.
         credentials (tuple[str, str]): (username, password) for Swaper
-
-    Returns:
-        bool: True on success, False on failure
 
     """
     urls = {
@@ -320,22 +287,18 @@ def open_selenium_swaper(
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='excel-storage*.xlsx') as swaper:
 
-        if not swaper.clean_download_location():
-            return False
+        swaper.clean_download_location()
 
-        if not swaper.open_start_page(
-                EC.presence_of_element_located((By.NAME, 'email'))):
-            return False
+        swaper.open_start_page(
+            EC.presence_of_element_located((By.NAME, 'email')))
 
-        if not swaper.log_into_page(
-                'email', 'password', credentials,
-                EC.presence_of_element_located((By.ID, 'open-investments')),
-                fill_delay=0.5):
-            return False
+        swaper.log_into_page(
+            'email', 'password', credentials,
+            EC.presence_of_element_located((By.ID, 'open-investments')),
+            fill_delay=0.5)
 
-        if not swaper.open_account_statement_page(
-                'Swaper', (By.ID, 'account-statement')):
-            return False
+        swaper.open_account_statement_page(
+            'Swaper', (By.ID, 'account-statement'))
 
         calendar_id_by = 'class'
         calendar_id = 'datepicker-container'
@@ -348,18 +311,15 @@ def open_selenium_swaper(
                       'table_id': 'id'}
         default_dates = (datetime.today().replace(day=1), datetime.now())
 
-        if not swaper.generate_statement_calendar(
-                start_date, end_date, default_dates, arrows, days_table,
-                calendar_id_by, calendar_id):
-            return False
+        swaper.generate_statement_calendar(
+            start_date, end_date, default_dates, arrows, days_table,
+            calendar_id_by, calendar_id)
 
-        success = swaper.download_statement(xpaths['download_btn'], By.XPATH)
-
-    return success
+        swaper.download_statement(xpaths['download_btn'], By.XPATH)
 
 def open_selenium_peerberry(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the PeerBerry account statement for given date range.
 
@@ -369,9 +329,6 @@ def open_selenium_peerberry(
         end_date (datetime.date): End of date range for which account
             statement must be generated.
         credentials (tuple[str, str]): (username, password) for PeerBerry
-
-    Returns:
-        bool: True on success, False on failure
 
     """
     urls = {
@@ -393,21 +350,17 @@ def open_selenium_peerberry(
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='transactions.csv') as peerberry:
 
-        if not peerberry.clean_download_location():
-            return False
+        peerberry.clean_download_location()
 
-        if not peerberry.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'email'))):
-            return False
+        peerberry.open_start_page(
+            EC.element_to_be_clickable((By.NAME, 'email')))
 
-        if not peerberry.log_into_page(
-                'email', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug'))):
-            return False
+        peerberry.log_into_page(
+            'email', 'password', credentials,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-        if not peerberry.open_account_statement_page(
-                'Kontoauszug', (By.NAME, 'startDate')):
-            return False
+        peerberry.open_account_statement_page(
+            'Kontoauszug', (By.NAME, 'startDate'))
 
         # Close the cookie policy, if present
         try:
@@ -428,10 +381,9 @@ def open_selenium_peerberry(
                       'id_from_calendar': False,
                       'table_id': 'class'}
 
-        if not peerberry.generate_statement_calendar(
-                start_date, end_date, default_dates, arrows, days_table,
-                calendar_id_by, calendar_id):
-            return True
+        peerberry.generate_statement_calendar(
+            start_date, end_date, default_dates, arrows, days_table,
+            calendar_id_by, calendar_id)
 
         # After setting the dates, the statement button needs to be clicked in
         # order to actually generate the statement
@@ -443,20 +395,18 @@ def open_selenium_peerberry(
                     ((By.XPATH, xpaths['start_balance'])),
                     'Eröffnungssaldo '+str(start_date).format('%Y-%m-%d')))
         except NoSuchElementException:
-            raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
-                               'gestartet werden.'.format(peerberry.name))
+            raise RuntimeError('Generierung des PeerBerry-Kontoauszugs konnte '
+                               'nicht gestartet werden.')
         except TimeoutException:
-            raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
-                               'gedauert.'.format(peerberry.name))
+            raise RuntimeError('Generierung des PeerBerry-Kontoauszugs hat zu '
+                               'lange gedauert.')
 
-        success = peerberry.download_statement(
+        peerberry.download_statement(
             xpaths['download_btn'], By.XPATH, actions='move_to_element')
-
-    return success
 
 def open_selenium_estateguru(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download Estateguru account statement for given date range.
 
@@ -466,9 +416,6 @@ def open_selenium_estateguru(
         end_date (datetime.date): End of date range for which account
             statement must be generated, is not used for Estateguru.
         credentials (tuple[str, str]): (username, password) for Estateguru
-
-    Returns:
-        bool: True on success, False on failure
 
     """
     urls = {
@@ -489,18 +436,15 @@ def open_selenium_estateguru(
             EC.element_to_be_clickable((By.NAME, 'username')),
             default_file_name=default_file_name) as estateguru:
 
-        if not estateguru.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'username'))):
-            return False
+        estateguru.open_start_page(
+            EC.element_to_be_clickable((By.NAME, 'username')))
 
-        if not estateguru.log_into_page(
-                'username', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND'))):
-            return False
+        estateguru.log_into_page(
+            'username', 'password', credentials,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND')))
 
-        if not estateguru.open_account_statement_page(
-                'Übersicht', (By.XPATH, xpaths['account_statement_check'])):
-            return False
+        estateguru.open_account_statement_page(
+            'Übersicht', (By.XPATH, xpaths['account_statement_check']))
 
         # Estateguru does not provide functionality for filtering payment
         # dates. Therefore we download the statement which includes all
@@ -509,11 +453,9 @@ def open_selenium_estateguru(
         estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
         estateguru.download_statement('CSV', By.LINK_TEXT)
 
-    return True
-
 def open_selenium_iuvo(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Iuvo account statement for given date range.
 
@@ -523,9 +465,6 @@ def open_selenium_iuvo(
         end_date (datetime.date): End of date range for which account
             statement must be generated.
         credentials (tuple[str, str]): (username, password) for Iuvo
-
-    Returns:
-        bool: True on success, False on failure
 
     """
     urls = {
@@ -542,15 +481,13 @@ def open_selenium_iuvo(
 
         driver = iuvo.driver
 
-        if not iuvo.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'login'))):
-            return False
+        iuvo.open_start_page(
+            EC.element_to_be_clickable((By.NAME, 'login')))
 
-        if not iuvo.log_into_page(
-                'login', 'password', credentials,
-                EC.element_to_be_clickable(
-                    (By.ID, 'p2p_btn_deposit_page_add_funds'))):
-            return False
+        iuvo.log_into_page(
+            'login', 'password', credentials,
+            EC.element_to_be_clickable(
+                (By.ID, 'p2p_btn_deposit_page_add_funds')))
 
         # Click away cookie policy, if present
         try:
@@ -559,9 +496,8 @@ def open_selenium_iuvo(
         except NoSuchElementException:
             pass
 
-        if not iuvo.open_account_statement_page(
-                'Kontoauszug', (By.ID, 'date_from')):
-            return False
+        iuvo.open_account_statement_page(
+            'Kontoauszug', (By.ID, 'date_from'))
 
         # Since Dec 2018 Iuvo only provides aggregated cashflows
         # for the whole requested date range, no more detailed information
@@ -577,14 +513,11 @@ def open_selenium_iuvo(
         for month in months:
             check_txt = '{0} - {1}'.format(
                 month[0].strftime('%Y-%m-%d'), month[1].strftime('%Y-%m-%d'))
-            if not iuvo.generate_statement_direct(
-                    month[0], month[1], (By.ID, 'date_from'),
-                    (By.ID, 'date_to'), '%Y-%m-%d',
-                    wait_until=EC.text_to_be_present_in_element(
-                        (By.XPATH, xpaths['statement_check']), check_txt),
-                    submit_btn_locator=(
-                        By.ID, 'account_statement_filters_btn')):
-                return False
+            iuvo.generate_statement_direct(
+                month[0], month[1], (By.ID, 'date_from'), (By.ID, 'date_to'),
+                '%Y-%m-%d', wait_until=EC.text_to_be_present_in_element(
+                    (By.XPATH, xpaths['statement_check']), check_txt),
+                submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
 
             # Read statement from page
             statement_table = driver.find_element_by_class_name(
@@ -604,11 +537,9 @@ def open_selenium_iuvo(
 
         df_result.to_csv('p2p_downloads/iuvo_statement.csv')
 
-    return True
-
 def open_selenium_grupeer(
         start_date: datetime.date, end_date: datetime.date,
-        credentials) -> bool:
+        credentials) -> None:
     """
     Generate and download the Grupeer account statement for given date range.
 
@@ -617,9 +548,6 @@ def open_selenium_grupeer(
             statement must be generated.
         end_date (datetime.date): End of date range for which account
             statement must be generated.
-
-    Returns:
-        bool: True on success, False on failure
 
     """
     urls = {
@@ -636,39 +564,30 @@ def open_selenium_grupeer(
             default_file_name='Account statement.xlsx',
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
-        if not grupeer.clean_download_location():
-            return False
+        grupeer.clean_download_location()
 
-        if not grupeer.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'email'))):
-            return False
+        grupeer.open_start_page(
+            EC.element_to_be_clickable((By.NAME, 'email')))
 
-        if not grupeer.log_into_page(
-                'email', 'password', credentials,
-                EC.element_to_be_clickable(
-                    (By.LINK_TEXT, 'Meine Investments'))):
-            return False
+        grupeer.log_into_page(
+            'email', 'password', credentials,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
 
-        if not grupeer.open_account_statement_page(
-                'Account Statement', (By.ID, 'from')):
-            return False
+        grupeer.open_account_statement_page(
+            'Account Statement', (By.ID, 'from'))
 
-        if not grupeer.generate_statement_direct(
-                start_date, end_date, (By.ID, 'from'), (By.ID, 'to'),
-                '%d.%m.%Y', wait_until=EC.text_to_be_present_in_element(
-                    (By.CLASS_NAME, 'balance-block'),
-                    'Bilanz geöffnet am '
-                    + str(start_date.strftime('%d.%m.%Y'))),
-                submit_btn_locator=(By.NAME, 'submit')):
-            return False
+        grupeer.generate_statement_direct(
+            start_date, end_date, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
+            wait_until=EC.text_to_be_present_in_element(
+                (By.CLASS_NAME, 'balance-block'),
+                'Bilanz geöffnet am ' + str(start_date.strftime('%d.%m.%Y'))),
+            submit_btn_locator=(By.NAME, 'submit'))
 
-        success = grupeer.download_statement('excel', By.NAME)
-
-    return success
+        grupeer.download_statement('excel', By.NAME)
 
 def open_selenium_dofinance(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Dofinance account statement for given date range.
 
@@ -679,9 +598,6 @@ def open_selenium_dofinance(
             statement must be generated.
         credentials (tuple[str, str]): (username, password) for DoFinance
 
-    Returns:
-        bool: True on success, False on failure
-
     """
     urls = {
         'login': 'https://www.dofinance.eu/de/users/login',
@@ -689,39 +605,33 @@ def open_selenium_dofinance(
         'statement': 'https://www.dofinance.eu/de/users/statement'}
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59.xlsx'.format(
         start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+
     with P2P(
             'DoFinance', urls, EC.title_contains('Kreditvergabe Plattform'),
             default_file_name=default_file_name) as dofinance:
 
-        if not dofinance.clean_download_location():
-            return False
+        dofinance.clean_download_location()
 
-        if not dofinance.open_start_page(
-                EC.element_to_be_clickable((By.NAME, 'email'))):
-            return False
+        dofinance.open_start_page(
+            EC.element_to_be_clickable((By.NAME, 'email')))
 
-        if not dofinance.log_into_page(
-                'email', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN'))):
-            return False
+        dofinance.log_into_page(
+            'email', 'password', credentials,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN')))
 
-        if not dofinance.open_account_statement_page(
-                'Transaktionen', (By.ID, 'date-from')):
-            return False
+        dofinance.open_account_statement_page(
+            'Transaktionen', (By.ID, 'date-from'))
 
-        if not dofinance.generate_statement_direct(
-                start_date, end_date, (By.ID, 'date-from'), (By.ID, 'date-to'),
-                '%d.%m.%Y',
-                wait_until=EC.element_to_be_clickable((By.NAME, 'xls'))):
-            return False
+        dofinance.generate_statement_direct(
+            start_date, end_date,
+            (By.ID, 'date-from'), (By.ID, 'date-to'), '%d.%m.%Y',
+            wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-        success = dofinance.download_statement('xls', By.NAME)
-
-    return success
+        dofinance.download_statement('xls', By.NAME)
 
 def open_selenium_twino(
         start_date: datetime.date, end_date: datetime.date,
-        credentials: Tuple[str, str]) -> bool:
+        credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Twino account statement for given date range.
 
@@ -755,31 +665,23 @@ def open_selenium_twino(
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='account_statement_*.xlsx') as twino:
 
-        if not twino.clean_download_location():
-            return False
+        twino.clean_download_location()
 
-        if not twino.open_start_page(
-                EC.element_to_be_clickable((By.XPATH, xpaths['login_btn']))):
-            return False
+        twino.open_start_page(
+            EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])))
 
-        if not twino.log_into_page(
-                'email', 'login-password', credentials,
-                EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
-                login_locator=(By.XPATH, xpaths['login_btn'])):
-            return False
+        twino.log_into_page(
+            'email', 'login-password', credentials,
+            EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
+            login_locator=(By.XPATH, xpaths['login_btn']))
 
-        if not twino.open_account_statement_page(
-                'TWINO', (By.XPATH, xpaths['start_date'])):
-            return False
+        twino.open_account_statement_page(
+            'TWINO', (By.XPATH, xpaths['start_date']))
 
-        if not twino.generate_statement_direct(
-                start_date, end_date, (By.XPATH, xpaths['start_date']),
-                (By.XPATH, xpaths['end_date']), '%d.%m.%Y',
-                wait_until=EC.element_to_be_clickable(
-                    (By.CSS_SELECTOR, '.accStatement__pdf'))):
-            return False
+        twino.generate_statement_direct(
+            start_date, end_date, (By.XPATH, xpaths['start_date']),
+            (By.XPATH, xpaths['end_date']), '%d.%m.%Y',
+            wait_until=EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, '.accStatement__pdf')))
 
-        success = twino.download_statement(
-            '.accStatement__pdf', By.CSS_SELECTOR)
-
-    return success
+        twino.download_statement('.accStatement__pdf', By.CSS_SELECTOR)

@@ -170,7 +170,6 @@ class WorkerThread(QThread):
             bool: True if function was run without errors, False otherwise.
 
         """
-        success = False
         if self.credentials[platform] is None:
             self.update_progress_text.emit(
                 'Keine Zugangsdaten für {0} vorhanden!'.format(platform),
@@ -180,8 +179,7 @@ class WorkerThread(QThread):
         self.update_progress_text.emit(
             'Start der Auswertung von {0}...'.format(platform), self.BLACK)
         try:
-            success = func(
-                self.start_date, self.end_date, self.credentials[platform])
+            func(self.start_date, self.end_date, self.credentials[platform])
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
             return False
@@ -189,7 +187,7 @@ class WorkerThread(QThread):
             self.update_progress_text.emit(str(warning), self.RED)
             # Continue anyway
 
-        return success
+        return True
 
     def run(self):
         """
