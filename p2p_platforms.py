@@ -60,6 +60,7 @@ def open_selenium_bondora(
         'logout': 'https://www.bondora.com/de/authorize/logout',
         'statement': 'https://www.bondora.com/de/cashflow'}
     xpaths = {
+        'no_payments': '/html/body/div[1]/div/div/div/div[3]/div',
         'search_btn': ('//*[@id="page-content-wrapper"]/div/div/div[1]/form/'
                        'div[3]/button'),
         'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/tbody/'
@@ -82,6 +83,7 @@ def open_selenium_bondora(
                 'Cashflow', (By.ID, 'StartYear')):
             return False
 
+        # Get the default values for start and end date
         start_year = Select(
             driver.find_element_by_id('StartYear')).first_selected_option.text
         start_month = Select(
@@ -91,6 +93,7 @@ def open_selenium_bondora(
         end_month = Select(
             driver.find_element_by_id('EndMonth')).first_selected_option.text
 
+        # Change the date values to the given start and end dates
         if start_year != start_date.year:
             select = Select(driver.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(start_date.year))
@@ -110,17 +113,33 @@ def open_selenium_bondora(
             select.select_by_visible_text(p2p_helper.nbr_to_short_month(
                 end_date.strftime('%m')))
 
+        # Start the account statement generation
         driver.find_element_by_xpath(xpaths['search_btn']).click()
-        bondora.wdwait(
-            EC.text_to_be_present_in_element(
-                (By.XPATH, xpaths['start_date']),
-                '{0} {1}'.format(start_date.strftime('%b'), start_date.year)))
 
+        # Wait until statement generation is finished. If the statement cannot
+        # be found a TimeoutException is raised. That can happen in case of
+        # errors or when there were no cashflows in the requested period.
+        try:
+            bondora.wdwait(
+                EC.text_to_be_present_in_element(
+                    (By.XPATH, xpaths['start_date']),
+                    '{0} {1}'.format(
+                        start_date.strftime('%b'), start_date.year)))
+        except TimeoutException as err:
+            if 'Keine Zahlungen gefunden' in \
+                    driver.find_element_by_xpath(xpaths['no_payments']).text:
+                raise RuntimeError(
+                    'Bondora: keine Zahlungen im angeforderten Zeitraum '
+                    'vorhanden!')
+            else:
+                raise TimeoutException(err)
+
+        # Scrape the cashflows from the web site and write them to a csv file
         cashflow_table = driver.find_element_by_id('cashflow-content')
         df = pd.read_html(
             cashflow_table.get_attribute("innerHTML"), index_col=0,
-            thousands='.', decimal=',')
-        df[0].to_csv('p2p_downloads/bondora_statement.csv')
+            thousands='.', decimal=',')[0]
+        df.to_csv('p2p_downloads/bondora_statement.csv')
 
     return True
 
