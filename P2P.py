@@ -10,12 +10,12 @@ webdriver. easyP2P uses Chromedriver as webdriver.
 
 """
 
-from datetime import datetime
+from datetime import datetime, date
 import glob
 from pathlib import Path
 import os
 import time
-from typing import Mapping, Tuple, Union
+from typing import cast, Mapping, Optional, Tuple, Union
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -49,10 +49,9 @@ class P2P:
 
     def __init__(
             self, name: str, urls: Mapping[str, str],
-            logout_wait_until: ExpectedCondition,
-            logout_locator: Tuple[str, str] = None,
-            default_file_name: str = None,
-            hover_locator: Tuple[str, str] = None) -> None:
+            logout_wait_until: bool,
+            logout_locator: Optional[Tuple[str, str]] = None,
+            hover_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         Constructor of P2P class.
 
@@ -61,13 +60,11 @@ class P2P:
             urls (dict[str, str]): Dictionary with URLs for login page
                 (key: 'login'), account statement page (key: 'statement')
                 and optionally logout page (key: 'logout')
-            logout_wait_until (ExpectedCondition): Expected condition in case
+            logout_wait_until (bool): Expected condition in case
                 of successful logout.
 
         Keyword Args:
             logout_locator (tuple[str, str]): locator of logout web element.
-            default_file_name (str): default name including path for account
-                statement downloads, chosen by the P2P platform
             hover_locator (tuple[str, str]): locator of web element where the
                 mouse needs to hover in order to make logout button visible.
 
@@ -77,11 +74,12 @@ class P2P:
         """
         self.name = name
         self.urls = urls
-        self.default_file_name = default_file_name
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
-        self.driver = None
+        # self.driver will be initialized in __enter__ method to make sure it
+        # is always closed again by __exit__
+        self.driver = cast(webdriver.Chrome, None)
         self.logged_in = False
 
         # Make sure URLs for login and statement page are provided
@@ -549,7 +547,8 @@ class P2P:
                     elem.click()
 
     def download_statement(
-            self, download_btn: str, find_btn_by: str, actions=None) -> None:
+            self, default_file_name: str, download_btn: str, find_btn_by: str,
+            actions=None) -> None:
         """
         Download account statement by clicking the provided button.
 
@@ -559,6 +558,8 @@ class P2P:
         the downloaded file to the file name chosen by the user.
 
         Args:
+            default_file_name (str): default file name without path for account
+                statement downloads, chosen by the P2P platform
             download_btn (str): id of the download button.
             find_btn_by (str): attribute of By class for translating
                 download_btn into web element.
@@ -578,7 +579,7 @@ class P2P:
         """
         # Get a list of all files named default_file_name since it contains
         # wildcards for some P2P platforms
-        file_list = glob.glob('p2p_downloads/' + self.default_file_name)
+        file_list = glob.glob('p2p_downloads/' + default_file_name)
 
         # Find and click the download button
         try:
@@ -588,50 +589,51 @@ class P2P:
             if actions == 'move_to_element':
                 action = ActionChains(self.driver)
                 action.move_to_element(download_button).perform()
+
             download_button.click()
         except NoSuchElementException:
             raise RuntimeError(
                 'Download des {0} Kontoauszugs konnte nicht gestartet werden.'
-                ''.format(self.name))
+                .format(self.name))
 
         # Wait until download has finished
         _download_finished = False
         _waited_one_second = False
         while not _download_finished:
             new_file_list = glob.glob(
-                'p2p_downloads/' + self.default_file_name)
+                'p2p_downloads/' + default_file_name)
             if len(new_file_list) - len(file_list) == 1:
                 _download_finished = True
             elif new_file_list == file_list:
                 ongoing_downloads = glob.glob(
-                    'p2p_downloads/{0}.crdownload'.format(
-                        self.default_file_name))
+                    'p2p_downloads/{0}.crdownload'.format(default_file_name))
                 if not ongoing_downloads and _waited_one_second:
                     # If the download didn't start after more than one second
                     # something has gone wrong.
                     raise RuntimeError(
                         'Download des {0}-Kontoauszugs wurde abgebrochen!'
-                        ''.format(self.name))
+                        .format(self.name))
 
                 time.sleep(1)
                 _waited_one_second = True
             else:
                 # This should never happen
-                raise RuntimeError('Mehr als ein aktiver Download des {0}-'
-                    'Kontoauszugs gefunden!'.format(self.name))
+                raise RuntimeError(
+                    'Mehr als ein aktiver Download des {0}-Kontoauszugs '
+                    'gefunden!'.format(self.name))
 
         # Get actual file name of downloaded file
         file_name = [file for file in new_file_list if file not in file_list][0]
         self._rename_statement(file_name)
 
     def wdwait(
-            self, wait_until: ExpectedCondition,
+            self, wait_until: bool,
             delay: float = 5.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
 
         Args:
-            wait_until (ExpectedCondition): expected condition for which the
+            wait_until (bool): expected condition for which the
                 webdriver should wait.
 
         Keyword Args:
@@ -658,8 +660,9 @@ class P2P:
             RuntimeError: if the downloaded statement cannot be found
 
         """
-        error_msg = ('{0}-Kontoauszug konnte nicht im Downloadverzeichnis '
-            'gefunden werden.'.format(self.name))
+        error_msg = (
+            '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
+            'werden.'.format(self.name))
 
         if file_name is None:
             raise RuntimeError(error_msg)
@@ -667,6 +670,6 @@ class P2P:
         try:
             os.rename(
                 file_name, 'p2p_downloads/{0}_statement{1}'.format(
-                    self.name.lower(), Path(self.default_file_name).suffix))
+                    self.name.lower(), Path(file_name).suffix))
         except FileNotFoundError:
             raise RuntimeError(error_msg)

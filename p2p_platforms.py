@@ -154,14 +154,12 @@ def open_selenium_mintos(
         'statement': 'https://www.mintos.com/de/kontoauszug/'}
     xpaths = {
         'logout_btn': "//a[contains(@href,'logout')]"}
-    today = datetime.today()
-    default_file_name = '{0}{1}{2}-account-statement.xlsx'.format(
-        today.year, today.strftime('%m'), today.strftime('%d'))
+    default_file_name = '{0}-account-statement.xlsx'.format(
+        datetime.today().strftime('%Y%m%d'))
 
     with P2P(
             'Mintos', urls, EC.title_contains('Vielen Dank'),
-            logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name=default_file_name) as mintos:
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
         mintos.open_start_page(
             EC.element_to_be_clickable((By.NAME, '_username')))
@@ -179,7 +177,7 @@ def open_selenium_mintos(
             wait_until=EC.presence_of_element_located((By.ID, 'export-button')),
             submit_btn_locator=(By.ID, 'filter-button'))
 
-        mintos.download_statement('export-button', By.ID)
+        mintos.download_statement(default_file_name, 'export-button', By.ID)
 
 def open_selenium_robocash(
         date_range: Tuple[datetime.date, datetime.date],
@@ -281,8 +279,7 @@ def open_selenium_swaper(
 
     with P2P(
             'Swaper', urls, EC.presence_of_element_located((By.ID, 'about')),
-            logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name='excel-storage*.xlsx') as swaper:
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
 
         swaper.open_start_page(
             EC.presence_of_element_located((By.NAME, 'email')))
@@ -310,7 +307,8 @@ def open_selenium_swaper(
             date_range, default_dates, arrows, days_table,
             calendar_id_by, calendar_id)
 
-        swaper.download_statement(xpaths['download_btn'], By.XPATH)
+        swaper.download_statement(
+            'excel-storage*.xlsx', xpaths['download_btn'], By.XPATH)
 
 def open_selenium_peerberry(
         date_range: Tuple[datetime.date, datetime.date],
@@ -341,8 +339,7 @@ def open_selenium_peerberry(
 
     with P2P(
             'PeerBerry', urls, EC.title_contains('Einloggen'),
-            logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name='transactions.csv') as peerberry:
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
 
         peerberry.open_start_page(
             EC.element_to_be_clickable((By.NAME, 'email')))
@@ -394,7 +391,8 @@ def open_selenium_peerberry(
                                'lange gedauert.')
 
         peerberry.download_statement(
-            xpaths['download_btn'], By.XPATH, actions='move_to_element')
+            'transactions.csv', xpaths['download_btn'], By.XPATH,
+            actions='move_to_element')
 
 def open_selenium_estateguru(
         date_range: Tuple[datetime.date, datetime.date],
@@ -424,8 +422,7 @@ def open_selenium_estateguru(
 
     with P2P(
             'Estateguru', urls,
-            EC.element_to_be_clickable((By.NAME, 'username')),
-            default_file_name=default_file_name) as estateguru:
+            EC.element_to_be_clickable((By.NAME, 'username'))) as estateguru:
 
         estateguru.open_start_page(
             EC.element_to_be_clickable((By.NAME, 'username')))
@@ -444,7 +441,7 @@ def open_selenium_estateguru(
         # anyway to be consistent with the other open_selenium_* functions.
         estateguru.driver.find_element_by_xpath(xpaths['select_btn']).click()
         estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
-        estateguru.download_statement('CSV', By.LINK_TEXT)
+        estateguru.download_statement(default_file_name, 'CSV', By.LINK_TEXT)
 
 def open_selenium_iuvo(
         date_range: Tuple[datetime.date, datetime.date],
@@ -506,7 +503,7 @@ def open_selenium_iuvo(
             check_txt = '{0} - {1}'.format(
                 month[0].strftime('%Y-%m-%d'), month[1].strftime('%Y-%m-%d'))
             iuvo.generate_statement_direct(
-                month[0], month[1], (By.ID, 'date_from'), (By.ID, 'date_to'),
+                (month[0], month[1]), (By.ID, 'date_from'), (By.ID, 'date_to'),
                 '%Y-%m-%d', EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['statement_check']), check_txt),
                 (By.ID, 'account_statement_filters_btn'))
@@ -553,7 +550,6 @@ def open_selenium_grupeer(
             'Grupeer', urls,
             EC.title_contains('P2P Investitionsplattform Grupeer'),
             (By.LINK_TEXT, 'Ausloggen'),
-            default_file_name='Account statement.xlsx',
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
         grupeer.open_start_page(
@@ -574,7 +570,7 @@ def open_selenium_grupeer(
                 + str(date_range[0].strftime('%d.%m.%Y'))),
             submit_btn_locator=(By.NAME, 'submit'))
 
-        grupeer.download_statement('excel', By.NAME)
+        grupeer.download_statement('Account statement.xlsx', 'excel', By.NAME)
 
 def open_selenium_dofinance(
         date_range: Tuple[datetime.date, datetime.date],
@@ -596,9 +592,8 @@ def open_selenium_dofinance(
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59.xlsx'.format(
         date_range[0].strftime('%Y-%m-%d'), date_range[1].strftime('%Y-%m-%d'))
 
-    with P2P(
-            'DoFinance', urls, EC.title_contains('Kreditvergabe Plattform'),
-            default_file_name=default_file_name) as dofinance:
+    with P2P('DoFinance', urls, EC.title_contains('Kreditvergabe Plattform')) \
+            as dofinance:
 
         dofinance.open_start_page(
             EC.element_to_be_clickable((By.NAME, 'email')))
@@ -614,7 +609,7 @@ def open_selenium_dofinance(
             date_range, (By.ID, 'date-from'), (By.ID, 'date-to'), '%d.%m.%Y',
             wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-        dofinance.download_statement('xls', By.NAME)
+        dofinance.download_statement(default_file_name, 'xls', By.NAME)
 
 def open_selenium_twino(
         date_range: Tuple[datetime.date, datetime.date],
@@ -645,8 +640,7 @@ def open_selenium_twino(
     with P2P(
             'Twino', urls,
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
-            logout_locator=(By.XPATH, xpaths['logout_btn']),
-            default_file_name='account_statement_*.xlsx') as twino:
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as twino:
 
         twino.open_start_page(
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])))
@@ -665,4 +659,5 @@ def open_selenium_twino(
             wait_until=EC.element_to_be_clickable(
                 (By.CSS_SELECTOR, '.accStatement__pdf')))
 
-        twino.download_statement('.accStatement__pdf', By.CSS_SELECTOR)
+        twino.download_statement(
+            'account_statement_*.xlsx', '.accStatement__pdf', By.CSS_SELECTOR)
