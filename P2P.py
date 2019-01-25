@@ -586,7 +586,8 @@ class P2P:
 
         # Wait until download has finished
         _download_finished = False
-        _waited_one_second = False
+        _waiting_time = 0
+        max_waiting_time = 4
         while not _download_finished:
             new_file_list = glob.glob('p2p_downloads/' + default_file_name)
             if len(new_file_list) - len(file_list) == 1:
@@ -594,15 +595,15 @@ class P2P:
             elif new_file_list == file_list:
                 ongoing_downloads = glob.glob(
                     'p2p_downloads/{0}.crdownload'.format(default_file_name))
-                if not ongoing_downloads and _waited_one_second:
-                    # If the download didn't start after more than one second
-                    # something has gone wrong.
+                if not ongoing_downloads and _waiting_time > max_waiting_time:
+                    # If the download didn't start after more than
+                    # max_waiting_time something has gone wrong.
                     raise RuntimeError(
                         'Download des {0}-Kontoauszugs wurde abgebrochen!'
                         .format(self.name))
 
                 time.sleep(1)
-                _waited_one_second = True
+                _waiting_time += 1
             else:
                 # This should never happen
                 raise RuntimeError(

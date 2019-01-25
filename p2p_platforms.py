@@ -138,7 +138,7 @@ def open_selenium_mintos(
         'statement': 'https://www.mintos.com/de/kontoauszug/'}
     xpaths = {
         'logout_btn': "//a[contains(@href,'logout')]"}
-    default_file_name = '{0}-account-statement.xlsx'.format(
+    default_file_name = '{0}-account-statement*.xlsx'.format(
         date.today().strftime('%Y%m%d'))
 
     with P2P(
@@ -363,7 +363,7 @@ def open_selenium_peerberry(
                                'lange gedauert.')
 
         peerberry.download_statement(
-            'transactions.csv', xpaths['download_btn'], By.XPATH,
+            'transactions*.csv', xpaths['download_btn'], By.XPATH,
             actions='move_to_element')
 
 def open_selenium_estateguru(
@@ -529,7 +529,7 @@ def open_selenium_grupeer(
                 + str(date_range[0].strftime('%d.%m.%Y'))),
             submit_btn_locator=(By.NAME, 'submit'))
 
-        grupeer.download_statement('Account statement.xlsx', 'excel', By.NAME)
+        grupeer.download_statement('Account statement*.xlsx', 'excel', By.NAME)
 
 def open_selenium_dofinance(
         date_range: Tuple[date, date],
@@ -548,7 +548,7 @@ def open_selenium_dofinance(
         'login': 'https://www.dofinance.eu/de/users/login',
         'logout': 'https://www.dofinance.eu/de/users/logout',
         'statement': 'https://www.dofinance.eu/de/users/statement'}
-    default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59.xlsx'.format(
+    default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59*.xlsx'.format(
         date_range[0].strftime('%Y-%m-%d'), date_range[1].strftime('%Y-%m-%d'))
 
     with P2P('DoFinance', urls, EC.title_contains('Kreditvergabe Plattform')) \
