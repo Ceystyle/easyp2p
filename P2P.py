@@ -185,8 +185,6 @@ class P2P:
             if login_locator is not None:
                 self.wdwait(EC.element_to_be_clickable(login_locator))
                 self.driver.find_element(*login_locator).click()
-            else:
-                self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
 
             # Make sure that the correct URL was loaded
             if self.driver.current_url != self.urls['login']:
@@ -200,6 +198,7 @@ class P2P:
 
         # Enter credentials in name and password field
         try:
+            self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
             elem = self.driver.find_element_by_name(name_field)
             elem.clear()
             elem.send_keys(credentials[0])
