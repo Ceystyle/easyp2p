@@ -572,8 +572,15 @@ class P2P:
             RuntimeError: - if the download button cannot be found
                           - if the downloaded file cannot be found and there
                             is no active download
+                          - if more than one active download of
+                            default_file_name is found
 
         """
+        # Get a list of all files named default_file_name since it contains
+        # wildcards for some P2P platforms
+        file_list = glob.glob('p2p_downloads/' + self.default_file_name)
+
+        # Find and click the download button
         try:
             download_button = self.driver.find_element(
                 find_btn_by, download_btn)
@@ -587,28 +594,35 @@ class P2P:
                 'Download des {0} Kontoauszugs konnte nicht gestartet werden.'
                 ''.format(self.name))
 
-        download_finished = False
-        duration = 0
-        while not download_finished:
-            file_list = glob.glob(
+        # Wait until download has finished
+        _download_finished = False
+        _waited_one_second = False
+        while not _download_finished:
+            new_file_list = glob.glob(
                 'p2p_downloads/' + self.default_file_name)
-            if len(file_list) == 1:
-                download_finished = True
-            elif not file_list:
-                file_list = glob.glob(
+            if len(new_file_list) - len(file_list) == 1:
+                _download_finished = True
+            elif new_file_list == file_list:
+                ongoing_downloads = glob.glob(
                     'p2p_downloads/{0}.crdownload'.format(
                         self.default_file_name))
-                if not file_list and duration > 1:
-                    # Duration ensures that at least one second has gone by
-                    # since starting the download
+                if not ongoing_downloads and _waited_one_second:
+                    # If the download didn't start after more than one second
+                    # something has gone wrong.
                     raise RuntimeError(
-                        'Download des {0} Kontoauszugs abgebrochen.'
+                        'Download des {0}-Kontoauszugs wurde abgebrochen!'
                         ''.format(self.name))
-                elif duration < 1:
-                    time.sleep(1)
-                    duration += 1
 
-        self.rename_statement()
+                time.sleep(1)
+                _waited_one_second = True
+            else:
+                # This should never happen
+                raise RuntimeError('Mehr als ein aktiver Download des {0}-'
+                    'Kontoauszugs gefunden!'.format(self.name))
+
+        # Get actual file name of downloaded file
+        file_name = [file for file in new_file_list if file not in file_list][0]
+        self._rename_statement(file_name)
 
     def wdwait(
             self, wait_until: ExpectedCondition,
@@ -657,7 +671,7 @@ class P2P:
             raise RuntimeWarning('Alte {0}-Downloads in ./p2p_downloads wurden'
                                  'entfernt.'.format(self.name))
 
-    def rename_statement(self) -> None:
+    def _rename_statement(self, file_name: str) -> None:
         """
         Rename downloaded statement to default_file_name.
 
@@ -665,21 +679,22 @@ class P2P:
         default name chosen by the P2P platform to
         default_file_name.
 
+        Args:
+            file_name (str): file name of the downloaded account statement
+
         Throws:
             RuntimeError: if the downloaded statement cannot be found
 
         """
-        file_list = glob.glob('p2p_downloads/' + self.default_file_name)
-        if len(file_list) == 1:
+        error_msg = ('{0}-Kontoauszug konnte nicht im Downloadverzeichnis '
+            'gefunden werden.'.format(self.name))
+
+        if file_name is None:
+            raise RuntimeError(error_msg)
+
+        try:
             os.rename(
-                file_list[0], 'p2p_downloads/{0}_statement{1}'.format(
+                file_name, 'p2p_downloads/{0}_statement{1}'.format(
                     self.name.lower(), Path(self.default_file_name).suffix))
-        elif not file_list:
-            raise RuntimeError(
-                '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
-                'werden.'.format(self.name))
-        else:
-            # This should never happen
-            raise RuntimeError('Alte {0} Downloads in ./p2p_downloads '
-                               'entdeckt. Bitte zuerst entfernen.'
-                               ''.format(self.name))
+        except FileNotFoundError:
+            raise RuntimeError(error_msg)
