@@ -14,7 +14,6 @@ from datetime import date
 from typing import Tuple
 
 import pandas as pd
-import requests
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -222,17 +221,12 @@ def open_selenium_robocash(
                         'gedauert!')
 
         # Robocash creates the download names randomly, therefore the default
-        # name is not known like for the other P2P sites. Thus we don't use the
-        # download button, but the download URL to get the statement.
-        download_url = robocash.driver.find_element_by_id(
-            'download_statement').get_attribute('href')
-        driver_cookies = robocash.driver.get_cookies()
-        cookies_copy = {}
-        for driver_cookie in driver_cookies:
-            cookies_copy[driver_cookie["name"]] = driver_cookie["value"]
-        data = requests.get(download_url, cookies=cookies_copy)
-        with open('p2p_downloads/robocash_statement.xlsx', 'wb') as output:
-            output.write(data.content)
+        # name is not known like for the other P2P sites. For now we use a
+        # generic * wildcard to find the file. This will not be safe anymore
+        # as soon as parallel downloads to the p2p_downloads directory are
+        # allowed. Thus:
+        #TODO: find a safer method for downloading the Robocash statement
+        robocash.download_statement('*', 'download_statement', By.ID)
 
 def open_selenium_swaper(
         date_range: Tuple[date, date],
