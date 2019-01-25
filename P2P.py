@@ -140,37 +140,6 @@ class P2P:
         driver.maximize_window()
         self.driver = driver
 
-    def open_start_page(
-            self, wait_until: bool) -> None:
-        """
-        Open start/login page of P2P platform.
-
-        This function will open the start/login page of the P2P platform
-        in the webdriver.
-
-        Args:
-            wait_until (bool): Expected condition in case of
-                success, in general the clickability of the user name field.
-
-        Throws:
-            RuntimeError: if the expected web page title is not found or if
-                loading the page takes too long
-
-        """
-        try:
-            self.driver.get(self.urls['login'])
-            self.wdwait(wait_until)
-
-            # Make sure that the correct URL was loaded
-            if self.driver.current_url != self.urls['login']:
-                raise RuntimeError(
-                    'Die {0}-Webseite konnte nicht geladen werden.'
-                    ''.format(self.name))
-        except TimeoutException:
-            raise RuntimeError(
-                'Das Laden der {0} Webseite hat zu lange gedauert.'
-                .format(self.name))
-
     def log_into_page(
             self, name_field: str, password_field: str,
             credentials: Tuple[str, str], wait_until: bool,
@@ -180,10 +149,10 @@ class P2P:
         Log into the P2P platform with provided user name/password.
 
         This function performs the login procedure for the P2P site.
-        It fills in user name and password. Some P2P sites only show
-        the user name and password field after clicking a button.
-        The id of the button can be provided by the optional login_field.
-        Some P2P sites (e.g. Swaper) also require a small delay
+        It opens the login page and fills in user name and password.
+        Some P2P sites only show the user name and password field after
+        clicking a button whose locator can be provided by the optional
+        login_locator. Some P2P sites (e.g. Swaper) also require a small delay
         between filling in name and password. Otherwise it can
         sometimes happen that the password is mistakenly written
         to the name field, too.
@@ -209,11 +178,28 @@ class P2P:
                           - if loading the page takes too long
 
         """
+        # Open the login page
         try:
-            if login_locator is not None:
-                self.driver.find_element(*login_locator).click()
+            self.driver.get(self.urls['login'])
 
-            self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
+            if login_locator is not None:
+                self.wdwait(EC.element_to_be_clickable(login_locator))
+                self.driver.find_element(*login_locator).click()
+            else:
+                self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
+
+            # Make sure that the correct URL was loaded
+            if self.driver.current_url != self.urls['login']:
+                raise RuntimeError(
+                    'Die {0}-Webseite konnte nicht geladen werden.'
+                    .format(self.name))
+        except TimeoutException:
+            raise RuntimeError(
+                'Das Laden der {0}-Webseite hat zu lange gedauert.'
+                .format(self.name))
+
+        # Enter credentials in name and password field
+        try:
             elem = self.driver.find_element_by_name(name_field)
             elem.clear()
             elem.send_keys(credentials[0])
@@ -236,7 +222,7 @@ class P2P:
         except TimeoutException:
             raise RuntimeError(
                 '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
-                ''.format(self.name))
+                .format(self.name))
 
         self.logged_in = True
 

@@ -55,9 +55,6 @@ def open_selenium_bondora(
 
         driver = bondora.driver
 
-        bondora.open_start_page(
-            EC.element_to_be_clickable((By.NAME, 'Email')))
-
         bondora.log_into_page(
             'Email', 'Password', credentials,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
@@ -148,9 +145,6 @@ def open_selenium_mintos(
             'Mintos', urls, EC.title_contains('Vielen Dank'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
-        mintos.open_start_page(
-            EC.element_to_be_clickable((By.NAME, '_username')))
-
         mintos.log_into_page(
             '_username', '_password', credentials,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
@@ -190,9 +184,6 @@ def open_selenium_robocash(
     xpaths = {'login_field': '/html/body/header/div/div[2]/a'}
 
     with P2P('Robocash', urls, EC.title_contains('Willkommen')) as robocash:
-
-        robocash.open_start_page(
-            EC.element_to_be_clickable((By.XPATH, xpaths['login_field'])))
 
         robocash.log_into_page(
             'email', 'password', credentials,
@@ -268,9 +259,6 @@ def open_selenium_swaper(
             'Swaper', urls, EC.presence_of_element_located((By.ID, 'about')),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
 
-        swaper.open_start_page(
-            EC.presence_of_element_located((By.NAME, 'email')))
-
         swaper.log_into_page(
             'email', 'password', credentials,
             EC.presence_of_element_located((By.ID, 'open-investments')),
@@ -327,9 +315,6 @@ def open_selenium_peerberry(
     with P2P(
             'PeerBerry', urls, EC.title_contains('Einloggen'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
-
-        peerberry.open_start_page(
-            EC.element_to_be_clickable((By.NAME, 'email')))
 
         peerberry.log_into_page(
             'email', 'password', credentials,
@@ -411,9 +396,6 @@ def open_selenium_estateguru(
             'Estateguru', urls,
             EC.element_to_be_clickable((By.NAME, 'username'))) as estateguru:
 
-        estateguru.open_start_page(
-            EC.element_to_be_clickable((By.NAME, 'username')))
-
         estateguru.log_into_page(
             'username', 'password', credentials,
             EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND')))
@@ -456,9 +438,6 @@ def open_selenium_iuvo(
             hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
         driver = iuvo.driver
-
-        iuvo.open_start_page(
-            EC.element_to_be_clickable((By.NAME, 'login')))
 
         iuvo.log_into_page(
             'login', 'password', credentials,
@@ -535,9 +514,6 @@ def open_selenium_grupeer(
             (By.LINK_TEXT, 'Ausloggen'),
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
-        grupeer.open_start_page(
-            EC.element_to_be_clickable((By.NAME, 'email')))
-
         grupeer.log_into_page(
             'email', 'password', credentials,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
@@ -577,9 +553,6 @@ def open_selenium_dofinance(
 
     with P2P('DoFinance', urls, EC.title_contains('Kreditvergabe Plattform')) \
             as dofinance:
-
-        dofinance.open_start_page(
-            EC.element_to_be_clickable((By.NAME, 'email')))
 
         dofinance.log_into_page(
             'email', 'password', credentials,
@@ -624,9 +597,6 @@ def open_selenium_twino(
             'Twino', urls,
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as twino:
-
-        twino.open_start_page(
-            EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])))
 
         twino.log_into_page(
             'email', 'login-password', credentials,
