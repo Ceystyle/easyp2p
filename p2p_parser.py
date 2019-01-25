@@ -14,7 +14,7 @@ Module for parsing output files of P2P platforms and printing combined results.
 import datetime
 import locale
 from pathlib import Path
-from typing import Sequence, Set, Tuple, Union
+from typing import Sequence, Tuple, Union
 
 import pandas as pd
 from xlrd.biffh import XLRDError
@@ -37,7 +37,7 @@ END_BALANCE_NAME = 'Endsaldo'
 
 
 def _check_unknown_cf_types(
-        df: pd.DataFrame, orig_cf_type_name: str) -> Set[str]:
+        df: pd.DataFrame, orig_cf_type_name: str) -> str:
     """
     Helper function to identify any unknown cash flow types.
 
@@ -48,11 +48,12 @@ def _check_unknown_cf_types(
         cash flow types as reported by the P2P platform
 
     Returns:
-        set(str): set consisting of all unknown cash flow types
+        str: string consisting of all unknown cash flow types
 
     """
-    return set(df[orig_cf_type_name].where(
+    unknown_cf_types = set(df[orig_cf_type_name].where(
         df['Cashflow-Typ'].isna()).dropna().tolist())
+    return ', '.join(unknown_cf_types)
 
 
 def get_df_from_file(input_file):
@@ -136,7 +137,7 @@ def _combine_dfs(list_of_dfs: Sequence[pd.DataFrame]) -> pd.DataFrame:
 
 
 def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Bondora.
 
@@ -191,12 +192,11 @@ def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
     # Since we define the column names, Bondora cannot have unknown CF types
-    unknown_cf_types = set()
-    return (df_result, unknown_cf_types)
+    return (df_result, '')
 
 
 def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Mintos.
 
@@ -244,7 +244,7 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
 
 
 def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Robocash.
 
@@ -283,7 +283,7 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
 
 
 def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Swaper.
 
@@ -331,7 +331,7 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
 
 
 def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Peerberry.
 
@@ -366,7 +366,7 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
 
 
 def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Estateguru.
 
@@ -412,7 +412,7 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
 
 
 def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Iuvo.
 
@@ -467,12 +467,11 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
     df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
 
     # Since we set the column names, there cannot be unknown CF types
-    unknown_cf_types = set()
-    return (df_result, unknown_cf_types)
+    return (df_result, '')
 
 
 def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Grupeer.
 
@@ -512,7 +511,7 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
 
 
 def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for DoFinance.
 
@@ -552,7 +551,7 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
 
 
 def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
-        -> Tuple[pd.DataFrame, Set[str]]:
+        -> Tuple[pd.DataFrame, str]:
     """
     Parser for Twino.
 
