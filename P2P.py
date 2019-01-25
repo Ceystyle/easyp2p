@@ -643,34 +643,6 @@ class P2P:
         """
         return WebDriverWait(self.driver, delay).until(wait_until)
 
-    def clean_download_location(self) -> None:
-        """
-        Ensure that there are no old download files in download location.
-
-        Makes sure that the download location does not contain
-        old downloads. In case old downloads are detected they will be
-        automatically removed. The user is informed via a warning message.
-
-        Throws:
-            RuntimeError: if old download files with the same default name
-                          cannot be deleted.
-            RuntimeWarning: if old download files were deleted
-
-        """
-        file_list = glob.glob(
-            'p2p_downloads/' + self.default_file_name)
-        if file_list:
-            for file in file_list:
-                try:
-                    os.remove(file)
-                except:
-                    raise RuntimeError('Alte {0}-Downloads in ./p2p_downloads '
-                                       'konnten nicht gelöscht werden. Bitte '
-                                       'manuell entfernen!'.format(self.name))
-
-            raise RuntimeWarning('Alte {0}-Downloads in ./p2p_downloads wurden'
-                                 'entfernt.'.format(self.name))
-
     def _rename_statement(self, file_name: str) -> None:
         """
         Rename downloaded statement to default_file_name.

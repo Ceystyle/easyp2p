@@ -163,8 +163,6 @@ def open_selenium_mintos(
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name=default_file_name) as mintos:
 
-        mintos.clean_download_location()
-
         mintos.open_start_page(
             EC.element_to_be_clickable((By.NAME, '_username')))
 
@@ -286,8 +284,6 @@ def open_selenium_swaper(
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='excel-storage*.xlsx') as swaper:
 
-        swaper.clean_download_location()
-
         swaper.open_start_page(
             EC.presence_of_element_located((By.NAME, 'email')))
 
@@ -347,8 +343,6 @@ def open_selenium_peerberry(
             'PeerBerry', urls, EC.title_contains('Einloggen'),
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='transactions.csv') as peerberry:
-
-        peerberry.clean_download_location()
 
         peerberry.open_start_page(
             EC.element_to_be_clickable((By.NAME, 'email')))
@@ -425,9 +419,9 @@ def open_selenium_estateguru(
                                     'div[2]/ul/li[5]/a'),
         'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
                        'div[1]/div[2]/button')}
-    today = datetime.today()
-    default_file_name = 'payments_{0}-{1}-{2}*.csv'.format(
-        today.year, today.strftime('%m'), today.strftime('%d'))
+    default_file_name = 'payments_{0}*.csv'.format(
+        datetime.today().strftime('%Y-%m-%d'))
+
     with P2P(
             'Estateguru', urls,
             EC.element_to_be_clickable((By.NAME, 'username')),
@@ -562,8 +556,6 @@ def open_selenium_grupeer(
             default_file_name='Account statement.xlsx',
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
-        grupeer.clean_download_location()
-
         grupeer.open_start_page(
             EC.element_to_be_clickable((By.NAME, 'email')))
 
@@ -607,8 +599,6 @@ def open_selenium_dofinance(
     with P2P(
             'DoFinance', urls, EC.title_contains('Kreditvergabe Plattform'),
             default_file_name=default_file_name) as dofinance:
-
-        dofinance.clean_download_location()
 
         dofinance.open_start_page(
             EC.element_to_be_clickable((By.NAME, 'email')))
@@ -657,8 +647,6 @@ def open_selenium_twino(
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             logout_locator=(By.XPATH, xpaths['logout_btn']),
             default_file_name='account_statement_*.xlsx') as twino:
-
-        twino.clean_download_location()
 
         twino.open_start_page(
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])))
