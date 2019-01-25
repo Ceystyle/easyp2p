@@ -37,9 +37,8 @@ def get_calendar_clicks(
 
     return clicks
 
-def get_list_of_months(
-        start_date: datetime.date,
-        end_date: datetime.date) -> List[Tuple[datetime.date, datetime.date]]:
+def get_list_of_months(date_range: Tuple[datetime.date, datetime.date]) \
+        -> List[Tuple[datetime.date, datetime.date]]:
     """
     Get list of months between (including) start and end date.
 
@@ -52,8 +51,8 @@ def get_list_of_months(
             (start_of_month, end_of_month)
     """
     months = []
-    current_date = start_date
-    while current_date < end_date:
+    current_date = date_range[0]
+    while current_date < date_range[1]:
         start_of_month = date(current_date.year, current_date.month, 1)
         end_of_month = date(
             current_date.year, current_date.month, calendar.monthrange(

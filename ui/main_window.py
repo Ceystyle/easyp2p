@@ -232,7 +232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         worker = WorkerThread(
-            self.platforms, self.credentials, self.start_date, self.end_date,
+            self.platforms, self.credentials, (self.start_date, self.end_date),
             self.output_file)
         worker.update_progress_bar.connect(self.update_progress_bar)
         worker.update_progress_text.connect(self.update_progress_text)

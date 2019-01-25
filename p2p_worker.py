@@ -39,8 +39,8 @@ class WorkerThread(QThread):
     def __init__(
             self, platforms: AbstractSet[str],
             credentials: Mapping[str, Tuple[str, str]],
-            start_date: date, end_date: date, output_file: str,
-            parent=None) -> None:
+            date_range: Tuple[date, date], output_file: str,
+            parent: QThread = None) -> None:
         """
         Constructor.
 
@@ -49,10 +49,9 @@ class WorkerThread(QThread):
                 platforms
             credentials (dict[str, tuple[str, str]]): keys are the names of the
                 P2P platforms, values are tuples with (username, password)
-            start_date (datetime.date): start of date range for which the
-                account statements should be generated.
-            end_date (datetime.date): end of date range for which the
-                account statements should be generated.
+            date_range (tuple(datetime.date, datetime.date)): date range
+                (start_date, end_date) for which the account statements must
+                be generated.
             output_file (str): name of the Excel file (including absolute path)
                 to which the results should be written.
 
@@ -63,8 +62,7 @@ class WorkerThread(QThread):
         super(WorkerThread, self).__init__(parent)
         self.platforms = platforms
         self.credentials = credentials
-        self.start_date = start_date
-        self.end_date = end_date
+        self.date_range = date_range
         self.output_file = output_file
         self.abort = False
 
@@ -188,7 +186,7 @@ class WorkerThread(QThread):
         self.update_progress_text.emit(
             'Start der Auswertung von {0}...'.format(platform), self.BLACK)
         try:
-            func(self.start_date, self.end_date, self.credentials[platform])
+            func(self.date_range, self.credentials[platform])
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
             return False
@@ -239,7 +237,7 @@ class WorkerThread(QThread):
             return
 
         if not p2p_parser.show_results(
-                list_of_dfs, self.start_date, self.end_date, self.output_file):
+                list_of_dfs, self.date_range, self.output_file):
             self.update_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
 

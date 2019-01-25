@@ -334,7 +334,7 @@ class P2P:
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
 
     def generate_statement_direct(
-            self, start_date: datetime.date, end_date: datetime.date,
+            self, date_range: Tuple[datetime.date, datetime.date],
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
             date_format: str, wait_until: ExpectedCondition = None,
             submit_btn_locator: Tuple[str, str] = None) -> None:
@@ -347,10 +347,9 @@ class P2P:
         statement generation.
 
         Args:
-            start_date (datetime.date): start of date range for which the
-                account statement should be generated.
-            end_date (datetime.date): end of date range for which the
-                account statement should be generated.
+            date_range (tuple(datetime.date, datetime.date)): date range
+                (start_date, end_date) for which the account statement must
+                be generated.
             start_locator (tuple[str, str]): locator of field where the start
                 date needs to be entered.
             end_element (tuple[str, str]): locator of field where the end date
@@ -373,20 +372,20 @@ class P2P:
         try:
             date_from = self.driver.find_element(*start_locator)
             date_from.send_keys(Keys.CONTROL + 'a')
-            date_from.send_keys(datetime.strftime(start_date, date_format))
+            date_from.send_keys(datetime.strftime(date_range[0], date_format))
 
             try:
                 date_to = self.driver.find_element(*end_locator)
                 date_to.click()
                 date_to.send_keys(Keys.CONTROL + 'a')
-                date_to.send_keys(datetime.strftime(end_date, date_format))
+                date_to.send_keys(datetime.strftime(date_range[1], date_format))
                 date_to.send_keys(Keys.RETURN)
             except StaleElementReferenceException:
                 # Some P2P sites refresh the page after a change
                 # which leads to this exception
                 date_to = self.driver.find_element(*end_locator)
                 date_to.send_keys(Keys.CONTROL + 'a')
-                date_to.send_keys(datetime.strftime(end_date, date_format))
+                date_to.send_keys(datetime.strftime(date_range[0], date_format))
 
             if submit_btn_locator is not None:
                 button = self.wdwait(EC.element_to_be_clickable(
@@ -408,7 +407,7 @@ class P2P:
                 ''.format(self.name))
 
     def generate_statement_calendar(
-            self, start_date: datetime.date, end_date: datetime.date,
+            self, date_range: Tuple[datetime.date, datetime.date],
             default_dates: Tuple[datetime.date, datetime.date],
             arrows: Mapping[str, str],
             days_table: Mapping[str, Union[str, bool]],
@@ -424,10 +423,9 @@ class P2P:
         the chosen day.
 
         Args:
-            start_date (datetime.date): start of date range for which the
-                account statement should be generated.
-            end_date (datetime.date): end of date range for which the
-                account statement should be generated.
+            date_range (tuple(datetime.date, datetime.date)): date range
+                (start_date, end_date) for which the account statement must
+                be generated.
             default_dates (tuple[datetime.date, datetime.date]): the pre-filled
                 default dates of the two date pickers.
             arrows (dict[str, str]): dictionary with three entries: class name
@@ -465,9 +463,9 @@ class P2P:
 
             # How many clicks on the arrow buttons are necessary?
             start_calendar_clicks = p2p_helper.get_calendar_clicks(
-                start_date, default_dates[0])
+                date_range[0], default_dates[0])
             end_calendar_clicks = p2p_helper.get_calendar_clicks(
-                end_date, default_dates[1])
+                date_range[1], default_dates[1])
 
             # Identify the arrows for both start and end calendar
             left_arrows = self.driver.find_elements_by_xpath(
@@ -479,12 +477,12 @@ class P2P:
 
             # Set start_date
             self.set_date_in_calendar(
-                start_calendar, start_date.day, start_calendar_clicks,
+                start_calendar, date_range[0].day, start_calendar_clicks,
                 left_arrows[0], right_arrows[0], days_table)
 
             # Set end_date
             self.set_date_in_calendar(
-                end_calendar, end_date.day, end_calendar_clicks,
+                end_calendar, date_range[1].day, end_calendar_clicks,
                 left_arrows[1], right_arrows[1], days_table)
 
         except NoSuchElementException:

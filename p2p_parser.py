@@ -599,8 +599,9 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
 
 
 def show_results(
-        list_of_dfs: Sequence[pd.DataFrame], start_date: datetime.date,
-        end_date: datetime.date, output_file: str) -> bool:
+        list_of_dfs: Sequence[pd.DataFrame],
+        date_range: Tuple[datetime.date, datetime.date],
+        output_file: str) -> bool:
     """
     Sum up the results contained in data frames and write them to an Excel file.
 
@@ -657,8 +658,8 @@ def show_results(
     df = df.round(2)
 
     # Make sure we only show results between start and end date
-    start_date = pd.Timestamp(start_date)
-    end_date = pd.Timestamp(end_date)
+    start_date = pd.Timestamp(date_range[0])
+    end_date = pd.Timestamp(date_range[1])
     df = df[(df['Datum'] >= start_date) & (df['Datum'] <= end_date)]
 
     # Write monthly results to file
