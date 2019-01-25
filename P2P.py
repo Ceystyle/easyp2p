@@ -97,6 +97,10 @@ class P2P:
         Returns:
             P2P: instance of P2P class
 
+        Throws:
+            RuntimeError: if neither logout URL or a locator for the logout
+                button are provided.
+
         """
         self.init_webdriver()
         return self
@@ -107,10 +111,14 @@ class P2P:
         if self.logged_in:
             if 'logout' in self.urls:
                 self.logout_by_url(self.logout_wait_until)
-            else:
+            elif self.logout_locator is not None:
                 self.logout_by_button(
                     self.logout_locator, self.logout_wait_until,
                     hover_locator=self.hover_locator)
+            else:
+                raise RuntimeError(
+                    '{0}: Keine Methode für Logout vorhanden!'
+                    .format(self.name))
 
             self.logged_in = False
 
