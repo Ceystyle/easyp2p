@@ -10,7 +10,7 @@ webdriver. easyP2P uses Chromedriver as webdriver.
 
 """
 
-from datetime import datetime, date
+from datetime import date
 import glob
 from pathlib import Path
 import os
@@ -340,9 +340,9 @@ class P2P:
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
 
     def generate_statement_direct(
-            self, date_range: Tuple[datetime.date, datetime.date],
+            self, date_range: Tuple[date, date],
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
-            date_format: str, wait_until: ExpectedCondition = None,
+            date_format: str, wait_until: bool = None,
             submit_btn_locator: Tuple[str, str] = None) -> None:
         """
         Generate acc. statement for platforms where date fields can be edited.
@@ -353,7 +353,7 @@ class P2P:
         statement generation.
 
         Args:
-            date_range (tuple(datetime.date, datetime.date)): date range
+            date_range (tuple(date, date)): date range
                 (start_date, end_date) for which the account statement must
                 be generated.
             start_locator (tuple[str, str]): locator of field where the start
@@ -378,20 +378,20 @@ class P2P:
         try:
             date_from = self.driver.find_element(*start_locator)
             date_from.send_keys(Keys.CONTROL + 'a')
-            date_from.send_keys(datetime.strftime(date_range[0], date_format))
+            date_from.send_keys(date.strftime(date_range[0], date_format))
 
             try:
                 date_to = self.driver.find_element(*end_locator)
                 date_to.click()
                 date_to.send_keys(Keys.CONTROL + 'a')
-                date_to.send_keys(datetime.strftime(date_range[1], date_format))
+                date_to.send_keys(date.strftime(date_range[1], date_format))
                 date_to.send_keys(Keys.RETURN)
             except StaleElementReferenceException:
                 # Some P2P sites refresh the page after a change
                 # which leads to this exception
                 date_to = self.driver.find_element(*end_locator)
                 date_to.send_keys(Keys.CONTROL + 'a')
-                date_to.send_keys(datetime.strftime(date_range[0], date_format))
+                date_to.send_keys(date.strftime(date_range[0], date_format))
 
             if submit_btn_locator is not None:
                 button = self.wdwait(EC.element_to_be_clickable(
@@ -413,8 +413,8 @@ class P2P:
                 ''.format(self.name))
 
     def generate_statement_calendar(
-            self, date_range: Tuple[datetime.date, datetime.date],
-            default_dates: Tuple[datetime.date, datetime.date],
+            self, date_range: Tuple[date, date],
+            default_dates: Tuple[date, date],
             arrows: Mapping[str, str],
             days_table: Mapping[str, Union[str, bool]],
             calendar_id_by: str, calendar_id: str) -> None:
@@ -429,10 +429,10 @@ class P2P:
         the chosen day.
 
         Args:
-            date_range (tuple(datetime.date, datetime.date)): date range
+            date_range (tuple(date, date)): date range
                 (start_date, end_date) for which the account statement must
                 be generated.
-            default_dates (tuple[datetime.date, datetime.date]): the pre-filled
+            default_dates (tuple[date, date]): the pre-filled
                 default dates of the two date pickers.
             arrows (dict[str, str]): dictionary with three entries: class name
                 of left arrows, class name of right arrows,
@@ -608,8 +608,7 @@ class P2P:
         _download_finished = False
         _waited_one_second = False
         while not _download_finished:
-            new_file_list = glob.glob(
-                'p2p_downloads/' + default_file_name)
+            new_file_list = glob.glob('p2p_downloads/' + default_file_name)
             if len(new_file_list) - len(file_list) == 1:
                 _download_finished = True
             elif new_file_list == file_list:
