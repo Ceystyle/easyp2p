@@ -2,6 +2,7 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """Module implementing CredentialsWindow."""
+from typing import Optional, Tuple
 
 import keyring
 from PyQt5.QtCore import pyqtSlot
@@ -48,7 +49,7 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         self.reject()
 
 
-def get_credentials(platform: str) -> tuple:
+def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
     """
     Get credentials for P2P platform from keyring or from user input.
 
@@ -60,7 +61,8 @@ def get_credentials(platform: str) -> tuple:
         platform (str): name of the P2P platform
 
     Returns:
-        tuple: (username, password) on success, None if user clicks Cancel.
+        Tuple[str, str]: (username, password) on success, None if user clicks
+            Cancel.
 
     """
     _done = False

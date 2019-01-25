@@ -14,14 +14,10 @@ Module for parsing output files of P2P platforms and printing combined results.
 import datetime
 import locale
 from pathlib import Path
-from typing import Sequence, Tuple, Union
+from typing import Sequence, Tuple
 
 import pandas as pd
 from xlrd.biffh import XLRDError
-
-Parser = Union[
-    'bondora', 'dofinance', 'estateguru', 'grupeer', 'iuvo', 'mintos',
-    'peerberry', 'robocash', 'swaper', 'twino']
 
 INTEREST_PAYMENT = 'Zinszahlungen'
 BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'

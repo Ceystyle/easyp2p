@@ -4,8 +4,7 @@
 """Module implementing WorkerThread."""
 
 from datetime import date
-from typing import AbstractSet, Callable, Mapping, Optional, Sequence, Set, \
-    Tuple
+from typing import AbstractSet, Callable, List, Mapping, Optional, Tuple
 
 
 import pandas as pd
@@ -66,7 +65,8 @@ class WorkerThread(QThread):
         self.output_file = output_file
         self.abort = False
 
-    def get_p2p_function(self, platform: str) -> p2p_platforms.OpenSelenium:
+    def get_p2p_function(self, platform: str) \
+            -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
         """
         Helper method to get the name of the appropriate webdriver function.
 
@@ -74,8 +74,9 @@ class WorkerThread(QThread):
             platform (str): name of the P2P platform
 
         Returns:
-            OpenSelenium: p2p_webdriver.open_selenium_* function for handling
-                this P2P platform or None if the function cannot be found
+            Callable[[Tuple[date, date], Tuple[str, str]], None]:
+                p2p_platforms.open_selenium_* function for handling
+                this P2P platform or None if the function cannot be found.
 
         """
         try:
@@ -90,7 +91,7 @@ class WorkerThread(QThread):
             return func
 
     def get_p2p_parser(self, platform: str) \
-            -> Optional[Callable[[], Tuple[pd.DataFrame, Set[str]]]]:
+            -> Optional[Callable[[], Tuple[pd.DataFrame, str]]]:
         """
         Helper method to get the name of the appropriate parser.
 
@@ -98,8 +99,9 @@ class WorkerThread(QThread):
             platform (str): name of the P2P platform
 
         Returns:
-            Parser: p2p_parser.* function for parsing this P2P platform or
-                None if the function cannot be found
+            Callable[[], Tuple[pd.DataFrame, str]]: p2p_parser.* function for
+                parsing this P2P platform or None if the function cannot be
+                found.
 
         """
         try:
@@ -127,14 +129,13 @@ class WorkerThread(QThread):
             '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_result(
-            self, platform: str, list_of_dfs: Sequence[pd.DataFrame]) \
-            -> Sequence[pd.DataFrame]:
+            self, platform: str, list_of_dfs: List[pd.DataFrame]) \
+            -> List[pd.DataFrame]:
         """
         Helper method for calling the parser and appending the dataframe list.
 
         Args:
             platform (str): name of the P2P platform
-            parser (p2p_parser.Parser): parser method for parsing results
             list_of_dfs (list(pd.DataFrame)): list of DataFrames, one DataFrame
                 for each successfully parsed P2P platform
 
@@ -165,13 +166,15 @@ class WorkerThread(QThread):
         return list_of_dfs
 
     def run_platform(
-            self, platform: str, func: p2p_platforms.OpenSelenium) -> bool:
+            self, platform: str,
+            func: Callable[[Tuple[date, date], Tuple[str, str]], None]) -> bool:
         """
         Helper method for calling the open_selenium_* function.
 
         Args:
             platform (str): name of the P2P platform
-            func (wd.OpenSelenium): function to run
+            func (Callable[[Tuple[date, date], Tuple[str, str]], None]):
+                p2p_platform.open_selenium_* function to run
 
         Returns:
             bool: True if function was run without errors, False otherwise.
@@ -196,7 +199,7 @@ class WorkerThread(QThread):
 
         return True
 
-    def run(self):
+    def run(self) -> None:
         """
         Get and output results from all selected P2P platforms.
 
@@ -205,8 +208,8 @@ class WorkerThread(QThread):
         bar is increased.
 
         """
-        list_of_dfs = []
-        progress = 0
+        list_of_dfs: List[pd.DataFrame] = []
+        progress = 0.
         # Distribute 95% evenly across all selected platforms
         # The last 5 percent are for preparing the results
         step = 95/len(self.platforms)

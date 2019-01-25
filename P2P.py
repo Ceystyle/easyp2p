@@ -15,7 +15,7 @@ import glob
 from pathlib import Path
 import os
 import time
-from typing import cast, Mapping, Optional, Tuple, Union
+from typing import cast, Mapping, Optional, Sequence, Tuple
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -29,12 +29,6 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 
 import p2p_helper
-
-ExpectedCondition = Union[
-    EC.element_to_be_clickable('locator'),
-    EC.presence_of_element_located('locator'),
-    EC.text_to_be_present_in_element('locator', str), EC.title_contains(str),
-    EC.visibility_of('locator')]
 
 
 class P2P:
@@ -147,7 +141,7 @@ class P2P:
         self.driver = driver
 
     def open_start_page(
-            self, wait_until: ExpectedCondition) -> None:
+            self, wait_until: bool) -> None:
         """
         Open start/login page of P2P platform.
 
@@ -155,7 +149,7 @@ class P2P:
         in the webdriver.
 
         Args:
-            wait_until (ExpectedCondition): Expected condition in case of
+            wait_until (bool): Expected condition in case of
                 success, in general the clickability of the user name field.
 
         Throws:
@@ -175,11 +169,11 @@ class P2P:
         except TimeoutException:
             raise RuntimeError(
                 'Das Laden der {0} Webseite hat zu lange gedauert.'
-                ''.format(self.name))
+                .format(self.name))
 
     def log_into_page(
             self, name_field: str, password_field: str,
-            credentials: Tuple[str, str], wait_until: ExpectedCondition,
+            credentials: Tuple[str, str], wait_until: bool,
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0) -> None:
         """
@@ -201,7 +195,7 @@ class P2P:
                 has to be entered.
             credentials (tuple[str, str]): login information: (username,
                 password)
-            wait_until (ExpectedCondition): Expected condition in case of
+            wait_until (bool): Expected condition in case of
                 success.
 
         Keyword Args:
@@ -278,8 +272,8 @@ class P2P:
 
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
-            wait_until: ExpectedCondition,
-            hover_locator: Tuple[str, str] = None) -> None:
+            wait_until: bool,
+            hover_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         Logout of P2P platform using the provided logout button.
 
@@ -290,7 +284,7 @@ class P2P:
 
         Args:
             logout_locator (tuple[str, str]): locator of logout button.
-            wait_until (ExpectedCondition): Expected condition in case of
+            wait_until (bool): Expected condition in case of
                 successful logout.
 
         Keyword Args:
@@ -316,7 +310,7 @@ class P2P:
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
 
     def logout_by_url(
-            self, wait_until: ExpectedCondition) -> None:
+            self, wait_until: bool) -> None:
         """
         Logout of P2P platform using the provided URL.
 
@@ -325,7 +319,7 @@ class P2P:
         provided in the urls dict attribute of the P2P class.
 
         Args:
-            wait_until (ExpectedCondition): Expected condition in case of
+            wait_until (bool): Expected condition in case of
                 successful logout
 
         Throws:
@@ -363,7 +357,7 @@ class P2P:
             date_format (str): date format.
 
         Keyword Args:
-            wait_until (ExpectedCondition): Expected condition in case of
+            wait_until (bool): Expected condition in case of
                 successful account statement generation.
             submit_btn_locator (tuple[str, str]): locator of button which needs
                 to clicked to start account statement generation. Not all P2P
@@ -416,8 +410,8 @@ class P2P:
             self, date_range: Tuple[date, date],
             default_dates: Tuple[date, date],
             arrows: Mapping[str, str],
-            days_table: Mapping[str, Union[str, bool]],
-            calendar_id_by: str, calendar_id: str) -> None:
+            days_table: Mapping[str, object],
+            calendar_id_by: str, calendar_id: Sequence[str]) -> None:
         """
         Generate account statement by clicking days in a calendar.
 
@@ -442,7 +436,7 @@ class P2P:
                 is day contained in id?.
             calendar_id_by (str): attribute of By class for translating
                 calendar_id to web element.
-            calendar_id (str): id of the two calendars.
+            calendar_id (list[str]): id of the two calendars.
 
         Throws:
             RuntimeError: - if a web element cannot be found
@@ -501,7 +495,7 @@ class P2P:
     def set_date_in_calendar(
             self, calendar_: WebElement, day: int, months: int,
             previous_month: WebElement, next_month: WebElement,
-            days_table: Mapping[str, Union[str, bool]]) -> None:
+            days_table: Mapping[str, object]) -> None:
         """
         Find and click the given day in the provided calendar.
 

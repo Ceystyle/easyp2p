@@ -483,7 +483,7 @@ def open_selenium_iuvo(
         # Get all required monthly date ranges
         months = p2p_helper.get_list_of_months(date_range)
 
-        df_result = None
+        df_result = pd.DataFrame()
 
         # Generate statement for each month and scrape it from the web site
         for month in months:
@@ -505,11 +505,7 @@ def open_selenium_iuvo(
             df = df.T
             df['Datum'] = month[0].strftime('%d.%m.%Y')
             df.set_index('Datum', inplace=True)
-
-            if df_result is None:
-                df_result = df
-            else:
-                df_result = df_result.append(df, sort=False)
+            df_result = df_result.append(df, sort=False)
 
         df_result.to_csv('p2p_downloads/iuvo_statement.csv')
 
