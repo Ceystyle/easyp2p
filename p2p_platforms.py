@@ -10,8 +10,8 @@ Each platform is created as an instance of the P2P class.
 
 """
 
-from datetime import datetime
-from typing import Tuple, Union
+from datetime import date
+from typing import Tuple
 
 import pandas as pd
 import requests
@@ -24,28 +24,15 @@ from selenium.common.exceptions import NoSuchElementException
 from P2P import P2P
 import p2p_helper
 
-ExpectedCondition = Union[
-    EC.element_to_be_clickable('locator'),
-    EC.presence_of_element_located('locator'),
-    EC.text_to_be_present_in_element('locator', str), EC.title_contains(str),
-    EC.visibility_of('locator')]
-
-OpenSelenium = Union[
-    'open_selenium_bondora', 'open_selenium_dofinance',
-    'open_selenium_estateguru', 'open_selenium_grupeer',
-    'open_selenium_iuvo', 'open_selenium_mintos',
-    'open_selenium_peerberry', 'open_selenium_robocash',
-    'open_selenium_swaper', 'open_selenium_twino']
-
 
 def open_selenium_bondora(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Bondora account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Bondora
@@ -137,13 +124,13 @@ def open_selenium_bondora(
         df.to_csv('p2p_downloads/bondora_statement.csv')
 
 def open_selenium_mintos(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Mintos account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Mintos
@@ -155,7 +142,7 @@ def open_selenium_mintos(
     xpaths = {
         'logout_btn': "//a[contains(@href,'logout')]"}
     default_file_name = '{0}-account-statement.xlsx'.format(
-        datetime.today().strftime('%Y%m%d'))
+        date.today().strftime('%Y%m%d'))
 
     with P2P(
             'Mintos', urls, EC.title_contains('Vielen Dank'),
@@ -180,13 +167,13 @@ def open_selenium_mintos(
         mintos.download_statement(default_file_name, 'export-button', By.ID)
 
 def open_selenium_robocash(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Robocash account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Robocash
@@ -257,13 +244,13 @@ def open_selenium_robocash(
             output.write(data.content)
 
 def open_selenium_swaper(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Swaper account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Swaper
@@ -301,7 +288,7 @@ def open_selenium_swaper(
                       'current_day_id': ' ',
                       'id_from_calendar': True,
                       'table_id': 'id'}
-        default_dates = (datetime.today().replace(day=1), datetime.now())
+        default_dates = (date.today().replace(day=1), date.today())
 
         swaper.generate_statement_calendar(
             date_range, default_dates, arrows, days_table,
@@ -311,13 +298,13 @@ def open_selenium_swaper(
             'excel-storage*.xlsx', xpaths['download_btn'], By.XPATH)
 
 def open_selenium_peerberry(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the PeerBerry account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for PeerBerry
@@ -359,7 +346,7 @@ def open_selenium_peerberry(
             pass
 
         # Create account statement for given date range
-        default_dates = (datetime.now(), datetime.now())
+        default_dates = (date.today(), date.today())
         arrows = {'arrow_tag': 'th',
                   'left_arrow_class': 'rdtPrev',
                   'right_arrow_class': 'rdtNext'}
@@ -395,13 +382,13 @@ def open_selenium_peerberry(
             actions='move_to_element')
 
 def open_selenium_estateguru(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download Estateguru account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Estateguru
@@ -418,7 +405,7 @@ def open_selenium_estateguru(
         'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
                        'div[1]/div[2]/button')}
     default_file_name = 'payments_{0}*.csv'.format(
-        datetime.today().strftime('%Y-%m-%d'))
+        date.today().strftime('%Y-%m-%d'))
 
     with P2P(
             'Estateguru', urls,
@@ -444,13 +431,13 @@ def open_selenium_estateguru(
         estateguru.download_statement(default_file_name, 'CSV', By.LINK_TEXT)
 
 def open_selenium_iuvo(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Iuvo account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Iuvo.
@@ -527,13 +514,13 @@ def open_selenium_iuvo(
         df_result.to_csv('p2p_downloads/iuvo_statement.csv')
 
 def open_selenium_grupeer(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Grupeer account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Iuvo.
@@ -573,13 +560,13 @@ def open_selenium_grupeer(
         grupeer.download_statement('Account statement.xlsx', 'excel', By.NAME)
 
 def open_selenium_dofinance(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Dofinance account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for DoFinance
@@ -612,13 +599,13 @@ def open_selenium_dofinance(
         dofinance.download_statement(default_file_name, 'xls', By.NAME)
 
 def open_selenium_twino(
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
     Generate and download the Twino account statement for given date range.
 
     Args:
-        date_range (tuple(datetime.date, datetime.date)): date range
+        date_range (tuple(date, date)): date range
             (start_date, end_date) for which the account statements must
             be generated.
         credentials (tuple[str, str]): (username, password) for Twino

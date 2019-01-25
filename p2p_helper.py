@@ -4,12 +4,12 @@
 """p2p_helper contains some helper functions for easyP2P."""
 
 import calendar
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from typing import List, Tuple
 
 
 def get_calendar_clicks(
-        target_date: datetime.date, start_date: datetime.date) -> int:
+        target_date: date, start_date: date) -> int:
     """
     Get number of calendar clicks necessary to get from start to target month.
 
@@ -37,8 +37,8 @@ def get_calendar_clicks(
 
     return clicks
 
-def get_list_of_months(date_range: Tuple[datetime.date, datetime.date]) \
-        -> List[Tuple[datetime.date, datetime.date]]:
+def get_list_of_months(date_range: Tuple[date, date]) \
+        -> List[Tuple[date, date]]:
     """
     Get list of months between (including) start and end date.
 
