@@ -108,14 +108,13 @@ class P2P:
 
         if self.logged_in:
             if 'logout' in self.urls:
-                success = self.logout_by_url(self.logout_wait_until)
+                self.logout_by_url(self.logout_wait_until)
             else:
-                success = self.logout_by_button(
+                self.logout_by_button(
                     self.logout_locator, self.logout_wait_until,
                     hover_locator=self.hover_locator)
 
-            if success:
-                self.logged_in = False
+            self.logged_in = False
 
         self.driver.close()
         if exc_type:
@@ -171,8 +170,6 @@ class P2P:
             raise RuntimeError(
                 'Das Laden der {0} Webseite hat zu lange gedauert.'
                 ''.format(self.name))
-
-        self.logged_in = True
 
     def log_into_page(
             self, name_field: str, password_field: str,
@@ -240,6 +237,8 @@ class P2P:
             raise RuntimeError(
                 '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
                 ''.format(self.name))
+
+        self.logged_in = True
 
     def open_account_statement_page(
             self, title: str, check_locator: Tuple[str, str]) -> None:
