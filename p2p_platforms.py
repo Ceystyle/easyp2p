@@ -157,7 +157,7 @@ def open_selenium_mintos(
             wait_until=EC.presence_of_element_located((By.ID, 'export-button')),
             submit_btn_locator=(By.ID, 'filter-button'))
 
-        mintos.download_statement(default_file_name, 'export-button', By.ID)
+        mintos.download_statement(default_file_name, (By.ID, 'export-button'))
 
 def open_selenium_robocash(
         date_range: Tuple[date, date],
@@ -226,7 +226,7 @@ def open_selenium_robocash(
         # as soon as parallel downloads to the p2p_downloads directory are
         # allowed. Thus:
         #TODO: find a safer method for downloading the Robocash statement
-        robocash.download_statement('*', 'download_statement', By.ID)
+        robocash.download_statement('*', (By.ID, 'download_statement'))
 
 def open_selenium_swaper(
         date_range: Tuple[date, date],
@@ -277,7 +277,7 @@ def open_selenium_swaper(
             calendar_id_by, calendar_id)
 
         swaper.download_statement(
-            'excel-storage*.xlsx', xpaths['download_btn'], By.XPATH)
+            'excel-storage*.xlsx', (By.XPATH, xpaths['download_btn']))
 
 def open_selenium_peerberry(
         date_range: Tuple[date, date],
@@ -357,7 +357,7 @@ def open_selenium_peerberry(
                                'lange gedauert.')
 
         peerberry.download_statement(
-            'transactions*.csv', xpaths['download_btn'], By.XPATH,
+            'transactions*.csv', (By.XPATH, xpaths['download_btn']),
             actions='move_to_element')
 
 def open_selenium_estateguru(
@@ -404,7 +404,7 @@ def open_selenium_estateguru(
         # anyway to be consistent with the other open_selenium_* functions.
         estateguru.driver.find_element_by_xpath(xpaths['select_btn']).click()
         estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
-        estateguru.download_statement(default_file_name, 'CSV', By.LINK_TEXT)
+        estateguru.download_statement(default_file_name, (By.LINK_TEXT, 'CSV'))
 
 def open_selenium_iuvo(
         date_range: Tuple[date, date],
@@ -456,6 +456,8 @@ def open_selenium_iuvo(
         # Get all required monthly date ranges
         months = p2p_helper.get_list_of_months(date_range)
 
+        # Initialize empty DataFrame. For each month the results will be
+        # appended to df_result.
         df_result = pd.DataFrame()
 
         # Generate statement for each month and scrape it from the web site
@@ -523,7 +525,8 @@ def open_selenium_grupeer(
                 + str(date_range[0].strftime('%d.%m.%Y'))),
             submit_btn_locator=(By.NAME, 'submit'))
 
-        grupeer.download_statement('Account statement*.xlsx', 'excel', By.NAME)
+        grupeer.download_statement(
+            'Account statement*.xlsx', (By.NAME, 'excel'))
 
 def open_selenium_dofinance(
         date_range: Tuple[date, date],
@@ -559,7 +562,7 @@ def open_selenium_dofinance(
             date_range, (By.ID, 'date-from'), (By.ID, 'date-to'), '%d.%m.%Y',
             wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-        dofinance.download_statement(default_file_name, 'xls', By.NAME)
+        dofinance.download_statement(default_file_name, (By.NAME, 'xls'))
 
 def open_selenium_twino(
         date_range: Tuple[date, date],
@@ -607,4 +610,4 @@ def open_selenium_twino(
                 (By.CSS_SELECTOR, '.accStatement__pdf')))
 
         twino.download_statement(
-            'account_statement_*.xlsx', '.accStatement__pdf', By.CSS_SELECTOR)
+            'account_statement_*.xlsx', (By.CSS_SELECTOR, '.accStatement__pdf'))

@@ -534,7 +534,7 @@ class P2P:
                     elem.click()
 
     def download_statement(
-            self, default_file_name: str, download_btn: str, find_btn_by: str,
+            self, default_file_name: str, download_locator: Tuple[str, str],
             actions=None) -> None:
         """
         Download account statement by clicking the provided button.
@@ -547,9 +547,7 @@ class P2P:
         Args:
             default_file_name (str): default file name without path for account
                 statement downloads, chosen by the P2P platform
-            download_btn (str): id of the download button.
-            find_btn_by (str): attribute of By class for translating
-                download_btn into web element.
+            download_locator (tuple[str, str]): locator of the download button.
 
         Keyword Args:
             actions (str): 'move to element' or None: some P2P sites
@@ -570,8 +568,7 @@ class P2P:
 
         # Find and click the download button
         try:
-            download_button = self.driver.find_element(
-                find_btn_by, download_btn)
+            download_button = self.driver.find_element(*download_locator)
 
             if actions == 'move_to_element':
                 action = ActionChains(self.driver)
