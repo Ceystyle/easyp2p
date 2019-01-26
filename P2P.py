@@ -15,7 +15,7 @@ import glob
 from pathlib import Path
 import os
 import time
-from typing import cast, Mapping, Optional, Sequence, Tuple
+from typing import cast, Mapping, Optional, Tuple
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -396,7 +396,7 @@ class P2P:
             default_dates: Tuple[date, date],
             arrows: Mapping[str, str],
             days_table: Mapping[str, object],
-            calendar_id_by: str, calendar_id: Sequence[str]) -> None:
+            calendar_locator: Tuple[Tuple[str, str], ...]) -> None:
         """
         Generate account statement by clicking days in a calendar.
 
@@ -419,9 +419,9 @@ class P2P:
             days_table (dict[str, {str, bool}]): dictionary with four entries:
                 class name of day table, id of day table, id of current day,
                 is day contained in id?.
-            calendar_id_by (str): attribute of By class for translating
-                calendar_id to web element.
-            calendar_id (list[str]): id of the two calendars.
+            calendar_locator (tuple[tuple[str, str], ...]): tuple containing
+                locators for the two calendars. It must have either length 1
+                or 2.
 
         Throws:
             RuntimeError: - if a web element cannot be found
@@ -430,21 +430,22 @@ class P2P:
 
         """
         try:
-            # Identify the two calendars
-            if calendar_id_by == 'name':
-                start_calendar = self.driver.find_element_by_name(
-                    calendar_id[0])
-                end_calendar = self.driver.find_element_by_name(
-                    calendar_id[1])
-            elif calendar_id_by == 'class':
-                datepicker = self.driver.find_elements_by_xpath(
-                    "//div[@class='{0}']".format(calendar_id))
+            # Identify the two calendars. If calendar_locator contains two
+            # elements, those are the locators for each calendar. If it
+            # contains only one element, this is the locator of a
+            # datepicker list which contains both calendars.
+            if len(calendar_locator) == 2:
+                start_calendar = self.driver.find_element(*calendar_locator[0])
+                end_calendar = self.driver.find_element(*calendar_locator[1])
+            elif len(calendar_locator) == 1:
+                datepicker = self.driver.find_elements(*calendar_locator[0])
                 start_calendar = datepicker[0]
                 end_calendar = datepicker[1]
             else:
                 # This should never happen
                 raise RuntimeError(
-                    '{0}: Keine ID für Kalender übergeben'.format(self.name))
+                    '{0}: Ungültiger Locator für Kalender übergeben'
+                    .format(self.name))
 
             # How many clicks on the arrow buttons are necessary?
             start_calendar_clicks = p2p_helper.get_calendar_clicks(

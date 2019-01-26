@@ -261,8 +261,8 @@ def open_selenium_swaper(
         swaper.open_account_statement_page(
             'Swaper', (By.ID, 'account-statement'))
 
-        calendar_id_by = 'class'
-        calendar_id = 'datepicker-container'
+        # calendar_locator must be a tuple of locators, thus the , at the end
+        calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )
         arrows = {'arrow_tag': 'div',
                   'left_arrow_class': 'icon icon icon-left',
                   'right_arrow_class': 'icon icon icon-right'}
@@ -273,8 +273,7 @@ def open_selenium_swaper(
         default_dates = (date.today().replace(day=1), date.today())
 
         swaper.generate_statement_calendar(
-            date_range, default_dates, arrows, days_table,
-            calendar_id_by, calendar_id)
+            date_range, default_dates, arrows, days_table, calendar_locator)
 
         swaper.download_statement(
             'excel-storage*.xlsx', (By.XPATH, xpaths['download_btn']))
@@ -329,16 +328,14 @@ def open_selenium_peerberry(
         arrows = {'arrow_tag': 'th',
                   'left_arrow_class': 'rdtPrev',
                   'right_arrow_class': 'rdtNext'}
-        calendar_id_by = 'name'
-        calendar_id = ['startDate', 'endDate']
+        calendar_locator = ((By.NAME, 'startDate'), (By.NAME, 'endDate'))
         days_table = {'class_name': 'rdtDays',
                       'current_day_id': 'rdtDay',
                       'id_from_calendar': False,
                       'table_id': 'class'}
 
         peerberry.generate_statement_calendar(
-            date_range, default_dates, arrows, days_table,
-            calendar_id_by, calendar_id)
+            date_range, default_dates, arrows, days_table, calendar_locator)
 
         # After setting the dates, the statement button needs to be clicked in
         # order to actually generate the statement
