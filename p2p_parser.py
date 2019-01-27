@@ -49,7 +49,7 @@ def _check_unknown_cf_types(
     """
     unknown_cf_types = set(df[orig_cf_type_name].where(
         df['Cashflow-Typ'].isna()).dropna().tolist())
-    return ', '.join(unknown_cf_types)
+    return ', '.join(sorted(unknown_cf_types))
 
 
 def get_df_from_file(input_file):
