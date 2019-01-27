@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Sequence, Tuple
 
 import pandas as pd
-from xlrd.biffh import XLRDError
 
 INTEREST_PAYMENT = 'Zinszahlungen'
 BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
@@ -81,10 +80,6 @@ def get_df_from_file(input_file):
     except FileNotFoundError:
         raise RuntimeError(
             '{0} konnte nicht gefunden werden!'.format(input_file))
-    except XLRDError:
-        raise RuntimeError(
-            ('Die Datei {0} ist beschädigt und kann nicht verwendet werden!'
-             .format(input_file)))
 
     return df
 
