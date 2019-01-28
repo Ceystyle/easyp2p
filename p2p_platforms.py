@@ -54,6 +54,9 @@ def open_selenium_bondora(
 
         driver = bondora.driver
 
+        # _no_payments is set True if there were no cashflows in date_range
+        _no_payments = False
+
         bondora.log_into_page(
             'Email', 'Password', credentials,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
@@ -106,17 +109,19 @@ def open_selenium_bondora(
         except TimeoutException as err:
             if 'Keine Zahlungen gefunden' in \
                     driver.find_element_by_xpath(xpaths['no_payments']).text:
-                raise RuntimeError(
-                    'Bondora: keine Zahlungen im angeforderten Zeitraum '
-                    'vorhanden!')
+                _no_payments = True
             else:
                 raise TimeoutException(err)
 
-        # Scrape the cashflows from the web site and write them to a csv file
-        cashflow_table = driver.find_element_by_id('cashflow-content')
-        df = pd.read_html(
-            cashflow_table.get_attribute("innerHTML"), index_col=0,
-            thousands='.', decimal=',')[0]
+        if _no_payments:
+            df = pd.DataFrame()
+        else:
+            # Scrape cashflows from the web site and write them to csv file
+            cashflow_table = driver.find_element_by_id('cashflow-content')
+            df = pd.read_html(
+                cashflow_table.get_attribute("innerHTML"), index_col=0,
+                thousands='.', decimal=',')[0]
+
         df.to_csv('p2p_downloads/bondora_statement.csv')
 
 def open_selenium_mintos(

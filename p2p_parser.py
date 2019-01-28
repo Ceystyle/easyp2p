@@ -75,6 +75,93 @@ def _check_unknown_cf_types(
     return ', '.join(sorted(unknown_cf_types))
 
 
+def get_missing_months(df: pd.DataFrame, date_range: Tuple[date, date]) \
+        -> List[Tuple[date, date]]:
+    """
+    Get list of months in date_range which do not contain at least one cashflow.
+
+    This function will identify all months in date_range which do not contain
+    at least one cashflow in the provided DataFrame. A list of those months
+    is returned.
+
+    Args:
+        df (pd.DataFrame): a DataFrame containing all cashflows in date_range
+            for the current P2P platform
+        date_range (tuple(date, date)): date range (start_date, end_date)
+            for which the results must be generated.
+
+    Returns:
+        List[Tuple[date, date]]: list of tuples (start_of_month, end_of_month)
+            which do not contain a cashflow.
+
+    """
+    list_of_months = p2p_helper.get_list_of_months(date_range)
+
+    # If there were no cashflows all months are missing
+    if df.empty:
+        return list_of_months
+
+    # Get all cashflow dates in date format from the DataFrame
+    df[DATE] = pd.to_datetime(df[DATE], format='%d.%m.%Y')
+    cf_date_list = []
+    for elem in df[DATE].tolist():
+        cf_date_list.append(date(elem.year, elem.month, elem.day))
+
+    # Remove all months for which there is at least one cashflow
+    for cf_date in cf_date_list:
+        for month in list_of_months:
+            if month[0] <= cf_date <= month[1]:
+                list_of_months.remove(month)
+
+    return list_of_months
+
+
+def add_missing_months(
+        df: pd.DataFrame, missing_months: List[Tuple[date, date]]) \
+        -> pd.DataFrame:
+    """
+    Create a zero entry in df for all missing_months.
+
+    This function will create a new row in the DataFrame df for each month in
+    missing_months. This will ensure that months without cashflows are shown
+    in the final result file.
+
+    Args:
+        df (pd.DataFrame): a DataFrame containing all cashflows in date_range
+            for the current P2P platform
+        date_range (List[Tuple[date, date]]): list of months
+            (start_of_month, end_of_month) which do not contain a cashflow.
+
+    Returns:
+        pd.DataFrame: the original DataFrame df with one zero line appended for
+            each month in missing_months
+
+    """
+    # Create list with new cashflow dates set to the first of each missing month
+    new_cf_dates = []
+    for month in missing_months:
+        new_cf_dates.append(datetime(
+            month[0].year, month[0].month, month[0].day))
+
+    # Set all columns of the new df to zero, except for the DATE column
+    content = dict()
+    zeroes = [0.] * len(new_cf_dates)
+    for column in TARGET_COLUMNS:
+        content[column] = zeroes
+    content[DATE] = new_cf_dates
+
+    # Create the new DataFrame and append it to the old one
+    df_new = pd.DataFrame(data=content, columns=TARGET_COLUMNS)
+    if df.empty:
+        df = df_new
+    else:
+        df = df.append(df_new, sort=False)
+    df.fillna(0., inplace=True)
+    df.sort_values(by=[DATE], inplace = True)
+
+    return df
+
+
 def get_df_from_file(input_file):
     """
     Read a pandas.DataFrame from input_file.
@@ -175,46 +262,58 @@ def bondora(
     """
     df = get_df_from_file(input_file)
 
-    df.set_index('Zeitraum', inplace=True)
-    df.drop(['Gesamt:'], inplace=True)
-    df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
-    df.rename_axis('Datum', inplace=True)
-    df.rename(
-        columns={
-            'Eingesetztes Kapital (netto)': INCOMING_PAYMENT,
-            'Erhaltene Zinsen - gesamt': INTEREST_PAYMENT,
-            'Erhaltener Kapitalbetrag - gesamt': REDEMPTION_PAYMENT,
-            'Investitionen (netto)': INVESTMENT_PAYMENT,
-        },
-        inplace=True
-    )
-    df.rename(
-        columns={
-            'Darlehensbetrag und erhaltene Zinsen - insgesamt':
-                'Gesamtzahlungen',
-            'Geplante Zinsen - gesamt': 'Geplante Zinszahlungen',
-            'Geplanter Kapitalbetrag - gesamt': 'Geplante Tilgungszahlungen',
-            'Kapitalbetrag und geplante Zinsen - gesamt':
-                'Geplante Gesamtzahlungen'
-        },
-        inplace=True
-    )
-    df = df.astype('float64')
+    if not df.empty:
+        df.set_index('Zeitraum', inplace=True)
+        df.drop(['Gesamt:'], inplace=True)
+        df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
+        df.rename_axis(DATE, inplace=True)
+        df.rename(
+            columns={
+                'Eingesetztes Kapital (netto)': INCOMING_PAYMENT,
+                'Erhaltene Zinsen - gesamt': INTEREST_PAYMENT,
+                'Erhaltener Kapitalbetrag - gesamt': REDEMPTION_PAYMENT,
+                'Investitionen (netto)': INVESTMENT_PAYMENT,
+            },
+            inplace=True
+        )
+        # The following columns will not be shown in the final result (at least
+        # for now). The other P2P platforms do not report them. We rename them
+        # to shorter names anyway.
+        df.rename(
+            columns={
+                'Darlehensbetrag und erhaltene Zinsen - insgesamt':
+                    'Gesamtzahlungen',
+                'Geplante Zinsen - gesamt': 'Geplante Zinszahlungen',
+                'Geplanter Kapitalbetrag - gesamt':
+                    'Geplante Tilgungszahlungen',
+                'Kapitalbetrag und geplante Zinsen - gesamt':
+                    'Geplante Gesamtzahlungen'
+            },
+            inplace=True
+        )
+        df = df.astype('float64')
 
-    df['Währung'] = 'EUR'
-    df['Plattform'] = 'Bondora'
-    df[DEFAULT_PAYMENT] = (df['Tilgungszahlungen']
-                           - df['Geplante Tilgungszahlungen'])
+        df[DEFAULT_PAYMENT] = (
+            df['Tilgungszahlungen'] - df['Geplante Tilgungszahlungen'])
 
-    df.reset_index(level=0, inplace=True)
-    # TODO: make sure locale is installed
-    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
-    df['Datum'] = pd.to_datetime(df['Datum'], format='%b %Y')
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
+        df.reset_index(level=0, inplace=True)
+        # TODO: make sure locale is installed
+        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
+        df[DATE] = pd.to_datetime(df[DATE], format='%b %Y')
+        df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
+
+    # Check if there are months in date_range with no cashflows. If yes, add
+    # a zero line for those months
+    missing_months = get_missing_months(df, date_range)
+    if missing_months:
+        df = add_missing_months(df, missing_months)
+
+    df[CURRENCY] = 'EUR'
+    df[PLATFORM] = 'Bondora'
+    df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
 
     # Since we define the column names, Bondora cannot have unknown CF types
-    return (df_result, '')
+    return (df, '')
 
 
 def mintos(
