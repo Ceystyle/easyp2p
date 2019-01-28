@@ -151,10 +151,17 @@ def _combine_dfs(list_of_dfs: Sequence[pd.DataFrame]) -> pd.DataFrame:
     return df_result
 
 
-def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
+def bondora(
+    date_range: Tuple[date, date],
+    input_file: str = 'p2p_downloads/bondora_statement.csv') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Bondora.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -210,10 +217,17 @@ def bondora(input_file: str = 'p2p_downloads/bondora_statement.csv') \
     return (df_result, '')
 
 
-def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
+def mintos(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Mintos.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -225,6 +239,7 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     mintos_dict = dict()
@@ -258,10 +273,17 @@ def mintos(input_file: str = 'p2p_downloads/mintos_statement.xlsx') \
     return (df_result, unknown_cf_types)
 
 
-def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
+def robocash(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Robocash.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -273,6 +295,7 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     robocash_dict = dict()
@@ -297,10 +320,17 @@ def robocash(input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
     return (df_result, unknown_cf_types)
 
 
-def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
+def swaper(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Swaper.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -312,6 +342,7 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     swaper_dict = dict()
@@ -345,10 +376,17 @@ def swaper(input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
     return (df_result, unknown_cf_types)
 
 
-def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
+def peerberry(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/peerberry_statement.csv') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Peerberry.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -360,6 +398,7 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     peerberry_dict = dict()
@@ -380,10 +419,17 @@ def peerberry(input_file: str = 'p2p_downloads/peerberry_statement.csv') \
     return (df_result, unknown_cf_types)
 
 
-def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
+def estateguru(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/estateguru_statement.csv') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Estateguru.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -395,6 +441,7 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     estateguru_dict = dict()
@@ -426,10 +473,17 @@ def estateguru(input_file: str = 'p2p_downloads/estateguru_statement.csv') \
     return (df_result, unknown_cf_types)
 
 
-def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
+def iuvo(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/iuvo_statement.csv') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Iuvo.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -441,6 +495,7 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     # Interest and redemption payments are reported in two columns by Iuvo.
@@ -485,10 +540,17 @@ def iuvo(input_file: str = 'p2p_downloads/iuvo_statement.csv') \
     return (df_result, '')
 
 
-def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
+def grupeer(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Grupeer.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -500,6 +562,7 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     grupeer_dict = dict()
@@ -525,10 +588,17 @@ def grupeer(input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
     return (df_result, unknown_cf_types)
 
 
-def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
+def dofinance(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for DoFinance.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -540,6 +610,7 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     dofinance_dict = dict()
@@ -565,10 +636,17 @@ def dofinance(input_file: str = 'p2p_downloads/dofinance_statement.xlsx') \
     return (df_result, unknown_cf_types)
 
 
-def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
+def twino(
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/twino_statement.xlsx') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Twino.
+
+    Args:
+        date_range (tuple(date, date)): date range
+            (start_date, end_date) for which the investment results must be
+            shown.
 
     Keyword Args:
         input_file (str): file name including path of the account statement
@@ -580,6 +658,7 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
         element is a set containing all unknown cash flow types.
 
     """
+    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
     twino_dict = dict()

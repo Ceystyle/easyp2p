@@ -151,7 +151,7 @@ class WorkerThread(QThread):
             return list_of_dfs
 
         try:
-            (df, unknown_cf_types) = parser()
+            (df, unknown_cf_types) = parser(self.date_range)
             list_of_dfs.append(df)
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
