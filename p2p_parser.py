@@ -11,13 +11,16 @@ Module for parsing output files of P2P platforms and printing combined results.
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
 """
-import datetime
+from datetime import date, datetime
 import locale
 from pathlib import Path
-from typing import Sequence, Tuple
+from typing import List, Sequence, Tuple
 
 import pandas as pd
 
+import p2p_helper
+
+# Define all necessary payment types
 INTEREST_PAYMENT = 'Zinszahlungen'
 BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
 BUYBACK_PAYMENT = 'Rückkäufe'
@@ -29,6 +32,27 @@ OUTGOING_PAYMENT = 'Auszahlungen'
 DEFAULT_PAYMENT = 'Ausfälle'
 START_BALANCE_NAME = 'Startguthaben'
 END_BALANCE_NAME = 'Endsaldo'
+TOTAL_INCOME = 'Gesamteinnahmen'
+DATE = 'Datum'
+PLATFORM = 'Plattform'
+CURRENCY = 'Währung'
+
+# TARGET_COLUMNS are the columns which will be shown in the final result file
+TARGET_COLUMNS = [
+    DATE,
+    PLATFORM,
+    CURRENCY,
+    START_BALANCE_NAME,
+    END_BALANCE_NAME,
+    TOTAL_INCOME,
+    INTEREST_PAYMENT,
+    INVESTMENT_PAYMENT,
+    REDEMPTION_PAYMENT,
+    BUYBACK_PAYMENT,
+    BUYBACK_INTEREST_PAYMENT,
+    LATE_FEE_PAYMENT,
+    DEFAULT_PAYMENT,
+]
 
 
 def _check_unknown_cf_types(
@@ -590,7 +614,7 @@ def twino(input_file: str = 'p2p_downloads/twino_statement.xlsx') \
 
 def show_results(
         list_of_dfs: Sequence[pd.DataFrame],
-        date_range: Tuple[datetime.date, datetime.date],
+        date_range: Tuple[date, date],
         output_file: str) -> bool:
     """
     Sum up the results contained in data frames and write them to an Excel file.
@@ -627,19 +651,7 @@ def show_results(
         df['Gesamteinnahmen'] += df[col]
 
     # Show only existing columns
-    target_columns = [
-        'Startguthaben',
-        'Endsaldo',
-        'Investitionen',
-        'Tilgungszahlungen',
-        'Zinszahlungen',
-        'Verzugsgebühren',
-        'Rückkäufe',
-        'Zinszahlungen aus Rückkäufen',
-        'Ausfälle',
-        'Gesamteinnahmen',
-    ]
-    show_columns = [col for col in df.columns if col in target_columns]
+    show_columns = [col for col in df.columns if col in TARGET_COLUMNS]
 
     df.reset_index(level=['Datum', 'Währung'], inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
