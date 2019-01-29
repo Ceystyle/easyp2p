@@ -245,6 +245,18 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/robocash_statement.xlsx',
             'tests/results/result_test_open_selenium_robocash.xlsx'))
 
+    def test_open_selenium_robocash_no_cfs(self):
+        """
+        Test open_selenium_robocash function when there is no cashflow in
+        date_range
+        """
+        credentials = self.get_credentials_from_keyring('Robocash')
+        p2p_platforms.open_selenium_robocash(
+            self.date_range_no_cfs, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/robocash_statement.xlsx',
+            'tests/results/result_test_open_selenium_robocash_no_cfs.xlsx'))
+
     def test_open_selenium_swaper(self):
         """Test open_selenium_swaper function"""
         credentials = self.get_credentials_from_keyring('Swaper')
@@ -412,12 +424,23 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'peerberry', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
 
-    @unittest.expectedFailure
     def test_robocash_parser(self):
         test_name = 'robocash_parser'
         self.run_parser_test(
             'robocash', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv')
+
+    def test_robocash_parser_no_cfs(self):
+        test_name = 'robocash_parser_no_cfs'
+        self.run_parser_test(
+            'robocash', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
+
+    def test_robocash_parser_missing_month(self):
+        test_name = 'robocash_parser_missing_month'
+        self.run_parser_test(
+            'robocash', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     @unittest.expectedFailure
     def test_swaper_parser(self):
