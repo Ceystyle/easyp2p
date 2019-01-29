@@ -480,9 +480,18 @@ def swaper(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'Swaper'
+        df[CURRENCY] = 'EUR'
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
+        return (df, '')
+
+    # Define mapping between Swaper and easyP2P cashflow types
     swaper_dict = dict()
     swaper_dict['REPAYMENT_INTEREST'] = INTEREST_PAYMENT
     swaper_dict['EXTENSION_INTEREST'] = INTEREST_PAYMENT
@@ -491,26 +500,26 @@ def swaper(
     swaper_dict['BUYBACK_INTEREST'] = BUYBACK_INTEREST_PAYMENT
     swaper_dict['BUYBACK_PRINCIPAL'] = BUYBACK_PAYMENT
 
-    try:
-        df.rename(columns={'Booking date': 'Datum'}, inplace=True)
-        df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-        df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
-        df['Währung'] = 'EUR'
-        df['Plattform'] = 'Swaper'
-    except KeyError as err:
-        raise RuntimeError(
-            'Swaper: unbekannte Spalte im Parser: ' + str(err))
-    except AttributeError as err:
-        if df.shape[0] == 0:
-            # TODO: add rows with zeros instead of erroring out
-            raise RuntimeError(
-                'Swaper: keine Zahlungen im angeforderten Zeitraum vorhanden!')
-        else:
-            raise AttributeError(err)
+    # Map Swaper cashflow types to easyP2P cashflow types
+    df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
+
+    # Format date column
+    df.rename(columns={'Booking date': DATE}, inplace=True)
+    df[DATE] = df['Datum'].dt.strftime('%d.%m.%Y')
+
+    # Set currency. Swaper only supports EUR.
+    df[CURRENCY] = 'EUR'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Transaction type')
     df_result = _create_df_result(df, 'Amount')
 
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df, date_range)
+    if missing_months:
+        df_result = add_missing_months(df_result, missing_months)
+
+    df_result[PLATFORM] = 'Swaper'
+    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     return (df_result, unknown_cf_types)
 
 
