@@ -214,7 +214,7 @@ def _create_df_result(df, value_column):
         columns=['Cashflow-Typ'], aggfunc=sum)
     df_result.fillna(0, inplace=True)
     df_result.reset_index(inplace=True)
-    df_result[DATE] = pd.to_datetime(df[DATE], format='%d.%m.%Y')
+    df_result[DATE] = pd.to_datetime(df_result[DATE], format='%d.%m.%Y')
 
     return df_result
 
@@ -345,9 +345,10 @@ def mintos(
         df = add_missing_months(df, missing_months)
         df[PLATFORM] = 'Mintos'
         df[CURRENCY] = 'EUR'
-        df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
         return (df, '')
 
+    # Define mapping between Mintos and easyP2P column names
     mintos_dict = dict()
     mintos_dict['Interest income'] = INTEREST_PAYMENT
     mintos_dict['Interest income on rebuy'] = BUYBACK_INTEREST_PAYMENT
@@ -357,10 +358,11 @@ def mintos(
     mintos_dict['Investment principal repayment'] = REDEMPTION_PAYMENT
     mintos_dict['Late payment fee income'] = LATE_FEE_PAYMENT
     mintos_dict['Incoming client payment'] = INCOMING_PAYMENT
-    # Treat bonus/cashback payments as normal interest payments
+    # Treat bonus/cashback payments as normal interest payments:
     mintos_dict['Cashback bonus'] = INTEREST_PAYMENT
     mintos_dict['Reversed incoming client payment'] = OUTGOING_PAYMENT
 
+    # Rename columns and create new ones for identifying cashflows
     df.rename(columns={'Date': DATE, 'Currency': CURRENCY}, inplace=True)
     df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d %H:%M:%S')
     df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
@@ -368,8 +370,9 @@ def mintos(
         ' Loan ID: ').str
     df['Mintos_Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].str.split(
         ' Rebuy purpose').str[0]
+
+    # Map Mintos cashflow types to easyP2P cashflow types
     df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
-    df[PLATFORM] = 'Mintos'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Mintos_Cashflow-Typ')
     df_result = _create_df_result(df, 'Turnover')
@@ -379,6 +382,7 @@ def mintos(
     if missing_months:
         df_result = add_missing_months(df_result, missing_months)
 
+    df_result[PLATFORM] = 'Mintos'
     df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     # TODO: get start and end balance
 

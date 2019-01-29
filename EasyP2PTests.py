@@ -274,6 +274,7 @@ class P2PParserTests(unittest.TestCase):
     def setUp(self):
         """Initializes the default arguments for p2p_parser."""
         self.date_range = (date(2018, 9, 1), date(2018, 12, 31))
+        self.date_range_missing_month = (date(2018, 8, 1), date(2018, 12, 31))
         self.date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
 
     def run_parser_test(
@@ -331,12 +332,14 @@ class P2PParserTests(unittest.TestCase):
     def test_bondora_parser_missing_month(self):
         test_name = 'bondora_parser_missing_month.csv'
         self.run_parser_test(
-            'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
+            'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
+            self.date_range_missing_month)
 
     def test_bondora_parser_no_cfs(self):
         test_name = 'bondora_parser_no_cfs.csv'
         self.run_parser_test(
-            'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
+            'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
+            self.date_range_no_cfs)
 
     @unittest.expectedFailure
     def test_dofinance_parser(self):
@@ -396,6 +399,12 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
+
+    def test_mintos_parser_missing_month(self):
+        test_name = 'mintos_parser_missing_month'
+        self.run_parser_test(
+            'mintos', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     @unittest.expectedFailure
     def test_peerberry_parser(self):
