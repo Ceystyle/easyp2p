@@ -212,6 +212,8 @@ def _create_df_result(df, value_column):
         df, values=value_column, index=['Plattform', 'Datum', 'Währung'],
         columns=['Cashflow-Typ'], aggfunc=sum)
     df_result.fillna(0, inplace=True)
+    df_result.reset_index(inplace=True)
+    df_result[DATE] = pd.to_datetime(df[DATE], format='%d.%m.%Y')
 
     return df_result
 
@@ -338,8 +340,16 @@ def mintos(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
+
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'Mintos'
+        df[CURRENCY] = 'EUR'
+        df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
+        return (df, '')
 
     mintos_dict = dict()
     mintos_dict['Interest income'] = INTEREST_PAYMENT
@@ -354,19 +364,25 @@ def mintos(
     mintos_dict['Cashback bonus'] = INTEREST_PAYMENT
     mintos_dict['Reversed incoming client payment'] = OUTGOING_PAYMENT
 
-    df.rename(columns={'Date': 'Datum', 'Currency': 'Währung'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'])
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    df.rename(columns={'Date': DATE, 'Currency': CURRENCY}, inplace=True)
+    df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d %H:%M:%S')
+    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
     df['Mintos_Cashflow-Typ'], df['Loan ID'] = df['Details'].str.split(
         ' Loan ID: ').str
     df['Mintos_Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].str.split(
         ' Rebuy purpose').str[0]
     df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
-    df['Plattform'] = 'Mintos'
+    df[PLATFORM] = 'Mintos'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Mintos_Cashflow-Typ')
     df_result = _create_df_result(df, 'Turnover')
 
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df, date_range)
+    if missing_months:
+        df_result = add_missing_months(df_result, missing_months)
+
+    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     # TODO: get start and end balance
 
     return (df_result, unknown_cf_types)

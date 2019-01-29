@@ -149,6 +149,7 @@ def open_selenium_mintos(
             'Mintos', urls, EC.title_contains('Vielen Dank'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
+        driver = mintos.driver
         mintos.log_into_page(
             '_username', '_password', credentials,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
@@ -159,10 +160,40 @@ def open_selenium_mintos(
         mintos.generate_statement_direct(
             date_range, (By.ID, 'period-from'),
             (By.ID, 'period-to'), '%d.%m.%Y',
-            wait_until=EC.presence_of_element_located((By.ID, 'export-button')),
             submit_btn_locator=(By.ID, 'filter-button'))
 
-        mintos.download_statement(default_file_name, (By.ID, 'export-button'))
+        # If there were no cashflows in date_range, the download button will
+        # not appear. In that case test if there really were no cashflows by
+        # checking that there are only two lines in the account statement with
+        # start and end balance of 0. If that is the case write an empty
+        # DataFrame to the file.
+        try:
+            mintos.wdwait(
+                EC.presence_of_element_located((By.ID, 'export-button')))
+        except TimeoutException:
+            try:
+                cashflow_table = driver.find_element_by_id('overview-results')
+                df = pd.read_html(cashflow_table.get_attribute("innerHTML"))[0]
+            except ValueError:
+                raise RuntimeError(
+                    'Der Mintos-Kontoauszug konnte nicht erfolgreich '
+                    'generiert werden')
+
+            if len(df) == 2:
+                if df.iloc[0][0] == 'Anfangssaldo ' \
+                        + date_range[0].strftime('%d.%m.%Y') \
+                    and df.iloc[0][1] == 0 \
+                    and df.iloc[1][0] == 'Endsaldo ' \
+                        + date_range[1].strftime('%d.%m.%Y'):
+                    df = pd.DataFrame()
+                    df.to_excel('p2p_downloads/mintos_statement.xlsx')
+            else:
+                raise RuntimeError(
+                    'Der Mintos-Kontoauszug konnte nicht erfolgreich '
+                    'generiert werden')
+        else:
+            mintos.download_statement(
+                default_file_name, (By.ID, 'export-button'))
 
 def open_selenium_robocash(
         date_range: Tuple[date, date],

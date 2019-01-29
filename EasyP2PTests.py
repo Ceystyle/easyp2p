@@ -218,6 +218,17 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/mintos_statement.xlsx',
             'tests/results/result_test_open_selenium_mintos.xlsx'))
 
+    def test_open_selenium_mintos_no_cfs(self):
+        """
+        Test open_selenium_mintos function when there is no cashflow in
+        date_range
+        """
+        credentials = self.get_credentials_from_keyring('Mintos')
+        p2p_platforms.open_selenium_mintos(self.date_range_no_cfs, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/mintos_statement.xlsx',
+            'tests/results/result_test_open_selenium_mintos_no_cfs.xlsx'))
+
     def test_open_selenium_peerberry(self):
         """Test open_selenium_peerberry function"""
         credentials = self.get_credentials_from_keyring('PeerBerry')
@@ -260,6 +271,10 @@ class P2PPlatformsTests(unittest.TestCase):
 
 class P2PParserTests(unittest.TestCase):
     """Test p2p_parser"""
+    def setUp(self):
+        """Initializes the default arguments for p2p_parser."""
+        self.date_range = (date(2018, 9, 1), date(2018, 12, 31))
+        self.date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
 
     def run_parser_test(
             self, platform: str, input_file: str,
@@ -347,7 +362,8 @@ class P2PParserTests(unittest.TestCase):
         test_name = 'estateguru_parser_unknown_cf.csv'
         self.run_parser_test(
             'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
-            'Investition(AutoInvestieren), TestCF1, TestCF2')
+            unknown_cf_types_exp = \
+                'Investition(AutoInvestieren), TestCF1, TestCF2')
 
     @unittest.expectedFailure
     def test_grupeer_parser(self):
@@ -362,20 +378,24 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'iuvo', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
 
-    @unittest.expectedFailure
     def test_mintos_parser(self):
         test_name = 'mintos_parser'
         self.run_parser_test(
             'mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv')
 
-    @unittest.expectedFailure
     def test_mintos_parser_unknown_cf(self):
         test_name = 'mintos_parser_unknown_cf'
         self.run_parser_test(
             'mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
-            'Interestincome, TestCF1, TestCF2')
+            unknown_cf_types_exp = 'Interestincome, TestCF1, TestCF2')
+
+    def test_mintos_parser_no_cfs(self):
+        test_name = 'mintos_parser_no_cfs'
+        self.run_parser_test(
+            'mintos', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
     @unittest.expectedFailure
     def test_peerberry_parser(self):
