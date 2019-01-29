@@ -139,6 +139,7 @@ class P2PPlatformsTests(unittest.TestCase):
     def setUp(self):
         """Initializes the default arguments for p2p_platforms."""
         self.date_range = (date(2018, 9, 1), date(2018, 12, 31))
+        self.date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
 
     def get_credentials_from_keyring(self, platform: str) -> Tuple[str, str]:
         """
@@ -172,8 +173,7 @@ class P2PPlatformsTests(unittest.TestCase):
     def test_open_selenium_bondora_no_cfs(self) -> None:
         """Test open_selenium_bondora when no cashflows exist in date range"""
         credentials = self.get_credentials_from_keyring('Bondora')
-        p2p_platforms.open_selenium_bondora(
-            (date(2016, 9, 1), date(2016, 12, 31)), credentials)
+        p2p_platforms.open_selenium_bondora(self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/bondora_statement.csv',
             'tests/results/result_test_open_selenium_bondora_no_cfs.csv'))
