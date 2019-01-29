@@ -268,8 +268,11 @@ class P2PPlatformsTests(unittest.TestCase):
     def test_open_selenium_swaper_no_cfs(self) -> None:
         """Test open_selenium_swaper when no cashflows exist in date range"""
         credentials = self.get_credentials_from_keyring('Swaper')
-        self.assertRaises(RuntimeError, p2p_platforms.open_selenium_swaper,
-            (date(2016, 12, 1), date(2016, 12, 31)), credentials)
+        p2p_platforms.open_selenium_swaper(
+            self.date_range_no_cfs, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/swaper_statement.xlsx',
+            'tests/results/result_test_open_selenium_swaper_no_cfs.xlsx'))
 
     def test_open_selenium_twino(self):
         """Test open_selenium_twino function"""
@@ -442,12 +445,23 @@ class P2PParserTests(unittest.TestCase):
             'robocash', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
-    @unittest.expectedFailure
     def test_swaper_parser(self):
         test_name = 'swaper_parser'
         self.run_parser_test(
             'swaper', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv')
+
+    def test_swaper_parser_no_cfs(self):
+        test_name = 'swaper_parser_no_cfs'
+        self.run_parser_test(
+            'swaper', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
+
+    def test_swaper_parser_missing_month(self):
+        test_name = 'swaper_parser_missing_month'
+        self.run_parser_test(
+            'swaper', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     @unittest.expectedFailure
     def test_twino_parser(self):
