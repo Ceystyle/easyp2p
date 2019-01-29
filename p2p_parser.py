@@ -149,6 +149,7 @@ def add_missing_months(
     for column in TARGET_COLUMNS:
         content[column] = zeroes
     content[DATE] = new_cf_dates
+    content[CURRENCY] = 'EUR'
 
     # Create the new DataFrame and append it to the old one
     df_new = pd.DataFrame(data=content, columns=TARGET_COLUMNS)
@@ -197,7 +198,7 @@ def get_df_from_file(input_file):
 
 def _create_df_result(df, value_column):
     """
-    Helper method to aggregate results by platform, date and currency.
+    Helper method to aggregate results by date and currency.
 
     Args:
         df (pd.DataFrame): data frame which contains the data to be aggregated
@@ -209,7 +210,7 @@ def _create_df_result(df, value_column):
 
     """
     df_result = pd.pivot_table(
-        df, values=value_column, index=['Plattform', 'Datum', 'Währung'],
+        df, values=value_column, index=[DATE, CURRENCY],
         columns=['Cashflow-Typ'], aggfunc=sum)
     df_result.fillna(0, inplace=True)
     df_result.reset_index(inplace=True)
@@ -265,44 +266,40 @@ def bondora(
     df = get_df_from_file(input_file)
 
     if not df.empty:
-        df.set_index('Zeitraum', inplace=True)
-        df.drop(['Gesamt:'], inplace=True)
+        # The first and last row only contain a summary
+        df = df[1:-1]
+
+        # Fix the column format
         df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
-        df.rename_axis(DATE, inplace=True)
+
+        # Rename columns to standard easyP2P format
         df.rename(
             columns={
+                'Zeitraum': DATE,
                 'Eingesetztes Kapital (netto)': INCOMING_PAYMENT,
                 'Erhaltene Zinsen - gesamt': INTEREST_PAYMENT,
                 'Erhaltener Kapitalbetrag - gesamt': REDEMPTION_PAYMENT,
                 'Investitionen (netto)': INVESTMENT_PAYMENT,
             },
-            inplace=True
-        )
-        # The following columns will not be shown in the final result (at least
-        # for now). The other P2P platforms do not report them. We rename them
-        # to shorter names anyway.
-        df.rename(
-            columns={
-                'Darlehensbetrag und erhaltene Zinsen - insgesamt':
-                    'Gesamtzahlungen',
-                'Geplante Zinsen - gesamt': 'Geplante Zinszahlungen',
-                'Geplanter Kapitalbetrag - gesamt':
-                    'Geplante Tilgungszahlungen',
-                'Kapitalbetrag und geplante Zinsen - gesamt':
-                    'Geplante Gesamtzahlungen'
-            },
-            inplace=True
-        )
-        df = df.astype('float64')
+            inplace=True)
 
-        df[DEFAULT_PAYMENT] = (
-            df['Tilgungszahlungen'] - df['Geplante Tilgungszahlungen'])
-
-        df.reset_index(level=0, inplace=True)
+        # Format the date column
         # TODO: make sure locale is installed
         locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
         df[DATE] = pd.to_datetime(df[DATE], format='%b %Y')
         df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
+
+        # Calculate debt default
+        df.set_index(DATE, inplace=True)
+        df = df.astype('float64')
+        df.reset_index(inplace=True)
+        df[DEFAULT_PAYMENT] = (
+            df['Tilgungszahlungen'] - df['Geplanter Kapitalbetrag - gesamt'])
+
+        # Drop unnecessary columns
+        for column in df.columns:
+            if column not in TARGET_COLUMNS:
+                df.drop(column, axis='columns', inplace=True)
 
     # Check if there are months in date_range with no cashflows. If yes, add
     # a zero line for those months
