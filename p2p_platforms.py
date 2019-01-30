@@ -535,7 +535,7 @@ def open_selenium_iuvo(
             df.set_index('Datum', inplace=True)
 
             # Append the result for this month to previous months' results
-            df_result = df_result.append(df, sort=False)
+            df_result = df_result.append(df, sort=True)
 
         df_result.to_csv('p2p_downloads/iuvo_statement.csv')
 

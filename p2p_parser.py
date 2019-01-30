@@ -676,17 +676,28 @@ def iuvo(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
-    # Interest and redemption payments are reported in two columns by Iuvo.
-    # For our purposes this is not necessary, so we will add them.
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'Estateguru'
+        df[CURRENCY] = 'EUR'
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
+        return (df, '')
+
+    # Temporarily make date column an index to avoid an error during type
+    # conversion
+    df.set_index('Datum', inplace=True)
+    df = df.astype('float64')
+    df.reset_index(inplace=True)
+
+    # Both interest and redemption payments are reported in two columns each
+    # by Iuvo (payments on/before planned payment date). For our purposes this
+    # is not necessary, so we will add them again.
     df[INTEREST_PAYMENT] = 0
     df[REDEMPTION_PAYMENT] = 0
-
-    # Date column will raise an error which can be ignored:
-    df = df.astype('float64', errors='ignore')
-
     interest_types = ['erhaltene Zinsen', 'vorfristige erhaltene Zinsen']
     for elem in interest_types:
         if elem in df.columns:
@@ -694,12 +705,13 @@ def iuvo(
             del df[elem]
 
     redemption_types = [
-        'vorfristiger erhaltener Grundbetrag', 'erhaltener Grundbetrag']
+        'erhaltener Grundbetrag', 'vorfristiger erhaltener Grundbetrag']
     for elem in redemption_types:
         if elem in df.columns:
             df[REDEMPTION_PAYMENT] += df[elem]
             del df[elem]
 
+    # Rename columns and format date column
     df.rename(
         columns={
             'Anfangsbestand': START_BALANCE_NAME,
@@ -711,14 +723,18 @@ def iuvo(
         inplace=True)
     df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
     df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Plattform'] = 'Iuvo'
-    df['Währung'] = 'EUR'
 
-    df.reset_index(level=0, inplace=True)
-    df_result = df.set_index(['Plattform', 'Datum', 'Währung'])
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df, date_range)
+    if missing_months:
+        df = add_missing_months(df, missing_months)
+
+    df[PLATFORM] = 'Iuvo'
+    df[CURRENCY] = 'EUR'
+    df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
 
     # Since we set the column names, there cannot be unknown CF types
-    return (df_result, '')
+    return (df, '')
 
 
 def grupeer(
