@@ -210,6 +210,17 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/iuvo_statement.csv',
             'tests/results/result_test_open_selenium_iuvo.csv'))
 
+    def test_open_selenium_iuvo_no_cfs(self):
+        """
+        Test open_selenium_iuvo function when there are no cashflows in
+        date_range
+        """
+        credentials = self.get_credentials_from_keyring('Iuvo')
+        p2p_platforms.open_selenium_iuvo(self.date_range_no_cfs, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/iuvo_statement.csv',
+            'tests/results/result_test_open_selenium_iuvo_no_cfs.csv'))
+
     def test_open_selenium_mintos(self):
         """Test open_selenium_mintos function"""
         credentials = self.get_credentials_from_keyring('Mintos')
@@ -412,11 +423,22 @@ class P2PParserTests(unittest.TestCase):
             'grupeer', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv')
 
-    @unittest.expectedFailure
     def test_iuvo_parser(self):
         test_name = 'iuvo_parser.csv'
         self.run_parser_test(
             'iuvo', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
+
+    def test_iuvo_parser_no_cfs(self):
+        test_name = 'iuvo_parser_no_cfs.csv'
+        self.run_parser_test(
+            'iuvo', INPUT_PREFIX + test_name,
+            RESULT_PREFIX + test_name, self.date_range_no_cfs)
+
+    def test_iuvo_parser_missing_month(self):
+        test_name = 'iuvo_parser_missing_month.csv'
+        self.run_parser_test(
+            'iuvo', INPUT_PREFIX + test_name,
+            RESULT_PREFIX + test_name, self.date_range_missing_month)
 
     def test_mintos_parser(self):
         test_name = 'mintos_parser'
