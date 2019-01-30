@@ -381,13 +381,23 @@ class P2PParserTests(unittest.TestCase):
             (date(2018, 9, 1), date(2018, 12, 31)),
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
 
-    @unittest.expectedFailure
     def test_estateguru_parser(self):
         test_name = 'estateguru_parser.csv'
         self.run_parser_test(
             'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
 
-    @unittest.expectedFailure
+    def test_estateguru_parser_missing_month(self):
+        test_name = 'estateguru_parser_missing_month.csv'
+        self.run_parser_test(
+            'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
+            self.date_range_missing_month)
+
+    def test_estateguru_parser_no_cfs(self):
+        test_name = 'estateguru_parser_no_cfs.csv'
+        self.run_parser_test(
+            'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
+            self.date_range_no_cfs)
+
     def test_estateguru_parser_unknown_cf(self):
         test_name = 'estateguru_parser_unknown_cf.csv'
         self.run_parser_test(
