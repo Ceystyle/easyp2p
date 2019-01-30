@@ -11,9 +11,10 @@ Each platform is created as an instance of the P2P class.
 """
 
 from datetime import date
-from typing import Tuple
+from typing import Callable, List, Tuple
 
 import pandas as pd
+from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -644,3 +645,21 @@ def open_selenium_twino(
 
         twino.download_statement(
             'account_statement_*.xlsx', (By.CSS_SELECTOR, '.accStatement__pdf'))
+
+
+class one_of_many_expected_conditions_true(object):
+    """
+    An expectation for checking if (at least) one of several provided expected
+    conditions is true
+    """
+    def __init__(self, conditions: List[Callable[[webdriver.Chrome], bool]]) \
+            -> None:
+        self.conditions = conditions
+
+    def __call__(self, driver: webdriver.Chrome) -> bool:
+        for condition in self.conditions:
+            try:
+                if condition(driver):
+                    return True
+            except:
+                pass
