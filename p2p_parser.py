@@ -545,24 +545,42 @@ def peerberry(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'PeerBerry'
+        df[CURRENCY] = 'EUR'
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
+        return (df, '')
+
+    # Define mapping between PeerBerry and easyP2P cashflow types
     peerberry_dict = dict()
     peerberry_dict['Amount of interest payment received'] = INTEREST_PAYMENT
     peerberry_dict['Investment'] = INVESTMENT_PAYMENT
     peerberry_dict['Amount of principal payment received'] = REDEMPTION_PAYMENT
 
-    df.rename(
-        columns={'Date': 'Datum', 'Currency Id': 'Währung'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'], format='%Y-%m-%d')
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    # Map PeerBerry cashflow types to easyP2P cashflow types
     df['Cashflow-Typ'] = df['Type'].map(peerberry_dict)
-    df['Plattform'] = 'Peerberry'
+
+    # Rename and format date/currency column
+    df.rename(
+        columns={'Date': DATE, 'Currency Id': CURRENCY}, inplace=True)
+    df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d')
+    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Type')
     df_result = _create_df_result(df, 'Amount')
 
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df, date_range)
+    if missing_months:
+        df_result = add_missing_months(df_result, missing_months)
+
+    df_result[PLATFORM] = 'PeerBerry'
+    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     return (df_result, unknown_cf_types)
 
 
