@@ -498,25 +498,47 @@ def open_selenium_iuvo(
         for month in months:
             check_txt = '{0} - {1}'.format(
                 month[0].strftime('%Y-%m-%d'), month[1].strftime('%Y-%m-%d'))
+
+            # Define conditions if account statement generation is successful:
+            # The first condition will be true if there were cashflows in
+            # date_range, the second condition will be true of there were none
+            conditions = [EC.text_to_be_present_in_element(
+                    (By.XPATH, xpaths['statement_check']), check_txt),
+                EC.text_to_be_present_in_element(
+                    (By.CLASS_NAME, 'text-center'), 'Keine passenden Daten!')]
+
             iuvo.generate_statement_direct(
                 (month[0], month[1]), (By.ID, 'date_from'), (By.ID, 'date_to'),
-                '%Y-%m-%d', EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['statement_check']), check_txt),
-                (By.ID, 'account_statement_filters_btn'))
+                '%Y-%m-%d',
+                wait_until=one_of_many_expected_conditions_true(conditions),
+                submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
 
-            # Read statement from page
-            statement_table = driver.find_element_by_class_name(
-                'table-responsive')
+            try:
+                # Read statement from page
+                statement_table = driver.find_element_by_class_name(
+                    'table-responsive')
+            except NoSuchElementException:
+                # Check if there were no cashflows in month
+                if driver.find_element_by_class_name(
+                    'text-center').text == 'Keine passenden Daten!':
+                    continue
+
             # pd.read_html returns a list of one element
             df = pd.read_html(
                 statement_table.get_attribute("innerHTML"), index_col=0)[0]
+
             # Transpose table to get the headers at the top
             df = df.T
+
+            # Format date column
             df['Datum'] = month[0].strftime('%d.%m.%Y')
             df.set_index('Datum', inplace=True)
+
+            # Append the result for this month to previous months' results
             df_result = df_result.append(df, sort=False)
 
         df_result.to_csv('p2p_downloads/iuvo_statement.csv')
+
 
 def open_selenium_grupeer(
         date_range: Tuple[date, date],
