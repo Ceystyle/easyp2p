@@ -378,7 +378,7 @@ def mintos(
     df_result = _create_df_result(df, 'Turnover')
 
     # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df, date_range)
+    missing_months = get_missing_months(df_result, date_range)
     if missing_months:
         df_result = add_missing_months(df_result, missing_months)
 
@@ -449,7 +449,7 @@ def robocash(
     df_result = _create_df_result(df, 'Betrag')
 
     # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df, date_range)
+    missing_months = get_missing_months(df_result, date_range)
     if missing_months:
         df_result = add_missing_months(df_result, missing_months)
 
@@ -514,7 +514,7 @@ def swaper(
     df_result = _create_df_result(df, 'Amount')
 
     # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df, date_range)
+    missing_months = get_missing_months(df_result, date_range)
     if missing_months:
         df_result = add_missing_months(df_result, missing_months)
 
@@ -575,7 +575,7 @@ def peerberry(
     df_result = _create_df_result(df, 'Amount')
 
     # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df, date_range)
+    missing_months = get_missing_months(df_result, date_range)
     if missing_months:
         df_result = add_missing_months(df_result, missing_months)
 
@@ -645,7 +645,7 @@ def estateguru(
     df_result = _create_df_result(df, 'Betrag')
 
     # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df, date_range)
+    missing_months = get_missing_months(df_result, date_range)
     if missing_months:
         df_result = add_missing_months(df_result, missing_months)
 
