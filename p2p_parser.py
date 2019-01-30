@@ -606,9 +606,18 @@ def estateguru(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'Estateguru'
+        df[CURRENCY] = 'EUR'
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
+        return (df, '')
+
+    # Define mapping between Estateguru and easyP2P cashflow types
     estateguru_dict = dict()
     estateguru_dict['Zins'] = INTEREST_PAYMENT
     # Treat bonus payments as normal interest payments
@@ -618,23 +627,30 @@ def estateguru(
     estateguru_dict['Einzahlung(Banktransfer)'] = INCOMING_PAYMENT
     estateguru_dict['Entschädigung'] = LATE_FEE_PAYMENT
 
-    df = df[:-1]  # Drop last line which only contains a summary
+    # Drop last line which only contains a summary and rename columns
+    df = df[:-1]
     df.rename(
-        columns={
-            'Zahlungsdatum': 'Datum',
-            'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
-        }, inplace=True)
+        columns={'Zahlungsdatum': DATE,
+            'Cashflow-Typ': 'Estateguru_Cashflow-Typ',}, inplace=True)
 
-    df['Datum'] = pd.to_datetime(df['Datum'], format='%d/%m/%Y %H:%M')
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    # Map Estateguru cashflow types to easyP2P cashflow types
     df['Cashflow-Typ'] = df['Estateguru_Cashflow-Typ'].map(estateguru_dict)
-    df['Plattform'] = 'Estateguru'
-    df['Währung'] = 'EUR'
-    df['Betrag'] = df['Betrag'].astype('float')
+
+    # Format date column
+    df[DATE] = pd.to_datetime(df[DATE], format='%d/%m/%Y %H:%M')
+    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Estateguru_Cashflow-Typ')
+    df['Betrag'] = df['Betrag'].astype('float')
     df_result = _create_df_result(df, 'Betrag')
 
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df, date_range)
+    if missing_months:
+        df_result = add_missing_months(df_result, missing_months)
+
+    df_result[PLATFORM] = 'Estateguru'
+    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     return (df_result, unknown_cf_types)
 
 
