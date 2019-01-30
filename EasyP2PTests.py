@@ -237,6 +237,18 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/peerberry_statement.csv',
             'tests/results/result_test_open_selenium_peerberry.csv'))
 
+    def test_open_selenium_peerberry_no_cfs(self):
+        """
+        Test open_selenium_peerberry function when there is no cashflow in
+        date_range
+        """
+        credentials = self.get_credentials_from_keyring('PeerBerry')
+        p2p_platforms.open_selenium_peerberry(
+            self.date_range_no_cfs, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/peerberry_statement.csv',
+            'tests/results/result_test_open_selenium_peerberry_no_cfs.csv'))
+
     def test_open_selenium_robocash(self):
         """Test open_selenium_robocash function"""
         credentials = self.get_credentials_from_keyring('Robocash')
@@ -421,11 +433,22 @@ class P2PParserTests(unittest.TestCase):
             'mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
-    @unittest.expectedFailure
     def test_peerberry_parser(self):
         test_name = 'peerberry_parser.csv'
         self.run_parser_test(
             'peerberry', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
+
+    def test_peerberry_parser_no_cfs(self):
+        test_name = 'peerberry_parser_no_cfs'
+        self.run_parser_test(
+            'peerberry', INPUT_PREFIX + test_name + '.csv',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
+
+    def test_peerberry_parser_missing_month(self):
+        test_name = 'peerberry_parser_missing_month'
+        self.run_parser_test(
+            'peerberry', INPUT_PREFIX + test_name + '.csv',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def test_robocash_parser(self):
         test_name = 'robocash_parser'
