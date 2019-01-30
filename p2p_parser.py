@@ -682,7 +682,7 @@ def iuvo(
     if df.empty:
         missing_months = get_missing_months(df, date_range)
         df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Estateguru'
+        df[PLATFORM] = 'Iuvo'
         df[CURRENCY] = 'EUR'
         df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
         return (df, '')
