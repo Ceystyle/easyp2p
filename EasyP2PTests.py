@@ -326,6 +326,17 @@ class P2PPlatformsTests(unittest.TestCase):
             'tests/results/result_test_open_selenium_twino.xlsx',
             drop_lines=0))
 
+    def test_open_selenium_twino_no_cfs(self):
+        """
+        Test open_selenium_twino function  when no cashflows exist in date range
+        """
+        credentials = self.get_credentials_from_keyring('Twino')
+        p2p_platforms.open_selenium_twino(self.date_range_no_cfs, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/twino_statement.xlsx',
+            'tests/results/result_test_open_selenium_twino_no_cfs.xlsx',
+            drop_lines=0))
+
 
 class P2PParserTests(unittest.TestCase):
     """Test p2p_parser"""
@@ -586,18 +597,37 @@ class P2PParserTests(unittest.TestCase):
             'swaper', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
-    @unittest.expectedFailure
     def test_twino_parser(self):
         test_name = 'twino_parser'
         self.run_parser_test(
             'twino', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv')
 
+    def test_twino_parser_unknown_cf(self):
+        test_name = 'twino_parser_unknown_cf'
+        self.run_parser_test(
+            'twino', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv',
+            unknown_cf_types_exp = ('TestCF1 PRINCIPAL, TestCF2 INTEREST'))
+
     def test_twino_parser_wrong_column_names(self):
         self.assertRaises(
             RuntimeError, p2p_parser.twino,
             (date(2018, 9, 1), date(2018, 12, 31)),
             INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
+
+    def test_twino_parser_no_cfs(self):
+        test_name = 'twino_parser_no_cfs'
+        self.run_parser_test(
+            'twino', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
+
+    def test_twino_parser_missing_month(self):
+        test_name = 'twino_parser_missing_month'
+        self.run_parser_test(
+            'twino', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
+
 
 def are_files_equal(
         file1: str, file2: str,
