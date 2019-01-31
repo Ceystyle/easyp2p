@@ -759,9 +759,18 @@ def grupeer(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'Grupeer'
+        df[CURRENCY] = 'EUR'
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
+        return (df, '')
+
+    # Define mapping between Grupeer and easyP2P cashflow types
     grupeer_dict = dict()
     grupeer_dict['Interest'] = INTEREST_PAYMENT
     grupeer_dict['Investment'] = INVESTMENT_PAYMENT
@@ -770,18 +779,42 @@ def grupeer(
     grupeer_dict['Cashback'] = INTEREST_PAYMENT
     grupeer_dict['Principal'] = REDEMPTION_PAYMENT
 
-    df.rename(columns={'Date': 'Datum'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'], format="%d.%m.%Y")
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    # Map Grupeer cashflow types to easyP2P cashflow types
     df['Cashflow-Typ'] = df['Type'].map(grupeer_dict)
-    df['Plattform'] = 'Grupeer'
-    df['Währung'] = 'EUR'
+
+    # Format date column
+    df.rename(columns={'Date': DATE}, inplace=True)
+    df[DATE] = pd.to_datetime(df[DATE], format="%d.%m.%Y")
+    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
+
+    # Get the currency from the Description column
+    df['Grupeer' + CURRENCY], df['Details'] \
+        = df['Description'].str.split(';').str
+    currency_dict = dict()
+    currency_dict = {'&euro': 'EUR', 'Gekauft &euro': 'EUR'}
+    df[CURRENCY] = df['Grupeer' + CURRENCY].map(currency_dict)
+
+    # Check if there were any unknown currencies
+    if df[CURRENCY].isnull().values.any():
+        raise RuntimeError(
+            'Grupeer: unbekannte Währung im Parser: ',
+            set(df['Grupeer' + CURRENCY].where(
+                df[CURRENCY].isna()).dropna().tolist()))
+
+    # Convert amounts to float64
     df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype(
-        'float')
+        'float64')
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Type')
     df_result = _create_df_result(df, 'Amount')
 
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df_result, date_range)
+    if missing_months:
+        df_result = add_missing_months(df_result, missing_months)
+
+    df_result[PLATFORM] = 'Grupeer'
+    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     return (df_result, unknown_cf_types)
 
 
