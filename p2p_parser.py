@@ -913,9 +913,24 @@ def twino(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
+    # Format the header of the table
+    df = df[1:]  # The first row only contains a generic header
+    new_header = df.iloc[0] # Get the new first row as header
+    df = df[1:] # Remove the header row
+    df.columns = new_header # Set the header row as the df header
+
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'Twino'
+        df[CURRENCY] = 'EUR'
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
+        return (df, '')
+
+    # Define mapping between Twino and easyP2P cashflow types
     twino_dict = dict()
     twino_dict['EXTENSION INTEREST'] = INTEREST_PAYMENT
     twino_dict['REPAYMENT INTEREST'] = INTEREST_PAYMENT
@@ -927,22 +942,32 @@ def twino(
     twino_dict['REPAYMENT PRINCIPAL'] = REDEMPTION_PAYMENT
     twino_dict['BUY_SHARES PRINCIPAL'] = INVESTMENT_PAYMENT
 
-    df = df[1:]  # The first row only contains a generic header
-    new_header = df.iloc[0] # Get the new first row as header
-    df = df[1:] # Remove the header row
-    df.columns = new_header # Set the header row as the df header
+    try:
+        # Map Twino cashflow types to easyP2P cashflow types
+        df['Twino_Cashflow-Typ'] = df['Type'] + ' ' + df['Description']
+        df['Cashflow-Typ'] = df['Twino_Cashflow-Typ'].map(twino_dict)
 
-    df.rename(columns={'Processing Date': 'Datum'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y %H:%M')
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Twino_Cashflow-Typ'] = df['Type'] + ' ' + df['Description']
-    df['Cashflow-Typ'] = df['Twino_Cashflow-Typ'].map(twino_dict)
-    df['Plattform'] = 'Twino'
-    df['Währung'] = 'EUR'
+        # Format date column
+        df.rename(columns={'Processing Date': DATE}, inplace=True)
+        df[DATE] = pd.to_datetime(df[DATE], format='%d.%m.%Y %H:%M')
+        df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
+    except KeyError as err:
+        raise RuntimeError(
+            'Twino: unbekannte Spalte im Parser: ' + str(err))
+
+    # We only report the EUR values
+    df[CURRENCY] = 'EUR'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Twino_Cashflow-Typ')
     df_result = _create_df_result(df, 'Amount, EUR')
 
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df_result, date_range)
+    if missing_months:
+        df_result = add_missing_months(df_result, missing_months)
+
+    df_result[PLATFORM] = 'Twino'
+    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     return (df_result, unknown_cf_types)
 
 
