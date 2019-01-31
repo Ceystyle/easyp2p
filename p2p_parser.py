@@ -840,29 +840,54 @@ def dofinance(
         element is a set containing all unknown cash flow types.
 
     """
-    #TODO: treat missing months / no cashflows
     df = get_df_from_file(input_file)
 
+    # Create a DataFrame with zero entries if there were no cashflows
+    if df.empty:
+        missing_months = get_missing_months(df, date_range)
+        df = add_missing_months(df, missing_months)
+        df[PLATFORM] = 'DoFinance'
+        df[CURRENCY] = 'EUR'
+        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
+        return (df, '')
+
+    # Define mapping between DoFinance and easyP2P cashflow types
+    # TODO: generalize dict for all interest rate values
     dofinance_dict = dict()
-    dofinance_dict['Verdienter Gewinn'] = INTEREST_PAYMENT
-    dofinance_dict['Auszahlung auf Bankkonto'] = OUTGOING_PAYMENT
-    dofinance_dict[
-        'Abgeschlossene Investition\nRate: 12% Typ: automatisch'] = \
+    dofinance_dict['Gewinn'] = INTEREST_PAYMENT
+    dofinance_dict['Abhebungen'] = OUTGOING_PAYMENT
+    dofinance_dict['Rückzahlung\nRate: 12% Typ: automatisch'] = \
         REDEMPTION_PAYMENT
     dofinance_dict['Anlage\nRate: 12% Typ: automatisch'] = INVESTMENT_PAYMENT
 
     # The last two rows only contain a summary, drop them
     df = df[:-2]
-    df.rename(columns={'Bearbeitungsdatum': 'Datum'}, inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    df['Cashflow-Typ'] = df['Art der Transaktion'].map(dofinance_dict)
-    df['Plattform'] = 'DoFinance'
-    df['Währung'] = 'EUR'
+
+    try:
+        # Map DoFinance cashflow types to easyP2P cashflow types
+        df['Cashflow-Typ'] = df['Art der Transaktion'].map(dofinance_dict)
+
+        # Format date column
+        df.rename(columns={'Bearbeitungsdatum': 'Datum'}, inplace=True)
+        df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
+        df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+    except KeyError as err:
+        raise RuntimeError(
+            'DoFinance: unbekannte Spalte im Parser: ' + str(err))
+
+    # DoFinance only supports currency EUR
+    df[CURRENCY] = 'EUR'
 
     unknown_cf_types = _check_unknown_cf_types(df, 'Art der Transaktion')
     df_result = _create_df_result(df, 'Betrag, €')
 
+    # Add rows for months in date_range without cashflows
+    missing_months = get_missing_months(df_result, date_range)
+    if missing_months:
+        df_result = add_missing_months(df_result, missing_months)
+
+    df_result[PLATFORM] = 'DoFinance'
+    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     return (df_result, unknown_cf_types)
 
 
