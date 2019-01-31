@@ -181,10 +181,19 @@ class P2PPlatformsTests(unittest.TestCase):
     def test_open_selenium_dofinance(self):
         """Test open_selenium_dofinance function"""
         credentials = self.get_credentials_from_keyring('DoFinance')
-        p2p_platforms.open_selenium_dofinance(self.date_range, credentials)
+        dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
+        p2p_platforms.open_selenium_dofinance(dofinance_date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/dofinance_statement.xlsx',
             'tests/results/result_test_open_selenium_dofinance.xlsx'))
+
+    def test_open_selenium_dofinance_no_cfs(self):
+        """Test open_selenium_dofinance function"""
+        credentials = self.get_credentials_from_keyring('DoFinance')
+        p2p_platforms.open_selenium_dofinance(self.date_range, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/dofinance_statement.xlsx',
+            'tests/results/result_test_open_selenium_dofinance_no_cfs.xlsx'))
 
     def test_open_selenium_estateguru(self):
         """Test open_selenium_estateguru function"""
@@ -390,12 +399,35 @@ class P2PParserTests(unittest.TestCase):
             'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
             self.date_range_no_cfs)
 
-    @unittest.expectedFailure
     def test_dofinance_parser(self):
         test_name = 'dofinance_parser'
+        dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
         self.run_parser_test(
             'dofinance', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv')
+            RESULT_PREFIX + test_name + '.csv', dofinance_date_range)
+
+    def test_dofinance_parser_unknown_cf(self):
+        test_name = 'dofinance_parser_unknown_cf'
+        dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
+        self.run_parser_test(
+            'dofinance', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', dofinance_date_range,
+            unknown_cf_types_exp = 'TestCF1, TestCF2')
+
+    def test_dofinance_parser_missing_month(self):
+        test_name = 'dofinance_parser_missing_month'
+        dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
+        self.run_parser_test(
+            'dofinance', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv',
+            dofinance_date_range)
+
+    def test_dofinance_parser_no_cfs(self):
+        test_name = 'dofinance_parser_no_cfs'
+        self.run_parser_test(
+            'dofinance', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv',
+            self.date_range_no_cfs)
 
     def test_dofinance_parser_wrong_column_names(self):
         self.assertRaises(
