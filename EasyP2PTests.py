@@ -202,6 +202,17 @@ class P2PPlatformsTests(unittest.TestCase):
             'p2p_downloads/grupeer_statement.xlsx',
             'tests/results/result_test_open_selenium_grupeer.xlsx'))
 
+    def test_open_selenium_grupeer_no_cfs(self):
+        """
+        Test open_selenium_grupeer function if there are no cashflows in
+        date_range
+        """
+        credentials = self.get_credentials_from_keyring('Grupeer')
+        p2p_platforms.open_selenium_grupeer(self.date_range_no_cfs, credentials)
+        self.assertTrue(are_files_equal(
+            'p2p_downloads/grupeer_statement.xlsx',
+            'tests/results/result_test_open_selenium_grupeer_no_cfs.xlsx'))
+
     def test_open_selenium_iuvo(self):
         """Test open_selenium_iuvo function"""
         credentials = self.get_credentials_from_keyring('Iuvo')
@@ -416,12 +427,37 @@ class P2PParserTests(unittest.TestCase):
             unknown_cf_types_exp = \
                 'Investition(AutoInvestieren), TestCF1, TestCF2')
 
-    @unittest.expectedFailure
     def test_grupeer_parser(self):
         test_name = 'grupeer_parser'
         self.run_parser_test(
             'grupeer', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv')
+
+    def test_grupeer_parser_unknown_cf(self):
+        test_name = 'grupeer_parser_unknown_cf'
+        self.run_parser_test(
+            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv',
+            unknown_cf_types_exp = 'TestCF1, TestCF2')
+
+    def test_grupeer_parser_no_cfs(self):
+        test_name = 'grupeer_parser_no_cfs'
+        self.run_parser_test(
+            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
+
+    def test_grupeer_parser_missing_month(self):
+        test_name = 'grupeer_parser_missing_month'
+        self.run_parser_test(
+            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
+
+    def test_grupeer_parser_unknown_currency(self):
+        test_name = 'grupeer_parser_unknown_currency'
+        self.assertRaises(
+            RuntimeError, p2p_parser.grupeer,
+            (date(2018, 9, 1), date(2018, 12, 31)),
+            INPUT_PREFIX + test_name + '.xlsx')
 
     def test_iuvo_parser(self):
         test_name = 'iuvo_parser.csv'
