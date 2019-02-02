@@ -714,43 +714,25 @@ def peerberry(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('PeerBerry', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'PeerBerry'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between PeerBerry and easyP2P cashflow types
-    peerberry_dict = dict()
-    peerberry_dict['Amount of interest payment received'] = INTEREST_PAYMENT
-    peerberry_dict['Investment'] = INVESTMENT_PAYMENT
-    peerberry_dict['Amount of principal payment received'] = REDEMPTION_PAYMENT
+    # Define mapping between PeerBerry and easyP2P cashflow types and column
+    # names
+    cashflow_types = {
+        'Amount of interest payment received': parser.INTEREST_PAYMENT,
+        'Amount of principal payment received': parser.REDEMPTION_PAYMENT,
+        'Investment': parser.INVESTMENT_PAYMENT }
+    rename_columns = {'Currency Id': parser.CURRENCY, 'Date': parser.DATE}
 
-    # Map PeerBerry cashflow types to easyP2P cashflow types
-    df['Cashflow-Typ'] = df['Type'].map(peerberry_dict)
+    unknown_cf_types = parser.parse_statement(
+        '%Y-%m-%d', rename_columns, cashflow_types, 'Type', 'Amount')
 
-    # Rename and format date/currency column
-    df.rename(
-        columns={'Date': DATE, 'Currency Id': CURRENCY}, inplace=True)
-    df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d')
-    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
-
-    unknown_cf_types = _check_unknown_cf_types(df, 'Type')
-    df_result = _create_df_result(df, 'Amount')
-
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'PeerBerry'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def estateguru(
