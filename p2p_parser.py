@@ -668,47 +668,28 @@ def swaper(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Swaper', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Swaper'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between Swaper and easyP2P cashflow types
-    swaper_dict = dict()
-    swaper_dict['REPAYMENT_INTEREST'] = INTEREST_PAYMENT
-    swaper_dict['EXTENSION_INTEREST'] = INTEREST_PAYMENT
-    swaper_dict['INVESTMENT'] = INVESTMENT_PAYMENT
-    swaper_dict['REPAYMENT_PRINCIPAL'] = REDEMPTION_PAYMENT
-    swaper_dict['BUYBACK_INTEREST'] = BUYBACK_INTEREST_PAYMENT
-    swaper_dict['BUYBACK_PRINCIPAL'] = BUYBACK_PAYMENT
+    # Define mapping between Swaper and easyP2P cashflow types and column names
+    cashflow_types = {
+        'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
+        'BUYBACK_PRINCIPAL': parser.BUYBACK_PAYMENT,
+        'EXTENSION_INTEREST': parser.INTEREST_PAYMENT,
+        'INVESTMENT': parser.INVESTMENT_PAYMENT,
+        'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
+        'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT }
+    rename_columns = {'Booking date': parser.DATE}
 
-    # Map Swaper cashflow types to easyP2P cashflow types
-    df['Cashflow-Typ'] = df['Transaction type'].map(swaper_dict)
+    unknown_cf_types = parser.parse_statement(
+        '%d.%m.%Y', rename_columns, cashflow_types,
+        'Transaction type', 'Amount')
 
-    # Format date column
-    df.rename(columns={'Booking date': DATE}, inplace=True)
-    df[DATE] = df['Datum'].dt.strftime('%d.%m.%Y')
-
-    # Set currency. Swaper only supports EUR.
-    df[CURRENCY] = 'EUR'
-
-    unknown_cf_types = _check_unknown_cf_types(df, 'Transaction type')
-    df_result = _create_df_result(df, 'Amount')
-
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'Swaper'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def peerberry(
