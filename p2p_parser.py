@@ -560,56 +560,44 @@ def mintos(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Mintos', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Mintos'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between Mintos and easyP2P cashflow types
-    mintos_dict = dict()
-    mintos_dict['Interest income'] = INTEREST_PAYMENT
-    mintos_dict['Interest income on rebuy'] = BUYBACK_INTEREST_PAYMENT
-    mintos_dict['Delayed interest income on rebuy'] = BUYBACK_INTEREST_PAYMENT
-    mintos_dict['Investment principal rebuy'] = BUYBACK_PAYMENT
-    mintos_dict['Investment principal increase'] = INVESTMENT_PAYMENT
-    mintos_dict['Investment principal repayment'] = REDEMPTION_PAYMENT
-    mintos_dict['Late payment fee income'] = LATE_FEE_PAYMENT
-    mintos_dict['Incoming client payment'] = INCOMING_PAYMENT
-    # Treat bonus/cashback payments as normal interest payments:
-    mintos_dict['Cashback bonus'] = INTEREST_PAYMENT
-    mintos_dict['Reversed incoming client payment'] = OUTGOING_PAYMENT
+    try:
+        # Create new columns for identifying cashflow types
+        parser.df['Mintos_Cashflow-Typ'], parser.df['Loan ID'] = \
+            parser.df['Details'].str.split(' Loan ID: ').str
+        parser.df['Mintos_Cashflow-Typ'] = \
+            parser.df['Mintos_Cashflow-Typ'].str.split(' Rebuy purpose').str[0]
+    except KeyError as err:
+        raise RuntimeError('Mintos: unbekannte Spalte im Parser: ' + str(err))
 
-    # Rename columns and create new ones for identifying cashflows
-    df.rename(columns={'Date': DATE, 'Currency': CURRENCY}, inplace=True)
-    df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d %H:%M:%S')
-    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
-    df['Mintos_Cashflow-Typ'], df['Loan ID'] = df['Details'].str.split(
-        ' Loan ID: ').str
-    df['Mintos_Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].str.split(
-        ' Rebuy purpose').str[0]
+    # Define mapping between Mintos and easyP2P cashflow types and column names
+    cashflow_types = {
+        # Treat bonus/cashback payments as normal interest payments:
+        'Cashback bonus': parser.INTEREST_PAYMENT,
+        'Delayed interest income on rebuy': parser.BUYBACK_INTEREST_PAYMENT,
+        'Interest income': parser.INTEREST_PAYMENT,
+        'Interest income on rebuy': parser.BUYBACK_INTEREST_PAYMENT,
+        'Investment principal rebuy': parser.BUYBACK_PAYMENT,
+        'Investment principal increase': parser.INVESTMENT_PAYMENT,
+        'Investment principal repayment': parser.REDEMPTION_PAYMENT,
+        'Incoming client payment': parser.INCOMING_PAYMENT,
+        'Late payment fee income': parser.LATE_FEE_PAYMENT,
+        'Reversed incoming client payment': parser.OUTGOING_PAYMENT }
+    rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
-    # Map Mintos cashflow types to easyP2P cashflow types
-    df['Cashflow-Typ'] = df['Mintos_Cashflow-Typ'].map(mintos_dict)
+    unknown_cf_types = parser.parse_statement(
+        '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
+        'Mintos_Cashflow-Typ', 'Turnover')
 
-    unknown_cf_types = _check_unknown_cf_types(df, 'Mintos_Cashflow-Typ')
-    df_result = _create_df_result(df, 'Turnover')
-
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'Mintos'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
     # TODO: get start and end balance
 
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def robocash(
