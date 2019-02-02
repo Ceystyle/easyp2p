@@ -14,7 +14,7 @@ Module for parsing output files of P2P platforms and printing combined results.
 from datetime import date, datetime
 import locale
 from pathlib import Path
-from typing import List, Sequence, Tuple
+from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
 
@@ -53,6 +53,241 @@ TARGET_COLUMNS = [
     LATE_FEE_PAYMENT,
     DEFAULT_PAYMENT,
 ]
+
+
+class P2PParser:
+
+    """
+    P2P parser for transforming account statements into easyP2P format.
+
+    Each P2P platform uses a unique format for their account statements. The
+    purpose of P2PParser is to provide parser methods for transforming those
+    files into a single unified easyP2P statement format.
+
+    """
+
+    # Define all necessary payment types
+    INTEREST_PAYMENT = 'Zinszahlungen'
+    BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
+    BUYBACK_PAYMENT = 'Rückkäufe'
+    INVESTMENT_PAYMENT = 'Investitionen'
+    REDEMPTION_PAYMENT = 'Tilgungszahlungen'
+    LATE_FEE_PAYMENT = 'Verzugsgebühren'
+    INCOMING_PAYMENT = 'Einzahlungen'
+    OUTGOING_PAYMENT = 'Auszahlungen'
+    DEFAULT_PAYMENT = 'Ausfälle'
+    START_BALANCE_NAME = 'Startguthaben'
+    END_BALANCE_NAME = 'Endsaldo'
+    TOTAL_INCOME = 'Gesamteinnahmen'
+
+    # Define additional column names
+    DATE = 'Datum'
+    MONTH = 'Monat'
+    PLATFORM = 'Plattform'
+    CURRENCY = 'Währung'
+
+    # TARGET_COLUMNS are the columns which will be shown in the final result
+    # file
+    TARGET_COLUMNS = [
+        DATE,
+        PLATFORM,
+        CURRENCY,
+        START_BALANCE_NAME,
+        END_BALANCE_NAME,
+        TOTAL_INCOME,
+        INTEREST_PAYMENT,
+        INVESTMENT_PAYMENT,
+        REDEMPTION_PAYMENT,
+        BUYBACK_PAYMENT,
+        BUYBACK_INTEREST_PAYMENT,
+        LATE_FEE_PAYMENT,
+        DEFAULT_PAYMENT ]
+
+    def __init__(
+            self, platform: str, date_range: Tuple[date, date],
+            input_file: str) -> None:
+        """
+        Constructor of P2PParser class.
+
+        Args:
+            platform (str): Name of the P2P platform
+            date_range (tuple(date, date)): date range
+                (start_date, end_date) for which the account statement was
+                generated.
+            input_file (str): file name including absolute path of the
+                downloaded account statement for this platform.
+
+        """
+        self.platform = platform
+        self.date_range = date_range
+        self.df = get_df_from_file(input_file)
+
+    def _add_missing_months(self) -> None:
+        """
+        Add a zero row for all months in date_range without cashflows.
+
+        To ensure that months without cashflows show up in the final output
+        file this method will create one new row in the DataFrame self.df for
+        each month in date_range without cashflows.
+
+        """
+        # Get a list of all months in date_range with no cashflows
+        missing_months = self._get_missing_months()
+
+        # Create list of dates set to the first of each missing month
+        new_cf_dates = []
+        for month in missing_months:
+            new_cf_dates.append(datetime(
+                month[0].year, month[0].month, month[0].day))
+
+        # Set all entries in the columns of the new DataFrame to zero, except
+        # for the DATE and CURRENCY column
+        content = dict()
+        zeroes = [0.] * len(new_cf_dates)
+        for column in self.TARGET_COLUMNS:
+            content[column] = zeroes
+        content[self.DATE] = new_cf_dates
+        content[self.CURRENCY] = 'EUR'
+
+        # Create the new DataFrame and append it to the old one
+        df_new = pd.DataFrame(data=content, columns=self.TARGET_COLUMNS)
+        if self.df.empty:
+            self.df = df_new
+        else:
+            self.df = self.df.append(df_new, sort=False)
+
+        # Fill missing values with zero and sort the whole DataFrame by date
+        self.df.fillna(0., inplace=True)
+        self.df.sort_values(by=[self.DATE], inplace = True)
+
+    def _get_missing_months(self) -> List[Tuple[date, date]]:
+        """
+        Get list of months in date_range which have no cashflows.
+
+        This method will identify all months in date_range which do not contain
+        at least one cashflow in the provided DataFrame. A list of those months
+        is returned.
+
+        Returns:
+            List[Tuple[date, date]]: list of month tuples
+                (start_of_month, end_of_month) which do not contain a cashflow.
+
+        """
+        # Get a list of all months in date_range
+        list_of_months = p2p_helper.get_list_of_months(self.date_range)
+
+        # If there were no cashflows all months are missing
+        if self.df.empty:
+            return list_of_months
+
+        # Get all cashflow dates in date format from the DataFrame
+        cf_date_list = []
+        for elem in self.df[self.DATE].tolist():
+            cf_date_list.append(date(elem.year, elem.month, elem.day))
+
+        # Remove all months for which there is at least one cashflow
+        for cf_date in cf_date_list:
+            for month in list_of_months:
+                if month[0] <= cf_date <= month[1]:
+                    list_of_months.remove(month)
+
+        return list_of_months
+
+    def _check_unknown_cf_types(self, orig_cf_column: str) -> str:
+        """
+        Helper method to identify any unknown cash flow types.
+
+        Args:
+            orig_cf_column (str): name of data frame column which contains
+            the cash flow types as reported by the P2P platform
+
+        Returns:
+            str: string consisting of all unknown cash flow types
+
+        """
+        unknown_cf_types = set(self.df[orig_cf_column].where(
+            self.df['Cashflow-Typ'].isna()).dropna().tolist())
+        return ', '.join(sorted(unknown_cf_types))
+
+    def _aggregate_df(self, value_column: Optional[str] = None) -> None:
+        """
+        Helper method to aggregate results by date and currency.
+
+        Args:
+            value_column (str): name of the DataFrame column which contains the
+                data to be aggregated
+
+        """
+        if value_column:
+            self.df = pd.pivot_table(
+                self.df, values=value_column, index=[self.DATE, self.CURRENCY],
+                columns=['Cashflow-Typ'], aggfunc=sum)
+            self.df.reset_index(inplace=True)
+        self.df.fillna(0, inplace=True)
+        try:
+            self.df[self.DATE] = pd.to_datetime(
+                self.df[self.DATE], format='%d.%m.%Y')
+        except KeyError:
+            # If the DataFrame is empty this error occurs and can be ignored
+            pass
+
+    def parse_statement(
+            self, date_format: Optional[str] = None,
+            rename_columns: Optional[Mapping[str, str]] = None,
+            cashflow_types: Optional[Mapping[str, str]] = None,
+            orig_cf_column: Optional[str] = None,
+            value_column: Optional[str] = None) -> None:
+        """
+        Parse the statement from platform format into easyP2P format.
+
+        Keyword Args:
+            date_format (str): date format which the platform uses.
+            rename_columns (dict(str, str)): a dictionary containing a mapping
+                between platform and easyP2P column names.
+            cashflow_types (dict(str, str)): a dictionary containing a mapping
+                between platform and easyP2P cashflow types.
+            orig_cf_column (str): name of the column which contains the
+                platform cashflow type.
+            value_column (str): name of the DataFrame column which contains the
+                data to be aggregated.
+
+        """
+        if rename_columns:
+            self.df.rename(columns=rename_columns, inplace=True)
+
+        if date_format:
+            try:
+                self.df[self.DATE] = pd.to_datetime(
+                    self.df[self.DATE], format=date_format)
+                self.df[self.DATE] = self.df[self.DATE].dt.strftime('%d.%m.%Y')
+            except KeyError:
+                raise RuntimeError(
+                    '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
+                    .format(self.platform))
+
+        if cashflow_types:
+            try:
+                self.df['Cashflow-Typ'] = self.df[orig_cf_column].map(
+                    cashflow_types)
+                unknown_cf_types = self._check_unknown_cf_types(orig_cf_column)
+            except KeyError:
+                raise RuntimeError(
+                    '{0}: Cashflowspalte nicht im Kontoauszug vorhanden!'
+                    .format(self.platform))
+        else:
+            unknown_cf_types = ''
+
+        # easyP2P (currently) only supports EUR
+        if self.CURRENCY not in self.df.columns:
+            self.df[self.CURRENCY] = 'EUR'
+
+        self._aggregate_df(value_column)
+        self._add_missing_months()
+        self.df[self.PLATFORM] = self.platform
+        self.df.set_index(
+            [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
+
+        return unknown_cf_types
 
 
 def _check_unknown_cf_types(
