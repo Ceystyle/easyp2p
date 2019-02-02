@@ -497,10 +497,9 @@ class P2PParserTests(unittest.TestCase):
 
     def test_grupeer_parser_unknown_currency(self):
         test_name = 'grupeer_parser_unknown_currency'
-        self.assertRaises(
-            RuntimeError, p2p_parser.grupeer,
-            (date(2018, 9, 1), date(2018, 12, 31)),
-            INPUT_PREFIX + test_name + '.xlsx')
+        self.run_parser_test(
+            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def test_iuvo_parser(self):
         test_name = 'iuvo_parser.csv'
