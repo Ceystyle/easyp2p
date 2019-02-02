@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
-
 import p2p_helper
 
 # Define all necessary payment types
@@ -290,114 +289,6 @@ class P2PParser:
         return unknown_cf_types
 
 
-def _check_unknown_cf_types(
-        df: pd.DataFrame, orig_cf_type_name: str) -> str:
-    """
-    Helper function to identify any unknown cash flow types.
-
-    Args:
-        df (pandas.DataFrame): data frame which contains the results for this
-        P2P platform
-        orig_cf_type_name (str): name of data frame column which contains the
-        cash flow types as reported by the P2P platform
-
-    Returns:
-        str: string consisting of all unknown cash flow types
-
-    """
-    unknown_cf_types = set(df[orig_cf_type_name].where(
-        df['Cashflow-Typ'].isna()).dropna().tolist())
-    return ', '.join(sorted(unknown_cf_types))
-
-
-def get_missing_months(df: pd.DataFrame, date_range: Tuple[date, date]) \
-        -> List[Tuple[date, date]]:
-    """
-    Get list of months in date_range which do not contain at least one cashflow.
-
-    This function will identify all months in date_range which do not contain
-    at least one cashflow in the provided DataFrame. A list of those months
-    is returned.
-
-    Args:
-        df (pd.DataFrame): a DataFrame containing all cashflows in date_range
-            for the current P2P platform
-        date_range (tuple(date, date)): date range (start_date, end_date)
-            for which the results must be generated.
-
-    Returns:
-        List[Tuple[date, date]]: list of tuples (start_of_month, end_of_month)
-            which do not contain a cashflow.
-
-    """
-    list_of_months = p2p_helper.get_list_of_months(date_range)
-
-    # If there were no cashflows all months are missing
-    if df.empty:
-        return list_of_months
-
-    # Get all cashflow dates in date format from the DataFrame
-    df[DATE] = pd.to_datetime(df[DATE], format='%d.%m.%Y')
-    cf_date_list = []
-    for elem in df[DATE].tolist():
-        cf_date_list.append(date(elem.year, elem.month, elem.day))
-
-    # Remove all months for which there is at least one cashflow
-    for cf_date in cf_date_list:
-        for month in list_of_months:
-            if month[0] <= cf_date <= month[1]:
-                list_of_months.remove(month)
-
-    return list_of_months
-
-
-def add_missing_months(
-        df: pd.DataFrame, missing_months: List[Tuple[date, date]]) \
-        -> pd.DataFrame:
-    """
-    Create a zero entry in df for all missing_months.
-
-    This function will create a new row in the DataFrame df for each month in
-    missing_months. This will ensure that months without cashflows are shown
-    in the final result file.
-
-    Args:
-        df (pd.DataFrame): a DataFrame containing all cashflows in date_range
-            for the current P2P platform
-        date_range (List[Tuple[date, date]]): list of months
-            (start_of_month, end_of_month) which do not contain a cashflow.
-
-    Returns:
-        pd.DataFrame: the original DataFrame df with one zero line appended for
-            each month in missing_months
-
-    """
-    # Create list with new cashflow dates set to the first of each missing month
-    new_cf_dates = []
-    for month in missing_months:
-        new_cf_dates.append(datetime(
-            month[0].year, month[0].month, month[0].day))
-
-    # Set all columns of the new df to zero, except for the DATE column
-    content = dict()
-    zeroes = [0.] * len(new_cf_dates)
-    for column in TARGET_COLUMNS:
-        content[column] = zeroes
-    content[DATE] = new_cf_dates
-    content[CURRENCY] = 'EUR'
-
-    # Create the new DataFrame and append it to the old one
-    df_new = pd.DataFrame(data=content, columns=TARGET_COLUMNS)
-    if df.empty:
-        df = df_new
-    else:
-        df = df.append(df_new, sort=False)
-    df.fillna(0., inplace=True)
-    df.sort_values(by=[DATE], inplace = True)
-
-    return df
-
-
 def get_df_from_file(input_file):
     """
     Read a pandas.DataFrame from input_file.
@@ -429,29 +320,6 @@ def get_df_from_file(input_file):
             '{0} konnte nicht gefunden werden!'.format(input_file))
 
     return df
-
-
-def _create_df_result(df, value_column):
-    """
-    Helper method to aggregate results by date and currency.
-
-    Args:
-        df (pd.DataFrame): data frame which contains the data to be aggregated
-        value_column (str): name of the data frame column which contains the
-            data to be aggregated
-
-    Returns:
-        pd.DataFrame: data frame with the aggregated results
-
-    """
-    df_result = pd.pivot_table(
-        df, values=value_column, index=[DATE, CURRENCY],
-        columns=['Cashflow-Typ'], aggfunc=sum)
-    df_result.fillna(0, inplace=True)
-    df_result.reset_index(inplace=True)
-    df_result[DATE] = pd.to_datetime(df_result[DATE], format='%d.%m.%Y')
-
-    return df_result
 
 
 def _combine_dfs(list_of_dfs: Sequence[pd.DataFrame]) -> pd.DataFrame:
