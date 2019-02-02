@@ -498,56 +498,44 @@ def bondora(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Bondora', date_range, input_file)
 
-    if not df.empty:
-        # The first and last row only contain a summary
-        df = df[1:-1]
+    # Create a DataFrame with zero entries if there were no cashflows
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-        # Fix the column format
-        df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
+    # The first and last row only contain a summary
+    parser.df = parser.df[1:-1]
 
-        # Rename columns to standard easyP2P format
-        df.rename(
-            columns={
-                'Zeitraum': DATE,
-                'Eingesetztes Kapital (netto)': INCOMING_PAYMENT,
-                'Erhaltene Zinsen - gesamt': INTEREST_PAYMENT,
-                'Erhaltener Kapitalbetrag - gesamt': REDEMPTION_PAYMENT,
-                'Investitionen (netto)': INVESTMENT_PAYMENT,
-            },
-            inplace=True)
+    # Bondora uses month short names, thus we need to make sure the right
+    # locale is used
+    # TODO: make sure locale is installed or find better way to fix this
+    locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
 
-        # Format the date column
-        # TODO: make sure locale is installed
-        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
-        df[DATE] = pd.to_datetime(df[DATE], format='%b %Y')
-        df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
+    # Fix the number format
+    parser.df.set_index('Zeitraum', inplace=True)
+    parser.df.replace({r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
+    parser.df = parser.df.astype('float64')
+    parser.df.reset_index(inplace=True)
 
-        # Calculate debt default
-        df.set_index(DATE, inplace=True)
-        df = df.astype('float64')
-        df.reset_index(inplace=True)
-        df[DEFAULT_PAYMENT] = (
-            df['Tilgungszahlungen'] - df['Geplanter Kapitalbetrag - gesamt'])
+    # Calculate defaulted payments
+    parser.df[parser.DEFAULT_PAYMENT] = (
+        parser.df['Erhaltener Kapitalbetrag - gesamt']
+        - parser.df['Geplanter Kapitalbetrag - gesamt'])
 
-        # Drop unnecessary columns
-        for column in df.columns:
-            if column not in TARGET_COLUMNS:
-                df.drop(column, axis='columns', inplace=True)
+    # Define mapping between Bondora and easyP2P column names
+    rename_columns = {
+        'Eingesetztes Kapital (netto)': parser.INCOMING_PAYMENT,
+        'Erhaltener Kapitalbetrag - gesamt': parser.REDEMPTION_PAYMENT,
+        'Erhaltene Zinsen - gesamt': parser.INTEREST_PAYMENT,
+        'Investitionen (netto)': parser.INVESTMENT_PAYMENT,
+        'Zeitraum': parser.DATE }
 
-    # Check if there are months in date_range with no cashflows. If yes, add
-    # a zero line for those months
-    missing_months = get_missing_months(df, date_range)
-    if missing_months:
-        df = add_missing_months(df, missing_months)
+    unknown_cf_types = parser.parse_statement(
+        '%b %Y', rename_columns=rename_columns)
 
-    df[CURRENCY] = 'EUR'
-    df[PLATFORM] = 'Bondora'
-    df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-
-    # Since we define the column names, Bondora cannot have unknown CF types
-    return (df, '')
+    return (parser.df, unknown_cf_types)
 
 
 def mintos(
