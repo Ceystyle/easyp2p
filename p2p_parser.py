@@ -757,52 +757,35 @@ def estateguru(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Estateguru', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Estateguru'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between Estateguru and easyP2P cashflow types
-    estateguru_dict = dict()
-    estateguru_dict['Zins'] = INTEREST_PAYMENT
-    # Treat bonus payments as normal interest payments
-    estateguru_dict['Bonus'] = INTEREST_PAYMENT
-    estateguru_dict['Investition(Auto Investieren)'] = INVESTMENT_PAYMENT
-    estateguru_dict['Hauptbetrag'] = REDEMPTION_PAYMENT
-    estateguru_dict['Einzahlung(Banktransfer)'] = INCOMING_PAYMENT
-    estateguru_dict['Entschädigung'] = LATE_FEE_PAYMENT
+    # Drop last line which only contains a summary
+    parser.df = parser.df[:-1]
 
-    # Drop last line which only contains a summary and rename columns
-    df = df[:-1]
-    df.rename(
-        columns={'Zahlungsdatum': DATE,
-            'Cashflow-Typ': 'Estateguru_Cashflow-Typ',}, inplace=True)
+    # Define mapping between Estateguru and easyP2P cashflow types and column
+    # names
+    cashflow_types = {
+        # Treat bonus payments as normal interest payments
+        'Bonus': parser.INTEREST_PAYMENT,
+        'Einzahlung(Banktransfer)': parser.INCOMING_PAYMENT,
+        'Entschädigung': parser.LATE_FEE_PAYMENT,
+        'Hauptbetrag': parser.REDEMPTION_PAYMENT,
+        'Investition(Auto Investieren)': parser.INVESTMENT_PAYMENT,
+        'Zins': parser.INTEREST_PAYMENT }
+    rename_columns = {
+        'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
+        'Zahlungsdatum': parser.DATE }
 
-    # Map Estateguru cashflow types to easyP2P cashflow types
-    df['Cashflow-Typ'] = df['Estateguru_Cashflow-Typ'].map(estateguru_dict)
+    unknown_cf_types = parser.parse_statement(
+        '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
+        'Estateguru_Cashflow-Typ', 'Betrag')
 
-    # Format date column
-    df[DATE] = pd.to_datetime(df[DATE], format='%d/%m/%Y %H:%M')
-    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
-
-    unknown_cf_types = _check_unknown_cf_types(df, 'Estateguru_Cashflow-Typ')
-    df['Betrag'] = df['Betrag'].astype('float')
-    df_result = _create_df_result(df, 'Betrag')
-
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'Estateguru'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def iuvo(
@@ -827,65 +810,50 @@ def iuvo(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Iuvo', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Iuvo'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
     # Temporarily make date column an index to avoid an error during type
     # conversion
-    df.set_index('Datum', inplace=True)
-    df = df.astype('float64')
-    df.reset_index(inplace=True)
+    parser.df.set_index('Datum', inplace=True)
+    parser.df = parser.df.astype('float64')
+    parser.df.reset_index(inplace=True)
 
-    # Both interest and redemption payments are reported in two columns each
+    # Both interest and redemption payments are each reported in two columns
     # by Iuvo (payments on/before planned payment date). For our purposes this
     # is not necessary, so we will add them again.
-    df[INTEREST_PAYMENT] = 0
-    df[REDEMPTION_PAYMENT] = 0
+    parser.df[parser.INTEREST_PAYMENT] = 0
+    parser.df[parser.REDEMPTION_PAYMENT] = 0
     interest_types = ['erhaltene Zinsen', 'vorfristige erhaltene Zinsen']
     for elem in interest_types:
-        if elem in df.columns:
-            df[INTEREST_PAYMENT] += df[elem]
-            del df[elem]
+        if elem in parser.df.columns:
+            parser.df[parser.INTEREST_PAYMENT] += parser.df[elem]
+            del parser.df[elem]
 
     redemption_types = [
         'erhaltener Grundbetrag', 'vorfristiger erhaltener Grundbetrag']
     for elem in redemption_types:
-        if elem in df.columns:
-            df[REDEMPTION_PAYMENT] += df[elem]
-            del df[elem]
+        if elem in parser.df.columns:
+            parser.df[parser.REDEMPTION_PAYMENT] += parser.df[elem]
+            del parser.df[elem]
 
-    # Rename columns and format date column
-    df.rename(
-        columns={
-            'Anfangsbestand': START_BALANCE_NAME,
+    # Define mapping between Iuvo and easyP2P cashflow types and column
+    # names
+    rename_columns = {
+            'Anfangsbestand': parser.START_BALANCE_NAME,
+            'Endbestand': parser.END_BALANCE_NAME,
+            'erhaltener Rückkaufgrundbetrag': parser.BUYBACK_PAYMENT,
+            'erhaltene Verspätungsgebühren': parser.LATE_FEE_PAYMENT,
             'Investitionen auf dem Primärmarkt mit Autoinvest':
-                INVESTMENT_PAYMENT,
-            'Endbestand': END_BALANCE_NAME,
-            'erhaltener Rückkaufgrundbetrag': BUYBACK_PAYMENT,
-            'erhaltene Verspätungsgebühren': LATE_FEE_PAYMENT},
-        inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
-    df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
+                parser.INVESTMENT_PAYMENT }
 
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df, date_range)
-    if missing_months:
-        df = add_missing_months(df, missing_months)
+    unknown_cf_types = parser.parse_statement('%d.%m.%Y', rename_columns)
 
-    df[PLATFORM] = 'Iuvo'
-    df[CURRENCY] = 'EUR'
-    df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-
-    # Since we set the column names, there cannot be unknown CF types
-    return (df, '')
+    return (parser.df, unknown_cf_types)
 
 
 def grupeer(
@@ -910,63 +878,38 @@ def grupeer(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Grupeer', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Grupeer'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between Grupeer and easyP2P cashflow types
-    grupeer_dict = dict()
-    grupeer_dict['Interest'] = INTEREST_PAYMENT
-    grupeer_dict['Investment'] = INVESTMENT_PAYMENT
-    grupeer_dict['Deposit'] = INCOMING_PAYMENT
-    # Treat cashback as interest payment:
-    grupeer_dict['Cashback'] = INTEREST_PAYMENT
-    grupeer_dict['Principal'] = REDEMPTION_PAYMENT
+    # Get the currency from the Description column and replace known currencies
+    # with their ISO code
+    parser.df[parser.CURRENCY], parser.df['Details'] \
+        = parser.df['Description'].str.split(';').str
+    rename_currency = {'&euro': 'EUR', 'Gekauft &euro': 'EUR'}
+    parser.df[parser.CURRENCY].replace(rename_currency, inplace=True)
 
-    # Map Grupeer cashflow types to easyP2P cashflow types
-    df['Cashflow-Typ'] = df['Type'].map(grupeer_dict)
+    # Convert amount to float64
+    parser.df['Amount'] = parser.df['Amount'].apply(
+        lambda x: x.replace(',', '.')).astype('float64')
 
-    # Format date column
-    df.rename(columns={'Date': DATE}, inplace=True)
-    df[DATE] = pd.to_datetime(df[DATE], format="%d.%m.%Y")
-    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
+    # Define mapping between Grupeer and easyP2P cashflow types and column names
+    cashflow_types = {
+        # Treat cashback as interest payment:
+        'Cashback': parser.INTEREST_PAYMENT,
+        'Deposit': parser.INCOMING_PAYMENT,
+        'Interest': parser.INTEREST_PAYMENT,
+        'Investment': parser.INVESTMENT_PAYMENT,
+        'Principal': parser.REDEMPTION_PAYMENT }
+    rename_columns = {'Date': parser.DATE}
 
-    # Get the currency from the Description column
-    df['Grupeer' + CURRENCY], df['Details'] \
-        = df['Description'].str.split(';').str
-    currency_dict = dict()
-    currency_dict = {'&euro': 'EUR', 'Gekauft &euro': 'EUR'}
-    df[CURRENCY] = df['Grupeer' + CURRENCY].map(currency_dict)
+    unknown_cf_types = parser.parse_statement(
+        '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount')
 
-    # Check if there were any unknown currencies
-    if df[CURRENCY].isnull().values.any():
-        raise RuntimeError(
-            'Grupeer: unbekannte Währung im Parser: ',
-            set(df['Grupeer' + CURRENCY].where(
-                df[CURRENCY].isna()).dropna().tolist()))
-
-    # Convert amounts to float64
-    df['Amount'] = df['Amount'].apply(lambda x: x.replace(',', '.')).astype(
-        'float64')
-
-    unknown_cf_types = _check_unknown_cf_types(df, 'Type')
-    df_result = _create_df_result(df, 'Amount')
-
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'Grupeer'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def dofinance(
@@ -991,55 +934,37 @@ def dofinance(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('DoFinance', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'DoFinance'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between DoFinance and easyP2P cashflow types
-    # TODO: generalize dict for all interest rate values
-    dofinance_dict = dict()
-    dofinance_dict['Gewinn'] = INTEREST_PAYMENT
-    dofinance_dict['Abhebungen'] = OUTGOING_PAYMENT
-    dofinance_dict['Rückzahlung\nRate: 12% Typ: automatisch'] = \
-        REDEMPTION_PAYMENT
-    dofinance_dict['Anlage\nRate: 12% Typ: automatisch'] = INVESTMENT_PAYMENT
+    # Drop the last two rows which only contain a summary
+    parser.df = parser.df[:-2]
 
-    # The last two rows only contain a summary, drop them
-    df = df[:-2]
+    # Define mapping between DoFinance and easyP2P cashflow types and column
+    # names
+    cashflow_types = {
+        'Abhebungen': parser.OUTGOING_PAYMENT,
+        'Gewinn': parser.INTEREST_PAYMENT }
 
-    try:
-        # Map DoFinance cashflow types to easyP2P cashflow types
-        df['Cashflow-Typ'] = df['Art der Transaktion'].map(dofinance_dict)
+    for interest_rate in ['5%', '7%', '9%', '12%']:
+        cashflow_types[
+            'Rückzahlung\nRate: {0} Typ: automatisch'.format(interest_rate)] \
+            = parser.REDEMPTION_PAYMENT
+        cashflow_types[
+            'Anlage\nRate: {0} Typ: automatisch'.format(interest_rate)] \
+            = parser.INVESTMENT_PAYMENT
 
-        # Format date column
-        df.rename(columns={'Bearbeitungsdatum': 'Datum'}, inplace=True)
-        df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
-        df['Datum'] = df['Datum'].dt.strftime('%d.%m.%Y')
-    except KeyError as err:
-        raise RuntimeError(
-            'DoFinance: unbekannte Spalte im Parser: ' + str(err))
+    rename_columns = {'Bearbeitungsdatum': parser.DATE}
 
-    # DoFinance only supports currency EUR
-    df[CURRENCY] = 'EUR'
+    unknown_cf_types = parser.parse_statement(
+        '%d.%m.%Y', rename_columns, cashflow_types, 'Art der Transaktion',
+        'Betrag, €')
 
-    unknown_cf_types = _check_unknown_cf_types(df, 'Art der Transaktion')
-    df_result = _create_df_result(df, 'Betrag, €')
-
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'DoFinance'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def twino(
@@ -1064,62 +989,46 @@ def twino(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Twino', date_range, input_file)
 
     # Format the header of the table
-    df = df[1:]  # The first row only contains a generic header
-    new_header = df.iloc[0] # Get the new first row as header
-    df = df[1:] # Remove the header row
-    df.columns = new_header # Set the header row as the df header
+    parser.df = parser.df[1:]  # The first row only contains a generic header
+    new_header = parser.df.iloc[0] # Get the new first row as header
+    parser.df = parser.df[1:] # Remove the first row
+    parser.df.columns = new_header # Set the new header
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Twino'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between Twino and easyP2P cashflow types
-    twino_dict = dict()
-    twino_dict['EXTENSION INTEREST'] = INTEREST_PAYMENT
-    twino_dict['REPAYMENT INTEREST'] = INTEREST_PAYMENT
-    twino_dict['SCHEDULE INTEREST'] = INTEREST_PAYMENT
-    twino_dict['BUYBACK INTEREST'] = BUYBACK_INTEREST_PAYMENT
-    twino_dict['REPURCHASE INTEREST'] = BUYBACK_INTEREST_PAYMENT
-    twino_dict['BUYBACK PRINCIPAL'] = BUYBACK_PAYMENT
-    twino_dict['REPURCHASE PRINCIPAL'] = BUYBACK_PAYMENT
-    twino_dict['REPAYMENT PRINCIPAL'] = REDEMPTION_PAYMENT
-    twino_dict['BUY_SHARES PRINCIPAL'] = INVESTMENT_PAYMENT
-
+    # Create a new column for identifying cashflow types
     try:
-        # Map Twino cashflow types to easyP2P cashflow types
-        df['Twino_Cashflow-Typ'] = df['Type'] + ' ' + df['Description']
-        df['Cashflow-Typ'] = df['Twino_Cashflow-Typ'].map(twino_dict)
-
-        # Format date column
-        df.rename(columns={'Processing Date': DATE}, inplace=True)
-        df[DATE] = pd.to_datetime(df[DATE], format='%d.%m.%Y %H:%M')
-        df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
-    except KeyError as err:
+        parser.df['Twino_Cashflow-Typ'] = parser.df['Type'] + ' ' \
+            + parser.df['Description']
+    except KeyError:
         raise RuntimeError(
-            'Twino: unbekannte Spalte im Parser: ' + str(err))
+            'Twino: Cashflowspalte nicht im Kontoauszug vorhanden!')
 
-    # We only report the EUR values
-    df[CURRENCY] = 'EUR'
+    # Define mapping between Twino and easyP2P cashflow types and column names
+    cashflow_types = {
+        'BUYBACK INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
+        'BUYBACK PRINCIPAL': parser.BUYBACK_PAYMENT,
+        'BUY_SHARES PRINCIPAL': parser.INVESTMENT_PAYMENT,
+        'EXTENSION INTEREST': parser.INTEREST_PAYMENT,
+        'REPAYMENT INTEREST': parser.INTEREST_PAYMENT,
+        'REPAYMENT PRINCIPAL': parser.REDEMPTION_PAYMENT,
+        'REPURCHASE INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
+        'REPURCHASE PRINCIPAL': parser.BUYBACK_PAYMENT,
+        'SCHEDULE INTEREST': parser.INTEREST_PAYMENT
+        }
+    rename_columns = {'Processing Date': parser.DATE}
 
-    unknown_cf_types = _check_unknown_cf_types(df, 'Twino_Cashflow-Typ')
-    df_result = _create_df_result(df, 'Amount, EUR')
+    unknown_cf_types = parser.parse_statement(
+        '%d.%m.%Y %H:%M', rename_columns, cashflow_types, 'Twino_Cashflow-Typ',
+        'Amount, EUR')
 
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'Twino'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def show_results(
