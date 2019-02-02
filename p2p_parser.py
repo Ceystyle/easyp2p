@@ -622,51 +622,28 @@ def robocash(
         element is a set containing all unknown cash flow types.
 
     """
-    df = get_df_from_file(input_file)
+    parser = P2PParser('Robocash', date_range, input_file)
 
     # Create a DataFrame with zero entries if there were no cashflows
-    if df.empty:
-        missing_months = get_missing_months(df, date_range)
-        df = add_missing_months(df, missing_months)
-        df[PLATFORM] = 'Robocash'
-        df[CURRENCY] = 'EUR'
-        df.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-        return (df, '')
+    if parser.df.empty:
+        parser.parse_statement()
+        return (parser.df, '')
 
-    # Define mapping between Robocash and easyP2P cashflow types
-    robocash_dict = dict()
-    robocash_dict['Zinsenzahlung'] = INTEREST_PAYMENT
-    robocash_dict['Darlehenskauf'] = INVESTMENT_PAYMENT
-    robocash_dict['Kreditrückzahlung'] = REDEMPTION_PAYMENT
-    robocash_dict['Die Geldauszahlung'] = OUTGOING_PAYMENT
-    robocash_dict['Geldeinzahlung'] = INCOMING_PAYMENT
+    # Define mapping between Robocash and easyP2P cashflow types and
+    # column names
+    cashflow_types = {
+        'Darlehenskauf': parser.INVESTMENT_PAYMENT,
+        'Die Geldauszahlung': parser.OUTGOING_PAYMENT,
+        'Geldeinzahlung': parser.INCOMING_PAYMENT,
+        'Kreditrückzahlung': parser.REDEMPTION_PAYMENT,
+        'Zinsenzahlung': parser.INTEREST_PAYMENT }
+    rename_columns = {'Datum und Laufzeit': parser.DATE}
 
-    # Cashflows between Robocash portfolios will not be reported
-    df = df[df.Operation != 'Die Geldauszahlung aus dem Portfolio']
-    df = df[df.Operation != 'Portfolio auffüllen']
+    unknown_cf_types = parser.parse_statement(
+        '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
+        'Operation', 'Betrag')
 
-    # Map Robocash cashflow types to easyP2P cashflow types
-    df['Cashflow-Typ'] = df['Operation'].map(robocash_dict)
-
-    # Format date column
-    df.rename(columns={'Datum und Laufzeit': DATE}, inplace=True)
-    df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d %H:%M:%S')
-    df[DATE] = df[DATE].dt.strftime('%d.%m.%Y')
-
-    # Set currency. Robocash only supports EUR.
-    df[CURRENCY] = 'EUR'
-
-    unknown_cf_types = _check_unknown_cf_types(df, 'Operation')
-    df_result = _create_df_result(df, 'Betrag')
-
-    # Add rows for months in date_range without cashflows
-    missing_months = get_missing_months(df_result, date_range)
-    if missing_months:
-        df_result = add_missing_months(df_result, missing_months)
-
-    df_result[PLATFORM] = 'Robocash'
-    df_result.set_index([PLATFORM, DATE, CURRENCY], inplace=True)
-    return (df_result, unknown_cf_types)
+    return (parser.df, unknown_cf_types)
 
 
 def swaper(
