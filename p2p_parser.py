@@ -191,6 +191,17 @@ class P2PParser:
 
         return list_of_months
 
+    def _calculate_total_income(self):
+        """ Calculate total income for each row of the DataFrame"""
+        income_columns = [
+            self.INTEREST_PAYMENT,
+            self.LATE_FEE_PAYMENT,
+            self.BUYBACK_INTEREST_PAYMENT,
+            self.DEFAULTS ]
+        self.df[self.TOTAL_INCOME] = 0.
+        for col in [col for col in self.df.columns if col in income_columns]:
+            self.df[self.TOTAL_INCOME] += self.df[col]
+
     def _check_unknown_cf_types(self, orig_cf_column: str) -> str:
         """
         Helper method to identify any unknown cash flow types.
@@ -281,6 +292,7 @@ class P2PParser:
 
         self._aggregate_df(value_column)
         self._add_missing_months()
+        self._calculate_total_income()
         self.df[self.PLATFORM] = self.platform
         self.df.set_index(
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
@@ -874,17 +886,6 @@ def show_results(
 
     if df.empty:
         return False
-
-    # Calculate total income for each row
-    income_columns = [
-        'Zinszahlungen',
-        'Verzugsgebühren',
-        'Zinszahlungen aus Rückkäufen',
-        'Ausfälle'
-    ]
-    df['Gesamteinnahmen'] = 0
-    for col in [col for col in df.columns if col in income_columns]:
-        df['Gesamteinnahmen'] += df[col]
 
     # Show only existing columns
     show_columns = [col for col in df.columns if col in TARGET_COLUMNS]
