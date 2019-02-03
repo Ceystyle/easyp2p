@@ -288,28 +288,6 @@ class P2PParser:
         return unknown_cf_types
 
 
-def _combine_dfs(list_of_dfs: Sequence[pd.DataFrame]) -> pd.DataFrame:
-    """
-    Helper method for combining pandas data frames.
-
-    Args:
-        list_of_dfs (list[pd.DataFrame]): a list of data frames which need
-            to be combined
-
-    Returns:
-        pd.DataFrame: the combined data frame
-
-    """
-    df_result = None
-    for df in list_of_dfs:
-        if df_result is not None:
-            df_result = df_result.append(df, sort=False).fillna(0)
-        else:
-            df_result = df
-
-    return df_result
-
-
 def bondora(
     date_range: Tuple[date, date],
     input_file: str = 'p2p_downloads/bondora_statement.csv') \
@@ -887,9 +865,14 @@ def show_results(
         bool: True on success, False on failure
 
     """
-    df = _combine_dfs(list_of_dfs)
+    df = pd.DataFrame()
+    for elem in list_of_dfs:
+        if df.empty:
+            df = elem
+        else:
+            df = df.append(elem, sort=True).fillna(0.)
 
-    if df is None:
+    if df.empty:
         return False
 
     # Calculate total income for each row
