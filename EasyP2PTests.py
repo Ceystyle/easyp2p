@@ -16,6 +16,7 @@ from PyQt5.QtTest import QTest
 
 from ui.main_window import MainWindow
 from ui.progress_window import ProgressWindow
+import p2p_helper
 import p2p_parser
 import p2p_platforms
 
@@ -648,8 +649,8 @@ def are_files_equal(
 
     """
     try:
-        df1 = p2p_parser.get_df_from_file(file1)
-        df2 = p2p_parser.get_df_from_file(file2)
+        df1 = p2p_helper.get_df_from_file(file1)
+        df2 = p2p_helper.get_df_from_file(file2)
     except RuntimeError:
         return False
 

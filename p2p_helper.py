@@ -5,7 +5,10 @@
 
 import calendar
 from datetime import date, timedelta
+from pathlib import Path
 from typing import List, Tuple
+
+import pandas as pd
 
 
 def get_calendar_clicks(
@@ -37,6 +40,40 @@ def get_calendar_clicks(
 
     return clicks
 
+
+def get_df_from_file(input_file):
+    """
+    Read a pandas.DataFrame from input_file.
+
+    Args:
+        input_file (str): file name including path
+
+    Returns:
+        pandas.DataFrame: data frame which was read from the file
+
+    Throws:
+        RuntimeError: if input_file does not exist, cannot be read or if the
+            file format is neither csv or xlsx
+
+    """
+
+    file_format = Path(input_file).suffix
+
+    try:
+        if file_format == '.csv':
+            df = pd.read_csv(input_file)
+        elif file_format == '.xlsx':
+            df = pd.read_excel(input_file)
+        else:
+            raise RuntimeError(
+                'Unbekanntes Dateiformat beim Import: ', input_file)
+    except FileNotFoundError:
+        raise RuntimeError(
+            '{0} konnte nicht gefunden werden!'.format(input_file))
+
+    return df
+
+
 def get_list_of_months(date_range: Tuple[date, date]) \
         -> List[Tuple[date, date]]:
     """
@@ -62,6 +99,7 @@ def get_list_of_months(date_range: Tuple[date, date]) \
 
     return months
 
+
 def short_month_to_nbr(short_name: str) -> str:
     """
     Helper method for translating month short names to numbers.
@@ -77,6 +115,7 @@ def short_month_to_nbr(short_name: str) -> str:
         'Dez': '12', 'Dec': '12'}
 
     return map_short_month_to_nbr[short_name]
+
 
 def nbr_to_short_month(nbr: str) -> str:
     """

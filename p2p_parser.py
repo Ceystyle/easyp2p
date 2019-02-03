@@ -13,7 +13,6 @@ Module for parsing output files of P2P platforms and printing combined results.
 """
 from datetime import date, datetime
 import locale
-from pathlib import Path
 from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
@@ -119,7 +118,7 @@ class P2PParser:
         """
         self.platform = platform
         self.date_range = date_range
-        self.df = get_df_from_file(input_file)
+        self.df = p2p_helper.get_df_from_file(input_file)
 
     def _add_missing_months(self) -> None:
         """
@@ -287,39 +286,6 @@ class P2PParser:
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
 
         return unknown_cf_types
-
-
-def get_df_from_file(input_file):
-    """
-    Read a pandas.DataFrame from input_file.
-
-    Args:
-        input_file (str): file name including path
-
-    Returns:
-        pandas.DataFrame: data frame which was read from the file
-
-    Throws:
-        RuntimeError: if input_file does not exist, cannot be read or if the
-            file format is neither csv or xlsx
-
-    """
-
-    file_format = Path(input_file).suffix
-
-    try:
-        if file_format == '.csv':
-            df = pd.read_csv(input_file)
-        elif file_format == '.xlsx':
-            df = pd.read_excel(input_file)
-        else:
-            raise RuntimeError(
-                'Unbekanntes Dateiformat im Parser: ', input_file)
-    except FileNotFoundError:
-        raise RuntimeError(
-            '{0} konnte nicht gefunden werden!'.format(input_file))
-
-    return df
 
 
 def _combine_dfs(list_of_dfs: Sequence[pd.DataFrame]) -> pd.DataFrame:
