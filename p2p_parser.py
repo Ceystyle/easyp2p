@@ -11,7 +11,7 @@ Module for parsing output files of P2P platforms and printing combined results.
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
 """
-from datetime import date, datetime
+from datetime import date
 import locale
 from typing import List, Mapping, Optional, Sequence, Tuple
 
@@ -135,24 +135,18 @@ class P2PParser:
         # Create list of dates set to the first of each missing month
         new_cf_dates = []
         for month in missing_months:
-            new_cf_dates.append(datetime(
-                month[0].year, month[0].month, month[0].day))
-
-        # Set all entries in the columns of the new DataFrame to zero, except
-        # for the DATE and CURRENCY column
-        content = dict()
-        zeroes = [0.] * len(new_cf_dates)
-        for column in self.TARGET_COLUMNS:
-            content[column] = zeroes
-        content[self.DATE] = new_cf_dates
-        content[self.CURRENCY] = 'EUR'
+            new_cf_dates.append(
+                date(month[0].year, month[0].month, month[0].day))
 
         # Create the new DataFrame and append it to the old one
-        df_new = pd.DataFrame(data=content, columns=self.TARGET_COLUMNS)
+        df_new = pd.DataFrame(
+            data={self.DATE: new_cf_dates, self.CURRENCY: 'EUR'},
+            columns=[self.DATE, self.CURRENCY])
+
         if self.df.empty:
             self.df = df_new
         else:
-            self.df = self.df.append(df_new, sort=False)
+            self.df = self.df.append(df_new, sort=True)
 
         # Fill missing values with zero and sort the whole DataFrame by date
         self.df.fillna(0., inplace=True)
@@ -180,7 +174,7 @@ class P2PParser:
 
         # Get all cashflow dates in date format from the DataFrame
         cf_date_list = []
-        for elem in self.df[self.DATE].tolist():
+        for elem in pd.to_datetime(self.df[self.DATE]).tolist():
             cf_date_list.append(date(elem.year, elem.month, elem.day))
 
         # Remove all months for which there is at least one cashflow
@@ -233,12 +227,6 @@ class P2PParser:
                 columns=['Cashflow-Typ'], aggfunc=sum)
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
-        try:
-            self.df[self.DATE] = pd.to_datetime(
-                self.df[self.DATE], format='%d.%m.%Y')
-        except KeyError:
-            # If the DataFrame is empty this error occurs and can be ignored
-            pass
 
     def parse_statement(
             self, date_format: Optional[str] = None,
@@ -264,11 +252,17 @@ class P2PParser:
         if rename_columns:
             self.df.rename(columns=rename_columns, inplace=True)
 
+        # Make sure we only show results between start and end date
+        start_date = pd.Timestamp(self.date_range[0])
+        end_date = pd.Timestamp(self.date_range[1])
+
         if date_format:
             try:
                 self.df[self.DATE] = pd.to_datetime(
                     self.df[self.DATE], format=date_format)
-                self.df[self.DATE] = self.df[self.DATE].dt.strftime('%d.%m.%Y')
+                self.df = self.df[(self.df[DATE] >= start_date) \
+                    & (self.df[DATE] <= end_date)]
+                self.df[self.DATE] = self.df[self.DATE].dt.date
             except KeyError:
                 raise RuntimeError(
                     '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
