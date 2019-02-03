@@ -27,7 +27,7 @@ REDEMPTION_PAYMENT = 'Tilgungszahlungen'
 LATE_FEE_PAYMENT = 'Verzugsgebühren'
 INCOMING_PAYMENT = 'Einzahlungen'
 OUTGOING_PAYMENT = 'Auszahlungen'
-DEFAULT_PAYMENT = 'Ausfälle'
+DEFAULTS = 'Ausfälle'
 START_BALANCE_NAME = 'Startguthaben'
 END_BALANCE_NAME = 'Endsaldo'
 TOTAL_INCOME = 'Gesamteinnahmen'
@@ -49,7 +49,7 @@ TARGET_COLUMNS = [
     BUYBACK_PAYMENT,
     BUYBACK_INTEREST_PAYMENT,
     LATE_FEE_PAYMENT,
-    DEFAULT_PAYMENT,
+    DEFAULTS,
 ]
 
 
@@ -73,7 +73,7 @@ class P2PParser:
     LATE_FEE_PAYMENT = 'Verzugsgebühren'
     INCOMING_PAYMENT = 'Einzahlungen'
     OUTGOING_PAYMENT = 'Auszahlungen'
-    DEFAULT_PAYMENT = 'Ausfälle'
+    DEFAULTS = 'Ausfälle'
     START_BALANCE_NAME = 'Startguthaben'
     END_BALANCE_NAME = 'Endsaldo'
     TOTAL_INCOME = 'Gesamteinnahmen'
@@ -99,7 +99,7 @@ class P2PParser:
         BUYBACK_PAYMENT,
         BUYBACK_INTEREST_PAYMENT,
         LATE_FEE_PAYMENT,
-        DEFAULT_PAYMENT ]
+        DEFAULTS ]
 
     def __init__(
             self, platform: str, date_range: Tuple[date, date],
@@ -332,7 +332,7 @@ def bondora(
     parser.df.reset_index(inplace=True)
 
     # Calculate defaulted payments
-    parser.df[parser.DEFAULT_PAYMENT] = (
+    parser.df[parser.DEFAULTS] = (
         parser.df['Erhaltener Kapitalbetrag - gesamt']
         - parser.df['Geplanter Kapitalbetrag - gesamt'])
 
