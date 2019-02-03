@@ -32,6 +32,7 @@ START_BALANCE_NAME = 'Startguthaben'
 END_BALANCE_NAME = 'Endsaldo'
 TOTAL_INCOME = 'Gesamteinnahmen'
 DATE = 'Datum'
+MONTH = 'Monat'
 PLATFORM = 'Plattform'
 CURRENCY = 'Währung'
 
@@ -288,6 +289,12 @@ class P2PParser:
         self._add_missing_months()
         self._calculate_total_income()
         self.df[self.PLATFORM] = self.platform
+
+        # Add missing columns
+        for col in [col for col in self.TARGET_COLUMNS
+                if col not in self.df.columns]:
+            self.df[col] = 'NaN'
+
         self.df.set_index(
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
 
@@ -881,30 +888,24 @@ def show_results(
     if df.empty:
         return False
 
-    # Show only existing columns
-    show_columns = [col for col in df.columns if col in TARGET_COLUMNS]
+    # Set index and format date/month columns
+    df.reset_index(level=[DATE, CURRENCY], inplace=True)
+    df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d')
+    df[MONTH] = pd.to_datetime(
+        df[DATE], format='%d.%m.%Y').dt.to_period('M')
 
-    df.reset_index(level=['Datum', 'Währung'], inplace=True)
-    df['Datum'] = pd.to_datetime(df['Datum'], format='%d.%m.%Y')
-    df['Monat'] = pd.to_datetime(
-        df['Datum'], format='%d.%m.%Y').dt.to_period('M')
+    # Round all results to 2 digits
     df = df.round(2)
-
-    # Make sure we only show results between start and end date
-    start_date = pd.Timestamp(date_range[0])
-    end_date = pd.Timestamp(date_range[1])
-    df = df[(df['Datum'] >= start_date) & (df['Datum'] <= end_date)]
 
     # Write monthly results to file
     writer = pd.ExcelWriter(output_file)
     month_pivot_table = pd.pivot_table(
-        df, values=show_columns,
-        index=['Plattform', 'Währung', 'Monat'], aggfunc=sum)
+        df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY, MONTH],
+        aggfunc=sum)
     month_pivot_table.to_excel(writer, 'Monatsergebnisse')
 
     totals_pivot_table = pd.pivot_table(
-        df, values=show_columns,
-        index=['Plattform', 'Währung'], aggfunc=sum)
+        df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY], aggfunc=sum)
 
     if 'Startguthaben' in totals_pivot_table.columns:
         for index in month_pivot_table.index.levels[0]:
