@@ -502,8 +502,8 @@ def open_selenium_iuvo(
             # Define conditions if account statement generation is successful:
             # The first condition will be true if there were cashflows in
             # date_range, the second condition will be true of there were none
-            conditions = [EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['statement_check']), check_txt),
+            conditions = [
+                EC.text_to_be_present_in_element((By.XPATH, xpaths['statement_check']), check_txt),
                 EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'text-center'), 'Keine passenden Daten!')]
 
@@ -520,7 +520,7 @@ def open_selenium_iuvo(
             except NoSuchElementException:
                 # Check if there were no cashflows in month
                 if driver.find_element_by_class_name(
-                    'text-center').text == 'Keine passenden Daten!':
+                        'text-center').text == 'Keine passenden Daten!':
                     continue
 
             # pd.read_html returns a list of one element

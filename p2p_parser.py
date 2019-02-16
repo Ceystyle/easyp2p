@@ -97,7 +97,7 @@ class P2PParser:
         BUYBACK_PAYMENT,
         BUYBACK_INTEREST_PAYMENT,
         LATE_FEE_PAYMENT,
-        DEFAULTS ]
+        DEFAULTS]
 
     def __init__(
             self, platform: str, date_range: Tuple[date, date],
@@ -148,7 +148,7 @@ class P2PParser:
 
         # Fill missing values with zero and sort the whole DataFrame by date
         self.df.fillna(0., inplace=True)
-        self.df.sort_values(by=[self.DATE], inplace = True)
+        self.df.sort_values(by=[self.DATE], inplace=True)
 
     def _get_missing_months(self) -> List[Tuple[date, date]]:
         """
@@ -189,7 +189,7 @@ class P2PParser:
             self.INTEREST_PAYMENT,
             self.LATE_FEE_PAYMENT,
             self.BUYBACK_INTEREST_PAYMENT,
-            self.DEFAULTS ]
+            self.DEFAULTS]
         self.df[self.TOTAL_INCOME] = 0.
         for col in [col for col in self.df.columns if col in income_columns]:
             self.df[self.TOTAL_INCOME] += self.df[col]
@@ -288,7 +288,8 @@ class P2PParser:
         self.df[self.PLATFORM] = self.platform
 
         # Add missing columns
-        for col in [col for col in self.TARGET_COLUMNS
+        for col in [
+                col for col in self.TARGET_COLUMNS
                 if col not in self.df.columns]:
             self.df[col] = 'NaN'
 
@@ -299,9 +300,9 @@ class P2PParser:
 
 
 def bondora(
-    date_range: Tuple[date, date],
-    input_file: str = 'p2p_downloads/bondora_statement.csv') \
-        -> Tuple[pd.DataFrame, str]:
+        date_range: Tuple[date, date],
+        input_file: str = 'p2p_downloads/bondora_statement.csv') \
+            -> Tuple[pd.DataFrame, str]:
     """
     Parser for Bondora.
 
@@ -352,7 +353,7 @@ def bondora(
         'Erhaltener Kapitalbetrag - gesamt': parser.REDEMPTION_PAYMENT,
         'Erhaltene Zinsen - gesamt': parser.INTEREST_PAYMENT,
         'Investitionen (netto)': parser.INVESTMENT_PAYMENT,
-        'Zeitraum': parser.DATE }
+        'Zeitraum': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
         '%b %Y', rename_columns=rename_columns)
@@ -410,7 +411,7 @@ def mintos(
         'Investment principal repayment': parser.REDEMPTION_PAYMENT,
         'Incoming client payment': parser.INCOMING_PAYMENT,
         'Late payment fee income': parser.LATE_FEE_PAYMENT,
-        'Reversed incoming client payment': parser.OUTGOING_PAYMENT }
+        'Reversed incoming client payment': parser.OUTGOING_PAYMENT}
     rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
@@ -458,7 +459,7 @@ def robocash(
         'Die Geldauszahlung': parser.OUTGOING_PAYMENT,
         'Geldeinzahlung': parser.INCOMING_PAYMENT,
         'Kreditrückzahlung': parser.REDEMPTION_PAYMENT,
-        'Zinsenzahlung': parser.INTEREST_PAYMENT }
+        'Zinsenzahlung': parser.INTEREST_PAYMENT}
     rename_columns = {'Datum und Laufzeit': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
@@ -504,7 +505,7 @@ def swaper(
         'EXTENSION_INTEREST': parser.INTEREST_PAYMENT,
         'INVESTMENT': parser.INVESTMENT_PAYMENT,
         'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
-        'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT }
+        'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT}
     rename_columns = {'Booking date': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
@@ -548,7 +549,7 @@ def peerberry(
     cashflow_types = {
         'Amount of interest payment received': parser.INTEREST_PAYMENT,
         'Amount of principal payment received': parser.REDEMPTION_PAYMENT,
-        'Investment': parser.INVESTMENT_PAYMENT }
+        'Investment': parser.INVESTMENT_PAYMENT}
     rename_columns = {'Currency Id': parser.CURRENCY, 'Date': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
@@ -598,10 +599,10 @@ def estateguru(
         'Entschädigung': parser.LATE_FEE_PAYMENT,
         'Hauptbetrag': parser.REDEMPTION_PAYMENT,
         'Investition(Auto Investieren)': parser.INVESTMENT_PAYMENT,
-        'Zins': parser.INTEREST_PAYMENT }
+        'Zins': parser.INTEREST_PAYMENT}
     rename_columns = {
         'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
-        'Zahlungsdatum': parser.DATE }
+        'Zahlungsdatum': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
         '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
@@ -666,12 +667,12 @@ def iuvo(
     # Define mapping between Iuvo and easyP2P cashflow types and column
     # names
     rename_columns = {
-            'Anfangsbestand': parser.START_BALANCE_NAME,
-            'Endbestand': parser.END_BALANCE_NAME,
-            'erhaltener Rückkaufgrundbetrag': parser.BUYBACK_PAYMENT,
-            'erhaltene Verspätungsgebühren': parser.LATE_FEE_PAYMENT,
-            'Investitionen auf dem Primärmarkt mit Autoinvest':
-                parser.INVESTMENT_PAYMENT }
+        'Anfangsbestand': parser.START_BALANCE_NAME,
+        'Endbestand': parser.END_BALANCE_NAME,
+        'erhaltener Rückkaufgrundbetrag': parser.BUYBACK_PAYMENT,
+        'erhaltene Verspätungsgebühren': parser.LATE_FEE_PAYMENT,
+        'Investitionen auf dem Primärmarkt mit Autoinvest':
+            parser.INVESTMENT_PAYMENT}
 
     unknown_cf_types = parser.parse_statement('%d.%m.%Y', rename_columns)
 
@@ -725,7 +726,7 @@ def grupeer(
         'Deposit': parser.INCOMING_PAYMENT,
         'Interest': parser.INTEREST_PAYMENT,
         'Investment': parser.INVESTMENT_PAYMENT,
-        'Principal': parser.REDEMPTION_PAYMENT }
+        'Principal': parser.REDEMPTION_PAYMENT}
     rename_columns = {'Date': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
@@ -770,7 +771,7 @@ def dofinance(
     # names
     cashflow_types = {
         'Abhebungen': parser.OUTGOING_PAYMENT,
-        'Gewinn': parser.INTEREST_PAYMENT }
+        'Gewinn': parser.INTEREST_PAYMENT}
 
     for interest_rate in ['5%', '7%', '9%', '12%']:
         cashflow_types[

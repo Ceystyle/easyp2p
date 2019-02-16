@@ -29,11 +29,13 @@ INPUT_PREFIX = 'tests/input/input_test_'
 
 def generate_parser_results():
     """
-    Generate the expected result files for the unit tests. They need to be checked manually before using them!
+    Generate the expected result files for the unit tests.
 
-    This function generates the expected results files for the parser unit tests. It can generate the 
-    default, unknown cashflow type, no cashflows and unknown currency result files. Since it uses the code
-    which these expected results should test, the result files need to be checked manually before using them!
+    This function generates the expected results files for the parser unit
+    tests. It can generate the default, unknown cashflow type, no cashflows
+    and unknown currency result files. Since it uses the code which these
+    expected results should test, the result files need to be checked manually
+    before using them!
 
     """
     for elem in PLATFORMS:

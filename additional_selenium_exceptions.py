@@ -2,7 +2,8 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """
-Module containing definitions of additional Selenium expected conditions which are not part of Selenium (yet).
+Definition of additional Selenium expected conditions which are not part of
+upstream (yet).
 
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
