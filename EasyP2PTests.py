@@ -425,7 +425,7 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'dofinance', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', dofinance_date_range,
-            unknown_cf_types_exp = 'TestCF1, TestCF2')
+            unknown_cf_types_exp='TestCF1, TestCF2')
 
     def test_dofinance_parser_missing_month(self):
         test_name = 'dofinance_parser_missing_month'
@@ -469,7 +469,7 @@ class P2PParserTests(unittest.TestCase):
         test_name = 'estateguru_parser_unknown_cf.csv'
         self.run_parser_test(
             'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
-            unknown_cf_types_exp = \
+            unknown_cf_types_exp=\
                 'Investition(AutoInvestieren), TestCF1, TestCF2')
 
     def test_grupeer_parser(self):
@@ -483,7 +483,7 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'grupeer', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
-            unknown_cf_types_exp = 'TestCF1, TestCF2')
+            unknown_cf_types_exp='TestCF1, TestCF2')
 
     def test_grupeer_parser_no_cfs(self):
         test_name = 'grupeer_parser_no_cfs'
@@ -531,7 +531,7 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
-            unknown_cf_types_exp = 'Interestincome, TestCF1, TestCF2')
+            unknown_cf_types_exp='Interestincome, TestCF1, TestCF2')
 
     def test_mintos_parser_no_cfs(self):
         test_name = 'mintos_parser_no_cfs'
@@ -609,7 +609,7 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'twino', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
-            unknown_cf_types_exp = ('TestCF1 PRINCIPAL, TestCF2 INTEREST'))
+            unknown_cf_types_exp=('TestCF1 PRINCIPAL, TestCF2 INTEREST'))
 
     def test_twino_parser_wrong_column_names(self):
         self.assertRaises(
