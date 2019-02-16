@@ -382,9 +382,10 @@ class P2PParserTests(unittest.TestCase):
         # Reset the index to allow comparing index values/types too
         df.reset_index(inplace=True)
         df_exp.reset_index(inplace=True)
+        df_exp.fillna('NaN', inplace=True)
 
         # Explicitly set the date column to datetime format
-        df_exp['Datum'] = pd.to_datetime(df['Datum'])
+        df_exp['Datum'] = pd.to_datetime(df_exp['Datum'])
 
         # If df is empty, df.equals() will not work since we imported df_exp
         # with non-empty index_cols
@@ -627,6 +628,31 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'twino', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
+
+    def test_show_results(self):
+        list_of_dfs = []
+
+        for platform in PLATFORMS:
+            df = p2p_helper.get_df_from_file(
+                RESULT_PREFIX + '{0}_parser.csv'.format(
+                    platform.lower()))
+            df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
+            list_of_dfs.append(df)
+
+        p2p_parser.show_results(
+            list_of_dfs, 'tests/test_show_results.xlsx')
+
+        month_pivot_table = pd.read_excel(
+            'tests/test_show_results.xlsx', 'Monatsergebnisse')
+        month_pivot_table_exp = pd.read_excel(
+            RESULT_PREFIX + 'show_results.xlsx', 'Monatsergebnisse')
+        totals_pivot_table = pd.read_excel(
+            'tests/test_show_results.xlsx', 'Gesamtergebnis')
+        totals_pivot_table_exp = pd.read_excel(
+            RESULT_PREFIX + 'show_results.xlsx', 'Gesamtergebnis')
+
+        self.assertTrue(month_pivot_table.equals(month_pivot_table_exp))
+        self.assertTrue(totals_pivot_table.equals(totals_pivot_table_exp))
 
 
 def are_files_equal(
