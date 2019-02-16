@@ -18,38 +18,6 @@ from typing import List, Mapping, Optional, Sequence, Tuple
 import pandas as pd
 import p2p_helper
 
-# Define all necessary payment types
-INTEREST_PAYMENT = 'Zinszahlungen'
-BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
-BUYBACK_PAYMENT = 'Rückkäufe'
-INVESTMENT_PAYMENT = 'Investitionen'
-REDEMPTION_PAYMENT = 'Tilgungszahlungen'
-LATE_FEE_PAYMENT = 'Verzugsgebühren'
-INCOMING_PAYMENT = 'Einzahlungen'
-OUTGOING_PAYMENT = 'Auszahlungen'
-DEFAULTS = 'Ausfälle'
-START_BALANCE_NAME = 'Startguthaben'
-END_BALANCE_NAME = 'Endsaldo'
-TOTAL_INCOME = 'Gesamteinnahmen'
-DATE = 'Datum'
-MONTH = 'Monat'
-PLATFORM = 'Plattform'
-CURRENCY = 'Währung'
-
-# TARGET_COLUMNS are the columns which will be shown in the final result file
-TARGET_COLUMNS = [
-    START_BALANCE_NAME,
-    END_BALANCE_NAME,
-    TOTAL_INCOME,
-    INTEREST_PAYMENT,
-    INVESTMENT_PAYMENT,
-    REDEMPTION_PAYMENT,
-    BUYBACK_PAYMENT,
-    BUYBACK_INTEREST_PAYMENT,
-    LATE_FEE_PAYMENT,
-    DEFAULTS,
-]
-
 
 class P2PParser:
 
@@ -85,9 +53,6 @@ class P2PParser:
     # TARGET_COLUMNS are the columns which will be shown in the final result
     # file
     TARGET_COLUMNS = [
-        DATE,
-        PLATFORM,
-        CURRENCY,
         START_BALANCE_NAME,
         END_BALANCE_NAME,
         TOTAL_INCOME,
@@ -258,8 +223,8 @@ class P2PParser:
             try:
                 self.df[self.DATE] = pd.to_datetime(
                     self.df[self.DATE], format=date_format)
-                self.df = self.df[(self.df[DATE] >= start_date) \
-                    & (self.df[DATE] <= end_date)]
+                self.df = self.df[(self.df[self.DATE] >= start_date) \
+                    & (self.df[self.DATE] <= end_date)]
                 self.df[self.DATE] = self.df[self.DATE].dt.date
             except KeyError:
                 raise RuntimeError(
@@ -877,20 +842,22 @@ def show_results(
 
     for df in list_of_dfs:
         df.reset_index(inplace=True)
-        df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d')
-        df[MONTH] = pd.to_datetime(
-            df[DATE], format='%d.%m.%Y').dt.to_period('M')
+        df[P2PParser.DATE] = pd.to_datetime(df[P2PParser.DATE], format='%Y-%m-%d')
+        df[P2PParser.MONTH] = pd.to_datetime(
+            df[P2PParser.DATE], format='%d.%m.%Y').dt.to_period('M')
 
         # We need to fill the NaNs with a dummy value so they don't disappear
         # when creating the pivot tables
         df.fillna('dummy', inplace=True)
 
         df_pivot = pd.pivot_table(
-            df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY, MONTH],
+            df, values=P2PParser.TARGET_COLUMNS,
+            index=[P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH],
             aggfunc=sum, dropna=False)
         df_monthly = df_monthly.append(df_pivot, sort=True)
         df_pivot = pd.pivot_table(
-            df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY], aggfunc=sum)
+            df, values=P2PParser.TARGET_COLUMNS,
+            index=[P2PParser.PLATFORM, P2PParser.CURRENCY], aggfunc=sum)
         df_total = df_total.append(df_pivot, sort=True)
 
     if df_total.empty:
@@ -907,14 +874,14 @@ def show_results(
     # Start and end balance columns were summed up as well if they are present.
     # That's obviously not correct, so we will look up the correct values
     # in the monthly table and overwrite the sums.
-    if START_BALANCE_NAME in df_total.columns:
+    if P2PParser.START_BALANCE_NAME in df_total.columns:
         for index in df_total.index.levels[0]:
-            start_balance = df_monthly.loc[index][START_BALANCE_NAME][0]
-            df_total.loc[index][START_BALANCE_NAME] = start_balance
-    if END_BALANCE_NAME in df_total.columns:
+            start_balance = df_monthly.loc[index][P2PParser.START_BALANCE_NAME][0]
+            df_total.loc[index][P2PParser.START_BALANCE_NAME] = start_balance
+    if P2PParser.END_BALANCE_NAME in df_total.columns:
         for index in df_total.index.levels[0]:
-            end_balance = df_monthly.loc[index][END_BALANCE_NAME][-1]
-            df_total.loc[index][END_BALANCE_NAME] = end_balance
+            end_balance = df_monthly.loc[index][P2PParser.END_BALANCE_NAME][-1]
+            df_total.loc[index][P2PParser.END_BALANCE_NAME] = end_balance
 
     # Write total results to file
     df_total.to_excel(writer, 'Gesamtergebnis')
