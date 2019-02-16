@@ -240,7 +240,7 @@ class WorkerThread(QThread):
             return
 
         if not p2p_parser.show_results(
-                list_of_dfs, self.date_range, self.output_file):
+                list_of_dfs, self.output_file):
             self.update_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
 

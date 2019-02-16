@@ -38,9 +38,6 @@ CURRENCY = 'Währung'
 
 # TARGET_COLUMNS are the columns which will be shown in the final result file
 TARGET_COLUMNS = [
-    DATE,
-    PLATFORM,
-    CURRENCY,
     START_BALANCE_NAME,
     END_BALANCE_NAME,
     TOTAL_INCOME,
@@ -857,9 +854,7 @@ def twino(
 
 
 def show_results(
-        list_of_dfs: Sequence[pd.DataFrame],
-        date_range: Tuple[date, date],
-        output_file: str) -> bool:
+        list_of_dfs: Sequence[pd.DataFrame], output_file: str) -> bool:
     """
     Sum up the results contained in data frames and write them to an Excel file.
 
@@ -870,54 +865,58 @@ def show_results(
     Args:
         df (pandas.DataFrame): data frame containing the combined data from
             the P2P platforms
-        start_date (datetime.date): start of the evaluation period
-        end_date (datetime.date): end of the evaluation period
         output_file (str): absolute path to the output file
 
     Returns:
         bool: True on success, False on failure
 
     """
-    df = pd.DataFrame()
-    for elem in list_of_dfs:
-        if df.empty:
-            df = elem
-        else:
-            df = df.append(elem, sort=True).fillna(0.)
+    df_monthly = pd.DataFrame()
+    df_total = pd.DataFrame()
 
-    if df.empty:
+    for df in list_of_dfs:
+        df.reset_index(inplace=True)
+        df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d')
+        df[MONTH] = pd.to_datetime(
+            df[DATE], format='%d.%m.%Y').dt.to_period('M')
+
+        # We need to fill the NaNs with a dummy value so they don't disappear
+        # when creating the pivot tables
+        df.fillna('dummy', inplace=True)
+
+        df_pivot = pd.pivot_table(
+            df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY, MONTH],
+            aggfunc=sum, dropna=False)
+        df_monthly = df_monthly.append(df_pivot, sort=True)
+        df_pivot = pd.pivot_table(
+            df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY], aggfunc=sum)
+        df_total = df_total.append(df_pivot, sort=True)
+
+    if df_total.empty:
         return False
 
-    # Set index and format date/month columns
-    df.reset_index(level=[DATE, CURRENCY], inplace=True)
-    df[DATE] = pd.to_datetime(df[DATE], format='%Y-%m-%d')
-    df[MONTH] = pd.to_datetime(
-        df[DATE], format='%d.%m.%Y').dt.to_period('M')
-
     # Round all results to 2 digits
-    df = df.round(2)
+    df_monthly = df_monthly.round(2)
+    df_total = df_total.round(2)
 
     # Write monthly results to file
-    writer = pd.ExcelWriter(output_file)
-    month_pivot_table = pd.pivot_table(
-        df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY, MONTH],
-        aggfunc=sum)
-    month_pivot_table.to_excel(writer, 'Monatsergebnisse')
+    writer = pd.ExcelWriter(output_file, date_format='%d.%m.%Y')
+    df_monthly.to_excel(writer, 'Monatsergebnisse')
 
-    totals_pivot_table = pd.pivot_table(
-        df, values=TARGET_COLUMNS, index=[PLATFORM, CURRENCY], aggfunc=sum)
-
-    if 'Startguthaben' in totals_pivot_table.columns:
-        for index in month_pivot_table.index.levels[0]:
-            start_balance = month_pivot_table.loc[index]['Startguthaben'][0]
-            totals_pivot_table.loc[index]['Startguthaben'] = start_balance
-    if 'Endsaldo' in totals_pivot_table.columns:
-        for index in month_pivot_table.index.levels[0]:
-            end_balance = month_pivot_table.loc[index]['Endsaldo'][0]
-            totals_pivot_table.loc[index]['Endsaldo'] = end_balance
+    # Start and end balance columns were summed up as well if they are present.
+    # That's obviously not correct, so we will look up the correct values
+    # in the monthly table and overwrite the sums.
+    if START_BALANCE_NAME in df_total.columns:
+        for index in df_total.index.levels[0]:
+            start_balance = df_monthly.loc[index][START_BALANCE_NAME][0]
+            df_total.loc[index][START_BALANCE_NAME] = start_balance
+    if END_BALANCE_NAME in df_total.columns:
+        for index in df_total.index.levels[0]:
+            end_balance = df_monthly.loc[index][END_BALANCE_NAME][-1]
+            df_total.loc[index][END_BALANCE_NAME] = end_balance
 
     # Write total results to file
-    totals_pivot_table.to_excel(writer, 'Gesamtergebnis')
+    df_total.to_excel(writer, 'Gesamtergebnis')
     writer.save()
 
     return True
