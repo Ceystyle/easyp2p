@@ -11,21 +11,8 @@ results.
 from datetime import date
 
 import p2p_parser
+import EasyP2PTests
 
-
-PLATFORMS = {
-    'Bondora': 'csv',
-    'DoFinance': 'xlsx',
-    'Estateguru': 'csv',
-    'Grupeer': 'xlsx',
-    'Iuvo': 'csv',
-    'Mintos': 'xlsx',
-    'PeerBerry': 'csv',
-    'Robocash': 'xlsx',
-    'Swaper': 'xlsx',
-    'Twino': 'xlsx'}
-RESULT_PREFIX = 'tests/results/result_test_'
-INPUT_PREFIX = 'tests/input/input_test_'
 
 def generate_parser_results():
     """
@@ -38,15 +25,16 @@ def generate_parser_results():
     before using them!
 
     """
-    for elem in PLATFORMS:
+    for elem in EasyP2PTests.PLATFORMS:
         # DoFinance has its own date range
         if elem == 'DoFinance':
             date_range = (date(2018, 5, 1), date(2018, 9, 30))
         else:
             date_range = (date(2018, 9, 1), date(2018, 12, 31))
-        input_file = INPUT_PREFIX + '{0}_parser.{1}'.format(
-            elem.lower(), PLATFORMS[elem])
-        output_file = RESULT_PREFIX + '{0}_parser.csv'.format(elem.lower())
+        input_file = EasyP2PTests.INPUT_PREFIX + '{0}_parser.{1}'.format(
+            elem.lower(), EasyP2PTests.PLATFORMS[elem])
+        output_file = EasyP2PTests.RESULT_PREFIX + '{0}_parser.csv'.format(
+            elem.lower())
         func = getattr(p2p_parser, elem.lower())
         (df, _) = func(date_range, input_file)
         df.to_csv(output_file)
@@ -57,19 +45,23 @@ def generate_parser_results():
             date_range = (date(2018, 5, 1), date(2018, 9, 30))
         else:
             date_range = (date(2018, 9, 1), date(2018, 12, 31))
-        input_file = INPUT_PREFIX + '{0}_parser_unknown_cf.{1}'.format(
-            elem.lower(), PLATFORMS[elem])
-        output_file = RESULT_PREFIX + '{0}_parser_unknown_cf.csv'.format(
-            elem.lower())
+        input_file = EasyP2PTests.INPUT_PREFIX \
+            + '{0}_parser_unknown_cf.{1}'.format(
+                elem.lower(), EasyP2PTests.PLATFORMS[elem])
+        output_file = EasyP2PTests.RESULT_PREFIX \
+            + '{0}_parser_unknown_cf.csv'.format(
+                elem.lower())
         func = getattr(p2p_parser, elem.lower())
         (df, _) = func(date_range, input_file)
         df.to_csv(output_file)
 
-    for elem in PLATFORMS:
-        input_file = INPUT_PREFIX + '{0}_parser_missing_month.{1}'.format(
-            elem.lower(), PLATFORMS[elem])
-        output_file = RESULT_PREFIX + '{0}_parser_missing_month.csv'.format(
-            elem.lower())
+    for elem in EasyP2PTests.PLATFORMS:
+        input_file = EasyP2PTests.INPUT_PREFIX \
+            + '{0}_parser_missing_month.{1}'.format(
+                elem.lower(), EasyP2PTests.PLATFORMS[elem])
+        output_file = EasyP2PTests.RESULT_PREFIX \
+            + '{0}_parser_missing_month.csv'.format(
+                elem.lower())
         func = getattr(p2p_parser, elem.lower())
 
         # DoFinance has its own date range
@@ -80,20 +72,24 @@ def generate_parser_results():
         (df, _) = func(date_range, input_file)
         df.to_csv(output_file)
 
-    for elem in PLATFORMS:
-        input_file = INPUT_PREFIX + '{0}_parser_no_cfs.{1}'.format(
-            elem.lower(), PLATFORMS[elem])
-        output_file = RESULT_PREFIX + '{0}_parser_no_cfs.csv'.format(
-            elem.lower())
+    for elem in EasyP2PTests.PLATFORMS:
+        input_file = EasyP2PTests.INPUT_PREFIX \
+            + '{0}_parser_no_cfs.{1}'.format(
+                elem.lower(), EasyP2PTests.PLATFORMS[elem])
+        output_file = EasyP2PTests.RESULT_PREFIX \
+            + '{0}_parser_no_cfs.csv'.format(
+                elem.lower())
         func = getattr(p2p_parser, elem.lower())
         (df, _) = func((date(2016, 9, 1), date(2016, 12, 31)), input_file)
         df.to_csv(output_file)
 
     for elem in ['Grupeer']:
-        input_file = INPUT_PREFIX + '{0}_parser_unknown_currency.{1}'.format(
-            elem.lower(), PLATFORMS[elem])
-        output_file = RESULT_PREFIX + '{0}_parser_unknown_currency.csv'.format(
-            elem.lower())
+        input_file = EasyP2PTests.INPUT_PREFIX \
+            + '{0}_parser_unknown_currency.{1}'.format(
+                elem.lower(), EasyP2PTests.PLATFORMS[elem])
+        output_file = EasyP2PTests.RESULT_PREFIX \
+            + '{0}_parser_unknown_currency.csv'.format(
+                elem.lower())
         func = getattr(p2p_parser, elem.lower())
         (df, _) = func(date_range, input_file)
         df.to_csv(output_file)
