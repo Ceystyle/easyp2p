@@ -31,7 +31,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import p2p_helper
 
 
-class P2P:
+class Platform:
 
     """
     Representation of P2P platform including required methods for interaction.

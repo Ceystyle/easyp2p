@@ -822,7 +822,7 @@ def twino(
 def show_results(
         list_of_dfs: Sequence[pd.DataFrame], output_file: str) -> bool:
     """
-    Sum up the results contained in data frames and write them to an Excel file.
+    Sum up the results contained in data frames and write them to Excel file.
 
     The results are presented in two ways: on a monthly basis (in the Excel tab
     'Monatsergebnisse') and the total sums (in tab 'Gesamtergebnis') for the

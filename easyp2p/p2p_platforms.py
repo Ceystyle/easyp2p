@@ -2,9 +2,9 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """
-p2p_platforms contains the main code for handling the P2P platforms.
+p2p.Platform_platforms contains the main code for handling the p2p.Platform platforms.
 
-Each platform is created as an instance of the P2P class.
+Each platform is created as an instance of the p2p.Platform class.
 
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
@@ -20,8 +20,8 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 
-from P2P import P2P
-import p2p_helper
+import p2p
+#import p2p_helper
 from additional_selenium_exceptions import one_of_many_expected_conditions_true
 
 
@@ -51,7 +51,7 @@ def open_selenium_bondora(
         'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/tbody/'
                        'tr[2]/td[1]/a')}
 
-    with P2P('Bondora', urls, EC.title_contains('Einloggen')) as bondora:
+    with p2p.Platform('Bondora', urls, EC.title_contains('Einloggen')) as bondora:
 
         driver = bondora.driver
 
@@ -79,20 +79,20 @@ def open_selenium_bondora(
             select = Select(driver.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(date_range[0].year))
 
-        if (p2p_helper.short_month_to_nbr(start_month)
+        if (p2p.Platform_helper.short_month_to_nbr(start_month)
                 != date_range[0].strftime('%m')):
             select = Select(driver.find_element_by_id('StartMonth'))
-            select.select_by_visible_text(p2p_helper.nbr_to_short_month(
+            select.select_by_visible_text(p2p.Platform_helper.nbr_to_short_month(
                 date_range[0].strftime('%m')))
 
         if end_year != date_range[1].year:
             select = Select(driver.find_element_by_id('EndYear'))
             select.select_by_visible_text(str(date_range[1].year))
 
-        if p2p_helper.short_month_to_nbr(end_month) \
+        if p2p.Platform_helper.short_month_to_nbr(end_month) \
                 != date_range[1].strftime('%m'):
             select = Select(driver.find_element_by_id('EndMonth'))
-            select.select_by_visible_text(p2p_helper.nbr_to_short_month(
+            select.select_by_visible_text(p2p.Platform_helper.nbr_to_short_month(
                 date_range[1].strftime('%m')))
 
         # Start the account statement generation
@@ -123,7 +123,7 @@ def open_selenium_bondora(
                 cashflow_table.get_attribute("innerHTML"), index_col=0,
                 thousands='.', decimal=',')[0]
 
-        df.to_csv('p2p_downloads/bondora_statement.csv')
+        df.to_csv('p2p.Platform_downloads/bondora_statement.csv')
 
 def open_selenium_mintos(
         date_range: Tuple[date, date],
@@ -146,7 +146,7 @@ def open_selenium_mintos(
     default_file_name = '{0}-account-statement*.xlsx'.format(
         date.today().strftime('%Y%m%d'))
 
-    with P2P(
+    with p2p.Platform(
             'Mintos', urls, EC.title_contains('Vielen Dank'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
@@ -187,7 +187,7 @@ def open_selenium_mintos(
                     and df.iloc[1][0] == 'Endsaldo ' \
                         + date_range[1].strftime('%d.%m.%Y'):
                     df = pd.DataFrame()
-                    df.to_excel('p2p_downloads/mintos_statement.xlsx')
+                    df.to_excel('p2p.Platform_downloads/mintos_statement.xlsx')
             else:
                 raise RuntimeError(
                     'Der Mintos-Kontoauszug konnte nicht erfolgreich '
@@ -219,7 +219,7 @@ def open_selenium_robocash(
         'statement': 'https://robo.cash/de/cabinet/statement'}
     xpaths = {'login_field': '/html/body/header/div/div[2]/a'}
 
-    with P2P('Robocash', urls, EC.title_contains('Willkommen')) as robocash:
+    with p2p.Platform('Robocash', urls, EC.title_contains('Willkommen')) as robocash:
 
         robocash.log_into_page(
             'email', 'password', credentials,
@@ -258,9 +258,9 @@ def open_selenium_robocash(
                         'gedauert!')
 
         # Robocash creates the download names randomly, therefore the default
-        # name is not known like for the other P2P sites. For now we use a
+        # name is not known like for the other p2p.Platform sites. For now we use a
         # generic * wildcard to find the file. This will not be safe anymore
-        # as soon as parallel downloads to the p2p_downloads directory are
+        # as soon as parallel downloads to the p2p.Platform_downloads directory are
         # allowed. Thus:
         #TODO: find a safer method for downloading the Robocash statement
         robocash.download_statement('*', (By.ID, 'download_statement'))
@@ -286,7 +286,7 @@ def open_selenium_swaper(
                          'div[1]/a/div[1]/div/span[2]'),
         'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
-    with P2P(
+    with p2p.Platform(
             'Swaper', urls, EC.presence_of_element_located((By.ID, 'about')),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
 
@@ -342,7 +342,7 @@ def open_selenium_peerberry(
         'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
                           'div[1]/div/div[2]/div/div[2]/div/span')}
 
-    with P2P(
+    with p2p.Platform(
             'PeerBerry', urls, EC.title_contains('Einloggen'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
 
@@ -420,7 +420,7 @@ def open_selenium_estateguru(
     default_file_name = 'payments_{0}*.csv'.format(
         date.today().strftime('%Y-%m-%d'))
 
-    with P2P(
+    with p2p.Platform(
             'Estateguru', urls,
             EC.element_to_be_clickable((By.NAME, 'username'))) as estateguru:
 
@@ -457,12 +457,12 @@ def open_selenium_iuvo(
         'login': 'https://www.iuvo-group.com/de/login/',
         'statement': 'https://www.iuvo-group.com/de/account-statement/'}
     xpaths = {
-        'statement_check': ('//*[@id="p2p_cont"]/div/div[6]/div/div/div/'
+        'statement_check': ('//*[@id="p2p.Platform_cont"]/div/div[6]/div/div/div/'
                             'strong[3]')}
 
-    with P2P(
+    with p2p.Platform(
             'Iuvo', urls, EC.element_to_be_clickable((By.ID, 'einloggen')),
-            logout_locator=(By.ID, 'p2p_logout'),
+            logout_locator=(By.ID, 'p2p.Platform_logout'),
             hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
         driver = iuvo.driver
@@ -470,7 +470,7 @@ def open_selenium_iuvo(
         iuvo.log_into_page(
             'login', 'password', credentials,
             EC.element_to_be_clickable(
-                (By.ID, 'p2p_btn_deposit_page_add_funds')))
+                (By.ID, 'p2p.Platform_btn_deposit_page_add_funds')))
 
         # Click away cookie policy, if present
         try:
@@ -488,7 +488,7 @@ def open_selenium_iuvo(
         # each month in date range
 
         # Get all required monthly date ranges
-        months = p2p_helper.get_list_of_months(date_range)
+        months = p2p.Platform_helper.get_list_of_months(date_range)
 
         # Initialize empty DataFrame. For each month the results will be
         # appended to df_result.
@@ -537,7 +537,7 @@ def open_selenium_iuvo(
             # Append the result for this month to previous months' results
             df_result = df_result.append(df, sort=True)
 
-        df_result.to_csv('p2p_downloads/iuvo_statement.csv')
+        df_result.to_csv('p2p.Platform_downloads/iuvo_statement.csv')
 
 
 def open_selenium_grupeer(
@@ -560,9 +560,9 @@ def open_selenium_grupeer(
         'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
                          'div/div/ul/li/a/span')}
 
-    with P2P(
+    with p2p.Platform(
             'Grupeer', urls,
-            EC.title_contains('P2P Investitionsplattform Grupeer'),
+            EC.title_contains('p2p.Platform Investitionsplattform Grupeer'),
             (By.LINK_TEXT, 'Ausloggen'),
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
@@ -604,7 +604,7 @@ def open_selenium_dofinance(
     default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59*.xlsx'.format(
         date_range[0].strftime('%Y-%m-%d'), date_range[1].strftime('%Y-%m-%d'))
 
-    with P2P('DoFinance', urls, EC.title_contains('Kreditvergabe Plattform')) \
+    with p2p.Platform('DoFinance', urls, EC.title_contains('Kreditvergabe Plattform')) \
             as dofinance:
 
         dofinance.log_into_page(
@@ -646,7 +646,7 @@ def open_selenium_twino(
         'statement': ('//a[@href="/de/profile/investor/my-investments/'
                       'individual-investments"]')}
 
-    with P2P(
+    with p2p.Platform(
             'Twino', urls,
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as twino:
