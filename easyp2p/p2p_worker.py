@@ -4,16 +4,15 @@
 """Module implementing WorkerThread."""
 
 from datetime import date
+import sys
 from typing import AbstractSet, Callable, List, Mapping, Optional, Tuple
-
 
 import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 
 import p2p_parser
-import p2p_platforms
-
+from platforms import *
 
 class WorkerThread(QThread):
 
@@ -80,12 +79,13 @@ class WorkerThread(QThread):
 
         """
         try:
-            func = getattr(p2p_platforms, 'download_{0}_statement'.format(
-                platform.lower()))
+            func = getattr(
+                getattr(sys.modules[__name__], platform.lower()),
+                'download_statement')
         except AttributeError:
             error_message = (
                 'Funktion zum Öffnen von {0} konnte nicht gefunden werden. '
-                'Ist p2p_webdriver.py vorhanden?'.format(platform))
+                'Ist {0}.py vorhanden?'.format(platform.lower()))
             self.update_progress_text.emit(error_message, self.RED)
             return None
         else:
@@ -106,11 +106,13 @@ class WorkerThread(QThread):
 
         """
         try:
-            parser = getattr(p2p_parser, platform.lower())
+            parser = getattr(
+                getattr(sys.modules[__name__], platform.lower()),
+                'parse_statement')
         except AttributeError:
             error_message = (
                 'Parser für {0} konnte nicht gefunden werden. '
-                'Ist p2p_parser.py vorhanden?'.format(platform))
+                'Ist {0}.py vorhanden?'.format(platform.lower()))
             self.update_progress_text.emit(error_message, self.RED)
             return None
         else:
