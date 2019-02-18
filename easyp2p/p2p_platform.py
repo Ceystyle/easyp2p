@@ -138,8 +138,13 @@ class P2PPlatform:
         prefs = {"download.default_directory": dl_location}
         options.add_experimental_option("prefs", prefs)
 
+        # TODO: Ubuntu doesn't put chromedriver in PATH so we need to
+        # explicitly specify its location. Find a better solution that works on
+        # all systems.
         try:
-            driver = webdriver.Chrome(options=options)
+            driver = webdriver.Chrome(
+                executable_path=r'/usr/lib/chromium-browser/chromedriver',
+                options=options)
         except WebDriverException:
             raise RuntimeError('Chromedriver konnte nicht gefunden werden!')
 
