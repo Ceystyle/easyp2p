@@ -75,12 +75,13 @@ class WorkerThread(QThread):
 
         Returns:
             Callable[[Tuple[date, date], Tuple[str, str]], None]:
-                p2p_platforms.open_selenium_* function for handling
+                p2p_platforms.download_platform_statement function for handling
                 this P2P platform or None if the function cannot be found.
 
         """
         try:
-            func = getattr(p2p_platforms, 'open_selenium_'+platform.lower())
+            func = getattr(p2p_platforms, 'download_{0}_statement'.format(
+                platform.lower()))
         except AttributeError:
             error_message = (
                 'Funktion zum Öffnen von {0} konnte nicht gefunden werden. '

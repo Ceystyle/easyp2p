@@ -14,11 +14,6 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
 
-#from ui.main_window import MainWindow
-#from ui.progress_window import ProgressWindow
-#import p2p_helper
-#import p2p_parser
-#import p2p_platforms
 from context import MainWindow
 from context import ProgressWindow
 from context import p2p_helper
@@ -168,179 +163,189 @@ class P2PPlatformsTests(unittest.TestCase):
 
         return (username, password)
 
-    def test_open_selenium_bondora(self) -> None:
-        """Test open_selenium_bondora function"""
+    def test_download_bondora_statement(self) -> None:
+        """Test download_bondora_statement"""
         credentials = self.get_credentials_from_keyring('Bondora')
-        p2p_platforms.open_selenium_bondora(self.date_range, credentials)
+        p2p_platforms.download_bondora_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/bondora_statement.csv',
-            'tests/results/result_test_open_selenium_bondora.csv'))
+            RESULT_PREFIX + 'test_download_bondora_statement.csv'))
 
-    def test_open_selenium_bondora_no_cfs(self) -> None:
-        """Test open_selenium_bondora when no cashflows exist in date range"""
+    def test_download_bondora_statement_no_cfs(self) -> None:
+        """
+        Test download_bondora_statement when no cashflows exist in date range
+        """
         credentials = self.get_credentials_from_keyring('Bondora')
-        p2p_platforms.open_selenium_bondora(self.date_range_no_cfs, credentials)
+        p2p_platforms.download_bondora_statement(
+            self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/bondora_statement.csv',
-            'tests/results/result_test_open_selenium_bondora_no_cfs.csv'))
+            RESULT_PREFIX + 'test_download_bondora_statement_no_cfs.csv'))
 
-    def test_open_selenium_dofinance(self):
-        """Test open_selenium_dofinance function"""
+    def test_download_dofinance_statement(self):
+        """Test download_dofinance_statement function"""
         credentials = self.get_credentials_from_keyring('DoFinance')
         dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        p2p_platforms.open_selenium_dofinance(dofinance_date_range, credentials)
+        p2p_platforms.download_dofinance_statement(
+            dofinance_date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/dofinance_statement.xlsx',
-            'tests/results/result_test_open_selenium_dofinance.xlsx'))
+            'tests/results/result_test_download_dofinance_statement.xlsx'))
 
-    def test_open_selenium_dofinance_no_cfs(self):
-        """Test open_selenium_dofinance function"""
+    def test_download_dofinance_statement_no_cfs(self):
+        """Test download_dofinance_statement function"""
         credentials = self.get_credentials_from_keyring('DoFinance')
-        p2p_platforms.open_selenium_dofinance(self.date_range, credentials)
+        p2p_platforms.download_dofinance_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/dofinance_statement.xlsx',
-            'tests/results/result_test_open_selenium_dofinance_no_cfs.xlsx'))
+            RESULT_PREFIX +'test_download_dofinance_statement_no_cfs.xlsx'))
 
-    def test_open_selenium_estateguru(self):
-        """Test open_selenium_estateguru function"""
+    def test_download_estateguru_statement(self):
+        """Test download_estateguru_statement"""
         credentials = self.get_credentials_from_keyring('Estateguru')
-        p2p_platforms.open_selenium_estateguru(self.date_range, credentials)
+        p2p_platforms.download_estateguru_statement(
+            self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/estateguru_statement.csv',
-            'tests/results/result_test_open_selenium_estateguru.csv'))
+            RESULT_PREFIX + 'test_download_estateguru_statement.csv'))
 
-    def test_open_selenium_grupeer(self):
-        """Test open_selenium_grupeer function"""
+    def test_download_grupeer_statement(self):
+        """Test download_grupeer_statement"""
         credentials = self.get_credentials_from_keyring('Grupeer')
-        p2p_platforms.open_selenium_grupeer(self.date_range, credentials)
+        p2p_platforms.download_grupeer_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/grupeer_statement.xlsx',
-            'tests/results/result_test_open_selenium_grupeer.xlsx'))
+            RESULT_PREFIX + 'test_download_grupeer_statement.xlsx'))
 
-    def test_open_selenium_grupeer_no_cfs(self):
+    def test_download_grupeer_statement_no_cfs(self):
         """
-        Test open_selenium_grupeer function if there are no cashflows in
-        date_range
+        Test download_grupeer_statement if there are no cashflows in date_range
         """
         credentials = self.get_credentials_from_keyring('Grupeer')
-        p2p_platforms.open_selenium_grupeer(self.date_range_no_cfs, credentials)
+        p2p_platforms.download_grupeer_statement(
+            self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/grupeer_statement.xlsx',
-            'tests/results/result_test_open_selenium_grupeer_no_cfs.xlsx'))
+            RESULT_PREFIX + 'test_download_grupeer_statement_no_cfs.xlsx'))
 
-    def test_open_selenium_iuvo(self):
-        """Test open_selenium_iuvo function"""
+    def test_download_iuvo_statement(self):
+        """Test download_iuvo_statement"""
         credentials = self.get_credentials_from_keyring('Iuvo')
-        p2p_platforms.open_selenium_iuvo(self.date_range, credentials)
+        p2p_platforms.download_iuvo_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/iuvo_statement.csv',
-            'tests/results/result_test_open_selenium_iuvo.csv'))
+            RESULT_PREFIX + 'test_download_iuvo_statement.csv'))
 
-    def test_open_selenium_iuvo_no_cfs(self):
+    def test_download_iuvo_statement_no_cfs(self):
         """
-        Test open_selenium_iuvo function when there are no cashflows in
+        Test download_iuvo_statement when there are no cashflows in
         date_range
         """
         credentials = self.get_credentials_from_keyring('Iuvo')
-        p2p_platforms.open_selenium_iuvo(self.date_range_no_cfs, credentials)
+        p2p_platforms.download_iuvo_statement(
+            self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/iuvo_statement.csv',
-            'tests/results/result_test_open_selenium_iuvo_no_cfs.csv'))
+            RESULT_PREFIX + 'test_download_iuvo_statement_no_cfs.csv'))
 
-    def test_open_selenium_mintos(self):
-        """Test open_selenium_mintos function"""
+    def test_download_mintos_statement(self):
+        """Test download_mintos_statement"""
         credentials = self.get_credentials_from_keyring('Mintos')
-        p2p_platforms.open_selenium_mintos(self.date_range, credentials)
+        p2p_platforms.download_mintos_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/mintos_statement.xlsx',
-            'tests/results/result_test_open_selenium_mintos.xlsx'))
+            RESULT_PREFIX + 'test_download_mintos_statement.xlsx'))
 
-    def test_open_selenium_mintos_no_cfs(self):
+    def test_download_mintos_statement_no_cfs(self):
         """
-        Test open_selenium_mintos function when there is no cashflow in
-        date_range
+        Test download_mintos_statement when there is no cashflow in date_range
         """
         credentials = self.get_credentials_from_keyring('Mintos')
-        p2p_platforms.open_selenium_mintos(self.date_range_no_cfs, credentials)
+        p2p_platforms.download_mintos_statement(
+            self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/mintos_statement.xlsx',
-            'tests/results/result_test_open_selenium_mintos_no_cfs.xlsx'))
+            RESULT_PREFIX + 'test_download_mintos_statement_no_cfs.xlsx'))
 
-    def test_open_selenium_peerberry(self):
-        """Test open_selenium_peerberry function"""
+    def test_download_peerberry_statement(self):
+        """Test download_peerberry_statement"""
         credentials = self.get_credentials_from_keyring('PeerBerry')
-        p2p_platforms.open_selenium_peerberry(self.date_range, credentials)
+        p2p_platforms.download_peerberry_statement(
+            self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/peerberry_statement.csv',
-            'tests/results/result_test_open_selenium_peerberry.csv'))
+            'tests/results/result_test_download_peerberry_statement.csv'))
 
-    def test_open_selenium_peerberry_no_cfs(self):
+    def test_download_peerberry_statement_no_cfs(self):
         """
-        Test open_selenium_peerberry function when there is no cashflow in
+        Test download_peerberry_statement when there is no cashflow in
         date_range
         """
         credentials = self.get_credentials_from_keyring('PeerBerry')
-        p2p_platforms.open_selenium_peerberry(
+        p2p_platforms.download_peerberry_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/peerberry_statement.csv',
-            'tests/results/result_test_open_selenium_peerberry_no_cfs.csv'))
+            RESULT_PREFIX + 'test_download_peerberry_statement_no_cfs.csv'))
 
-    def test_open_selenium_robocash(self):
-        """Test open_selenium_robocash function"""
+    def test_download_robocash_statement(self):
+        """Test download_robocash_statement function"""
         credentials = self.get_credentials_from_keyring('Robocash')
-        p2p_platforms.open_selenium_robocash(self.date_range, credentials)
+        p2p_platforms.download_robocash_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/robocash_statement.xlsx',
-            'tests/results/result_test_open_selenium_robocash.xlsx'))
+            RESULT_PREFIX + 'test_download_robocash_statement.xlsx'))
 
-    def test_open_selenium_robocash_no_cfs(self):
+    def test_download_robocash_statement_no_cfs(self):
         """
-        Test open_selenium_robocash function when there is no cashflow in
+        Test download_robocash_statement function when there is no cashflow in
         date_range
         """
         credentials = self.get_credentials_from_keyring('Robocash')
-        p2p_platforms.open_selenium_robocash(
+        p2p_platforms.download_robocash_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/robocash_statement.xlsx',
-            'tests/results/result_test_open_selenium_robocash_no_cfs.xlsx'))
+            RESULT_PREFIX + 'test_download_robocash_statement_no_cfs.xlsx'))
 
-    def test_open_selenium_swaper(self):
-        """Test open_selenium_swaper function"""
+    def test_download_swaper_statement(self):
+        """Test download_swaper_statement function"""
         credentials = self.get_credentials_from_keyring('Swaper')
-        p2p_platforms.open_selenium_swaper(self.date_range, credentials)
+        p2p_platforms.download_swaper_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/swaper_statement.xlsx',
-            'tests/results/result_test_open_selenium_swaper.xlsx'))
+            RESULT_PREFIX + 'test_download_swaper_statement.xlsx'))
 
-    def test_open_selenium_swaper_no_cfs(self) -> None:
-        """Test open_selenium_swaper when no cashflows exist in date range"""
+    def test_download_swaper_statement_no_cfs(self) -> None:
+        """
+        Test download_swaper_statement when no cashflows exist in date range
+        """
         credentials = self.get_credentials_from_keyring('Swaper')
-        p2p_platforms.open_selenium_swaper(
+        p2p_platforms.download_swaper_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/swaper_statement.xlsx',
-            'tests/results/result_test_open_selenium_swaper_no_cfs.xlsx'))
+            RESULT_PREFIX + 'test_download_swaper_statement_no_cfs.xlsx'))
 
-    def test_open_selenium_twino(self):
-        """Test open_selenium_twino function"""
+    def test_download_twino_statement(self):
+        """Test download_twino_statement"""
         credentials = self.get_credentials_from_keyring('Twino')
-        p2p_platforms.open_selenium_twino(self.date_range, credentials)
+        p2p_platforms.download_twino_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/twino_statement.xlsx',
-            'tests/results/result_test_open_selenium_twino.xlsx',
+            RESULT_PREFIX + 'test_download_twino_statement.xlsx',
             drop_lines=0))
 
-    def test_open_selenium_twino_no_cfs(self):
+    def test_download_twino_statement_no_cfs(self):
         """
-        Test open_selenium_twino function  when no cashflows exist in date range
+        Test download_twino_statement when no cashflows exist in date range
         """
         credentials = self.get_credentials_from_keyring('Twino')
-        p2p_platforms.open_selenium_twino(self.date_range_no_cfs, credentials)
+        p2p_platforms.download_twino_statement(
+            self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/twino_statement.xlsx',
-            'tests/results/result_test_open_selenium_twino_no_cfs.xlsx',
+            'tests/results/result_test_download_twino_statement_no_cfs.xlsx',
             drop_lines=0))
 
 

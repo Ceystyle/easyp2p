@@ -24,7 +24,7 @@ import p2p_helper
 from p2p_platform import P2PPlatform
 
 
-def open_selenium_bondora(
+def download_bondora_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -125,7 +125,7 @@ def open_selenium_bondora(
 
         df.to_csv('p2p_downloads/bondora_statement.csv')
 
-def open_selenium_mintos(
+def download_mintos_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -196,7 +196,7 @@ def open_selenium_mintos(
             mintos.download_statement(
                 default_file_name, (By.ID, 'export-button'))
 
-def open_selenium_robocash(
+def download_robocash_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -266,7 +266,7 @@ def open_selenium_robocash(
         #TODO: find a safer method for downloading the Robocash statement
         robocash.download_statement('*', (By.ID, 'download_statement'))
 
-def open_selenium_swaper(
+def download_swaper_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -316,7 +316,7 @@ def open_selenium_swaper(
         swaper.download_statement(
             'excel-storage*.xlsx', (By.XPATH, xpaths['download_btn']))
 
-def open_selenium_peerberry(
+def download_peerberry_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -395,7 +395,7 @@ def open_selenium_peerberry(
             'transactions*.csv', (By.XPATH, xpaths['download_btn']),
             actions='move_to_element')
 
-def open_selenium_estateguru(
+def download_estateguru_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -441,7 +441,7 @@ def open_selenium_estateguru(
         estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
         estateguru.download_statement(default_file_name, (By.LINK_TEXT, 'CSV'))
 
-def open_selenium_iuvo(
+def download_iuvo_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -543,7 +543,7 @@ def open_selenium_iuvo(
         df_result.to_csv('p2p_downloads/iuvo_statement.csv')
 
 
-def open_selenium_grupeer(
+def download_grupeer_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -587,7 +587,7 @@ def open_selenium_grupeer(
         grupeer.download_statement(
             'Account statement*.xlsx', (By.NAME, 'excel'))
 
-def open_selenium_dofinance(
+def download_dofinance_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
@@ -624,7 +624,7 @@ def open_selenium_dofinance(
 
         dofinance.download_statement(default_file_name, (By.NAME, 'xls'))
 
-def open_selenium_twino(
+def download_twino_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
