@@ -27,6 +27,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 
 import p2p_helper
@@ -130,14 +131,18 @@ class P2PPlatform:
         working directory and opens a new maximized browser window.
 
         """
-        # TODO: handle error cases
         options = webdriver.ChromeOptions()
 #        options.add_argument("--headless")
 #        options.add_argument("--window-size=1920,1200")
         dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
         prefs = {"download.default_directory": dl_location}
         options.add_experimental_option("prefs", prefs)
-        driver = webdriver.Chrome(options=options)
+
+        try:
+            driver = webdriver.Chrome(options=options)
+        except WebDriverException:
+            raise RuntimeError('Chromedriver konnte nicht gefunden werden!')
+
         driver.maximize_window()
         self.driver = driver
 
