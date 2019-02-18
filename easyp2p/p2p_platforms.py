@@ -21,8 +21,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 
 import p2p
-#import p2p_helper
-from additional_selenium_exceptions import one_of_many_expected_conditions_true
+from p2p_helper import one_of_many_expected_conditions_true
 
 
 def open_selenium_bondora(

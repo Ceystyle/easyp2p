@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
 
-"""p2p_helper contains some helper functions for easyP2P."""
+"""p2p_helper contains some helper functions/classes for easyP2P."""
 
 import calendar
 from datetime import date, timedelta
 from pathlib import Path
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 
+from selenium import webdriver
 import pandas as pd
 
 
@@ -132,3 +133,22 @@ def nbr_to_short_month(nbr: str) -> str:
         '11': 'Nov', '12': 'Dez'}
 
     return map_nbr_to_short_month[nbr]
+
+
+class one_of_many_expected_conditions_true():
+    """
+    An expectation for checking if (at least) one of several provided expected
+    conditions for the Selenium webdriver is true.
+    """
+    def __init__(self, conditions: List[Callable[[webdriver.Chrome], bool]]) \
+            -> None:
+        self.conditions = conditions
+
+    def __call__(self, driver: webdriver.Chrome) -> bool:
+        for condition in self.conditions:
+            try:
+                if condition(driver):
+                    return True
+            except:
+                pass
+        return False

@@ -3,13 +3,6 @@
 
 """
     easyP2P gets investment results from various P2P platforms.
-
-    easyP2P is a Python module with a QT GUI for downloading and processing
-    of investment results for various P2P lending platforms. The results are
-    combined and presented in a unified way in a single Excel file.
-
-.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
-
 """
 __author__ = 'Niko Sandschneider'
 __copyright__ = 'Copyright (C) 2018-19 Niko Sandschneider'
