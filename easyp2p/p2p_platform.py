@@ -86,7 +86,7 @@ class P2PPlatform:
             raise RuntimeError('Keine Kontoauszug-URLs für {0} '
                                'vorhanden!'.format(self.name))
 
-    def __enter__(self) -> 'P2P':
+    def __enter__(self) -> 'P2PPlatform':
         """
         Start of context management protocol.
 

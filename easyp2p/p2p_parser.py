@@ -195,7 +195,7 @@ class P2PParser:
             rename_columns: Optional[Mapping[str, str]] = None,
             cashflow_types: Optional[Mapping[str, str]] = None,
             orig_cf_column: Optional[str] = None,
-            value_column: Optional[str] = None) -> None:
+            value_column: Optional[str] = None) -> str:
         """
         Parse the statement from platform format into easyP2P format.
 
