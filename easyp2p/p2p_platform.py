@@ -2,11 +2,12 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """
-Module implementing P2P, a class representing a P2P platform.
+Module implementing P2PPlatform, a class representing a P2P platform.
 
-This module defines the P2P class and contains code for accessing and handling
-supported P2P sites. It relies mainly on functionality provided by the Selenium
-webdriver. easyP2P uses Chromedriver as webdriver.
+This module defines the P2PPlatform class. It contains code for performing log
+in, opening the account statement page and downloading the account statement.
+It relies mainly on functionality provided by the Selenium webdriver. easyp2p
+uses Chromedriver as webdriver.
 
 """
 
@@ -31,7 +32,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import p2p_helper
 
 
-class Platform:
+class P2PPlatform:
 
     """
     Representation of P2P platform including required methods for interaction.
