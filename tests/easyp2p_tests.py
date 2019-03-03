@@ -21,7 +21,7 @@ PLATFORMS = {
     'DoFinance': 'xlsx',
     'Estateguru': 'csv',
     'Grupeer': 'xlsx',
-    'Iuvo': 'csv',
+    'Iuvo': 'xlsx',
     'Mintos': 'xlsx',
     'PeerBerry': 'csv',
     'Robocash': 'xlsx',

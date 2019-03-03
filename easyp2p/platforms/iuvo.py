@@ -37,20 +37,19 @@ def download_statement(
         'login': 'https://www.iuvo-group.com/de/login/',
         'statement': 'https://www.iuvo-group.com/de/account-statement/'}
     xpaths = {
-        'statement_check': ('//*[@id="P2PPlatform_cont"]/div/div[6]/div/div/'
+        'statement_check': ('/html/body/div[5]/main/div/div/div/div[6]/div/div/'
                             'div/strong[3]')}
 
     with P2PPlatform(
             'Iuvo', urls, EC.element_to_be_clickable((By.ID, 'einloggen')),
-            logout_locator=(By.ID, 'P2PPlatform_logout'),
+            logout_locator=(By.ID, 'p2p_logout'),
             hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
         driver = iuvo.driver
 
         iuvo.log_into_page(
             'login', 'password', credentials,
-            EC.element_to_be_clickable(
-                (By.ID, 'P2PPlatform_btn_deposit_page_add_funds')))
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
         # Click away cookie policy, if present
         try:
@@ -62,69 +61,39 @@ def download_statement(
         iuvo.open_account_statement_page(
             'Kontoauszug', (By.ID, 'date_from'))
 
-        # Since Dec 2018 Iuvo only provides aggregated cashflows
-        # for the whole requested date range, no more detailed information
-        # Workaround to get monthly data: create account statement for
-        # each month in date range
+        check_txt = '{0} - {1}'.format(
+            date_range[0].strftime('%Y-%m-%d'),
+            date_range[1].strftime('%Y-%m-%d'))
 
-        # Get all required monthly date ranges
-        months = p2p_helper.get_list_of_months(date_range)
+        # Define conditions if account statement generation is successful:
+        # The first condition will be true if there were cashflows in
+        # date_range, the second condition will be true of there were none
+        conditions = [
+            EC.text_to_be_present_in_element(
+                (By.XPATH, xpaths['statement_check']), check_txt),
+            EC.text_to_be_present_in_element(
+                (By.CLASS_NAME, 'text-center'), 'Keine passenden Daten!')]
 
-        # Initialize empty DataFrame. For each month the results will be
-        # appended to df_result.
-        df_result = pd.DataFrame()
+        iuvo.generate_statement_direct(
+            (date_range[0], date_range[1]), (By.ID, 'date_from'),
+            (By.ID, 'date_to'), '%Y-%m-%d',
+            wait_until=p2p_helper.one_of_many_expected_conditions_true(
+                conditions),
+            submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
 
-        # Generate statement for each month and scrape it from the web site
-        for month in months:
-            check_txt = '{0} - {1}'.format(
-                month[0].strftime('%Y-%m-%d'), month[1].strftime('%Y-%m-%d'))
-
-            # Define conditions if account statement generation is successful:
-            # The first condition will be true if there were cashflows in
-            # date_range, the second condition will be true of there were none
-            conditions = [
-                EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['statement_check']), check_txt),
-                EC.text_to_be_present_in_element(
-                    (By.CLASS_NAME, 'text-center'), 'Keine passenden Daten!')]
-
-            iuvo.generate_statement_direct(
-                (month[0], month[1]), (By.ID, 'date_from'), (By.ID, 'date_to'),
-                '%Y-%m-%d',
-                wait_until=p2p_helper.one_of_many_expected_conditions_true(
-                    conditions),
-                submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
-
-            try:
-                # Read statement from page
-                statement_table = driver.find_element_by_class_name(
-                    'table-responsive')
-            except NoSuchElementException:
-                # Check if there were no cashflows in month
-                if driver.find_element_by_class_name(
-                        'text-center').text == 'Keine passenden Daten!':
-                    continue
-
-            # pd.read_html returns a list of one element
-            df = pd.read_html(
-                statement_table.get_attribute("innerHTML"), index_col=0)[0]
-
-            # Transpose table to get the headers at the top
-            df = df.T
-
-            # Format date column
-            df['Datum'] = month[0].strftime('%d.%m.%Y')
-            df.set_index('Datum', inplace=True)
-
-            # Append the result for this month to previous months' results
-            df_result = df_result.append(df, sort=True)
-
-        df_result.to_csv('p2p_downloads/iuvo_statement.csv')
+        # If there were no cashflows write an empty DataFrame to the file
+        if conditions[1]:
+            df = pd.DataFrame()
+            df.to_excel('p2p_downloads/iuvo_statement.xlsx')
+        else:
+            iuvo.download_statement('AccountStatement-{0}*'.format(
+                date.today().strftime('%Y%m%d')),
+                (By.CLASS_NAME, 'p2p-download-full-list'))
 
 
 def parse_statement(
         date_range: Tuple[date, date],
-        input_file: str = 'p2p_downloads/iuvo_statement.csv') \
+        input_file: str = 'p2p_downloads/iuvo_statement.xlsx') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Iuvo.
@@ -151,40 +120,30 @@ def parse_statement(
         parser.parse_statement()
         return (parser.df, '')
 
-    # Temporarily make date column an index to avoid an error during type
-    # conversion
-    parser.df.set_index('Datum', inplace=True)
-    parser.df = parser.df.astype('float64')
-    parser.df.reset_index(inplace=True)
+    # Format the header of the table
+    parser.df = parser.df[1:]  # The first row only contains a generic header
+    new_header = parser.df.iloc[0] # Get the new first row as header
+    parser.df = parser.df[1:] # Remove the first row
+    parser.df.columns = new_header # Set the new header
 
-    # Both interest and redemption payments are each reported in two columns
-    # by Iuvo (payments on/before planned payment date). For our purposes this
-    # is not necessary, so we will add them again.
-    parser.df[parser.INTEREST_PAYMENT] = 0
-    parser.df[parser.REDEMPTION_PAYMENT] = 0
-    interest_types = ['erhaltene Zinsen', 'vorfristige erhaltene Zinsen']
-    for elem in interest_types:
-        if elem in parser.df.columns:
-            parser.df[parser.INTEREST_PAYMENT] += parser.df[elem]
-            del parser.df[elem]
+    # The last three rows only contain a summary
+    parser.df = parser.df[:-3]
 
-    redemption_types = [
-        'erhaltener Grundbetrag', 'vorfristiger erhaltener Grundbetrag']
-    for elem in redemption_types:
-        if elem in parser.df.columns:
-            parser.df[parser.REDEMPTION_PAYMENT] += parser.df[elem]
-            del parser.df[elem]
+    # Define mapping between Iuvo and easyP2P cashflow types and column names
+    cashflow_types = {
+        'late_fee': parser.LATE_FEE_PAYMENT,
+        'payment_interest': parser.INTEREST_PAYMENT,
+        'payment_interest_early': parser.INTEREST_PAYMENT,
+        'primary_market_auto_invest': parser.INVESTMENT_PAYMENT,
+        'payment_principal_buyback': parser.BUYBACK_PAYMENT,
+        'payment_principal': parser.REDEMPTION_PAYMENT,
+        'payment_principal_early': parser.REDEMPTION_PAYMENT}
+    rename_columns = {'Date': parser.DATE}
 
-    # Define mapping between Iuvo and easyP2P cashflow types and column
-    # names
-    rename_columns = {
-        'Anfangsbestand': parser.START_BALANCE_NAME,
-        'Endbestand': parser.END_BALANCE_NAME,
-        'erhaltener Rückkaufgrundbetrag': parser.BUYBACK_PAYMENT,
-        'erhaltene Verspätungsgebühren': parser.LATE_FEE_PAYMENT,
-        'Investitionen auf dem Primärmarkt mit Autoinvest':
-            parser.INVESTMENT_PAYMENT}
+    unknown_cf_types = parser.parse_statement(
+        '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
+        'Transaction Type', 'Turnover')
 
-    unknown_cf_types = parser.parse_statement('%d.%m.%Y', rename_columns)
+    # TODO: get start and end balance
 
     return (parser.df, unknown_cf_types)
