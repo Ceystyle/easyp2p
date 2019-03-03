@@ -10,7 +10,7 @@ results.
 """
 from datetime import date
 
-import p2p_parser
+from context import *
 import easyp2p_tests
 
 
@@ -35,8 +35,10 @@ def generate_parser_results():
             elem.lower(), easyp2p_tests.PLATFORMS[elem])
         output_file = easyp2p_tests.RESULT_PREFIX + '{0}_parser.csv'.format(
             elem.lower())
-        func = getattr(p2p_parser, elem.lower())
-        (df, _) = func(date_range, input_file)
+        parser = getattr(
+            getattr(sys.modules[__name__], elem.lower()),
+            'parse_statement')
+        (df, _) = parser(date_range, input_file)
         df.to_csv(output_file)
 
     for elem in ['Estateguru', 'Mintos', 'Grupeer', 'DoFinance', 'Twino']:
@@ -51,8 +53,10 @@ def generate_parser_results():
         output_file = easyp2p_tests.RESULT_PREFIX \
             + '{0}_parser_unknown_cf.csv'.format(
                 elem.lower())
-        func = getattr(p2p_parser, elem.lower())
-        (df, _) = func(date_range, input_file)
+        parser = getattr(
+            getattr(sys.modules[__name__], elem.lower()),
+            'parse_statement')
+        (df, _) = parser(date_range, input_file)
         df.to_csv(output_file)
 
     for elem in easyp2p_tests.PLATFORMS:
@@ -62,14 +66,16 @@ def generate_parser_results():
         output_file = easyp2p_tests.RESULT_PREFIX \
             + '{0}_parser_missing_month.csv'.format(
                 elem.lower())
-        func = getattr(p2p_parser, elem.lower())
+        parser = getattr(
+            getattr(sys.modules[__name__], elem.lower()),
+            'parse_statement')
 
         # DoFinance has its own date range
         if elem == 'DoFinance':
             date_range = (date(2018, 5, 1), date(2018, 9, 30))
         else:
             date_range = (date(2018, 8, 1), date(2018, 12, 31))
-        (df, _) = func(date_range, input_file)
+        (df, _) = parser(date_range, input_file)
         df.to_csv(output_file)
 
     for elem in easyp2p_tests.PLATFORMS:
@@ -79,8 +85,10 @@ def generate_parser_results():
         output_file = easyp2p_tests.RESULT_PREFIX \
             + '{0}_parser_no_cfs.csv'.format(
                 elem.lower())
-        func = getattr(p2p_parser, elem.lower())
-        (df, _) = func((date(2016, 9, 1), date(2016, 12, 31)), input_file)
+        parser = getattr(
+            getattr(sys.modules[__name__], elem.lower()),
+            'parse_statement')
+        (df, _) = parser((date(2016, 9, 1), date(2016, 12, 31)), input_file)
         df.to_csv(output_file)
 
     for elem in ['Grupeer']:
@@ -90,8 +98,10 @@ def generate_parser_results():
         output_file = easyp2p_tests.RESULT_PREFIX \
             + '{0}_parser_unknown_currency.csv'.format(
                 elem.lower())
-        func = getattr(p2p_parser, elem.lower())
-        (df, _) = func(date_range, input_file)
+        parser = getattr(
+            getattr(sys.modules[__name__], elem.lower()),
+            'parse_statement')
+        (df, _) = parser(date_range, input_file)
         df.to_csv(output_file)
 
 if __name__ == '__main__':

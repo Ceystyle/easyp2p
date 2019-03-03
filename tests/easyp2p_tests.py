@@ -5,7 +5,7 @@
 
 from datetime import date
 import sys
-from typing import Mapping, Tuple, Union
+from typing import Tuple
 import unittest
 
 import keyring
@@ -132,11 +132,11 @@ class ProgressWindowTests(unittest.TestCase):
         self.assertEqual(self.form.pushButton_ok.isEnabled(), False)
         self.assertEqual(self.form.pushButton_abort.isEnabled(), True)
 
-@unittest.skip('Skip')
-class P2PPlatformsTests(unittest.TestCase):
+
+class PlatformTests(unittest.TestCase):
     """Test p2p_platforms"""
     def setUp(self):
-        """Initializes the default arguments for p2p_platforms."""
+        """Initializes the default date ranges for the tests."""
         self.date_range = (date(2018, 9, 1), date(2018, 12, 31))
         self.date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
 
@@ -164,77 +164,77 @@ class P2PPlatformsTests(unittest.TestCase):
     def test_download_bondora_statement(self) -> None:
         """Test download_bondora_statement"""
         credentials = self.get_credentials_from_keyring('Bondora')
-        p2p_platforms.download_bondora_statement(self.date_range, credentials)
+        bondora.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/bondora_statement.csv',
-            RESULT_PREFIX + 'test_download_bondora_statement.csv'))
+            RESULT_PREFIX + 'download_bondora_statement.csv'))
 
     def test_download_bondora_statement_no_cfs(self) -> None:
         """
         Test download_bondora_statement when no cashflows exist in date range
         """
         credentials = self.get_credentials_from_keyring('Bondora')
-        p2p_platforms.download_bondora_statement(
+        bondora.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/bondora_statement.csv',
-            RESULT_PREFIX + 'test_download_bondora_statement_no_cfs.csv'))
+            RESULT_PREFIX + 'download_bondora_statement_no_cfs.csv'))
 
     def test_download_dofinance_statement(self):
         """Test download_dofinance_statement function"""
         credentials = self.get_credentials_from_keyring('DoFinance')
         dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        p2p_platforms.download_dofinance_statement(
+        dofinance.download_statement(
             dofinance_date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/dofinance_statement.xlsx',
-            'tests/results/result_test_download_dofinance_statement.xlsx'))
+            RESULT_PREFIX + 'download_dofinance_statement.xlsx'))
 
     def test_download_dofinance_statement_no_cfs(self):
         """
         Test download_dofinance_statement when no cashflows exist in date range
         """
         credentials = self.get_credentials_from_keyring('DoFinance')
-        p2p_platforms.download_dofinance_statement(self.date_range, credentials)
+        dofinance.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/dofinance_statement.xlsx',
-            RESULT_PREFIX +'test_download_dofinance_statement_no_cfs.xlsx'))
+            RESULT_PREFIX +'download_dofinance_statement_no_cfs.xlsx'))
 
     def test_download_estateguru_statement(self):
         """Test download_estateguru_statement"""
         credentials = self.get_credentials_from_keyring('Estateguru')
-        p2p_platforms.download_estateguru_statement(
+        estateguru.download_statement(
             self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/estateguru_statement.csv',
-            RESULT_PREFIX + 'test_download_estateguru_statement.csv'))
+            RESULT_PREFIX + 'download_estateguru_statement.csv'))
 
     def test_download_grupeer_statement(self):
         """Test download_grupeer_statement"""
         credentials = self.get_credentials_from_keyring('Grupeer')
-        p2p_platforms.download_grupeer_statement(self.date_range, credentials)
+        grupeer.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/grupeer_statement.xlsx',
-            RESULT_PREFIX + 'test_download_grupeer_statement.xlsx'))
+            RESULT_PREFIX + 'download_grupeer_statement.xlsx'))
 
     def test_download_grupeer_statement_no_cfs(self):
         """
         Test download_grupeer_statement if there are no cashflows in date_range
         """
         credentials = self.get_credentials_from_keyring('Grupeer')
-        p2p_platforms.download_grupeer_statement(
+        grupeer.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/grupeer_statement.xlsx',
-            RESULT_PREFIX + 'test_download_grupeer_statement_no_cfs.xlsx'))
+            RESULT_PREFIX + 'download_grupeer_statement_no_cfs.xlsx'))
 
     def test_download_iuvo_statement(self):
         """Test download_iuvo_statement"""
         credentials = self.get_credentials_from_keyring('Iuvo')
-        p2p_platforms.download_iuvo_statement(self.date_range, credentials)
+        iuvo.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/iuvo_statement.csv',
-            RESULT_PREFIX + 'test_download_iuvo_statement.csv'))
+            RESULT_PREFIX + 'download_iuvo_statement.csv'))
 
     def test_download_iuvo_statement_no_cfs(self):
         """
@@ -242,39 +242,39 @@ class P2PPlatformsTests(unittest.TestCase):
         date_range
         """
         credentials = self.get_credentials_from_keyring('Iuvo')
-        p2p_platforms.download_iuvo_statement(
+        iuvo.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/iuvo_statement.csv',
-            RESULT_PREFIX + 'test_download_iuvo_statement_no_cfs.csv'))
+            RESULT_PREFIX + 'download_iuvo_statement_no_cfs.csv'))
 
     def test_download_mintos_statement(self):
         """Test download_mintos_statement"""
         credentials = self.get_credentials_from_keyring('Mintos')
-        p2p_platforms.download_mintos_statement(self.date_range, credentials)
+        mintos.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/mintos_statement.xlsx',
-            RESULT_PREFIX + 'test_download_mintos_statement.xlsx'))
+            RESULT_PREFIX + 'download_mintos_statement.xlsx'))
 
     def test_download_mintos_statement_no_cfs(self):
         """
         Test download_mintos_statement when there is no cashflow in date_range
         """
         credentials = self.get_credentials_from_keyring('Mintos')
-        p2p_platforms.download_mintos_statement(
+        mintos.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/mintos_statement.xlsx',
-            RESULT_PREFIX + 'test_download_mintos_statement_no_cfs.xlsx'))
+            RESULT_PREFIX + 'download_mintos_statement_no_cfs.xlsx'))
 
     def test_download_peerberry_statement(self):
         """Test download_peerberry_statement"""
         credentials = self.get_credentials_from_keyring('PeerBerry')
-        p2p_platforms.download_peerberry_statement(
+        peerberry.download_statement(
             self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/peerberry_statement.csv',
-            'tests/results/result_test_download_peerberry_statement.csv'))
+            RESULT_PREFIX + 'download_peerberry_statement.csv'))
 
     def test_download_peerberry_statement_no_cfs(self):
         """
@@ -282,19 +282,19 @@ class P2PPlatformsTests(unittest.TestCase):
         date_range
         """
         credentials = self.get_credentials_from_keyring('PeerBerry')
-        p2p_platforms.download_peerberry_statement(
+        peerberry.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/peerberry_statement.csv',
-            RESULT_PREFIX + 'test_download_peerberry_statement_no_cfs.csv'))
+            RESULT_PREFIX + 'download_peerberry_statement_no_cfs.csv'))
 
     def test_download_robocash_statement(self):
         """Test download_robocash_statement function"""
         credentials = self.get_credentials_from_keyring('Robocash')
-        p2p_platforms.download_robocash_statement(self.date_range, credentials)
+        robocash.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/robocash_statement.xlsx',
-            RESULT_PREFIX + 'test_download_robocash_statement.xlsx'))
+            RESULT_PREFIX + 'download_robocash_statement.xlsx'))
 
     def test_download_robocash_statement_no_cfs(self):
         """
@@ -302,51 +302,51 @@ class P2PPlatformsTests(unittest.TestCase):
         date_range
         """
         credentials = self.get_credentials_from_keyring('Robocash')
-        p2p_platforms.download_robocash_statement(
+        robocash.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/robocash_statement.xlsx',
-            RESULT_PREFIX + 'test_download_robocash_statement_no_cfs.xlsx'))
+            RESULT_PREFIX + 'download_robocash_statement_no_cfs.xlsx'))
 
     def test_download_swaper_statement(self):
         """Test download_swaper_statement function"""
         credentials = self.get_credentials_from_keyring('Swaper')
-        p2p_platforms.download_swaper_statement(self.date_range, credentials)
+        swaper.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/swaper_statement.xlsx',
-            RESULT_PREFIX + 'test_download_swaper_statement.xlsx'))
+            RESULT_PREFIX + 'download_swaper_statement.xlsx'))
 
     def test_download_swaper_statement_no_cfs(self) -> None:
         """
         Test download_swaper_statement when no cashflows exist in date range
         """
         credentials = self.get_credentials_from_keyring('Swaper')
-        p2p_platforms.download_swaper_statement(
+        swaper.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/swaper_statement.xlsx',
-            RESULT_PREFIX + 'test_download_swaper_statement_no_cfs.xlsx'))
+            RESULT_PREFIX + 'download_swaper_statement_no_cfs.xlsx'))
 
     def test_download_twino_statement(self):
         """Test download_twino_statement"""
         credentials = self.get_credentials_from_keyring('Twino')
-        p2p_platforms.download_twino_statement(self.date_range, credentials)
+        twino.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/twino_statement.xlsx',
-            RESULT_PREFIX + 'test_download_twino_statement.xlsx',
-            drop_lines=0))
+            RESULT_PREFIX + 'download_twino_statement.xlsx',
+            drop_header=True))
 
     def test_download_twino_statement_no_cfs(self):
         """
         Test download_twino_statement when no cashflows exist in date range
         """
         credentials = self.get_credentials_from_keyring('Twino')
-        p2p_platforms.download_twino_statement(
+        twino.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/twino_statement.xlsx',
-            'tests/results/result_test_download_twino_statement_no_cfs.xlsx',
-            drop_lines=0))
+            RESULT_PREFIX + 'download_twino_statement_no_cfs.xlsx',
+            drop_header=True))
 
 
 class P2PParserTests(unittest.TestCase):
@@ -379,8 +379,10 @@ class P2PParserTests(unittest.TestCase):
                 cashflow types
 
         """
-        func = getattr(p2p_parser, platform.lower())
-        (df, unknown_cf_types) = func(date_range, input_file)
+        parser = getattr(
+            getattr(sys.modules[__name__], platform.lower()),
+            'parse_statement')
+        (df, unknown_cf_types) = parser(date_range, input_file)
         df_exp = pd.read_csv(
             exp_result_file, index_col=[0, 1, 2])
 
@@ -476,7 +478,7 @@ class P2PParserTests(unittest.TestCase):
         names in the statement
         """
         self.assertRaises(
-            RuntimeError, p2p_parser.dofinance,
+            RuntimeError, dofinance.parse_statement,
             (date(2018, 9, 1), date(2018, 12, 31)),
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
 
@@ -561,27 +563,28 @@ class P2PParserTests(unittest.TestCase):
 
     def test_iuvo_parser(self):
         """Test parsing Iuvo statement"""
-        test_name = 'iuvo_parser.csv'
+        test_name = 'iuvo_parser'
         self.run_parser_test(
-            'iuvo', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
+            'iuvo', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv')
 
     def test_iuvo_parser_no_cfs(self):
         """
         Test parsing Iuvo statement if there were no cashflows in date_range
         """
-        test_name = 'iuvo_parser_no_cfs.csv'
+        test_name = 'iuvo_parser_no_cfs'
         self.run_parser_test(
-            'iuvo', INPUT_PREFIX + test_name,
-            RESULT_PREFIX + test_name, self.date_range_no_cfs)
+            'iuvo', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
     def test_iuvo_parser_missing_month(self):
         """
         Test parsing Iuvo statement if a month in date_range is missing
         """
-        test_name = 'iuvo_parser_missing_month.csv'
+        test_name = 'iuvo_parser_missing_month'
         self.run_parser_test(
-            'iuvo', INPUT_PREFIX + test_name,
-            RESULT_PREFIX + test_name, self.date_range_missing_month)
+            'iuvo', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def test_mintos_parser(self):
         """Test parsing Mintos statement"""
@@ -717,7 +720,7 @@ class P2PParserTests(unittest.TestCase):
         the statement
         """
         self.assertRaises(
-            RuntimeError, p2p_parser.twino,
+            RuntimeError, twino.parse_statement,
             (date(2018, 9, 1), date(2018, 12, 31)),
             INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
 
@@ -768,7 +771,7 @@ class P2PParserTests(unittest.TestCase):
 
 def are_files_equal(
         file1: str, file2: str,
-        drop_lines: Union[int, Mapping[int, int]] = None) -> bool:
+        drop_header: bool = False) -> bool:
     """
     Function to determine if two files are equal.
 
@@ -777,8 +780,8 @@ def are_files_equal(
         file2 (str): Name including path of second file
 
     Keyword Args:
-        drop_lines (int or list[int]): lines in the files by row number
-            or range which should not be compared
+        drop_header: If True the header of the files will be ignored in the
+            comparison
 
     Returns:
         bool: True if the files are equal, False if not or if at least one
@@ -791,12 +794,30 @@ def are_files_equal(
     except RuntimeError:
         return False
 
-    if drop_lines is not None:
-        df1.drop(df1.index[drop_lines])
-        df2.drop(df2.index[drop_lines])
+    if drop_header:
+        df1 = drop_df_header(df1)
+        df2 = drop_df_header(df2)
 
     return df1.equals(df2)
 
+
+def drop_df_header(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Helper function to drop the header of a pandas DataFrame.
+
+    Args:
+        df: DataFrame including header
+
+    Returns:
+        DataFrame with the header row removed.
+
+    """
+    df = df[1:]  # The first row only contains a generic header
+    new_header = df.iloc[0] # Get the new first row as header
+    df = df[1:] # Remove the first row
+    df.columns = new_header # Set the new header
+
+    return df
 
 if __name__ == "__main__":
     unittest.main()
