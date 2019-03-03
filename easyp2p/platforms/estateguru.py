@@ -32,7 +32,7 @@ def download_statement(
 
     """
     urls = {
-        'login': 'https://estateguru.co/portal/login/auth?lang=de',
+        'login': 'https://estateguru.co/de/?switch=de',
         'logout': 'https://estateguru.co/portal/logout/index',
         'statement': 'https://estateguru.co/portal/portfolio/account'}
     xpaths = {
@@ -46,11 +46,13 @@ def download_statement(
 
     with P2PPlatform(
             'Estateguru', urls,
-            EC.element_to_be_clickable((By.NAME, 'username'))) as estateguru:
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
+            as estateguru:
 
         estateguru.log_into_page(
             'username', 'password', credentials,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND')))
+            EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND')),
+            login_locator=(By.LINK_TEXT, 'Einloggen'))
 
         estateguru.open_account_statement_page(
             'Übersicht', (By.XPATH, xpaths['account_statement_check']))
