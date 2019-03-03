@@ -40,7 +40,7 @@ def download_statement(
 
     with P2PPlatform(
             'Grupeer', urls,
-            EC.title_contains('P2PPlatform Investitionsplattform Grupeer'),
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
             (By.LINK_TEXT, 'Ausloggen'),
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
