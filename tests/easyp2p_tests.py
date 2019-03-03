@@ -14,11 +14,7 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
 
-from context import MainWindow
-from context import ProgressWindow
-from context import p2p_helper
-from context import p2p_parser
-from context import p2p_platforms
+from context import *
 
 PLATFORMS = {
     'Bondora': 'csv',
