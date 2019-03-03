@@ -21,7 +21,7 @@ from p2p_parser import P2PParser
 from p2p_platform import P2PPlatform
 
 
-def download_robocash_statement(
+def download_statement(
         date_range: Tuple[date, date],
         credentials: Tuple[str, str]) -> None:
     """
