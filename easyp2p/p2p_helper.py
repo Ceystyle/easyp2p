@@ -128,9 +128,11 @@ def nbr_to_short_month(nbr: str) -> str:
     """
     # Only German locale is used so far
     map_nbr_to_short_month = {
-        '1': 'Jan', '2': 'Feb', '3': 'Mrz', '4': 'Apr', '5': 'Mai',
-        '6': 'Jun', '7': 'Jul', '8': 'Aug', '9': 'Sep', '10': 'Okt',
-        '11': 'Nov', '12': 'Dez'}
+        '1': 'Jan', '01': 'Jan', '2': 'Feb', '02': 'Feb',
+        '3': 'Mrz', '03': 'Mrz', '4': 'Apr', '04': 'Apr',
+        '5': 'Mai', '05': 'Mai', '6': 'Jun', '06': 'Jun',
+        '7': 'Jul', '07': 'Jul', '8': 'Aug', '08': 'Aug',
+        '9': 'Sep', '09': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Dez'}
 
     return map_nbr_to_short_month[nbr]
 
