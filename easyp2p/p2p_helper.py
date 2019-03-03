@@ -1,7 +1,25 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
 
-"""p2p_helper contains some helper functions/classes for easyP2P."""
+"""
+p2p_helper contains some helper functions/classes for easyP2P.
+
+Functions:
+
+* get_calendar_clicks: get number of calendar clicks necessary to get from \
+    provided start to target month.
+* get_df_from_file: read a pandas DataFrame from given input file.
+* get_list_of_months: returns a list of all months between provided start and \
+    end date.
+* short_month_to_nbr: translates month short name to number.
+* nbr_to_short_month: translates number to month short name.
+
+Classes:
+
+* one_of_many_expected_conditions_true: expected condition for the Selenium \
+    webdriver.
+
+"""
 
 import calendar
 from datetime import date, timedelta
@@ -23,12 +41,11 @@ def get_calendar_clicks(
     future, negative numbers months into the past.
 
     Args:
-        target_date (datetime.date): Target date.
-        start_date (datetime.date): Start date.
+        target_date: Target date.
+        start_date: Start date.
 
     Returns:
-        int: number of months between start and
-            target date.
+        Number of months between start and target date.
 
     """
     if target_date.year != start_date.year:
@@ -42,18 +59,18 @@ def get_calendar_clicks(
     return clicks
 
 
-def get_df_from_file(input_file):
+def get_df_from_file(input_file: str) -> pd.DataFrame:
     """
     Read a pandas.DataFrame from input_file.
 
     Args:
-        input_file (str): file name including path
+        input_file: file name including path
 
     Returns:
-        pandas.DataFrame: data frame which was read from the file
+        pandas.DataFrame: DataFrame which was read from the file
 
-    Throws:
-        RuntimeError: if input_file does not exist, cannot be read or if the
+    Raises:
+        RuntimeError: If input_file does not exist, cannot be read or if the \
             file format is neither csv or xlsx
 
     """
@@ -81,12 +98,12 @@ def get_list_of_months(date_range: Tuple[date, date]) \
     Get list of months between (including) start and end date.
 
     Args:
-        start_date (datetime.date): start date
-        end_date (datetime.date): end_date
+        date_range: Tuple (start_date, end_date)
 
     Returns:
-        list[tuple[datetime.date, datetime.date]]: List of tuples
-            (start_of_month, end_of_month)
+        List of tuples (start_of_month, end_of_month) for all months between \
+        start and end date.
+
     """
     months = []
     current_date = date_range[0]
@@ -105,8 +122,11 @@ def short_month_to_nbr(short_name: str) -> str:
     """
     Helper method for translating month short names to numbers.
 
+    Args:
+        short_name: Month short name
+
     Returns:
-        str: two-digit month number padded with 0
+        Two-digit month number padded with 0
 
     """
     map_short_month_to_nbr = {
@@ -122,8 +142,11 @@ def nbr_to_short_month(nbr: str) -> str:
     """
     Helper method for translating numbers to month short names.
 
+    Args:
+        nbr: Number of month with or without a leading zero
+
     Returns:
-        str: month short name
+        Month short name
 
     """
     # Only German locale is used so far
@@ -144,9 +167,26 @@ class one_of_many_expected_conditions_true():
     """
     def __init__(self, conditions: List[Callable[[webdriver.Chrome], bool]]) \
             -> None:
+        """
+        Initialize class.
+
+        Args:
+            conditions: List of all conditions which should be checked.
+
+        """
         self.conditions = conditions
 
     def __call__(self, driver: webdriver.Chrome) -> bool:
+        """
+        Caller for class.
+
+        Args:
+            driver: Selenium webdriver
+
+        Returns:
+            True if at least one of the conditions is true, False otherwise.
+
+        """
         for condition in self.conditions:
             try:
                 if condition(driver):
