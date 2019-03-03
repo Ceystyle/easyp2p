@@ -142,9 +142,12 @@ class P2PPlatform:
         # explicitly specify its location. Find a better solution that works on
         # all systems.
         try:
-            driver = webdriver.Chrome(
-                executable_path=r'/usr/lib/chromium-browser/chromedriver',
-                options=options)
+            if os.path.isfile('/usr/lib/chromium-browser/chromedriver'):
+                driver = webdriver.Chrome(
+                    executable_path=r'/usr/lib/chromium-browser/chromedriver',
+                    options=options)
+            else:
+                driver = webdriver.Chrome(options=options)
         except WebDriverException:
             raise RuntimeError('Chromedriver konnte nicht gefunden werden!')
 
