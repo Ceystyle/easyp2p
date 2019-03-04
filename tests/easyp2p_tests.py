@@ -205,9 +205,13 @@ class PlatformTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Estateguru')
         estateguru.download_statement(
             self.date_range, credentials)
-        self.assertTrue(are_files_equal(
-            'p2p_downloads/estateguru_statement.csv',
-            RESULT_PREFIX + 'download_estateguru_statement.csv'))
+        # The Estateguru statement contains all cashflows ever generated for
+        # this account. Therefore it changes regularly and we cannot compare
+        # it to a fixed reference file. This test just makes sure that the
+        # statement was downloaded.
+        # TODO: check for content errors
+        self.assertTrue(os.path.isfile(
+            'p2p_downloads/estateguru_statement.csv'))
 
     def test_download_grupeer_statement(self):
         """Test download_grupeer_statement"""
