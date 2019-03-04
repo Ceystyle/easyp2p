@@ -395,6 +395,11 @@ class P2PPlatform:
                     time.sleep(1)
                 button.click()
 
+            # Iuvo needs some time to update the field if there were cashflows
+            # TODO: find better fix
+            if self.name == 'Iuvo':
+                time.sleep(1)
+
             if wait_until is not None:
                 self.wdwait(wait_until)
         except NoSuchElementException:

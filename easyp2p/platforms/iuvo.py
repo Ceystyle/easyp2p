@@ -81,8 +81,17 @@ def download_statement(
                 conditions),
             submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
 
+        try:
+            if iuvo.driver.find_element_by_class_name('text-center').text \
+                    == 'Keine passenden Daten!':
+                no_cashflows = True
+            else:
+                no_cashflows = False
+        except NoSuchElementException:
+            no_cashflows = False
+
         # If there were no cashflows write an empty DataFrame to the file
-        if conditions[1]:
+        if no_cashflows:
             df = pd.DataFrame()
             df.to_excel('p2p_downloads/iuvo_statement.xlsx')
         else:
