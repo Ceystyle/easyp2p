@@ -94,7 +94,7 @@ def download_statement(
 
 def parse_statement(
         date_range: Tuple[date, date],
-        input_file: str = 'p2p_downloads/robocash_statement.xlsx') \
+        input_file: str = 'p2p_downloads/robocash_statement.xls') \
         -> Tuple[pd.DataFrame, str]:
     """
     Parser for Robocash.

@@ -24,7 +24,7 @@ PLATFORMS = {
     'Iuvo': 'xlsx',
     'Mintos': 'xlsx',
     'PeerBerry': 'csv',
-    'Robocash': 'xlsx',
+    'Robocash': 'xls',
     'Swaper': 'xlsx',
     'Twino': 'xlsx'}
 INPUT_PREFIX = 'input/input_test_'
@@ -293,8 +293,8 @@ class PlatformTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Robocash')
         robocash.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
-            'p2p_downloads/robocash_statement.xlsx',
-            RESULT_PREFIX + 'download_robocash_statement.xlsx'))
+            'p2p_downloads/robocash_statement.xls',
+            RESULT_PREFIX + 'download_robocash_statement.xls'))
 
     def test_download_robocash_statement_no_cfs(self):
         """
@@ -305,8 +305,8 @@ class PlatformTests(unittest.TestCase):
         robocash.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
-            'p2p_downloads/robocash_statement.xlsx',
-            RESULT_PREFIX + 'download_robocash_statement_no_cfs.xlsx'))
+            'p2p_downloads/robocash_statement.xls',
+            RESULT_PREFIX + 'download_robocash_statement_no_cfs.xls'))
 
     def test_download_swaper_statement(self):
         """Test download_swaper_statement function"""
@@ -650,7 +650,7 @@ class P2PParserTests(unittest.TestCase):
         """Test parsing Robocash statement"""
         test_name = 'robocash_parser'
         self.run_parser_test(
-            'robocash', INPUT_PREFIX + test_name + '.xlsx',
+            'robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv')
 
     def test_robocash_parser_no_cfs(self):
@@ -660,7 +660,7 @@ class P2PParserTests(unittest.TestCase):
         """
         test_name = 'robocash_parser_no_cfs'
         self.run_parser_test(
-            'robocash', INPUT_PREFIX + test_name + '.xlsx',
+            'robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
     def test_robocash_parser_missing_month(self):
@@ -669,7 +669,7 @@ class P2PParserTests(unittest.TestCase):
         """
         test_name = 'robocash_parser_missing_month'
         self.run_parser_test(
-            'robocash', INPUT_PREFIX + test_name + '.xlsx',
+            'robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def test_swaper_parser(self):
