@@ -384,7 +384,7 @@ class P2PPlatform:
                 # which leads to this exception
                 date_to = self.driver.find_element(*end_locator)
                 date_to.send_keys(Keys.CONTROL + 'a')
-                date_to.send_keys(date.strftime(date_range[0], date_format))
+                date_to.send_keys(date.strftime(date_range[1], date_format))
 
             if submit_btn_locator is not None:
                 button = self.wdwait(EC.element_to_be_clickable(
