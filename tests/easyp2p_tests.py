@@ -237,8 +237,8 @@ class PlatformTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Iuvo')
         iuvo.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
-            'p2p_downloads/iuvo_statement.csv',
-            RESULT_PREFIX + 'download_iuvo_statement.csv'))
+            'p2p_downloads/iuvo_statement.xlsx',
+            RESULT_PREFIX + 'download_iuvo_statement.xlsx'))
 
     def test_download_iuvo_statement_no_cfs(self):
         """
@@ -249,8 +249,8 @@ class PlatformTests(unittest.TestCase):
         iuvo.download_statement(
             self.date_range_no_cfs, credentials)
         self.assertTrue(are_files_equal(
-            'p2p_downloads/iuvo_statement.csv',
-            RESULT_PREFIX + 'download_iuvo_statement_no_cfs.csv'))
+            'p2p_downloads/iuvo_statement.xlsx',
+            RESULT_PREFIX + 'download_iuvo_statement_no_cfs.xlsx'))
 
     def test_download_mintos_statement(self):
         """Test download_mintos_statement"""
