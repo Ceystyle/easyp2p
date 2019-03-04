@@ -97,6 +97,11 @@ class P2PPlatform:
                 button are provided.
 
         """
+        if 'logout' not in self.urls and self.logout_locator is None:
+            raise RuntimeError(
+                '{0}: Keine Methode für Logout vorhanden!'
+                .format(self.name))
+
         self.init_webdriver()
         return self
 
@@ -106,14 +111,10 @@ class P2PPlatform:
         if self.logged_in:
             if 'logout' in self.urls:
                 self.logout_by_url(self.logout_wait_until)
-            elif self.logout_locator is not None:
+            else:
                 self.logout_by_button(
                     self.logout_locator, self.logout_wait_until,
                     hover_locator=self.hover_locator)
-            else:
-                raise RuntimeError(
-                    '{0}: Keine Methode für Logout vorhanden!'
-                    .format(self.name))
 
             self.logged_in = False
 
