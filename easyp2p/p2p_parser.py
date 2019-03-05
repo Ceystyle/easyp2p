@@ -216,7 +216,8 @@ class P2PParser:
 
         # Make sure we only show results between start and end date
         start_date = pd.Timestamp(self.date_range[0])
-        end_date = pd.Timestamp(self.date_range[1])
+        end_date = pd.Timestamp(self.date_range[1]).replace(
+            hour=23, minute=59, second=59)
 
         if date_format:
             try:
