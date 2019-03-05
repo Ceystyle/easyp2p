@@ -151,7 +151,7 @@ def parse_statement(
 
     unknown_cf_types = parser.parse_statement(
         '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-        'Transaction Type', 'Turnover')
+        'Transaction Type', 'Turnover', 'Balance')
 
     # TODO: get start and end balance
 

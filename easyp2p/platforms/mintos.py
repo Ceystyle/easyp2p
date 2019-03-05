@@ -147,8 +147,6 @@ def parse_statement(
 
     unknown_cf_types = parser.parse_statement(
         '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-        'Mintos_Cashflow-Typ', 'Turnover')
-
-    # TODO: get start and end balance
+        'Mintos_Cashflow-Typ', 'Turnover', 'Balance')
 
     return (parser.df, unknown_cf_types)
