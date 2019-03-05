@@ -219,7 +219,8 @@ class P2PParser:
             rename_columns: Optional[Mapping[str, str]] = None,
             cashflow_types: Optional[Mapping[str, str]] = None,
             orig_cf_column: Optional[str] = None,
-            value_column: Optional[str] = None) -> str:
+            value_column: Optional[str] = None,
+            balance_column: Optional[str] = None) -> str:
         """
         Parse the statement from platform format into easyP2P format.
 
@@ -271,7 +272,10 @@ class P2PParser:
         if self.CURRENCY not in self.df.columns:
             self.df[self.CURRENCY] = 'EUR'
 
+        orig_df = self.df
         self._aggregate_df(value_column)
+        if balance_column is not None:
+            self._get_balances(balance_column, value_column, orig_df)
         self._add_missing_months()
         self._calculate_total_income()
         self.df[self.PLATFORM] = self.platform
@@ -324,6 +328,31 @@ def show_results(
             df, values=P2PParser.TARGET_COLUMNS,
             index=[P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH],
             aggfunc=sum, dropna=False)
+
+        # If start and end balance columns were present they were also summed
+        # up which is obviously not correct. Drop them and fill in the correct
+        # values from the original DataFrame.
+        try:
+            df_pivot.drop(
+                [P2PParser.START_BALANCE_NAME, P2PParser.END_BALANCE_NAME],
+                axis=1, inplace=True)
+        except KeyError:
+            pass
+
+        start_balances = df.groupby(P2PParser.MONTH).first()[
+            P2PParser.START_BALANCE_NAME]
+        end_balances = df.groupby(P2PParser.MONTH).last()[
+            P2PParser.END_BALANCE_NAME]
+
+        df_pivot = df_pivot.reset_index().merge(
+            start_balances.to_frame(), how='left', on=P2PParser.MONTH)\
+            .set_index(
+                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
+        df_pivot = df_pivot.reset_index().merge(
+            end_balances.to_frame(), how='left', on=P2PParser.MONTH)\
+            .set_index(
+                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
+
         df_monthly = df_monthly.append(df_pivot, sort=True)
         df_pivot = pd.pivot_table(
             df, values=P2PParser.TARGET_COLUMNS,
@@ -346,7 +375,8 @@ def show_results(
     # in the monthly table and overwrite the sums.
     if P2PParser.START_BALANCE_NAME in df_total.columns:
         for index in df_total.index.levels[0]:
-            start_balance = df_monthly.loc[index][P2PParser.START_BALANCE_NAME][0]
+            start_balance = \
+                df_monthly.loc[index][P2PParser.START_BALANCE_NAME][0]
             df_total.loc[index][P2PParser.START_BALANCE_NAME] = start_balance
     if P2PParser.END_BALANCE_NAME in df_total.columns:
         for index in df_total.index.levels[0]:
