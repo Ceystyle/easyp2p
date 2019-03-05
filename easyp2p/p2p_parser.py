@@ -190,6 +190,30 @@ class P2PParser:
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
 
+    def _get_balances(
+            self, balance_column: str, value_column: str,
+            df: pd.DataFrame) -> None:
+        """
+        Helper method to determine start and end balances.
+
+        Args:
+            balance_column: name of the DataFrame column which contains the
+                balances
+            value_column: name of the DataFrame column which contains the
+                amounts
+            df: DataFrame with the balances
+
+        """
+        df_balances = pd.DataFrame()
+        # The first balance value of each day already includes the first daily
+        # cashflow which needs to be subtracted again
+        df_balances[self.START_BALANCE_NAME] = \
+            df.groupby(self.DATE).first()[balance_column] \
+            - df.groupby(self.DATE).first()[value_column]
+        df_balances[self.END_BALANCE_NAME] = \
+            df.groupby(self.DATE).last()[balance_column]
+        self.df = self.df.merge(df_balances, on=self.DATE)
+
     def parse_statement(
             self, date_format: Optional[str] = None,
             rename_columns: Optional[Mapping[str, str]] = None,
