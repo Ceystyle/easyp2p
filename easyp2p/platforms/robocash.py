@@ -133,6 +133,6 @@ def parse_statement(
 
     unknown_cf_types = parser.parse_statement(
         '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-        'Operation', 'Betrag')
+        'Operation', 'Betrag', 'Der Saldo des Portfolios')
 
     return (parser.df, unknown_cf_types)
