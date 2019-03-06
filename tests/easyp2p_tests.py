@@ -657,6 +657,16 @@ class P2PParserTests(unittest.TestCase):
             'robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv')
 
+    def test_robocash_parser_unknown_cf(self):
+        """
+        Test parsing Robocash statement if unknown cashflow types are present
+        """
+        test_name = 'robocash_parser_unknown_cf'
+        self.run_parser_test(
+            'robocash', INPUT_PREFIX + test_name + '.xls',
+            RESULT_PREFIX + test_name + '.csv',
+            unknown_cf_types_exp=('TestCF1, TestCF2'))
+
     def test_robocash_parser_no_cfs(self):
         """
         Test parsing Robocash statement if there were no cashflows in
