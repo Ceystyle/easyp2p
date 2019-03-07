@@ -572,6 +572,16 @@ class P2PParserTests(unittest.TestCase):
             'iuvo', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv')
 
+    def test_iuvo_parser_unknown_cf(self):
+        """
+        Test parsing Iuvo statement if unknown cashflow types are present
+        """
+        test_name = 'iuvo_parser_unknown_cf'
+        self.run_parser_test(
+            'iuvo', INPUT_PREFIX + test_name + '.xlsx',
+            RESULT_PREFIX + test_name + '.csv',
+            unknown_cf_types_exp='TestCF1, TestCF2')
+
     def test_iuvo_parser_no_cfs(self):
         """
         Test parsing Iuvo statement if there were no cashflows in date_range
