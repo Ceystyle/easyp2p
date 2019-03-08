@@ -99,8 +99,10 @@ def parse_statement(
     rename_currency = {'&euro': 'EUR', 'Gekauft &euro': 'EUR'}
     parser.df[parser.CURRENCY].replace(rename_currency, inplace=True)
 
-    # Convert amount to float64
+    # Convert amount and balance to float64
     parser.df['Amount'] = parser.df['Amount'].apply(
+        lambda x: x.replace(',', '.')).astype('float64')
+    parser.df['Balance'] = parser.df['Balance'].apply(
         lambda x: x.replace(',', '.')).astype('float64')
 
     # Define mapping between Grupeer and easyP2P cashflow types and column names
@@ -114,6 +116,6 @@ def parse_statement(
     rename_columns = {'Date': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
-        '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount')
+        '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount', 'Balance')
 
     return (parser.df, unknown_cf_types)
