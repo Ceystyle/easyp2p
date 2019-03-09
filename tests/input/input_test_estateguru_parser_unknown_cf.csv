@@ -255,7 +255,7 @@ UniqueId,Zahlungsdatum,Bestätigungsdatum,Cashflow-Typ,Cashflow-Status,Projektna
 1234567890376ABC,08/09/2018 00:00,10/09/2018 09:54,Zins,Genehmigt,Example project ABC,EUR,0.21,33.4
 1234567890377ABC,08/09/2018 00:00,10/09/2018 12:35,Zins,Genehmigt,Example project ABC,EUR,0.23,33.63
 1234567890378ABC,10/09/2018 00:00,11/09/2018 09:29,Zins,Genehmigt,Example project ABC,EUR,0.46,34.09
-1234567890379ABC,10/09/2018 00:00,11/09/2018 09:29,Zins,Genehmigt,Example project ABC,EUR,0.46,34.55
+1234567890379ABC,10/09/2018 00:00,11/09/2018 09:29,TestCF1,Genehmigt,Example project ABC,EUR,0.46,34.55
 1234567890380ABC,12/09/2018 00:00,12/09/2018 10:45,Zins,Genehmigt,Example project ABC,EUR,0.46,35.01
 1234567890381ABC,15/09/2018 00:00,17/09/2018 09:57,Zins,Genehmigt,Example project ABC,EUR,0.42,35.43
 1234567890382ABC,15/09/2018 00:00,17/09/2018 10:04,Zins,Genehmigt,Example project ABC,EUR,0.46,35.89
@@ -296,7 +296,7 @@ UniqueId,Zahlungsdatum,Bestätigungsdatum,Cashflow-Typ,Cashflow-Status,Projektna
 1234567890417ABC,16/10/2018 11:20,16/10/2018 11:20,Investition(Auto Investieren),Genehmigt,Example project ABC,EUR,-50.0,7.86
 1234567890418ABC,28/01/2019 00:00,16/10/2018 16:44,Hauptbetrag,Genehmigt,Example project ABC,EUR,50.0,57.86
 1234567890419ABC,16/10/2018 00:00,16/10/2018 16:45,Zins,Genehmigt,Example project ABC,EUR,3.9,61.76
-1234567890420ABC,17/10/2018 10:35,17/10/2018 10:35,Investition(Auto Investieren),Genehmigt,Example project ABC,EUR,-50.0,11.76
+1234567890420ABC,17/10/2018 10:35,17/10/2018 10:35,Investition(AutoInvestieren),Genehmigt,Example project ABC,EUR,-50.0,11.76
 1234567890421ABC,13/10/2018 00:00,17/10/2018 14:42,Zins,Genehmigt,Example project ABC,EUR,1.38,13.14
 1234567890422ABC,15/10/2018 00:00,18/10/2018 13:50,Zins,Genehmigt,Example project ABC,EUR,0.46,13.6
 1234567890423ABC,15/10/2018 00:00,22/10/2018 09:32,Zins,Genehmigt,Example project ABC,EUR,0.46,14.06
@@ -346,7 +346,7 @@ UniqueId,Zahlungsdatum,Bestätigungsdatum,Cashflow-Typ,Cashflow-Status,Projektna
 1234567890467ABC,28/11/2018 00:00,28/11/2018 15:24,Zins,Genehmigt,Example project ABC,EUR,0.48,90.43
 1234567890468ABC,15/11/2018 00:00,30/11/2018 16:02,Zins,Genehmigt,Example project ABC,EUR,0.44,90.87
 1234567890469ABC,15/11/2018 00:00,03/12/2018 14:43,Zins,Genehmigt,Example project ABC,EUR,0.46,91.33
-1234567890470ABC,05/12/2018 16:00,05/12/2018 16:00,Investition(Auto Investieren),Genehmigt,Example project ABC,EUR,-50.0,41.33
+1234567890470ABC,05/12/2018 16:00,05/12/2018 16:00,TestCF2,Genehmigt,Example project ABC,EUR,-50.0,41.33
 1234567890471ABC,08/12/2018 00:00,07/12/2018 19:51,Zins,Genehmigt,Example project ABC,EUR,0.21,41.54
 1234567890472ABC,10/12/2018 00:00,10/12/2018 17:11,Zins,Genehmigt,Example project ABC,EUR,0.46,42.0
 1234567890473ABC,10/12/2018 00:00,10/12/2018 17:11,Zins,Genehmigt,Example project ABC,EUR,0.46,42.46
