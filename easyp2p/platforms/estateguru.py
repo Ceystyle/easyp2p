@@ -115,6 +115,6 @@ def parse_statement(
 
     unknown_cf_types = parser.parse_statement(
         '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
-        'Estateguru_Cashflow-Typ', 'Betrag')
+        'Estateguru_Cashflow-Typ', 'Betrag',  'Verfügbar für Investitionen')
 
     return (parser.df, unknown_cf_types)
