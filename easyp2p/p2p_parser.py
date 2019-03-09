@@ -212,7 +212,9 @@ class P2PParser:
             - df.groupby(self.DATE).first()[value_column]
         df_balances[self.END_BALANCE_NAME] = \
             df.groupby(self.DATE).last()[balance_column]
-        self.df = self.df.merge(df_balances, on=self.DATE)
+
+        if not df_balances.empty:
+            self.df = self.df.merge(df_balances, on=self.DATE)
 
     def parse_statement(
             self, date_format: Optional[str] = None,
