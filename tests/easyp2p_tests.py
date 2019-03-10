@@ -452,7 +452,8 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'dofinance', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', dofinance_date_range,
-            unknown_cf_types_exp='TestCF1, TestCF2')
+            unknown_cf_types_exp = \
+                'Anlage\nRate: 6% Typ: automatisch, TestCF1, TestCF2')
 
     def test_dofinance_parser_missing_month(self):
         """
