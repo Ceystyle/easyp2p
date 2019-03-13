@@ -34,6 +34,7 @@ class P2PParser:
     BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
     BUYBACK_PAYMENT = 'Rückkäufe'
     INVESTMENT_PAYMENT = 'Investitionen'
+    IGNORE = 'Ignoriert'
     REDEMPTION_PAYMENT = 'Tilgungszahlungen'
     LATE_FEE_PAYMENT = 'Verzugsgebühren'
     INCOMING_PAYMENT = 'Einzahlungen'

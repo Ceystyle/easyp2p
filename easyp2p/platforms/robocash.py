@@ -128,6 +128,8 @@ def parse_statement(
         'Die Geldauszahlung': parser.OUTGOING_PAYMENT,
         'Geldeinzahlung': parser.INCOMING_PAYMENT,
         'Kreditrückzahlung': parser.REDEMPTION_PAYMENT,
+        # We don't report cash transfers within Robocash:
+        'Portfolio auffüllen': parser.IGNORE,
         'Zinsenzahlung': parser.INTEREST_PAYMENT}
     rename_columns = {'Datum und Laufzeit': parser.DATE}
 
