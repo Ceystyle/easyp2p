@@ -325,7 +325,7 @@ def show_results(
 
         # We need to fill the NaNs with a dummy value so they don't disappear
         # when creating the pivot tables
-        df.fillna('dummy', inplace=True)
+        df.fillna('', inplace=True)
 
         df_pivot = pd.pivot_table(
             df, values=P2PParser.TARGET_COLUMNS,
@@ -339,22 +339,21 @@ def show_results(
             df_pivot.drop(
                 [P2PParser.START_BALANCE_NAME, P2PParser.END_BALANCE_NAME],
                 axis=1, inplace=True)
+            start_balances = df.groupby(P2PParser.MONTH).first()[
+                P2PParser.START_BALANCE_NAME]
+            end_balances = df.groupby(P2PParser.MONTH).last()[
+                P2PParser.END_BALANCE_NAME]
+
+            df_pivot = df_pivot.reset_index().merge(
+                start_balances.to_frame(), how='left', on=P2PParser.MONTH)\
+                .set_index(
+                    [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
+            df_pivot = df_pivot.reset_index().merge(
+                end_balances.to_frame(), how='left', on=P2PParser.MONTH)\
+                .set_index(
+                    [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
         except KeyError:
             pass
-
-        start_balances = df.groupby(P2PParser.MONTH).first()[
-            P2PParser.START_BALANCE_NAME]
-        end_balances = df.groupby(P2PParser.MONTH).last()[
-            P2PParser.END_BALANCE_NAME]
-
-        df_pivot = df_pivot.reset_index().merge(
-            start_balances.to_frame(), how='left', on=P2PParser.MONTH)\
-            .set_index(
-                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
-        df_pivot = df_pivot.reset_index().merge(
-            end_balances.to_frame(), how='left', on=P2PParser.MONTH)\
-            .set_index(
-                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
 
         df_monthly = df_monthly.append(df_pivot, sort=True)
         df_pivot = pd.pivot_table(
@@ -380,11 +379,11 @@ def show_results(
         for index in df_total.index.levels[0]:
             start_balance = \
                 df_monthly.loc[index][P2PParser.START_BALANCE_NAME][0]
-            df_total.loc[index][P2PParser.START_BALANCE_NAME] = start_balance
+            df_total.loc[index, P2PParser.START_BALANCE_NAME] = start_balance
     if P2PParser.END_BALANCE_NAME in df_total.columns:
         for index in df_total.index.levels[0]:
             end_balance = df_monthly.loc[index][P2PParser.END_BALANCE_NAME][-1]
-            df_total.loc[index][P2PParser.END_BALANCE_NAME] = end_balance
+            df_total.loc[index, P2PParser.END_BALANCE_NAME] = end_balance
 
     # Write total results to file
     df_total.to_excel(writer, 'Gesamtergebnis')
