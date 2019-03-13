@@ -55,14 +55,14 @@ class P2PParser:
     TARGET_COLUMNS = [
         START_BALANCE_NAME,
         END_BALANCE_NAME,
-        TOTAL_INCOME,
-        INTEREST_PAYMENT,
         INVESTMENT_PAYMENT,
         REDEMPTION_PAYMENT,
         BUYBACK_PAYMENT,
+        INTEREST_PAYMENT,
         BUYBACK_INTEREST_PAYMENT,
         LATE_FEE_PAYMENT,
-        DEFAULTS]
+        DEFAULTS,
+        TOTAL_INCOME]
 
     def __init__(
             self, platform: str, date_range: Tuple[date, date],
@@ -367,6 +367,10 @@ def show_results(
     # Round all results to 2 digits
     df_monthly = df_monthly.round(2)
     df_total = df_total.round(2)
+
+    # Sort columns
+    df_monthly = df_monthly[P2PParser.TARGET_COLUMNS]
+    df_total = df_total[P2PParser.TARGET_COLUMNS]
 
     # Write monthly results to file
     writer = pd.ExcelWriter(output_file, date_format='%d.%m.%Y')
