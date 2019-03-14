@@ -588,7 +588,7 @@ class P2PParserTests(unittest.TestCase):
             list_of_dfs.append(df)
 
         self.run_show_results(
-            list_of_dfs, 'test_show_results.xlsx',
+            list_of_dfs, 'test_show_results_all.xlsx',
             RESULT_PREFIX + 'show_results_all.xlsx')
 
     def test_show_results_estateguru(self):
