@@ -368,6 +368,12 @@ def show_results(
     df_monthly = df_monthly.round(2)
     df_total = df_total.round(2)
 
+    # Make sure all target columns are present
+    for column in P2PParser.TARGET_COLUMNS:
+        if column not in df_monthly.columns:
+            df_monthly[column] = ''
+            df_total[column] = ''
+
     # Sort columns
     df_monthly = df_monthly[P2PParser.TARGET_COLUMNS]
     df_total = df_total[P2PParser.TARGET_COLUMNS]
