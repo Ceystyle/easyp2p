@@ -5,7 +5,7 @@
 
 from datetime import date
 import sys
-from typing import Tuple
+from typing import Sequence, Tuple
 import unittest
 
 import pandas as pd
@@ -546,8 +546,38 @@ class P2PParserTests(unittest.TestCase):
             'twino', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
-    def test_show_results(self):
-        """Test show_results"""
+    def run_show_results(
+            self, list_of_dfs: Sequence[pd.DataFrame], result_file: str,
+            exp_result_file: str) -> None:
+        """
+        Test the show_results functionality for the given platforms
+
+        In order to run these tests the known correct results need to be saved
+        in exp_result_file first.
+
+        Args:
+            list_of_dfs: List with the parsed account statements
+            result_file: output file of show_results
+            exp_result_file: file with expected results
+
+        """
+        p2p_parser.show_results(
+            list_of_dfs, result_file)
+
+        month_pivot_table = pd.read_excel(
+            result_file, 'Monatsergebnisse')
+        month_pivot_table_exp = pd.read_excel(
+            exp_result_file, 'Monatsergebnisse')
+        totals_pivot_table = pd.read_excel(
+            result_file, 'Gesamtergebnis')
+        totals_pivot_table_exp = pd.read_excel(
+            exp_result_file, 'Gesamtergebnis')
+
+        self.assertTrue(month_pivot_table.equals(month_pivot_table_exp))
+        self.assertTrue(totals_pivot_table.equals(totals_pivot_table_exp))
+
+    def test_show_results_all(self):
+        """Test show_results for all supported platforms"""
         list_of_dfs = []
 
         for platform in PLATFORMS:
@@ -557,20 +587,20 @@ class P2PParserTests(unittest.TestCase):
             df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
             list_of_dfs.append(df)
 
-        p2p_parser.show_results(
-            list_of_dfs, 'test_show_results.xlsx')
+        self.run_show_results(
+            list_of_dfs, 'test_show_results.xlsx',
+            RESULT_PREFIX + 'show_results_all.xlsx')
 
-        month_pivot_table = pd.read_excel(
-            'test_show_results.xlsx', 'Monatsergebnisse')
-        month_pivot_table_exp = pd.read_excel(
-            RESULT_PREFIX + 'show_results.xlsx', 'Monatsergebnisse')
-        totals_pivot_table = pd.read_excel(
-            'test_show_results.xlsx', 'Gesamtergebnis')
-        totals_pivot_table_exp = pd.read_excel(
-            RESULT_PREFIX + 'show_results.xlsx', 'Gesamtergebnis')
+    def test_show_results_estateguru(self):
+        """Test show_results for Estateguru"""
 
-        self.assertTrue(month_pivot_table.equals(month_pivot_table_exp))
-        self.assertTrue(totals_pivot_table.equals(totals_pivot_table_exp))
+        df = p2p_helper.get_df_from_file(
+            RESULT_PREFIX + 'estateguru_parser.csv')
+        df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
+
+        self.run_show_results(
+            [df], 'test_show_results_estateguru.xlsx',
+            RESULT_PREFIX + 'show_results_estateguru.xlsx')
 
 
 def are_files_equal(
