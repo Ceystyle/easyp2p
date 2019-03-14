@@ -111,7 +111,7 @@ def parse_statement(
         'Zins': parser.INTEREST_PAYMENT}
     rename_columns = {
         'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
-        'Zahlungsdatum': parser.DATE}
+        'Bestätigungsdatum': parser.DATE}
 
     unknown_cf_types = parser.parse_statement(
         '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
