@@ -74,9 +74,9 @@ class P2PParser:
 
         Args:
             platform: Name of the P2P platform
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statement was generated
-            input_file: file name including absolute path of the
+            input_file: File name including absolute path of the
                 downloaded account statement for this platform
 
         """
@@ -165,7 +165,7 @@ class P2PParser:
         Helper method to identify any unknown cash flow types.
 
         Args:
-            orig_cf_column: name of data frame column which contains
+            orig_cf_column: Name of data frame column which contains
                 the cash flow types as reported by the P2P platform
 
         Returns:
@@ -182,7 +182,7 @@ class P2PParser:
         Helper method to aggregate results by date and currency.
 
         Args:
-            value_column: name of the DataFrame column which contains the
+            value_column: Name of the DataFrame column which contains the
                 data to be aggregated
 
         """
@@ -200,10 +200,8 @@ class P2PParser:
         Helper method to determine start and end balances.
 
         Args:
-            balance_column: name of the DataFrame column which contains the
-                balances
-            value_column: name of the DataFrame column which contains the
-                amounts
+            balance_column: DataFrame column which contains the balances
+            value_column: DataFrame column which contains the amounts
             df: DataFrame which contains the balances
 
         """
@@ -230,14 +228,14 @@ class P2PParser:
         Parse the account statement from platform format to easyp2p format.
 
         Keyword Args:
-            date_format: date format which the platform uses
-            rename_columns: dictionary containing a mapping between platform
+            date_format: Date format which the platform uses
+            rename_columns: Dictionary containing a mapping between platform
                 and easyP2P column names
-            cashflow_types: dictionary containing a mapping between platform
+            cashflow_types: Dictionary containing a mapping between platform
                 and easyP2P cashflow types
-            orig_cf_column: name of the column in the platform account
+            orig_cf_column: Name of the column in the platform account
                 statement which contains the cash flow type
-            value_column: name of the DataFrame column which contains the
+            value_column: Name of the DataFrame column which contains the
                 amounts to be aggregated
 
         Returns:
@@ -312,9 +310,9 @@ def show_results(
     period between start and end date.
 
     Args:
-        list_of_dfs: list of data frames containing the parsed account
+        list_of_dfs: List of data frames containing the parsed account
             statements from the P2P platforms
-        output_file: absolute path of the output file
+        output_file: Absolute path of the output file
 
     Returns:
         True on success, False on failure
@@ -428,7 +426,7 @@ def _set_excel_column_width(
     Helper function to set Excel column width to header length + 1.
 
     Args:
-        worksheet: worksheet containing the columns to be formatted
+        worksheet: Worksheet containing the columns to be formatted
         df: DataFrame which was used for creating the worksheet
 
     """
