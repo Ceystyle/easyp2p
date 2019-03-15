@@ -16,6 +16,7 @@ from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
 import p2p_helper
+import xlsxwriter
 
 
 class P2PParser:
@@ -406,17 +407,26 @@ def show_results(
     total_ws = writer.sheets['Gesamtergebnis']
 
     monthly_ws.set_column('D:M', None, money_format)
-    length_list = [len(x) + 1 for x in df_monthly.columns]
-    column_offset = len(df_monthly.index.names)
-    for i, width in enumerate(length_list):
-        monthly_ws.set_column(i + column_offset, i + column_offset, width)
+    _set_excel_column_width(monthly_ws, df_monthly)
 
     total_ws.set_column('C:L', None, money_format)
-    length_list = [len(x) + 1 for x in df_total.columns]
-    column_offset = len(df_total.index.names)
-    for i, width in enumerate(length_list):
-        total_ws.set_column(i + column_offset, i + column_offset, width)
+    _set_excel_column_width(total_ws, df_total)
 
     writer.save()
 
     return True
+
+def _set_excel_column_width(
+            worksheet: xlsxwriter.worksheet, df: pd.DataFrame) -> None:
+    """
+    Helper function to set Excel column width to header length + 1.
+
+    Args:
+        worksheet: worksheet containing the columns to be formatted
+        df: DataFrame which was used for creating the worksheet
+
+    """
+    length_list = [len(x) + 1 for x in df.columns]
+    column_offset = len(df.index.names)
+    for i, width in enumerate(length_list):
+        worksheet.set_column(i + column_offset, i + column_offset, width)
