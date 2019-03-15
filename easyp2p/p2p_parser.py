@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
 
 """
 Module for parsing output files of P2P platforms and printing combined results.
@@ -22,11 +23,11 @@ import xlsxwriter
 class P2PParser:
 
     """
-    P2P parser for transforming account statements into easyP2P format.
+    Parser for transforming P2P platform account statements to easyp2p format.
 
     Each P2P platform uses a unique format for their account statements. The
     purpose of P2PParser is to provide parser methods for transforming those
-    files into a single unified easyP2P statement format.
+    files into a single unified easyp2p statement format.
 
     """
 
@@ -72,12 +73,11 @@ class P2PParser:
         Constructor of P2PParser class.
 
         Args:
-            platform (str): Name of the P2P platform
-            date_range (tuple(date, date)): date range
-                (start_date, end_date) for which the account statement was
-                generated.
-            input_file (str): file name including absolute path of the
-                downloaded account statement for this platform.
+            platform: Name of the P2P platform
+            date_range: date range (start_date, end_date) for which the account
+                statement was generated
+            input_file: file name including absolute path of the
+                downloaded account statement for this platform
 
         """
         self.platform = platform
@@ -88,9 +88,9 @@ class P2PParser:
         """
         Add a zero row for all months in date_range without cashflows.
 
-        To ensure that months without cashflows show up in the final output
+        To ensure that months without cash flows show up in the final output
         file this method will create one new row in the DataFrame self.df for
-        each month in date_range without cashflows.
+        each month in date_range without cash flows.
 
         """
         # Get a list of all months in date_range with no cashflows
@@ -121,12 +121,12 @@ class P2PParser:
         Get list of months in date_range which have no cashflows.
 
         This method will identify all months in date_range which do not contain
-        at least one cashflow in the provided DataFrame. A list of those months
-        is returned.
+        at least one cash flow in the provided DataFrame. A list of those
+        months is returned.
 
         Returns:
-            List[Tuple[date, date]]: list of month tuples
-                (start_of_month, end_of_month) which do not contain a cashflow.
+            List of month tuples (start_of_month, end_of_month) which do not
+            contain a cash flow
 
         """
         # Get a list of all months in date_range
@@ -150,7 +150,7 @@ class P2PParser:
         return list_of_months
 
     def _calculate_total_income(self):
-        """ Calculate total income for each row of the DataFrame"""
+        """ Calculate total income for each row of the DataFrame """
         income_columns = [
             self.INTEREST_PAYMENT,
             self.LATE_FEE_PAYMENT,
@@ -165,11 +165,12 @@ class P2PParser:
         Helper method to identify any unknown cash flow types.
 
         Args:
-            orig_cf_column (str): name of data frame column which contains
-            the cash flow types as reported by the P2P platform
+            orig_cf_column: name of data frame column which contains
+                the cash flow types as reported by the P2P platform
 
         Returns:
-            str: string consisting of all unknown cash flow types
+            Sorted comma separated string consisting of all unknown cash flow
+            types
 
         """
         unknown_cf_types = set(self.df[orig_cf_column].where(
@@ -181,7 +182,7 @@ class P2PParser:
         Helper method to aggregate results by date and currency.
 
         Args:
-            value_column (str): name of the DataFrame column which contains the
+            value_column: name of the DataFrame column which contains the
                 data to be aggregated
 
         """
@@ -203,7 +204,7 @@ class P2PParser:
                 balances
             value_column: name of the DataFrame column which contains the
                 amounts
-            df: DataFrame with the balances
+            df: DataFrame which contains the balances
 
         """
         df_balances = pd.DataFrame()
@@ -226,18 +227,18 @@ class P2PParser:
             value_column: Optional[str] = None,
             balance_column: Optional[str] = None) -> str:
         """
-        Parse the statement from platform format into easyP2P format.
+        Parse the account statement from platform format to easyp2p format.
 
         Keyword Args:
-            date_format (str): date format which the platform uses.
-            rename_columns (dict(str, str)): a dictionary containing a mapping
-                between platform and easyP2P column names.
-            cashflow_types (dict(str, str)): a dictionary containing a mapping
-                between platform and easyP2P cashflow types.
-            orig_cf_column (str): name of the column which contains the
-                platform cashflow type.
-            value_column (str): name of the DataFrame column which contains the
-                data to be aggregated.
+            date_format: date format which the platform uses
+            rename_columns: dictionary containing a mapping between platform
+                and easyP2P column names
+            cashflow_types: dictionary containing a mapping between platform
+                and easyP2P cashflow types
+            orig_cf_column: name of the column in the platform account
+                statement which contains the cash flow type
+            value_column: name of the DataFrame column which contains the
+                amounts to be aggregated
 
         """
         if rename_columns:
@@ -272,7 +273,8 @@ class P2PParser:
         else:
             unknown_cf_types = ''
 
-        # easyP2P (currently) only supports EUR
+        # If the platform does not explicitly report currencies assume that
+        # currency is EUR
         if self.CURRENCY not in self.df.columns:
             self.df[self.CURRENCY] = 'EUR'
 
@@ -306,12 +308,12 @@ def show_results(
     period between start and end date.
 
     Args:
-        df (pandas.DataFrame): data frame containing the combined data from
-            the P2P platforms
-        output_file (str): absolute path to the output file
+        list_of_dfs: list of data frames containing the parsed account
+            statements from the P2P platforms
+        output_file: absolute path of the output file
 
     Returns:
-        bool: True on success, False on failure
+        True on success, False on failure
 
     """
     df_monthly = pd.DataFrame()
