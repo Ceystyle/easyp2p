@@ -4,10 +4,10 @@
 """
 Module for parsing output files of P2P platforms and printing combined results.
 
-    Each P2P platform has a unique format for presenting investment results.
-    The purpose of this module is to provide parser methods to transform them
-    into a single output format. The combined output is aggregated and
-    written to an Excel file.
+Each P2P platform has a unique format for presenting investment results. The
+purpose of this module is to provide parser methods to transform them into a
+single output format. The combined output is aggregated and written to an Excel
+file.
 
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
@@ -239,6 +239,10 @@ class P2PParser:
                 statement which contains the cash flow type
             value_column: name of the DataFrame column which contains the
                 amounts to be aggregated
+
+        Returns:
+            Sorted comma separated string consisting of all unknown cash flow
+            types
 
         """
         if rename_columns:
