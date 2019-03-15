@@ -379,7 +379,8 @@ def show_results(
     df_total = df_total[P2PParser.TARGET_COLUMNS]
 
     # Write monthly results to file
-    writer = pd.ExcelWriter(output_file, date_format='%d.%m.%Y')
+    writer = pd.ExcelWriter(
+        output_file, date_format='%d.%m.%Y', engine='xlsxwriter')
     df_monthly.to_excel(writer, 'Monatsergebnisse')
 
     # Start and end balance columns were summed up as well if they are present.
@@ -397,6 +398,25 @@ def show_results(
 
     # Write total results to file
     df_total.to_excel(writer, 'Gesamtergebnis')
+
+    # Format columns in the Excel sheets
+    workbook = writer.book
+    money_format = workbook.add_format({'num_format': '0.00'})
+    monthly_ws = writer.sheets['Monatsergebnisse']
+    total_ws = writer.sheets['Gesamtergebnis']
+
+    monthly_ws.set_column('D:M', None, money_format)
+    length_list = [len(x) + 1 for x in df_monthly.columns]
+    column_offset = len(df_monthly.index.names)
+    for i, width in enumerate(length_list):
+        monthly_ws.set_column(i + column_offset, i + column_offset, width)
+
+    total_ws.set_column('C:L', None, money_format)
+    length_list = [len(x) + 1 for x in df_total.columns]
+    column_offset = len(df_total.index.names)
+    for i, width in enumerate(length_list):
+        total_ws.set_column(i + column_offset, i + column_offset, width)
+
     writer.save()
 
     return True
