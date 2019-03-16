@@ -16,8 +16,8 @@ from datetime import date
 from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
-import p2p_helper
 import xlsxwriter
+import p2p_helper
 
 
 class P2PParser:
@@ -421,7 +421,7 @@ def show_results(
     return True
 
 def _set_excel_column_width(
-            worksheet: xlsxwriter.worksheet, df: pd.DataFrame) -> None:
+        worksheet: xlsxwriter.worksheet, df: pd.DataFrame) -> None:
     """
     Helper function to set Excel column width to header length + 1.
 
