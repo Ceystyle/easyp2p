@@ -4,15 +4,18 @@
 """Module containing platform tests for easyp2p"""
 
 from datetime import date
+import os
 import sys
 from typing import Tuple
 import unittest
-
 import keyring
-from context import *
 
-app = QApplication(sys.argv)
-
+sys.path.insert(0, os.path.abspath(os.path.join(
+    os.path.dirname(__file__), '../easyp2p')))
+from easyp2p_tests import are_files_equal, RESULT_PREFIX
+from platforms import (
+    bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,
+    swaper, twino)
 
 class PlatformTests(unittest.TestCase):
     """Test downloading account statements from all supported platforms."""
@@ -233,3 +236,6 @@ class PlatformTests(unittest.TestCase):
             'p2p_downloads/twino_statement.xlsx',
             RESULT_PREFIX + 'download_twino_statement_no_cfs.xlsx',
             drop_header=True))
+
+if __name__ == '__main__':
+    unittest.main()
