@@ -51,20 +51,20 @@ class P2PPlatform:
         Constructor of P2P class.
 
         Args:
-            name (str): Name of the P2P platform
-            urls (dict[str, str]): Dictionary with URLs for login page
+            name: Name of the P2P platform
+            urls: Dictionary with URLs for login page
                 (key: 'login'), account statement page (key: 'statement')
                 and optionally logout page (key: 'logout')
-            logout_wait_until (bool): Expected condition in case
-                of successful logout.
+            logout_wait_until: Expected condition in case
+                of successful logout
 
         Keyword Args:
-            logout_locator (tuple[str, str]): locator of logout web element.
-            hover_locator (tuple[str, str]): locator of web element where the
-                mouse needs to hover in order to make logout button visible.
+            logout_locator: Locator of logout web element
+            hover_locator: Locator of web element where the
+                mouse needs to hover in order to make logout button visible
 
-        Throws:
-            RuntimeError: if no URL for login or statement page is provided.
+       Raises:
+            RuntimeError: If no URL for login or statement page is provided
 
         """
         self.name = name
@@ -90,11 +90,11 @@ class P2PPlatform:
         Start of context management protocol.
 
         Returns:
-            P2P: instance of P2P class
+            P2Platform: Instance of P2P class
 
-        Throws:
-            RuntimeError: if neither logout URL or a locator for the logout
-                button are provided.
+        Raises:
+            RuntimeError: If neither logout URL or a locator for the logout
+                button are provided
 
         """
         if 'logout' not in self.urls and self.logout_locator is None:
@@ -126,9 +126,9 @@ class P2PPlatform:
         """
         Initialize Chromedriver as webdriver.
 
-        This function initializes Chromedriver as webdriver, sets the
-        default download location to p2p_downloads relative to the current
-        working directory and opens a new maximized browser window.
+        Initializes Chromedriver as webdriver, sets the default download
+        location to p2p_downloads relative to the current working directory
+        and opens a new maximized browser window.
 
         """
         options = webdriver.ChromeOptions()
@@ -158,11 +158,11 @@ class P2PPlatform:
             self, name_field: str, password_field: str,
             credentials: Tuple[str, str], wait_until: bool,
             login_locator: Tuple[str, str] = None,
-            fill_delay: float = 0) -> None:
+            fill_delay: float = 0.) -> None:
         """
-        Log into the P2P platform with provided user name/password.
+        Log into the P2P platform with using the provided credentials.
 
-        This function performs the login procedure for the P2P site.
+        This method performs the login procedure for the P2P website.
         It opens the login page and fills in user name and password.
         Some P2P sites only show the user name and password field after
         clicking a button whose locator can be provided by the optional
@@ -172,24 +172,23 @@ class P2PPlatform:
         to the name field, too.
 
         Args:
-            name_field (str): name of web element where the user name
-                has to be entered.
-            password_field (str): name of web element where the password
-                has to be entered.
-            credentials (tuple[str, str]): login information: (username,
-                password)
-            wait_until (bool): Expected condition in case of
-                success.
+            name_field: Name of web element where the user name has to be
+                entered
+            password_field: Name of web element where the password has to be
+                entered
+            credentials: Tuple (username, password) containing login
+                credentials
+            wait_until: Expected condition in case of successful login
 
         Keyword Args:
-            login_locator (tuple[str, str]): locator of web element which has
-                to be clicked in order to open login form.
-            fill_delay (float): a small delay between filling in password
-                and user name fields.
+            login_locator: Locator of web element which has to be clicked in
+                order to open login form.
+            fill_delay: Delay in seconds between filling in password and user
+                name fields
 
-        Throws:
-            RuntimeError: - if login or password fields cannot be found
-                          - if loading the page takes too long
+        Raises:
+            RuntimeError: - If login or password fields cannot be found
+                          - If loading the page takes too long
 
         """
         # Open the login page
@@ -240,7 +239,7 @@ class P2PPlatform:
         self.logged_in = True
 
     def open_account_statement_page(
-            self, title: str, check_locator: Tuple[str, str]) -> None:
+            self, check_title: str, check_locator: Tuple[str, str]) -> None:
         """
         Open account statement page of the P2P platform.
 
@@ -249,21 +248,20 @@ class P2PPlatform:
         attribute of the P2P class.
 
         Args:
-            title (str): (part of the) window title of the account statement
-                page.
-            check_locator (tuple[str, str]): locator of a web element which
-                must be present if the account statement page loaded
-                successfully.
+            check_title: String which must be contained in the account
+                statement page window title if the page loaded successfully
+            check_locator: Locator of a web element which must be present if
+                the account statement page loaded successfully
 
-        Throws:
-            RuntimeError: - if title of the page is not equal to provided one
-                          - if loading of page takes too long
+        Raises:
+            RuntimeError: - If title of the page does not contain check_title
+                          - If loading of page takes too long
 
         """
         try:
             self.driver.get(self.urls['statement'])
             self.wdwait(EC.presence_of_element_located(check_locator))
-            assert title in self.driver.title
+            assert check_title in self.driver.title
         except (AssertionError, TimeoutException):
             raise RuntimeError(
                 '{0}-Kontoauszugsseite konnte nicht geladen werden!'
@@ -274,25 +272,24 @@ class P2PPlatform:
             wait_until: bool,
             hover_locator: Optional[Tuple[str, str]] = None) -> None:
         """
-        Logout of P2P platform using the provided logout button.
+        P2P platform logout using the provided logout button.
 
-        This function performs the logout procedure for P2P sites
+        This method performs the logout procedure for P2P sites
         where a button needs to be clicked to logout. For some sites the
         button only becomes clickable after hovering over a certain element.
-        This element is provided by the optional hover_elem variable.
+        This element is provided by the optional hover_locator variable.
 
         Args:
-            logout_locator (tuple[str, str]): locator of logout button.
-            wait_until (bool): Expected condition in case of
-                successful logout.
+            logout_locator: Locator of logout button
+            wait_until: Expected condition in case of successful logout
 
         Keyword Args:
-            hover_locator (str): locator of web element over which the mouse
-                needs to hover in order to make the logout button visible.
+            hover_locator: Locator of web element over which the mouse
+                needs to hover in order to make the logout button visible
 
-        Throws:
-            RuntimeWarning: if loading of page takes too long or the download
-                button cannot be found.
+        Raises:
+            RuntimeWarning: - If loading of page takes too long
+                            - If the download button cannot be found
 
         """
         try:
@@ -308,21 +305,19 @@ class P2PPlatform:
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
 
-    def logout_by_url(
-            self, wait_until: bool) -> None:
+    def logout_by_url(self, wait_until: bool) -> None:
         """
-        Logout of P2P platform using the provided URL.
+        P2P platform logout using the provided URL.
 
-        This function performs the logout procedure for P2P sites
+        This method performs the logout procedure for P2P sites
         where the logout page can by accessed by URL. The URL itself is
         provided in the urls dict attribute of the P2P class.
 
         Args:
-            wait_until (bool): Expected condition in case of
-                successful logout
+            wait_until: Expected condition in case of successful logout
 
-        Throws:
-            RuntimeWarning: if loading of page takes too long
+        Raises:
+            RuntimeWarning: If loading of logout page takes too long
 
         """
         try:
@@ -338,33 +333,33 @@ class P2PPlatform:
             date_format: str, wait_until: bool = None,
             submit_btn_locator: Tuple[str, str] = None) -> None:
         """
-        Generate acc. statement for platforms where date fields can be edited.
+        Generate account statement when date fields can be edited directly.
 
-        For P2P sites where the two date range fields for account statement
-        generation can be edited directly. The function will locate the two
+        This method generates the account statement for P2P sites where the
+        two date range fields can be edited directly. It will locate the two
         date fields, enter start and end date and then start the account
-        statement generation.
+        statement generation by sending the RETURN key or optionally by
+        pushing the submit button provided in the submit_btn_locator variable.
 
         Args:
-            date_range (tuple(date, date)): date range
-                (start_date, end_date) for which the account statement must
-                be generated.
-            start_locator (tuple[str, str]): locator of field where the start
-                date needs to be entered.
-            end_element (tuple[str, str]): locator of field where the end date
-                needs to be entered.
-            date_format (str): date format.
+            date_range: Date range (start_date, end_date) for which the account
+                statement must be generated
+            start_locator: Locator of web element where the start date needs
+                to be entered
+            end_element: Locator of web element where the end date needs to be
+                entered.
+            date_format: Date format which the platform uses
 
         Keyword Args:
-            wait_until (bool): Expected condition in case of
-                successful account statement generation.
-            submit_btn_locator (tuple[str, str]): locator of button which needs
-                to clicked to start account statement generation. Not all P2P
-                platforms require this.
+            wait_until: Expected condition in case of successful account
+                statement generation
+            submit_btn_locator: Locator of button which needs to clicked to
+                start account statement generation. Not all P2P platforms
+                require this.
 
-        Throws:
-            RuntimeError: - if a web element cannot be found
-                          - if the generation of the account statement
+        Raises:
+            RuntimeError: - If a web element cannot be found
+                          - If the generation of the account statement
                             takes too long
 
         """
@@ -421,30 +416,29 @@ class P2PPlatform:
 
         For P2P sites where the two date range fields for account
         statement generation cannot be edited directly, but must be
-        clicked in a calendar. The function will locate the two calendars,
+        clicked in a calendar. The method will locate the two calendars,
         determine how many clicks are necessary to get to the
         correct month, perform the clicks and finally locate and click
         the chosen day.
 
         Args:
-            date_range (tuple(date, date)): date range
-                (start_date, end_date) for which the account statement must
-                be generated.
-            default_dates (tuple[date, date]): the pre-filled
-                default dates of the two date pickers.
-            arrows (dict[str, str]): dictionary with three entries: class name
-                of left arrows, class name of right arrows,
-                tag name of arrows.
-            days_table (dict[str, {str, bool}]): dictionary with four entries:
-                class name of day table, id of day table, id of current day,
-                is day contained in id?.
-            calendar_locator (tuple[tuple[str, str], ...]): tuple containing
-                locators for the two calendars. It must have either length 1
-                or 2.
+            date_range: Date range (start_date, end_date) for which the
+                account statement must be generated
+            default_dates: Pre-filled default dates of the two date pickers
+            arrows: Dictionary with three entries: class name of left arrows
+                (left_arrow_class), class name of right arrows
+                (right_arrow_class), tag name of arrows (arrow_tag)
+            days_table: Dictionary with four entries:
+                class name of day table ('class name'),
+                id of day table ('table_id'),
+                id of current day ('current_day_id'),
+                is day contained in id? ('id_from_calendar')
+            calendar_locator: Tuple containing locators for the two calendars.
+                It must have either length 1 or 2
 
-        Throws:
-            RuntimeError: - if a web element cannot be found
-                          - if the generation of the account statement
+        Raises:
+            RuntimeError: - If a web element cannot be found
+                          - If the generation of the account statement
                             takes too long
 
         """
@@ -505,18 +499,20 @@ class P2PPlatform:
         Find and click the given day in the provided calendar.
 
         Args:
-            calendar_ (WebElement): web element which needs to be clicked
-                in order to open the calendar
-            day (int): day number of the target date
-            months (int): how many months in the past/future
-                (negative/positive) is the target date
-            previous_month (WebElement): web element to switch calendar to the
-                previous month
-            next_month (WebElement): web element to switch calendar to the
-                next month
-            days_table (dict[str, {str, bool}]): dictionary with four entries:
-                class name of day table, id of day table, id of current day,
-                is day contained in id?.
+            calendar_: web element which needs to be clicked in order to open
+                the calendar
+            day: day (as int) of the target date
+            months: how many months in the past/future (negative/positive) is
+                the target date compared to default date
+            previous_month: web element which needs to be clicked to switch the
+                calendar to the previous month
+            next_month: web element which needs to be clicked to switch the
+                calendar to the next month
+            days_table: Dictionary with four entries:
+                class name of day table ('class name'),
+                id of day table ('table_id'),
+                id of current day ('current_day_id'),
+                is day contained in id? ('id_from_calendar')
 
         """
         # Open the calendar and wait until the buttons for changing the month
@@ -559,26 +555,27 @@ class P2PPlatform:
         """
         Download account statement by clicking the provided button.
 
-        Downloads the generated account statement and checks
-        if the download was successful. If the download was successful,
-        it will also call the rename_statement function to rename
-        the downloaded file to the file name chosen by the user.
+        Downloads the generated account statement by clicking the provided
+        download button. Some P2P sites require further actions before the
+        button is clickable, which can be provided by the optional actions
+        variable. The method also checks if the download was successful.
+        If true, the _rename_statement method is called to rename the
+        downloaded file.
 
         Args:
-            default_file_name (str): default file name without path for account
+            default_file_name: Default file name without path for account
                 statement downloads, chosen by the P2P platform
-            download_locator (tuple[str, str]): locator of the download button.
+            download_locator: Locator of the download button
 
         Keyword Args:
-            actions (str): 'move to element' or None: some P2P sites
-                require that the mouse hovers over a certain element
-                in order to make the download button clickable.
+            actions: 'move to element' or None: some P2P sites require that the
+                mouse hovers over the download button to make it clickable
 
-        Throws:
-            RuntimeError: - if the download button cannot be found
-                          - if the downloaded file cannot be found and there
+        Raises:
+            RuntimeError: - If the download button cannot be found
+                          - If the downloaded file cannot be found and there
                             is no active download
-                          - if more than one active download of
+                          - If more than one active download of
                             default_file_name is found
 
         """
@@ -630,38 +627,35 @@ class P2PPlatform:
         file_name = [file for file in new_file_list if file not in file_list][0]
         self._rename_statement(file_name)
 
-    def wdwait(
-            self, wait_until: bool,
-            delay: float = 5.0) -> WebElement:
+    def wdwait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
 
         Args:
-            wait_until (bool): expected condition for which the
-                webdriver should wait.
+            wait_until: Expected condition for which the webdriver should wait
 
         Keyword Args:
-            delay (float): maximal waiting time in seconds
+            delay: Maximal waiting time in seconds
 
         Returns:
-            WebElement: WebElement which WebDriverWait waited for.
+            WebElement which WebDriverWait waited for.
 
         """
         return WebDriverWait(self.driver, delay).until(wait_until)
 
     def _rename_statement(self, file_name: str) -> None:
         """
-        Rename downloaded statement to default_file_name.
+        Rename downloaded statement to platform_statement.suffix.
 
         Will rename the downloaded statement from the
-        default name chosen by the P2P platform to
-        default_file_name.
+        default name chosen by the P2P platform to platform_statement.suffix.
 
         Args:
-            file_name (str): file name of the downloaded account statement
+            file_name: file name including path of the downloaded account
+                statement
 
-        Throws:
-            RuntimeError: if the downloaded statement cannot be found
+        Raises:
+            RuntimeError: If the downloaded statement cannot be found
 
         """
         error_msg = (
