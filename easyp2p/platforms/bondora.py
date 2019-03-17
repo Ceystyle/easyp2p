@@ -36,8 +36,6 @@ def download_statement(
         credentials (tuple[str, str]): (username, password) for Bondora
 
     """
-    # TODO: check if the input variables are sane, also for the other
-    # open_selenium_* functions
     urls = {
         'login': 'https://www.bondora.com/de/login',
         'logout': 'https://www.bondora.com/de/authorize/logout',
@@ -97,21 +95,22 @@ def download_statement(
         # Start the account statement generation
         driver.find_element_by_xpath(xpaths['search_btn']).click()
 
-        # Wait until statement generation is finished. If the statement cannot
-        # be found a TimeoutException is raised. That can happen in case of
-        # errors or when there were no cashflows in the requested period.
-        try:
-            bondora.wdwait(
-                EC.text_to_be_present_in_element(
+        # Wait until statement generation is finished. If there were no
+        # cashflows in date_range set _no_payments to True.
+        conditions = [
+            EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['start_date']),
                     '{0} {1}'.format(
-                        date_range[0].strftime('%b'), date_range[0].year)))
+                        date_range[0].strftime('%b'), date_range[0].year)),
+            EC.text_to_be_present_in_element(
+                (By.XPATH, xpaths['no_payments']), 'Keine Zahlungen gefunden')]
+        try:
+            bondora.wdwait(
+                p2p_helper.one_of_many_expected_conditions_true(conditions))
+            _no_payments = bool('Keine Zahlungen gefunden' in \
+                    driver.find_element_by_xpath(xpaths['no_payments']).text)
         except TimeoutException as err:
-            if 'Keine Zahlungen gefunden' in \
-                    driver.find_element_by_xpath(xpaths['no_payments']).text:
-                _no_payments = True
-            else:
-                raise TimeoutException(err)
+            raise TimeoutException(err)
 
         if _no_payments:
             df = pd.DataFrame()
