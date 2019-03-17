@@ -21,12 +21,12 @@ from platforms import (
 class WorkerThread(QThread):
 
     """
-    Worker thread to offload calls to p2p_webdriver, p2p_parser, p2p_results.
+    Worker thread to offload calls to p2p_platform and p2p_parser.
 
     This class is responsible for accessing the P2P platform methods in
-    p2p_webdriver and to prepare the results. The main reason for separating
-    the calls to p2p_webdriver, p2p_parser and p2p_results from the main thread
-    is to keep the GUI responsive while the webdriver is working.
+    p2p_platform and to prepare the results. The main reason for separating
+    the calls from the main thread is to keep the GUI responsive while the
+    webdriver is working.
 
     """
 
@@ -47,18 +47,17 @@ class WorkerThread(QThread):
         Constructor.
 
         Args:
-            platforms (set[str]): set containing the names of all selected P2P
+            platforms: Set containing the names of all selected P2P
                 platforms
-            credentials (dict[str, tuple[str, str]]): keys are the names of the
-                P2P platforms, values are tuples with (username, password)
-            date_range (tuple(datetime.date, datetime.date)): date range
-                (start_date, end_date) for which the account statements must
-                be generated.
-            output_file (str): name of the Excel file (including absolute path)
-                to which the results should be written.
+            credentials: Dictionary where keys are the names of the
+                P2P platforms, values are tuples (username, password)
+            date_range: Date range (start_date, end_date) for which the
+                account statements must be generated
+            output_file: Name of the Excel file (including absolute path)
+                to which the results will be written
 
         Keyword Args:
-            parent (QThread): reference to the parent thread
+            parent: Reference to the parent thread
 
         """
         super(WorkerThread, self).__init__(parent)
@@ -68,18 +67,18 @@ class WorkerThread(QThread):
         self.output_file = output_file
         self.abort = False
 
+# TODO: merge get_p2p_function and get_p2p_parser
     def get_p2p_function(self, platform: str) \
             -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
         """
-        Helper method to get the name of the appropriate webdriver function.
+        Helper method to get the download_statement method of the platform.
 
         Args:
-            platform (str): name of the P2P platform
+            platform: Name of the P2P platform
 
         Returns:
-            Callable[[Tuple[date, date], Tuple[str, str]], None]:
-                p2p_platforms.download_platform_statement function for handling
-                this P2P platform or None if the function cannot be found.
+            platform.download_statement function or None if the function cannot
+            be found
 
         """
         try:
@@ -101,12 +100,11 @@ class WorkerThread(QThread):
         Helper method to get the name of the appropriate parser.
 
         Args:
-            platform (str): name of the P2P platform
+            platform: Name of the P2P platform
 
         Returns:
-            Callable[[], Tuple[pd.DataFrame, str]]: p2p_parser.* function for
-                parsing this P2P platform or None if the function cannot be
-                found.
+            platform.parse_statement function or None if the function cannot
+            be found
 
         """
         try:
@@ -127,8 +125,8 @@ class WorkerThread(QThread):
         Helper method for printing ignore and error message to GUI.
 
         Args:
-            platform (str): name of the P2P platform
-            error_msg (str): error message
+            platform: Name of the P2P platform
+            error_msg: Error message to print
 
         """
         self.update_progress_text.emit(error_msg, self.RED)
@@ -142,14 +140,14 @@ class WorkerThread(QThread):
         Helper method for calling the parser and appending the dataframe list.
 
         Args:
-            platform (str): name of the P2P platform
-            list_of_dfs (list(pd.DataFrame)): list of DataFrames, one DataFrame
-                for each successfully parsed P2P platform
+            platform: Name of the P2P platform
+            list_of_dfs: List of DataFrames, one DataFrame for each
+                successfully parsed P2P platform
 
         Returns:
-            list(pd.DataFrame): if successful the provided list_of_dfs with one
-                DataFrame appended, if not then the original list_of_dfs is
-                returned
+            If successful the provided list_of_dfs with one DataFrame for this
+            platform appended, if not successful the original list_of_dfs is
+            returned
 
         """
         parser = self.get_p2p_parser(platform)
@@ -176,15 +174,14 @@ class WorkerThread(QThread):
             self, platform: str,
             func: Callable[[Tuple[date, date], Tuple[str, str]], None]) -> bool:
         """
-        Helper method for calling the open_selenium_* function.
+        Helper method for calling the download_statement functions.
 
         Args:
-            platform (str): name of the P2P platform
-            func (Callable[[Tuple[date, date], Tuple[str, str]], None]):
-                p2p_platform.open_selenium_* function to run
+            platform: Name of the P2P platform
+            func: platform.download_statement method to run
 
         Returns:
-            bool: True if function was run without errors, False otherwise.
+            True if function finished without errors, False otherwise
 
         """
         if self.credentials[platform] is None:
@@ -210,9 +207,9 @@ class WorkerThread(QThread):
         """
         Get and output results from all selected P2P platforms.
 
-        Iterates over all selected P2P platforms, gets the results from
-        p2p_webdriver and outputs the results. After each platform the progress
-        bar is increased.
+        Iterates over all selected P2P platforms, downloads the account
+        statements, parses them and writes the results to an Excel file. After
+        each finished platform the progress bar is increased.
 
         """
         list_of_dfs: List[pd.DataFrame] = []
