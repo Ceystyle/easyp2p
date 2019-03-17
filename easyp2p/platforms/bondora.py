@@ -99,9 +99,8 @@ def download_statement(
         # cashflows in date_range set _no_payments to True.
         conditions = [
             EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['start_date']),
-                    '{0} {1}'.format(
-                        date_range[0].strftime('%b'), date_range[0].year)),
+                (By.XPATH, xpaths['start_date']), '{0} {1}'.format(
+                    date_range[0].strftime('%b'), date_range[0].year)),
             EC.text_to_be_present_in_element(
                 (By.XPATH, xpaths['no_payments']), 'Keine Zahlungen gefunden')]
         try:
