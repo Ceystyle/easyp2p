@@ -82,11 +82,9 @@ def download_statement(
             submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
 
         try:
-            if iuvo.driver.find_element_by_class_name('text-center').text \
-                    == 'Keine passenden Daten!':
-                no_cashflows = True
-            else:
-                no_cashflows = False
+            no_cashflows = bool(
+                iuvo.driver.find_element_by_class_name('text-center').text \
+                == 'Keine passenden Daten!')
         except NoSuchElementException:
             no_cashflows = False
 
@@ -95,8 +93,8 @@ def download_statement(
             df = pd.DataFrame()
             df.to_excel('p2p_downloads/iuvo_statement.xlsx')
         else:
-            iuvo.download_statement('AccountStatement-{0}*'.format(
-                date.today().strftime('%Y%m%d')),
+            iuvo.download_statement(
+                'AccountStatement-{0}*'.format(date.today().strftime('%Y%m%d')),
                 (By.CLASS_NAME, 'p2p-download-full-list'))
 
 
@@ -152,7 +150,5 @@ def parse_statement(
     unknown_cf_types = parser.parse_statement(
         '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
         'Transaction Type', 'Turnover', 'Balance')
-
-    # TODO: get start and end balance
 
     return (parser.df, unknown_cf_types)
