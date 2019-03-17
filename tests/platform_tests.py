@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2019 Niko Sandschneider
 
-"""Module containing platform tests for easyp2p"""
+"""Module containing all P2P platform download tests for easyp2p."""
 
 from datetime import date
 import os
@@ -18,10 +18,11 @@ from platforms import (
     swaper, twino)
 
 class PlatformTests(unittest.TestCase):
+
     """Test downloading account statements from all supported platforms."""
 
     def setUp(self):
-        """Initializes the default date ranges for the tests."""
+        """Initialize the default date ranges for the tests."""
         self.date_range = (date(2018, 9, 1), date(2018, 12, 31))
         self.date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
 
@@ -30,10 +31,10 @@ class PlatformTests(unittest.TestCase):
         Helper method to get credentials from the keyring.
 
         Args:
-            platform (str): Name of the P2P platform
+            platform: Name of the P2P platform
 
         Returns:
-            Tuple[str, str]: (username, password) for the P2P platform
+            Tuple (username, password) for the P2P platform
 
         """
         if keyring.get_keyring():
@@ -47,7 +48,7 @@ class PlatformTests(unittest.TestCase):
         return (username, password)
 
     def test_download_bondora_statement(self) -> None:
-        """Test download_bondora_statement"""
+        """Test download_bondora_statement."""
         credentials = self.get_credentials_from_keyring('Bondora')
         bondora.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
@@ -55,9 +56,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_bondora_statement.csv'))
 
     def test_download_bondora_statement_no_cfs(self) -> None:
-        """
-        Test download_bondora_statement when no cashflows exist in date range
-        """
+        """Test Bondora download when there are no cashflows."""
         credentials = self.get_credentials_from_keyring('Bondora')
         bondora.download_statement(
             self.date_range_no_cfs, credentials)
@@ -66,7 +65,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_bondora_statement_no_cfs.csv'))
 
     def test_download_dofinance_statement(self):
-        """Test download_dofinance_statement function"""
+        """Test download_dofinance_statement function."""
         credentials = self.get_credentials_from_keyring('DoFinance')
         dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
         dofinance.download_statement(
@@ -76,17 +75,15 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_dofinance_statement.xlsx'))
 
     def test_download_dofinance_statement_no_cfs(self):
-        """
-        Test download_dofinance_statement when no cashflows exist in date range
-        """
+        """Test DoFinance download when there are no cashflows."""
         credentials = self.get_credentials_from_keyring('DoFinance')
         dofinance.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
             'p2p_downloads/dofinance_statement.xlsx',
-            RESULT_PREFIX +'download_dofinance_statement_no_cfs.xlsx'))
+            RESULT_PREFIX + 'download_dofinance_statement_no_cfs.xlsx'))
 
     def test_download_estateguru_statement(self):
-        """Test download_estateguru_statement"""
+        """Test download_estateguru_statement."""
         credentials = self.get_credentials_from_keyring('Estateguru')
         estateguru.download_statement(
             self.date_range, credentials)
@@ -99,7 +96,7 @@ class PlatformTests(unittest.TestCase):
             'p2p_downloads/estateguru_statement.csv'))
 
     def test_download_grupeer_statement(self):
-        """Test download_grupeer_statement"""
+        """Test download_grupeer_statement."""
         credentials = self.get_credentials_from_keyring('Grupeer')
         grupeer.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
@@ -107,9 +104,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_grupeer_statement.xlsx'))
 
     def test_download_grupeer_statement_no_cfs(self):
-        """
-        Test download_grupeer_statement if there are no cashflows in date_range
-        """
+        """Test Grupeer download when there are no cashflows in date_range."""
         credentials = self.get_credentials_from_keyring('Grupeer')
         grupeer.download_statement(
             self.date_range_no_cfs, credentials)
@@ -118,7 +113,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_grupeer_statement_no_cfs.xlsx'))
 
     def test_download_iuvo_statement(self):
-        """Test download_iuvo_statement"""
+        """Test download_iuvo_statement."""
         credentials = self.get_credentials_from_keyring('Iuvo')
         iuvo.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
@@ -126,10 +121,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_iuvo_statement.xlsx'))
 
     def test_download_iuvo_statement_no_cfs(self):
-        """
-        Test download_iuvo_statement when there are no cashflows in
-        date_range
-        """
+        """Test Iuvo download when there are no cashflows in date_range."""
         credentials = self.get_credentials_from_keyring('Iuvo')
         iuvo.download_statement(
             self.date_range_no_cfs, credentials)
@@ -138,7 +130,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_iuvo_statement_no_cfs.xlsx'))
 
     def test_download_mintos_statement(self):
-        """Test download_mintos_statement"""
+        """Test download_mintos_statement."""
         credentials = self.get_credentials_from_keyring('Mintos')
         mintos.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
@@ -146,9 +138,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_mintos_statement.xlsx'))
 
     def test_download_mintos_statement_no_cfs(self):
-        """
-        Test download_mintos_statement when there is no cashflow in date_range
-        """
+        """Test Mintos download when there are no cashflows."""
         credentials = self.get_credentials_from_keyring('Mintos')
         mintos.download_statement(
             self.date_range_no_cfs, credentials)
@@ -157,7 +147,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_mintos_statement_no_cfs.xlsx'))
 
     def test_download_peerberry_statement(self):
-        """Test download_peerberry_statement"""
+        """Test download_peerberry_statement."""
         credentials = self.get_credentials_from_keyring('PeerBerry')
         peerberry.download_statement(
             self.date_range, credentials)
@@ -166,10 +156,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_peerberry_statement.csv'))
 
     def test_download_peerberry_statement_no_cfs(self):
-        """
-        Test download_peerberry_statement when there is no cashflow in
-        date_range
-        """
+        """Test Peerberry download when there are no cashflows."""
         credentials = self.get_credentials_from_keyring('PeerBerry')
         peerberry.download_statement(
             self.date_range_no_cfs, credentials)
@@ -178,7 +165,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_peerberry_statement_no_cfs.csv'))
 
     def test_download_robocash_statement(self):
-        """Test download_robocash_statement function"""
+        """Test download_robocash_statement function."""
         credentials = self.get_credentials_from_keyring('Robocash')
         robocash.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
@@ -186,10 +173,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_robocash_statement.xls'))
 
     def test_download_robocash_statement_no_cfs(self):
-        """
-        Test download_robocash_statement function when there is no cashflow in
-        date_range
-        """
+        """Test Robocash download when there are no cashflows in date_range."""
         credentials = self.get_credentials_from_keyring('Robocash')
         robocash.download_statement(
             self.date_range_no_cfs, credentials)
@@ -198,7 +182,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_robocash_statement_no_cfs.xls'))
 
     def test_download_swaper_statement(self):
-        """Test download_swaper_statement function"""
+        """Test download_swaper_statement function."""
         credentials = self.get_credentials_from_keyring('Swaper')
         swaper.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
@@ -206,9 +190,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_swaper_statement.xlsx'))
 
     def test_download_swaper_statement_no_cfs(self) -> None:
-        """
-        Test download_swaper_statement when no cashflows exist in date range
-        """
+        """Test Swaper download when there are no cashflows."""
         credentials = self.get_credentials_from_keyring('Swaper')
         swaper.download_statement(
             self.date_range_no_cfs, credentials)
@@ -217,7 +199,7 @@ class PlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'download_swaper_statement_no_cfs.xlsx'))
 
     def test_download_twino_statement(self):
-        """Test download_twino_statement"""
+        """Test download_twino_statement."""
         credentials = self.get_credentials_from_keyring('Twino')
         twino.download_statement(self.date_range, credentials)
         self.assertTrue(are_files_equal(
@@ -226,9 +208,7 @@ class PlatformTests(unittest.TestCase):
             drop_header=True))
 
     def test_download_twino_statement_no_cfs(self):
-        """
-        Test download_twino_statement when no cashflows exist in date range
-        """
+        """Test Twino download when there are no cashflows."""
         credentials = self.get_credentials_from_keyring('Twino')
         twino.download_statement(
             self.date_range_no_cfs, credentials)
@@ -236,6 +216,10 @@ class PlatformTests(unittest.TestCase):
             'p2p_downloads/twino_statement.xlsx',
             RESULT_PREFIX + 'download_twino_statement_no_cfs.xlsx',
             drop_header=True))
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
