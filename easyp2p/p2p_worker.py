@@ -12,7 +12,11 @@ from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 
 import p2p_parser
-from platforms import *
+# Ignore unused import warning: the platforms are implicitly used in
+# get_p2p_function and get_p2p_parser
+from platforms import (
+    bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,
+    swaper, twino)
 
 class WorkerThread(QThread):
 
