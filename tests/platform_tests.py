@@ -5,13 +5,11 @@
 
 from datetime import date
 import os
-import sys
 from typing import Tuple
 import unittest
 import keyring
 
-sys.path.insert(0, os.path.abspath(os.path.join(
-    os.path.dirname(__file__), '../easyp2p')))
+import context
 from easyp2p_tests import are_files_equal, RESULT_PREFIX
 from platforms import (
     bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,

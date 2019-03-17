@@ -13,7 +13,14 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
 
-from context import *
+import context
+import p2p_helper
+import p2p_parser
+from platforms import (
+    bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,
+    swaper, twino)
+from ui.main_window import MainWindow
+from ui.progress_window import ProgressWindow
 
 PLATFORMS = {
     'Bondora': 'csv',
