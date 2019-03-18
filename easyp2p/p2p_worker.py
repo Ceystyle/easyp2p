@@ -68,6 +68,33 @@ class WorkerThread(QThread):
         self.abort = False
 
 # TODO: merge get_p2p_function and get_p2p_parser
+    def get_platform_method(self, platform: str, method_name: str) \
+            -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
+        """
+        Helper method to get methods from the platform modules.
+
+        Args:
+            platform: Name of the P2P platform/module
+            method_name: Name of the module method to get
+
+        Returns:
+            platform.method_name method or None if the module/method cannot
+            be found
+
+        """
+        try:
+            func = getattr(
+                getattr(sys.modules[__name__], platform.lower()),
+                method_name)
+        except AttributeError:
+            error_message = (
+                'Methode {0} konnte nicht gefunden werden. Ist {0}.py '
+                'vorhanden?'.format(method_name, platform.lower()))
+            self.update_progress_text.emit(error_message, self.RED)
+            return None
+        else:
+            return func
+
     def get_p2p_function(self, platform: str) \
             -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
         """
