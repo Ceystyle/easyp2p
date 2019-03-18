@@ -94,58 +94,6 @@ class WorkerThread(QThread):
         else:
             return func
 
-    def get_p2p_function(self, platform: str) \
-            -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
-        """
-        Helper method to get the download_statement method of the platform.
-
-        Args:
-            platform: Name of the P2P platform
-
-        Returns:
-            platform.download_statement function or None if the function cannot
-            be found
-
-        """
-        try:
-            func = getattr(
-                getattr(sys.modules[__name__], platform.lower()),
-                'download_statement')
-        except AttributeError:
-            error_message = (
-                'Funktion zum Öffnen von {0} konnte nicht gefunden werden. '
-                'Ist {0}.py vorhanden?'.format(platform.lower()))
-            self.update_progress_text.emit(error_message, self.RED)
-            return None
-        else:
-            return func
-
-    def get_p2p_parser(self, platform: str) \
-            -> Optional[Callable[[], Tuple[pd.DataFrame, str]]]:
-        """
-        Helper method to get the name of the appropriate parser.
-
-        Args:
-            platform: Name of the P2P platform
-
-        Returns:
-            platform.parse_statement function or None if the function cannot
-            be found
-
-        """
-        try:
-            parser = getattr(
-                getattr(sys.modules[__name__], platform.lower()),
-                'parse_statement')
-        except AttributeError:
-            error_message = (
-                'Parser für {0} konnte nicht gefunden werden. '
-                'Ist {0}.py vorhanden?'.format(platform.lower()))
-            self.update_progress_text.emit(error_message, self.RED)
-            return None
-        else:
-            return parser
-
     def ignore_platform(self, platform: str, error_msg: str) -> None:
         """
         Helper method for printing ignore and error message to GUI.
