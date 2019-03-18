@@ -80,7 +80,7 @@ def get_df_from_file(input_file: str) -> pd.DataFrame:
     try:
         if file_format == '.csv':
             df = pd.read_csv(input_file)
-        elif file_format == '.xlsx' or file_format == '.xls':
+        elif file_format in ('.xlsx', '.xls'):
             df = pd.read_excel(input_file)
         else:
             raise RuntimeError(
