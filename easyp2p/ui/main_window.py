@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
 
-"""Module implementing MainWindow, the main window of easyP2P."""
+"""Module implementing MainWindow, the main window of easyp2p."""
 
 import calendar
 from datetime import date
@@ -9,6 +9,7 @@ import os
 from typing import Callable
 
 from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
 
@@ -21,14 +22,14 @@ from .Ui_main_window import Ui_MainWindow
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
-    """This class defines the main window of easyP2P."""
+    """This class defines the main window of easyp2p."""
 
     def __init__(self, parent=None):
         """
-        Constructor.
+        Constructor of MainWindow.
 
         Keyword Args:
-        parent (QWidget): reference to the parent widget
+            parent: Reference to the parent widget
 
         """
         super(MainWindow, self).__init__(parent)
@@ -71,86 +72,98 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 check_box.stateChanged.connect(self._bind_box(check_box))
 
     def _bind_box(self, box: QCheckBox) -> Callable:
-        """Helper method for connecting check boxes to add_platform."""
+        """
+        Helper method for connecting check boxes to add_platform.
+
+        Args:
+            box: Checkbox which needs to be connected
+
+        """
         return lambda: self.add_platform(box)
 
-    def add_platform(self, check_box):
-        """Add/remove platform to/from platform list if check_box is checked."""
+    def add_platform(self, check_box: QCheckBox):
+        """
+        Add/remove platform to/from platform list if check_box is checked.
+
+        Args:
+            check_box: Toggled checkbox
+
+        """
         if check_box.isChecked():
             self.platforms.add(check_box.text().replace('&', ''))
         else:
             self.platforms.remove(check_box.text().replace('&', ''))
 
-    def set_start_date(self):
+    def set_start_date(self) -> None:
         """Helper method to set start date to first day of selected month."""
         self.start_date = date(self.start_year, self.start_month, 1)
 
-    def set_end_date(self):
+    def set_end_date(self) -> None:
         """Helper method to set end date to last day of selected month."""
         end_of_month = calendar.monthrange(self.end_year, self.end_month)[1]
         self.end_date = date(self.end_year, self.end_month, end_of_month)
 
     @pyqtSlot(str)
-    def on_comboBox_start_month_activated(self, month):
+    def on_comboBox_start_month_activated(self, month: str) -> None:
         """
         Update start date if the user changed start month in the combo box.
 
         Args:
-            month (str): short month name chosen by the user in the combo box
+            month: short month name chosen by the user in the combo box
 
         """
         self.start_month = int(p2p_helper.short_month_to_nbr(month))
         self.set_start_date()
 
     @pyqtSlot(str)
-    def on_comboBox_start_year_activated(self, year):
+    def on_comboBox_start_year_activated(self, year: str) -> None:
         """
         Update start date if the user changed start year in the combo box.
 
         Args:
-            year (str): year chosen by the user in the combo box
+            year: year chosen by the user in the combo box
 
         """
         self.start_year = int(year)
         self.set_start_date()
 
     @pyqtSlot(str)
-    def on_comboBox_end_month_activated(self, month):
+    def on_comboBox_end_month_activated(self, month: str) -> None:
         """
         Update end date if the user changed end month in the combo box.
 
         Args:
-            month (str): short month name chosen by the user in the combo box
+            month: short month name chosen by the user in the combo box
 
         """
         self.end_month = int(p2p_helper.short_month_to_nbr(month))
         self.set_end_date()
 
     @pyqtSlot(str)
-    def on_comboBox_end_year_activated(self, year):
+    def on_comboBox_end_year_activated(self, year: str) -> None:
         """
         Update end date if the user changed end year in the combo box.
 
         Args:
-            year (str): year chosen by the user in the combo box
+            year: year chosen by the user in the combo box
 
         """
         self.end_year = int(year)
         self.set_end_date()
 
     @pyqtSlot(str)
-    def on_lineEdit_output_file_textChanged(self, file_name):
+    def on_lineEdit_output_file_textChanged(self, file_name: str) -> None:
         """
         Update location where the results file should be saved.
 
         Args:
-            file_name (str): file name entered by the user
+            file_name: file name entered by the user
 
         """
         QLineEdit.setText(self.lineEdit_output_file, file_name)
 
     @pyqtSlot()
-    def on_pushButton_file_chooser_clicked(self):
+    def on_pushButton_file_chooser_clicked(self) -> None:
         """
         Open dialog window for changing the save location of the results file.
         """
@@ -167,12 +180,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.on_lineEdit_output_file_textChanged(self.output_file)
 
     @pyqtSlot(bool)
-    def on_checkBox_select_all_toggled(self, checked):
+    def on_checkBox_select_all_toggled(self, checked: bool) -> None:
         """
         Toggle/untoggle all P2P platforms.
 
         Args:
-            checked (bool): if True toggle all check boxes, if False untoggle
+            checked: if True toggle all check boxes, if False untoggle
                 all check boxes
 
         """
@@ -180,7 +193,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             check_box.setChecked(checked)
 
     @pyqtSlot()
-    def on_pushButton_start_clicked(self):
+    def on_pushButton_start_clicked(self) -> None:
         """
         Start evaluation for selected P2P platforms and the given date range.
 
@@ -228,7 +241,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Setup the worker thread and its attributes.
 
         Returns:
-            WorkerThread: handle of the worker thread
+            Handle of the worker thread
 
         """
         worker = WorkerThread(
@@ -238,12 +251,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         worker.update_progress_text.connect(self.update_progress_text)
         return worker
 
-    def update_progress_bar(self, value):
+    def update_progress_bar(self, value: float) -> None:
         """
         Update the progress bar in ProgressWindow to new value.
 
         Args:
-            value (float): value of the progress bar, between 0 and 100
+            value: Value of the progress bar, between 0 and 100
 
         """
         if not 0 <= value <= 100:
@@ -255,13 +268,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.progress_window.progressBar.setValue(value)
 
-    def update_progress_text(self, txt, color):
+    def update_progress_text(self, txt: str, color: QColor) -> None:
         """
         Append a new line to the progress text in ProgressWindow.
 
         Args:
-            txt (str): string to add to progress text
-            color (QColor): color in which the message should be displayed
+            txt: String to add to progress text
+            color: Color in which the message should be displayed
 
         """
         self.progress_window.progressText.setTextColor(color)
