@@ -13,7 +13,7 @@ from PyQt5.QtGui import QColor
 
 import p2p_parser
 # Ignore unused import warning: the platforms are implicitly used in
-# get_p2p_function and get_p2p_parser
+# get_platform_method
 from platforms import (
     bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,
     swaper, twino)
@@ -67,7 +67,6 @@ class WorkerThread(QThread):
         self.output_file = output_file
         self.abort = False
 
-# TODO: merge get_p2p_function and get_p2p_parser
     def get_platform_method(self, platform: str, method_name: str) \
             -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
         """
@@ -177,7 +176,7 @@ class WorkerThread(QThread):
             returned
 
         """
-        parser = self.get_p2p_parser(platform)
+        parser = self.get_platform_method(platform, 'parse_statement')
 
         if parser is None:
             return list_of_dfs
@@ -249,7 +248,7 @@ class WorkerThread(QThread):
             if self.abort:
                 return
 
-            func = self.get_p2p_function(platform)
+            func = self.get_platform_method(platform, 'download_statement')
             if func is None:
                 continue
 
