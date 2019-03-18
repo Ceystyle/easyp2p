@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/niko/workspace/easyP2P/ui/progress_window.ui'
+# Form implementation generated from reading ui file '/home/niko/workspace/easyp2p/easyp2p/ui/progress_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #

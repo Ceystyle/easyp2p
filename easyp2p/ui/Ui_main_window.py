@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/niko/workspace/easyP2P/ui/main_window.ui'
+# Form implementation generated from reading ui file '/home/niko/workspace/easyp2p/easyp2p/ui/main_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -188,7 +188,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "easyP2P"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "easyp2p"))
         self.groupBox_platforms.setTitle(_translate("MainWindow", "Für welche P2P-Plattformen sollen Ergebnisse geladen werden?"))
         self.checkBox_select_all.setText(_translate("MainWindow", "Alle aus-/abwählen"))
         self.groupBox_start_date.setTitle(_translate("MainWindow", "Startdatum"))
