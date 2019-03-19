@@ -29,7 +29,7 @@ from selenium.common.exceptions import (
     WebDriverException)
 from selenium.webdriver.common.action_chains import ActionChains
 
-import p2p_helper
+import easyp2p.p2p_helper as p2p_helper
 
 
 class P2PPlatform:

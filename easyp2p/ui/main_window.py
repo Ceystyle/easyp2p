@@ -13,10 +13,10 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
 from PyQt5.QtWidgets import QMessageBox
 
-import p2p_helper
-from p2p_worker import WorkerThread
-from ui.credentials_window import get_credentials
-from ui.progress_window import ProgressWindow
+import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_worker import WorkerThread
+from easyp2p.ui.credentials_window import get_credentials
+from easyp2p.ui.progress_window import ProgressWindow
 from .Ui_main_window import Ui_MainWindow
 
 

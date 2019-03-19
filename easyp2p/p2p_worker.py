@@ -11,10 +11,10 @@ import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 
-import p2p_parser
+import easyp2p.p2p_parser as p2p_parser
 # Ignore unused import warning: the platforms are implicitly used in
 # get_platform_method
-from platforms import (
+from easyp2p.platforms import (
     bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,
     swaper, twino)
 

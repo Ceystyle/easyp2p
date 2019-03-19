@@ -17,8 +17,8 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 
-from p2p_parser import P2PParser
-from p2p_platform import P2PPlatform
+from easyp2p.p2p_parser import P2PParser
+from easyp2p.p2p_platform import P2PPlatform
 
 
 def download_statement(

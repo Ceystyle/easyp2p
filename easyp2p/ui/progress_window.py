@@ -6,7 +6,7 @@
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog
 
-from ui.Ui_progress_window import Ui_Dialog
+from easyp2p.ui.Ui_progress_window import Ui_Dialog
 
 
 

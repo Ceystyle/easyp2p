@@ -18,9 +18,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-import p2p_helper
-from p2p_parser import P2PParser
-from p2p_platform import P2PPlatform
+import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_parser import P2PParser
+from easyp2p.p2p_platform import P2PPlatform
 
 
 def download_statement(
