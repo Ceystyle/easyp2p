@@ -13,14 +13,9 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
 
-import context
-import p2p_helper
-import p2p_parser
-from platforms import (
-    bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,
-    swaper, twino)
-from ui.main_window import MainWindow
-from ui.progress_window import ProgressWindow
+from .context import (
+    p2p_helper, p2p_parser, bondora, dofinance, estateguru, grupeer, iuvo,
+    mintos, peerberry, robocash, swaper, twino, MainWindow, ProgressWindow)
 
 PLATFORMS = {
     'Bondora': 'csv',
@@ -33,8 +28,8 @@ PLATFORMS = {
     'Robocash': 'xls',
     'Swaper': 'xlsx',
     'Twino': 'xlsx'}
-INPUT_PREFIX = 'input/input_test_'
-RESULT_PREFIX = 'results/result_test_'
+INPUT_PREFIX = 'tests/input/input_test_'
+RESULT_PREFIX = 'tests/results/result_test_'
 
 app = QApplication(sys.argv)
 
