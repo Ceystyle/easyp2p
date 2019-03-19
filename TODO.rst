@@ -9,5 +9,4 @@ The items are listed in no particular order:
 * Parallelize downloading account statements for different platforms
 * Make sure easyp2p runs on at least Ubuntu, Debian and Windows 10
 * Remember the selected platforms for the next run
-* Generate generic test input and result files, at least for the parser
 * Show (daily) account balances where available to check efficiency of the platform
