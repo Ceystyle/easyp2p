@@ -1,7 +1,7 @@
 TODOs
 =====
 
-This file contains some of the further developments and improvements planned for easyp2p which are not (yet) mentioned as TODOs in the source code.
+Some further developments and improvements planned for easyp2p which are not (yet) mentioned as TODOs in the source code.
 The items are listed in no particular order:
 
 * Make the download location for the account statements configurable, i.e. don't hardcode it to p2p_downloads/
@@ -10,3 +10,5 @@ The items are listed in no particular order:
 * Make sure easyp2p runs on at least Ubuntu, Debian and Windows 10
 * Remember the selected platforms for the next run
 * Show (daily) account balances where available to check efficiency of the platform
+
+Some additional TODOs are already mentioned directly in the source code.
