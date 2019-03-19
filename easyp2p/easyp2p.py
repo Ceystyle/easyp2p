@@ -13,10 +13,6 @@ from PyQt5 import QtWidgets
 from easyp2p.ui.main_window import MainWindow
 
 name = "easyp2p"
-__author__ = 'Niko Sandschneider'
-__copyright__ = 'Copyright (C) 2018-19 Niko Sandschneider'
-__license__ = 'MIT'
-__version__ = '0.0.1'
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
