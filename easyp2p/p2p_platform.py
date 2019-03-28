@@ -72,9 +72,16 @@ class P2PPlatform:
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
+
         # self.driver will be initialized in __enter__ method to make sure it
         # is always closed again by __exit__
         self.driver = cast(webdriver.Chrome, None)
+
+        # Set download directory and create it if it doesn't exist yet
+        self.dl_dir = os.path.join(Path.home(), '.easyp2p', self.name.lower())
+        if not os.path.isdir(self.dl_dir):
+            os.makedirs(self.dl_dir)
+
         self.logged_in = False
 
         # Make sure URLs for login and statement page are provided
@@ -144,8 +151,7 @@ class P2PPlatform:
         options = webdriver.ChromeOptions()
 #        options.add_argument("--headless")
 #        options.add_argument("--window-size=1920,1200")
-        dl_location = os.path.join(os.getcwd(), 'p2p_downloads')
-        prefs = {"download.default_directory": dl_location}
+        prefs = {"download.default_directory": self.dl_dir}
         options.add_experimental_option("prefs", prefs)
 
         # TODO: Ubuntu doesn't put chromedriver in PATH so we need to
@@ -560,8 +566,8 @@ class P2PPlatform:
                     elem.click()
 
     def download_statement(
-            self, default_file_name: str, download_locator: Tuple[str, str],
-            actions=None) -> None:
+            self, default_file_name: str, download_file_name: str,
+            download_locator: Tuple[str, str], actions=None) -> None:
         """
         Download account statement by clicking the provided button.
 
@@ -570,11 +576,13 @@ class P2PPlatform:
         button is clickable, which can be provided by the optional actions
         variable. The method also checks if the download was successful.
         If true, the _rename_statement method is called to rename the
-        downloaded file.
+        downloaded file to download_file_name.
 
         Args:
             default_file_name: Default file name without path for account
                 statement downloads, chosen by the P2P platform
+            download_file_name: File name including path where the downloaded
+                statement must be saved
             download_locator: Locator of the download button
 
         Keyword Args:
@@ -591,7 +599,7 @@ class P2PPlatform:
         """
         # Get a list of all files named default_file_name since it contains
         # wildcards for some P2P platforms
-        file_list = glob.glob('p2p_downloads/' + default_file_name)
+        file_list = glob.glob(os.path.join(self.dl_dir, default_file_name))
 
         # Find and click the download button
         try:
@@ -612,12 +620,13 @@ class P2PPlatform:
         _waiting_time = 0
         max_waiting_time = 4
         while not _download_finished:
-            new_file_list = glob.glob('p2p_downloads/' + default_file_name)
+            new_file_list = glob.glob(os.path.join(
+                self.dl_dir, default_file_name))
             if len(new_file_list) - len(file_list) == 1:
                 _download_finished = True
             elif new_file_list == file_list:
-                ongoing_downloads = glob.glob(
-                    'p2p_downloads/{0}.crdownload'.format(default_file_name))
+                ongoing_downloads = glob.glob(os.path.join(
+                    self.dl_dir, '{0}.crdownload'.format(default_file_name)))
                 if not ongoing_downloads and _waiting_time > max_waiting_time:
                     # If the download didn't start after more than
                     # max_waiting_time something has gone wrong.
@@ -635,7 +644,7 @@ class P2PPlatform:
 
         # Get actual file name of downloaded file
         file_name = [file for file in new_file_list if file not in file_list][0]
-        self._rename_statement(file_name)
+        self._rename_statement(file_name,  download_file_name)
 
     def wdwait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
         """
@@ -653,31 +662,26 @@ class P2PPlatform:
         """
         return WebDriverWait(self.driver, delay).until(wait_until)
 
-    def _rename_statement(self, file_name: str) -> None:
+    def _rename_statement(
+            self, source_file_name: str, target_file_name: str) -> None:
         """
-        Rename downloaded statement to platform_statement.suffix.
-
-        Will rename the downloaded statement from the
-        default name chosen by the P2P platform to platform_statement.suffix.
+        Rename downloaded statement from source_file_name to target_file_name.
 
         Args:
-            file_name: file name including path of the downloaded account
-                statement
+            source_file_name: file name including path of the file which should
+                be renamed
+            target_file_name: file name including path which the file should be
+                renamed to
 
         Raises:
-            RuntimeError: If the downloaded statement cannot be found
+            RuntimeError: If source file cannot be found
 
         """
         error_msg = (
             '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
             'werden.'.format(self.name))
 
-        if file_name is None:
-            raise RuntimeError(error_msg)
-
         try:
-            os.rename(
-                file_name, 'p2p_downloads/{0}_statement{1}'.format(
-                    self.name.lower(), Path(file_name).suffix))
+            os.rename(source_file_name, target_file_name)
         except FileNotFoundError:
             raise RuntimeError(error_msg)
