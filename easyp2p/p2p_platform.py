@@ -77,13 +77,6 @@ class P2PPlatform:
         # is always closed again by __exit__
         self.driver = cast(webdriver.Chrome, None)
 
-        # Set download directory and create it if it doesn't exist yet
-        self.dl_dir = os.path.join(Path.home(), '.easyp2p', self.name.lower())
-        if not os.path.isdir(self.dl_dir):
-            os.makedirs(self.dl_dir)
-
-        self.logged_in = False
-
         # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
             raise RuntimeError('Keine Login-URL für {0} '
@@ -91,6 +84,13 @@ class P2PPlatform:
         if 'statement' not in urls:
             raise RuntimeError('Keine Kontoauszug-URLs für {0} '
                                'vorhanden!'.format(self.name))
+
+        # Set download directory and create it if it doesn't exist yet
+        self.dl_dir = os.path.join(Path.home(), '.easyp2p', self.name.lower())
+        if not os.path.isdir(self.dl_dir):
+            os.makedirs(self.dl_dir)
+
+        self.logged_in = False
 
     def __enter__(self) -> 'P2PPlatform':
         """
