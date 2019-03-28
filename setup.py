@@ -37,5 +37,5 @@ setuptools.setup(
     ],
     python_requires=">=3.5",
     install_requires=['lxml', 'pandas', 'PyQt5', 'selenium', 'xlrd', 'xlsxwriter'],
-    entry_points = {'gui_scripts': ['easyp2p=easyp2p.easyp2p:main'],},
+    entry_points = {'gui_scripts': ['easyp2p=easyp2p.__main__:main'],},
 )
