@@ -17,7 +17,7 @@ import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_worker import WorkerThread
 from easyp2p.ui.credentials_window import get_credentials
 from easyp2p.ui.progress_window import ProgressWindow
-from .Ui_main_window import Ui_MainWindow
+from easyp2p.ui.Ui_main_window import Ui_MainWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
