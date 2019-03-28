@@ -24,7 +24,6 @@ Classes:
 import calendar
 from datetime import date, timedelta
 from pathlib import Path
-import os
 from typing import Callable, List, Tuple
 
 from selenium import webdriver
@@ -159,39 +158,6 @@ def nbr_to_short_month(nbr: str) -> str:
         '9': 'Sep', '09': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Dez'}
 
     return map_nbr_to_short_month[nbr]
-
-
-def set_statement_file_name(
-        platform_name: str, dl_dir: str, suffix: str,
-        date_range: Tuple[date, date], statement_file: str = None) -> str:
-    """
-    Helper method for setting the account statement download file name.
-
-    Default file name will be 'platform name'_statement-'start_date'-
-    'end-date.suffix. statement_file can be used to override the default.
-
-    Args:
-        platform_name: Name of the platform
-        dl_dir: path of the download directory
-        suffix: suffix of the file name (csv, xlsx or xls)
-        date_range: date range for which the account statement will be
-            generated
-
-    Keyword Args:
-        statement_file: if not None this will override the default file name
-
-    Returns:
-        File name including path where the paltform account statement should
-        be saved
-
-    """
-    if statement_file is not None:
-        return statement_file
-    else:
-        return os.path.join(
-            dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
-                platform_name.lower(), date_range[0].strftime('%Y%m%d'),
-                date_range[1].strftime('%Y%m%d'), suffix))
 
 
 class one_of_many_expected_conditions_true():

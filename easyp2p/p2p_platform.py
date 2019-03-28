@@ -139,6 +139,37 @@ class P2PPlatform:
         if exc_type:
             raise exc_type(exc_value)
 
+    def set_statement_file_name(
+            self, date_range: Tuple[date, date], suffix: str,
+            statement_file: str = None) -> str:
+        """
+        Helper method for setting the account statement download file name.
+
+        Default file name will be 'platform name'_statement-'start_date'-
+        'end-date'.suffix. statement_file can be used to override the default.
+
+        Args:
+            date_range: Date range (start_date, end_date) for which the account
+                statement must be generated
+            suffix: Suffix of the statement file
+
+        Keyword Args:
+            statement_file: if not None this will override the default file
+                name
+
+        Returns:
+            File name including path where the paltform account statement
+            should be saved
+
+        """
+        if statement_file is not None:
+            return statement_file
+        else:
+            return os.path.join(
+                self.dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
+                    self.name.lower(), date_range[0].strftime('%Y%m%d'),
+                    date_range[1].strftime('%Y%m%d'), suffix))
+
     def init_webdriver(self) -> None:
         """
         Initialize Chromedriver as webdriver.
