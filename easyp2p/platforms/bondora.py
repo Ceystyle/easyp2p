@@ -10,7 +10,6 @@ Download and parse Bondora statement.
 
 from datetime import date
 import locale
-import os
 from typing import Tuple
 
 import pandas as pd
@@ -156,16 +155,9 @@ class Bondora:
             element is the data frame containing the parsed results. The second
             element is a set containing all unknown cash flow types.
 
-        Raises:
-            RuntimeError: if the statement file cannot be found
-
         """
         if statement_file_name is not None:
             self.statement_file_name = statement_file_name
-        elif not os.path.exists(self.statement_file_name):
-            raise RuntimeError(
-                'Kontoauszugsdatei {0} konnte nicht gefunden werden!'
-                .format(self.statement_file_name))
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 

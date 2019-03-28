@@ -9,7 +9,6 @@ Download and parse DoFinance statement.
 """
 
 from datetime import date
-import os
 from typing import Tuple
 
 import pandas as pd
@@ -93,10 +92,6 @@ class DoFinance:
         """
         if statement_file_name is not None:
             self.statement_file_name = statement_file_name
-        elif not os.path.exists(self.statement_file_name):
-            raise RuntimeError(
-                'Kontoauszugsdatei {0} konnte nicht gefunden werden!'
-                .format(self.statement_file_name))
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
