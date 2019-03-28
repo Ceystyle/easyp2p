@@ -20,121 +20,127 @@ from selenium.common.exceptions import TimeoutException
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 
+class Robocash:
 
-def download_statement(
-        date_range: Tuple[date, date],
-        credentials: Tuple[str, str]) -> None:
-    """
-    Generate and download the Robocash account statement for given date range.
+    def __init__(self, date_range: Tuple[date, date]) -> None:
+        """
+        Constructor of Robocash class.
 
-    Args:
-        date_range (tuple(date, date)): date range
-            (start_date, end_date) for which the account statements must
-            be generated.
-        credentials (tuple[str, str]): (username, password) for Robocash
+        Args:
+            date_range: date range (start_date, end_date) for which the account
+                statements must be generated
 
-    Throws:
-        RuntimeError: - if the statement button cannot be found
-                      - if the download of the statement takes too long
+        """
+        self.name = 'Robocash'
+        self.date_range = date_range
 
-    """
-    urls = {
-        'login': 'https://robo.cash/de',
-        'logout': 'https://robo.cash/de/logout',
-        'statement': 'https://robo.cash/de/cabinet/statement'}
-    xpaths = {'login_field': '/html/body/header/div/div[2]/a'}
+    def download_statement(self,  credentials: Tuple[str, str]) -> None:
+        """
+        Generate and download the Robocash account statement.
 
-    with P2PPlatform('Robocash', urls, EC.title_contains('Willkommen')) \
-            as robocash:
+        Args:
+            credentials: (username, password) for Robocash
 
-        robocash.log_into_page(
-            'email', 'password', credentials,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
-            login_locator=(By.XPATH, xpaths['login_field']))
+        Raises:
+            RuntimeError: - If the statement button cannot be found
+                          - If the download of the statement takes too long
 
-        robocash.open_account_statement_page(
-            'Kontoauszug', (By.ID, 'new_statement'))
+        """
+        urls = {
+            'login': 'https://robo.cash/de',
+            'logout': 'https://robo.cash/de/logout',
+            'statement': 'https://robo.cash/de/cabinet/statement'}
+        xpaths = {'login_field': '/html/body/header/div/div[2]/a'}
 
-        try:
-            robocash.driver.find_element_by_id('new_statement').click()
-        except NoSuchElementException:
-            raise RuntimeError(
-                'Generierung des Robocash-Kontoauszugs konnte nicht gestartet '
-                'werden.')
+        with P2PPlatform('Robocash', urls, EC.title_contains('Willkommen')) \
+                as robocash:
 
-        robocash.generate_statement_direct(
-            date_range, (By.ID, 'date-after'),
-            (By.ID, 'date-before'), '%Y-%m-%d')
+            self.statement_file_name = robocash.set_statement_file_name(
+                self.date_range, 'xls')
 
-        # Robocash does not automatically show download button after statement
-        # generation is done. An explicit reload of the page is needed.
-        present = False
-        wait = 0
-        while not present:
+            robocash.log_into_page(
+                'email', 'password', credentials,
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
+                login_locator=(By.XPATH, xpaths['login_field']))
+
+            robocash.open_account_statement_page(
+                'Kontoauszug', (By.ID, 'new_statement'))
+
             try:
-                robocash.driver.get(robocash.urls['statement'])
-                robocash.wdwait(
-                    EC.element_to_be_clickable((By.ID, 'download_statement')))
-                present = True
-            except TimeoutException:
-                wait += 1
-                if wait > 10:  # Roughly 10*delay seconds
-                    raise RuntimeError(
-                        'Generierung des Robocash-Kontoauszugs hat zu lange '
-                        'gedauert!')
+                robocash.driver.find_element_by_id('new_statement').click()
+            except NoSuchElementException:
+                raise RuntimeError(
+                    'Generierung des Robocash-Kontoauszugs konnte nicht gestartet '
+                    'werden.')
 
-        # Robocash creates the download names randomly, therefore the default
-        # name is not known like for the other P2PPlatform sites. For now we
-        # use a generic * wildcard to find the file. This will not be safe
-        # anymore as soon as parallel downloads to the p2p_downloads
-        # directory are allowed. Thus:
-        #TODO: find a safer method for downloading the Robocash statement
-        robocash.download_statement('*', (By.ID, 'download_statement'))
+            robocash.generate_statement_direct(
+                self.date_range, (By.ID, 'date-after'),
+                (By.ID, 'date-before'), '%Y-%m-%d')
 
+            # Robocash does not automatically show download button after
+            # statement generation is done. An explicit reload of the page is
+            # needed.
+            present = False
+            wait = 0
+            while not present:
+                try:
+                    robocash.driver.get(robocash.urls['statement'])
+                    robocash.wdwait(
+                        EC.element_to_be_clickable(
+                            (By.ID, 'download_statement')))
+                    present = True
+                except TimeoutException:
+                    wait += 1
+                    if wait > 10:  # Roughly 10*delay seconds
+                        raise RuntimeError(
+                            'Generierung des {0}-Kontoauszugs hat zu lange '
+                            'gedauert!'.format(self.name))
 
-def parse_statement(
-        date_range: Tuple[date, date],
-        input_file: str = 'p2p_downloads/robocash_statement.xls') \
-        -> Tuple[pd.DataFrame, str]:
-    """
-    Parser for Robocash.
+            # Robocash creates the download names randomly, therefore the
+            # default name is not known like for the other P2PPlatform sites.
+            # For now we use a generic * wildcard to find the file.
+            robocash.download_statement(
+                '*', self.statement_file_name, (By.ID, 'download_statement'))
 
-    Args:
-        date_range (tuple(date, date)): date range
-            (start_date, end_date) for which the investment results must be
-            shown.
+    def parse_statement(self, statement_file_name: str = None) \
+            -> Tuple[pd.DataFrame, str]:
+        """
+        Parser for Robocash.
 
-    Keyword Args:
-        input_file (str): file name including path of the account statement
-            downloaded from the Robocash web site
+        Keyword Args:
+            statement_file_name: File name including path of the account
+                statement which should be parsed
 
-    Returns:
-        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
-        element is the data frame containing the parsed results. The second
-        element is a set containing all unknown cash flow types.
+        Returns:
+            Tuple with two elements. The first
+            element is the data frame containing the parsed results. The second
+            element is a set containing all unknown cash flow types.
 
-    """
-    parser = P2PParser('Robocash', date_range, input_file)
+        """
+        if statement_file_name is not None:
+            self.statement_file_name = statement_file_name
 
-    # Create a DataFrame with zero entries if there were no cashflows
-    if parser.df.empty:
-        parser.parse_statement()
-        return (parser.df, '')
+        parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
-    # Define mapping between Robocash and easyP2P cashflow types and
-    # column names
-    cashflow_types = {
-        'Darlehenskauf': parser.INVESTMENT_PAYMENT,
-        'Die Geldauszahlung': parser.OUTGOING_PAYMENT,
-        'Geldeinzahlung': parser.INCOMING_PAYMENT,
-        'Kreditrückzahlung': parser.REDEMPTION_PAYMENT,
-        # We don't report cash transfers within Robocash:
-        'Portfolio auffüllen': parser.IGNORE,
-        'Zinsenzahlung': parser.INTEREST_PAYMENT}
-    rename_columns = {'Datum und Laufzeit': parser.DATE}
+        # Create a DataFrame with zero entries if there were no cashflows
+        if parser.df.empty:
+            parser.parse_statement()
+            return (parser.df, '')
 
-    unknown_cf_types = parser.parse_statement(
-        '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-        'Operation', 'Betrag', 'Der Saldo des Portfolios')
+        # Define mapping between Robocash and easyP2P cashflow types and
+        # column names
+        cashflow_types = {
+            'Darlehenskauf': parser.INVESTMENT_PAYMENT,
+            'Die Geldauszahlung': parser.OUTGOING_PAYMENT,
+            'Geldeinzahlung': parser.INCOMING_PAYMENT,
+            'Kreditrückzahlung': parser.REDEMPTION_PAYMENT,
+            # We don't report cash transfers within Robocash:
+            'Portfolio auffüllen': parser.IGNORE,
+            'Zinsenzahlung': parser.INTEREST_PAYMENT}
+        rename_columns = {'Datum und Laufzeit': parser.DATE}
 
-    return (parser.df, unknown_cf_types)
+        unknown_cf_types = parser.parse_statement(
+            '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
+            'Operation', 'Betrag', 'Der Saldo des Portfolios')
+
+        return (parser.df, unknown_cf_types)
