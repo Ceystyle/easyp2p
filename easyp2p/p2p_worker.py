@@ -67,32 +67,29 @@ class WorkerThread(QThread):
         self.output_file = output_file
         self.abort = False
 
-    def get_platform_method(self, platform: str, method_name: str) \
+    def get_platform_class(self, platform: str) \
             -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
         """
         Helper method to get methods from the platform modules.
 
         Args:
             platform: Name of the P2P platform/module
-            method_name: Name of the module method to get
 
         Returns:
-            platform.method_name method or None if the module/method cannot
-            be found
+            platform class or None if the class cannot be found
 
         """
         try:
-            func = getattr(
-                getattr(sys.modules[__name__], platform.lower()),
-                method_name)
+            class_ = getattr(getattr(
+                sys.modules[__name__], platform.lower()), platform)
         except AttributeError:
             error_message = (
-                'Methode {0} konnte nicht gefunden werden. Ist {0}.py '
-                'vorhanden?'.format(method_name, platform.lower()))
+                'Klasse {0} konnte nicht gefunden werden. Ist {0}.py '
+                'vorhanden?'.format(platform.lower()))
             self.update_progress_text.emit(error_message, self.RED)
             return None
         else:
-            return func
+            return class_
 
     def ignore_platform(self, platform: str, error_msg: str) -> None:
         """
@@ -108,7 +105,8 @@ class WorkerThread(QThread):
             '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_result(
-            self, platform: str, list_of_dfs: List[pd.DataFrame]) \
+            self, platform: str, list_of_dfs: List[pd.DataFrame],
+            platform_instance: Callable[[Tuple[date, date]], None]) \
             -> List[pd.DataFrame]:
         """
         Helper method for calling the parser and appending the dataframe list.
@@ -117,6 +115,7 @@ class WorkerThread(QThread):
             platform: Name of the P2P platform
             list_of_dfs: List of DataFrames, one DataFrame for each
                 successfully parsed P2P platform
+            platform_instance: platform class with parse_statement method
 
         Returns:
             If successful the provided list_of_dfs with one DataFrame for this
@@ -124,13 +123,8 @@ class WorkerThread(QThread):
             returned
 
         """
-        parser = self.get_platform_method(platform, 'parse_statement')
-
-        if parser is None:
-            return list_of_dfs
-
         try:
-            (df, unknown_cf_types) = parser(self.date_range)
+            (df, unknown_cf_types) = platform_instance.parse_statement()
             list_of_dfs.append(df)
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
@@ -146,16 +140,16 @@ class WorkerThread(QThread):
 
     def run_platform(
             self, platform: str,
-            func: Callable[[Tuple[date, date], Tuple[str, str]], None]) -> bool:
+            platform_instance: Callable[[Tuple[date, date]], None]) -> bool:
         """
         Helper method for calling the download_statement functions.
 
         Args:
             platform: Name of the P2P platform
-            func: platform.download_statement method to run
+            platform_instance: platform class with download_statement method
 
         Returns:
-            True if function finished without errors, False otherwise
+            True if download finished without errors, False otherwise
 
         """
         if self.credentials[platform] is None:
@@ -167,7 +161,7 @@ class WorkerThread(QThread):
         self.update_progress_text.emit(
             'Start der Auswertung von {0}...'.format(platform), self.BLACK)
         try:
-            func(self.date_range, self.credentials[platform])
+            platform_instance.download_statement(self.credentials[platform])
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
             return False
@@ -196,11 +190,12 @@ class WorkerThread(QThread):
             if self.abort:
                 return
 
-            func = self.get_platform_method(platform, 'download_statement')
-            if func is None:
+            class_ = self.get_platform_class(platform)
+            if class_ is None:
                 continue
 
-            success = self.run_platform(platform, func)
+            platform_instance = class_(self.date_range)
+            success = self.run_platform(platform, platform_instance)
 
             if success:
                 if self.abort:
@@ -212,7 +207,8 @@ class WorkerThread(QThread):
                     '{0} erfolgreich ausgewertet!'.format(platform),
                     self.BLACK)
 
-                list_of_dfs = self.parse_result(platform, list_of_dfs)
+                list_of_dfs = self.parse_result(
+                    platform, list_of_dfs, platform_instance)
 
         if self.abort:
             return
