@@ -18,99 +18,110 @@ from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 
 
-def download_statement(
-        date_range: Tuple[date, date],
-        credentials: Tuple[str, str]) -> None:
-    """
-    Generate and download the Swaper account statement for given date range.
+class Swaper:
 
-    Args:
-        date_range (tuple(date, date)): date range
-            (start_date, end_date) for which the account statements must
-            be generated.
-        credentials (tuple[str, str]): (username, password) for Swaper
+    def __init__(self, date_range: Tuple[date, date]) -> None:
+        """
+        Constructor of Swaper class.
 
-    """
-    urls = {
-        'login': 'https://www.swaper.com/#/dashboard',
-        'statement': 'https://www.swaper.com/#/overview/account-statement'}
-    xpaths = {
-        'download_btn': ('//*[@id="account-statement"]/div[3]/div[4]/div/'
-                         'div[1]/a/div[1]/div/span[2]'),
-        'logout_btn': '//*[@id="logout"]/span[1]/span'}
+        Args:
+            date_range: date range (start_date, end_date) for which the account
+                statements must be generated
 
-    with P2PPlatform(
-            'Swaper', urls, EC.presence_of_element_located((By.ID, 'about')),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
+        """
+        self.name = 'Swaper'
+        self.date_range = date_range
 
-        swaper.log_into_page(
-            'email', 'password', credentials,
-            EC.presence_of_element_located((By.ID, 'open-investments')),
-            fill_delay=0.5)
+    def download_statement(self,  credentials: Tuple[str, str]) -> None:
+        """
+        Generate and download the Swaper account statement for given date range.
 
-        swaper.open_account_statement_page(
-            'Swaper', (By.ID, 'account-statement'))
+        Args:
+            credentials: (username, password) for Swaper
 
-        # calendar_locator must be a tuple of locators, thus the , at the end
-        calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )
-        arrows = {'arrow_tag': 'div',
-                  'left_arrow_class': 'icon icon icon-left',
-                  'right_arrow_class': 'icon icon icon-right'}
-        days_table = {'class_name': '',
-                      'current_day_id': ' ',
-                      'id_from_calendar': True,
-                      'table_id': 'id'}
-        default_dates = (date.today().replace(day=1), date.today())
+        """
+        urls = {
+            'login': 'https://www.swaper.com/#/dashboard',
+            'statement': 'https://www.swaper.com/#/overview/account-statement'}
+        xpaths = {
+            'download_btn': ('//*[@id="account-statement"]/div[3]/div[4]/div/'
+                             'div[1]/a/div[1]/div/span[2]'),
+            'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
-        swaper.generate_statement_calendar(
-            date_range, default_dates, arrows, days_table, calendar_locator)
+        with P2PPlatform(
+                'Swaper', urls,
+                EC.presence_of_element_located((By.ID, 'about')),
+                logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
 
-        swaper.download_statement(
-            'excel-storage*.xlsx', (By.XPATH, xpaths['download_btn']))
+            self.statement_file_name = swaper.set_statement_file_name(
+                self.date_range, 'xlsx')
 
+            swaper.log_into_page(
+                'email', 'password', credentials,
+                EC.presence_of_element_located((By.ID, 'open-investments')),
+                fill_delay=0.5)
 
-def parse_statement(
-        date_range: Tuple[date, date],
-        input_file: str = 'p2p_downloads/swaper_statement.xlsx') \
-        -> Tuple[pd.DataFrame, str]:
-    """
-    Parser for Swaper.
+            swaper.open_account_statement_page(
+                'Swaper', (By.ID, 'account-statement'))
 
-    Args:
-        date_range (tuple(date, date)): date range
-            (start_date, end_date) for which the investment results must be
-            shown.
+            # calendar_locator must be a tuple of locators, thus the , at the end
+            calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )
+            arrows = {'arrow_tag': 'div',
+                      'left_arrow_class': 'icon icon icon-left',
+                      'right_arrow_class': 'icon icon icon-right'}
+            days_table = {'class_name': '',
+                          'current_day_id': ' ',
+                          'id_from_calendar': True,
+                          'table_id': 'id'}
+            default_dates = (date.today().replace(day=1), date.today())
 
-    Keyword Args:
-        input_file (str): file name including path of the account statement
-            downloaded from the Swaper web site
+            swaper.generate_statement_calendar(
+                self.date_range, default_dates, arrows, days_table,
+                calendar_locator)
 
-    Returns:
-        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
-        element is the data frame containing the parsed results. The second
-        element is a set containing all unknown cash flow types.
+            swaper.download_statement(
+                'excel-storage*.xlsx', self.statement_file_name,
+                (By.XPATH, xpaths['download_btn']))
 
-    """
-    parser = P2PParser('Swaper', date_range, input_file)
+    def parse_statement(self, statement_file_name: str = None) \
+            -> Tuple[pd.DataFrame, str]:
+        """
+        Parser for Swaper.
 
-    # Create a DataFrame with zero entries if there were no cashflows
-    if parser.df.empty:
-        parser.parse_statement()
-        return (parser.df, '')
+        Keyword Args:
+            statement_file_name: File name including path of the account
+                statement which should be parsed
 
-    # Define mapping between Swaper and easyP2P cashflow types and column names
-    cashflow_types = {
-        'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
-        'BUYBACK_PRINCIPAL': parser.BUYBACK_PAYMENT,
-        'EXTENSION_INTEREST': parser.INTEREST_PAYMENT,
-        'INVESTMENT': parser.INVESTMENT_PAYMENT,
-        'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
-        'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT,
-        'WITHDRAWAL': parser.OUTGOING_PAYMENT}
-    rename_columns = {'Booking date': parser.DATE}
+        Returns:
+            Tuple with two elements. The first
+            element is the data frame containing the parsed results. The second
+            element is a set containing all unknown cash flow types.
 
-    unknown_cf_types = parser.parse_statement(
-        '%d.%m.%Y', rename_columns, cashflow_types,
-        'Transaction type', 'Amount')
+        """
+        if statement_file_name is not None:
+            self.statement_file_name = statement_file_name
 
-    return (parser.df, unknown_cf_types)
+        parser = P2PParser(self.name, self.date_range, self.statement_file_name)
+
+        # Create a DataFrame with zero entries if there were no cashflows
+        if parser.df.empty:
+            parser.parse_statement()
+            return (parser.df, '')
+
+        # Define mapping between Swaper and easyP2P cashflow types and column
+        # names
+        cashflow_types = {
+            'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
+            'BUYBACK_PRINCIPAL': parser.BUYBACK_PAYMENT,
+            'EXTENSION_INTEREST': parser.INTEREST_PAYMENT,
+            'INVESTMENT': parser.INVESTMENT_PAYMENT,
+            'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
+            'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT,
+            'WITHDRAWAL': parser.OUTGOING_PAYMENT}
+        rename_columns = {'Booking date': parser.DATE}
+
+        unknown_cf_types = parser.parse_statement(
+            '%d.%m.%Y', rename_columns, cashflow_types,
+            'Transaction type', 'Amount')
+
+        return (parser.df, unknown_cf_types)
