@@ -156,6 +156,9 @@ class Bondora:
             element is the data frame containing the parsed results. The second
             element is a set containing all unknown cash flow types.
 
+        Raises:
+            RuntimeError: if the statement file cannot be found
+
         """
         if statement_file_name is not None:
             self.statement_file_name = statement_file_name
