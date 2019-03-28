@@ -84,8 +84,8 @@ class WorkerThread(QThread):
                 sys.modules[__name__], platform.lower()), platform)
         except AttributeError:
             error_message = (
-                'Klasse {0} konnte nicht gefunden werden. Ist {0}.py '
-                'vorhanden?'.format(platform.lower()))
+                'Klasse {0} konnte nicht gefunden werden. Ist {1}.py '
+                'vorhanden?'.format(platform, platform.lower()))
             self.update_progress_text.emit(error_message, self.RED)
             return None
         else:
