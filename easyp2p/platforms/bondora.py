@@ -162,7 +162,7 @@ class Bondora:
         elif not os.path.exists(self.statement_file_name):
             raise RuntimeError(
                 'Kontoauszugsdatei {0} konnte nicht gefunden werden!'
-                .format(self.input_file))
+                .format(self.statement_file_name))
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
