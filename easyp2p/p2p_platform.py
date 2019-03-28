@@ -72,6 +72,7 @@ class P2PPlatform:
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
+        self.logged_in = False
 
         # self.driver will be initialized in __enter__ method to make sure it
         # is always closed again by __exit__
@@ -89,8 +90,6 @@ class P2PPlatform:
         self.dl_dir = os.path.join(Path.home(), '.easyp2p', self.name.lower())
         if not os.path.isdir(self.dl_dir):
             os.makedirs(self.dl_dir)
-
-        self.logged_in = False
 
     def __enter__(self) -> 'P2PPlatform':
         """
