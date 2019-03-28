@@ -1,7 +1,7 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """
-Download and parse Bondora statement.
+Download and parse Grupeer statement.
 
 .. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
 
@@ -18,104 +18,117 @@ from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 
 
-def download_statement(
-        date_range: Tuple[date, date],
-        credentials: Tuple[str, str]) -> None:
-    """
-    Generate and download the Grupeer account statement for given date range.
+class Grupeer:
 
-    Args:
-        date_range (tuple(date, date)): date range
-            (start_date, end_date) for which the account statements must
-            be generated.
-        credentials (tuple[str, str]): (username, password) for Iuvo.
+    def __init__(self, date_range: Tuple[date, date]) -> None:
+        """
+        Constructor of Grupeer class.
 
-    """
-    urls = {
-        'login': 'https://www.grupeer.com/de/login',
-        'statement': 'https://www.grupeer.com/de/account-statement'}
-    xpaths = {
-        'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
-                         'div/div/ul/li/a/span')}
+        Args:
+            date_range: date range (start_date, end_date) for which the account
+                statements must be generated
 
-    with P2PPlatform(
-            'Grupeer', urls,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
-            (By.LINK_TEXT, 'Ausloggen'),
-            hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
+        """
+        self.name = 'Grupeer'
+        self.date_range = date_range
 
-        grupeer.log_into_page(
-            'email', 'password', credentials,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
+    def download_statement(self,  credentials: Tuple[str, str]) -> None:
+        """
+        Generate and download the Grupeer account statement.
 
-        grupeer.open_account_statement_page(
-            'Account Statement', (By.ID, 'from'))
+        Args:
+            credentials: (username, password) for Grupeer.
 
-        grupeer.generate_statement_direct(
-            date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
-            wait_until=EC.text_to_be_present_in_element(
-                (By.CLASS_NAME, 'balance-block'),
-                'Bilanz geöffnet am '
-                + str(date_range[0].strftime('%d.%m.%Y'))),
-            submit_btn_locator=(By.NAME, 'submit'))
+        """
+        urls = {
+            'login': 'https://www.grupeer.com/de/login',
+            'statement': 'https://www.grupeer.com/de/account-statement'}
+        xpaths = {
+            'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
+                             'div/div/ul/li/a/span')}
 
-        grupeer.download_statement(
-            'Account statement*.xlsx', (By.NAME, 'excel'))
+        with P2PPlatform(
+                'Grupeer', urls,
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
+                (By.LINK_TEXT, 'Ausloggen'),
+                hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
+            self.statement_file_name = grupeer.set_statement_file_name(
+                self.date_range, 'xlsx')
 
-def parse_statement(
-        date_range: Tuple[date, date],
-        input_file: str = 'p2p_downloads/grupeer_statement.xlsx') \
-        -> Tuple[pd.DataFrame, str]:
-    """
-    Parser for Grupeer.
+            grupeer.log_into_page(
+                'email', 'password', credentials,
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
 
-    Args:
-        date_range (tuple(date, date)): date range
-            (start_date, end_date) for which the investment results must be
-            shown.
+            grupeer.open_account_statement_page(
+                'Account Statement', (By.ID, 'from'))
 
-    Keyword Args:
-        input_file (str): file name including path of the account statement
-            downloaded from the Grupeer web site
+            grupeer.generate_statement_direct(
+                self.date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
+                wait_until=EC.text_to_be_present_in_element(
+                    (By.CLASS_NAME, 'balance-block'),
+                    'Bilanz geöffnet am '
+                    + str(self.date_range[0].strftime('%d.%m.%Y'))),
+                submit_btn_locator=(By.NAME, 'submit'))
 
-    Returns:
-        tuple(pandas.DataFrame, set(str)): tuple with two elements. The first
-        element is the data frame containing the parsed results. The second
-        element is a set containing all unknown cash flow types.
+            grupeer.download_statement(
+                'Account statement*.xlsx', self.statement_file_name,
+                (By.NAME, 'excel'))
 
-    """
-    parser = P2PParser('Grupeer', date_range, input_file)
+    def parse_statement(self, statement_file_name: str = None) \
+            -> Tuple[pd.DataFrame, str]:
+        """
+        Parser for Grupeer.
 
-    # Create a DataFrame with zero entries if there were no cashflows
-    if parser.df.empty:
-        parser.parse_statement()
-        return (parser.df, '')
+        Keyword Args:
+            statement_file_name: File name including path of the account
+                statement which should be parsed
 
-    # Get the currency from the Description column and replace known currencies
-    # with their ISO code
-    parser.df[parser.CURRENCY], parser.df['Details'] \
-        = parser.df['Description'].str.split(';').str
-    rename_currency = {'&euro': 'EUR', 'Gekauft &euro': 'EUR'}
-    parser.df[parser.CURRENCY].replace(rename_currency, inplace=True)
+        Returns:
+            Tuple with two elements. The first
+            element is the data frame containing the parsed results. The second
+            element is a set containing all unknown cash flow types.
 
-    # Convert amount and balance to float64
-    parser.df['Amount'] = parser.df['Amount'].apply(
-        lambda x: x.replace(',', '.')).astype('float64')
-    parser.df['Balance'] = parser.df['Balance'].apply(
-        lambda x: x.replace(',', '.')).astype('float64')
+        Raises:
+            RuntimeError: if the statement file cannot be found
 
-    # Define mapping between Grupeer and easyP2P cashflow types and column names
-    cashflow_types = {
-        # Treat cashback as interest payment:
-        'Cashback': parser.INTEREST_PAYMENT,
-        'Deposit': parser.INCOMING_PAYMENT,
-        'Interest': parser.INTEREST_PAYMENT,
-        'Investment': parser.INVESTMENT_PAYMENT,
-        'Principal': parser.REDEMPTION_PAYMENT}
-    rename_columns = {'Date': parser.DATE}
+        """
+        if statement_file_name is not None:
+            self.statement_file_name = statement_file_name
 
-    unknown_cf_types = parser.parse_statement(
-        '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount', 'Balance')
+        parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
-    return (parser.df, unknown_cf_types)
+        # Create a DataFrame with zero entries if there were no cashflows
+        if parser.df.empty:
+            parser.parse_statement()
+            return (parser.df, '')
+
+        # Get the currency from the Description column and replace known
+        # currencies with their ISO code
+        parser.df[parser.CURRENCY], parser.df['Details'] \
+            = parser.df['Description'].str.split(';').str
+        rename_currency = {'&euro': 'EUR', 'Gekauft &euro': 'EUR'}
+        parser.df[parser.CURRENCY].replace(rename_currency, inplace=True)
+
+        # Convert amount and balance to float64
+        parser.df['Amount'] = parser.df['Amount'].apply(
+            lambda x: x.replace(',', '.')).astype('float64')
+        parser.df['Balance'] = parser.df['Balance'].apply(
+            lambda x: x.replace(',', '.')).astype('float64')
+
+        # Define mapping between Grupeer and easyp2p cashflow types and column
+        # names
+        cashflow_types = {
+            # Treat cashback as interest payment:
+            'Cashback': parser.INTEREST_PAYMENT,
+            'Deposit': parser.INCOMING_PAYMENT,
+            'Interest': parser.INTEREST_PAYMENT,
+            'Investment': parser.INVESTMENT_PAYMENT,
+            'Principal': parser.REDEMPTION_PAYMENT}
+        rename_columns = {'Date': parser.DATE}
+
+        unknown_cf_types = parser.parse_statement(
+            '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount',
+            'Balance')
+
+        return (parser.df, unknown_cf_types)
