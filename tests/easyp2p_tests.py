@@ -4,6 +4,7 @@
 """Module containing all parser tests for easyp2p."""
 
 from datetime import date
+import os
 import sys
 from typing import Sequence, Tuple
 import unittest
@@ -25,8 +26,8 @@ PLATFORMS = {
     'Robocash': 'xls',
     'Swaper': 'xlsx',
     'Twino': 'xlsx'}
-INPUT_PREFIX = 'tests/input/input_test_'
-RESULT_PREFIX = 'tests/results/result_test_'
+INPUT_PREFIX = os.path.join('tests', 'input', 'input_test_')
+RESULT_PREFIX = os.path.join('tests', 'results', 'result_test_')
 
 
 class P2PParserTests(unittest.TestCase):
@@ -63,10 +64,11 @@ class P2PParserTests(unittest.TestCase):
                 types
 
         """
-        parser = getattr(
-            getattr(sys.modules[__name__], platform.lower()),
-            'parse_statement')
-        (df, unknown_cf_types) = parser(date_range, input_file)
+        class_ = getattr(getattr(
+            sys.modules[__name__], platform.lower()), platform)
+        platform_instance = class_(date_range)
+        (df, unknown_cf_types) = platform_instance.parse_statement(
+            input_file)
         df_exp = pd.read_csv(
             exp_result_file, index_col=[0, 1, 2])
 
@@ -85,17 +87,36 @@ class P2PParserTests(unittest.TestCase):
 
         # If df is empty, df.equals() will not work since we imported df_exp
         # with non-empty index_cols
-        if df.empty:
-            self.assertTrue(df_exp.empty)
-        else:
-            self.assertTrue(df.equals(df_exp))
-        self.assertEqual(unknown_cf_types, unknown_cf_types_exp)
+        try:
+            if df.empty:
+                self.assertTrue(df_exp.empty)
+            else:
+                self.assertTrue(df.equals(df_exp))
+        except AssertionError:
+            print('df:', df, df.dtypes)
+            print('df_exp:', df_exp,  df_exp.dtypes)
+            raise AssertionError
 
-    def test_bondora_parser(self):
-        """Test parsing Bondora statement."""
-        test_name = 'bondora_parser.csv'
-        self.run_parser_test(
-            'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
+        try:
+            self.assertEqual(unknown_cf_types, unknown_cf_types_exp)
+        except AssertionError:
+            print('unknown_cf_types:',  unknown_cf_types)
+            print('unknown_cf_types_exp:')
+            raise AssertionError
+
+    def test_parser(self):
+        """Test parsing default statements."""
+        for platform in PLATFORMS.keys():
+            test_name = '{0}_parser'.format(platform.lower())
+            if platform == 'DoFinance':
+                self.run_parser_test(
+                    platform, (INPUT_PREFIX + test_name + '.'
+                    + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv',
+                    date_range=(date(2018, 5, 1), date(2018, 9, 30)))
+            else:
+                self.run_parser_test(
+                    platform, (INPUT_PREFIX + test_name + '.'
+                    + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv')
 
     def test_bondora_parser_missing_month(self):
         """
@@ -112,14 +133,6 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
             self.date_range_no_cfs)
-
-    def test_dofinance_parser(self):
-        """Test parsing DoFinance statement."""
-        test_name = 'dofinance_parser'
-        dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        self.run_parser_test(
-            'dofinance', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv', dofinance_date_range)
 
     def test_dofinance_parser_unknown_cf(self):
         """
@@ -159,12 +172,6 @@ class P2PParserTests(unittest.TestCase):
             (date(2018, 9, 1), date(2018, 12, 31)),
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
 
-    def test_estateguru_parser(self):
-        """Test parsing Estateguru statement."""
-        test_name = 'estateguru_parser.csv'
-        self.run_parser_test(
-            'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
-
     def test_estateguru_parser_missing_month(self):
         """
         Test parsing Estateguru statement if a month in date_range is missing.
@@ -188,13 +195,6 @@ class P2PParserTests(unittest.TestCase):
             'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
             unknown_cf_types_exp=
             'Investition(AutoInvestieren), TestCF1, TestCF2')
-
-    def test_grupeer_parser(self):
-        """Test parsing Grupeer statement."""
-        test_name = 'grupeer_parser'
-        self.run_parser_test(
-            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv')
 
     def test_grupeer_parser_unknown_cf(self):
         """
@@ -227,13 +227,6 @@ class P2PParserTests(unittest.TestCase):
             'grupeer', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
-    def test_iuvo_parser(self):
-        """Test parsing Iuvo statement."""
-        test_name = 'iuvo_parser'
-        self.run_parser_test(
-            'iuvo', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv')
-
     def test_iuvo_parser_unknown_cf(self):
         """
         Test parsing Iuvo statement if unknown cashflow types are present.
@@ -259,13 +252,6 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'iuvo', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
-    def test_mintos_parser(self):
-        """Test parsing Mintos statement."""
-        test_name = 'mintos_parser'
-        self.run_parser_test(
-            'mintos', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv')
 
     def test_mintos_parser_unknown_cf(self):
         """
@@ -295,12 +281,6 @@ class P2PParserTests(unittest.TestCase):
             'mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
-    def test_peerberry_parser(self):
-        """Test parsing Peerberry statement."""
-        test_name = 'peerberry_parser.csv'
-        self.run_parser_test(
-            'peerberry', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name)
-
     def test_peerberry_parser_no_cfs(self):
         """Test Peerberry parser if there were no cashflows in date_range."""
         test_name = 'peerberry_parser_no_cfs'
@@ -314,13 +294,6 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'peerberry', INPUT_PREFIX + test_name + '.csv',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
-    def test_robocash_parser(self):
-        """Test parsing Robocash statement."""
-        test_name = 'robocash_parser'
-        self.run_parser_test(
-            'robocash', INPUT_PREFIX + test_name + '.xls',
-            RESULT_PREFIX + test_name + '.csv')
 
     def test_robocash_parser_unknown_cf(self):
         """
@@ -348,13 +321,6 @@ class P2PParserTests(unittest.TestCase):
             'robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
-    def test_swaper_parser(self):
-        """Test parsing Swaper statement."""
-        test_name = 'swaper_parser'
-        self.run_parser_test(
-            'swaper', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv')
-
     def test_swaper_parser_no_cfs(self):
         """
         Test parsing Swaper statement if there were no cashflows in date_range.
@@ -372,13 +338,6 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'swaper', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
-    def test_twino_parser(self):
-        """Test parsing Twino statement."""
-        test_name = 'twino_parser'
-        self.run_parser_test(
-            'twino', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv')
 
     def test_twino_parser_unknown_cf(self):
         """
