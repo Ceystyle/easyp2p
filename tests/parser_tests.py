@@ -12,8 +12,8 @@ import unittest
 import pandas as pd
 
 from .context import (
-    p2p_helper, p2p_parser, bondora, dofinance, estateguru, grupeer, iuvo,
-    mintos, peerberry, robocash, swaper, twino)
+    p2p_helper, p2p_parser, Bondora, DoFinance, Estateguru, Grupeer, Iuvo,
+    Mintos, PeerBerry, Robocash, Swaper, Twino)
 
 PLATFORMS = {
     'Bondora': 'csv',
@@ -64,8 +64,7 @@ class P2PParserTests(unittest.TestCase):
                 types
 
         """
-        class_ = getattr(getattr(
-            sys.modules[__name__], platform.lower()), platform)
+        class_ = getattr(sys.modules[__name__], platform)
         platform_instance = class_(date_range)
         (df, unknown_cf_types) = platform_instance.parse_statement(
             input_file)
@@ -156,9 +155,9 @@ class P2PParserTests(unittest.TestCase):
 
     def test_dofinance_parser_wrong_column_names(self):
         """Test DoFinance parser if there are unknown column names."""
-        instance = dofinance.DoFinance((date(2018, 9, 1), date(2018, 12, 31)))
+        dofinance = DoFinance((date(2018, 9, 1), date(2018, 12, 31)))
         self.assertRaises(
-            RuntimeError, instance.parse_statement,
+            RuntimeError, dofinance.parse_statement,
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
 
     def test_estateguru_parser_unknown_cf(self):
@@ -237,9 +236,9 @@ class P2PParserTests(unittest.TestCase):
         """
         Test Twino parser if unknown column names are present in the statement.
         """
-        instance = twino.Twino((date(2018, 9, 1), date(2018, 12, 31)))
+        twino = Twino((date(2018, 9, 1), date(2018, 12, 31)))
         self.assertRaises(
-            RuntimeError, instance.parse_statement,
+            RuntimeError, twino.parse_statement,
             INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
 
     def run_show_results(
