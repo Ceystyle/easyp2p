@@ -228,13 +228,6 @@ class ParserTests(unittest.TestCase):
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='TestCF1, TestCF2')
 
-    def test_grupeer_parser_unknown_currency(self):
-        """Test Grupeer parser if unknown currencies types are present."""
-        test_name = 'grupeer_parser_unknown_currency'
-        self.run_parser_test(
-            'Grupeer', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
     def test_iuvo_parser(self):
         """Test parsing Iuvo default statement."""
         self.default_parser_test('Iuvo')

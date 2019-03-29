@@ -100,13 +100,6 @@ class Grupeer:
             parser.parse_statement()
             return (parser.df, '')
 
-        # Get the currency from the Description column and replace known
-        # currencies with their ISO code
-        parser.df[parser.CURRENCY], parser.df['Details'] \
-            = parser.df['Description'].str.split(';').str
-        rename_currency = {'&euro': 'EUR', 'Gekauft &euro': 'EUR'}
-        parser.df[parser.CURRENCY].replace(rename_currency, inplace=True)
-
         # Convert amount and balance to float64
         parser.df['Amount'] = parser.df['Amount'].apply(
             lambda x: x.replace(',', '.')).astype('float64')
@@ -122,7 +115,7 @@ class Grupeer:
             'Interest': parser.INTEREST_PAYMENT,
             'Investment': parser.INVESTMENT_PAYMENT,
             'Principal': parser.REDEMPTION_PAYMENT}
-        rename_columns = {'Date': parser.DATE}
+        rename_columns = {'Date': parser.DATE, 'Currency': parser.CURRENCY}
 
         unknown_cf_types = parser.parse_statement(
             '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount',
