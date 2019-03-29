@@ -149,23 +149,23 @@ class P2PParserTests(unittest.TestCase):
         test_name = 'dofinance_parser_unknown_cf'
         dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
         self.run_parser_test(
-            'dofinance', INPUT_PREFIX + test_name + '.xlsx',
+            'DoFinance', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', dofinance_date_range,
             unknown_cf_types_exp=
             'Anlage\nRate: 6% Typ: automatisch, TestCF1, TestCF2')
 
     def test_dofinance_parser_wrong_column_names(self):
         """Test DoFinance parser if there are unknown column names."""
+        instance = dofinance.DoFinance((date(2018, 9, 1), date(2018, 12, 31)))
         self.assertRaises(
-            RuntimeError, dofinance.parse_statement,
-            (date(2018, 9, 1), date(2018, 12, 31)),
+            RuntimeError, instance.parse_statement,
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
 
     def test_estateguru_parser_unknown_cf(self):
         """Test Estateguru parser if unknown cashflow types are present."""
         test_name = 'estateguru_parser_unknown_cf.csv'
         self.run_parser_test(
-            'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
+            'Estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
             unknown_cf_types_exp=
             'Investition(AutoInvestieren), TestCF1, TestCF2')
 
@@ -175,7 +175,7 @@ class P2PParserTests(unittest.TestCase):
         """
         test_name = 'grupeer_parser_unknown_cf'
         self.run_parser_test(
-            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
+            'Grupeer', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='TestCF1, TestCF2')
 
@@ -183,7 +183,7 @@ class P2PParserTests(unittest.TestCase):
         """Test Grupeer parser if unknown currencies types are present."""
         test_name = 'grupeer_parser_unknown_currency'
         self.run_parser_test(
-            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
+            'Grupeer', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def test_iuvo_parser_unknown_cf(self):
@@ -192,7 +192,7 @@ class P2PParserTests(unittest.TestCase):
         """
         test_name = 'iuvo_parser_unknown_cf'
         self.run_parser_test(
-            'iuvo', INPUT_PREFIX + test_name + '.xlsx',
+            'Iuvo', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='TestCF1, TestCF2')
 
@@ -202,15 +202,15 @@ class P2PParserTests(unittest.TestCase):
         """
         test_name = 'mintos_parser_unknown_cf'
         self.run_parser_test(
-            'mintos', INPUT_PREFIX + test_name + '.xlsx',
+            'Mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='Interestincome, TestCF1, TestCF2')
 
     def test_peerberry_parser_no_cfs(self):
-        """Test Peerberry parser if there were no cashflows in date_range."""
+        """Test PeerBerry parser if there were no cashflows in date_range."""
         test_name = 'peerberry_parser_no_cfs'
         self.run_parser_test(
-            'peerberry', INPUT_PREFIX + test_name + '.csv',
+            'PeerBerry', INPUT_PREFIX + test_name + '.csv',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
     def test_robocash_parser_unknown_cf(self):
@@ -219,7 +219,7 @@ class P2PParserTests(unittest.TestCase):
         """
         test_name = 'robocash_parser_unknown_cf'
         self.run_parser_test(
-            'robocash', INPUT_PREFIX + test_name + '.xls',
+            'Robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp=('TestCF1, TestCF2'))
 
@@ -229,7 +229,7 @@ class P2PParserTests(unittest.TestCase):
         """
         test_name = 'twino_parser_unknown_cf'
         self.run_parser_test(
-            'twino', INPUT_PREFIX + test_name + '.xlsx',
+            'Twino', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp=('TestCF1 PRINCIPAL, TestCF2 INTEREST'))
 
@@ -237,9 +237,9 @@ class P2PParserTests(unittest.TestCase):
         """
         Test Twino parser if unknown column names are present in the statement.
         """
+        instance = twino.Twino((date(2018, 9, 1), date(2018, 12, 31)))
         self.assertRaises(
-            RuntimeError, twino.parse_statement,
-            (date(2018, 9, 1), date(2018, 12, 31)),
+            RuntimeError, instance.parse_statement,
             INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
 
     def run_show_results(
