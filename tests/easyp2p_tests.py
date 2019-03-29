@@ -118,14 +118,20 @@ class P2PParserTests(unittest.TestCase):
                     platform, (INPUT_PREFIX + test_name + '.'
                     + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv')
 
-    def test_bondora_parser_missing_month(self):
-        """
-        Test parsing Bondora statement if a month in date_range is missing.
-        """
-        test_name = 'bondora_parser_missing_month.csv'
-        self.run_parser_test(
-            'bondora', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
-            self.date_range_missing_month)
+    def test_parser_missing_month(self):
+        """Test parsing statements if a month in date_range is missing."""
+        for platform in PLATFORMS.keys():
+            test_name = '{0}_parser_missing_month'.format(platform.lower())
+            if platform == 'DoFinance':
+                self.run_parser_test(
+                    platform, (INPUT_PREFIX + test_name + '.'
+                    + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv',
+                    date_range=(date(2018, 5, 1), date(2018, 9, 30)))
+            else:
+                self.run_parser_test(
+                    platform, (INPUT_PREFIX + test_name + '.'
+                    + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv',
+                    self.date_range_missing_month)
 
     def test_bondora_parser_no_cfs(self):
         """Test Bondora parser if there were no cashflows in date_range."""
@@ -146,17 +152,6 @@ class P2PParserTests(unittest.TestCase):
             unknown_cf_types_exp=
             'Anlage\nRate: 6% Typ: automatisch, TestCF1, TestCF2')
 
-    def test_dofinance_parser_missing_month(self):
-        """
-        Test parsing DoFinance statement if a month in date_range is missing.
-        """
-        test_name = 'dofinance_parser_missing_month'
-        dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        self.run_parser_test(
-            'dofinance', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv',
-            dofinance_date_range)
-
     def test_dofinance_parser_no_cfs(self):
         """Test DoFinance parser if there were no cashflows in date_range."""
         test_name = 'dofinance_parser_no_cfs'
@@ -171,15 +166,6 @@ class P2PParserTests(unittest.TestCase):
             RuntimeError, dofinance.parse_statement,
             (date(2018, 9, 1), date(2018, 12, 31)),
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
-
-    def test_estateguru_parser_missing_month(self):
-        """
-        Test parsing Estateguru statement if a month in date_range is missing.
-        """
-        test_name = 'estateguru_parser_missing_month.csv'
-        self.run_parser_test(
-            'estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
-            self.date_range_missing_month)
 
     def test_estateguru_parser_no_cfs(self):
         """Test Estateguru parser if there were no cashflows in date_range."""
@@ -213,13 +199,6 @@ class P2PParserTests(unittest.TestCase):
             'grupeer', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
-    def test_grupeer_parser_missing_month(self):
-        """Test Grupeer parser if a month in date_range is missing."""
-        test_name = 'grupeer_parser_missing_month'
-        self.run_parser_test(
-            'grupeer', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
     def test_grupeer_parser_unknown_currency(self):
         """Test Grupeer parser if unknown currencies types are present."""
         test_name = 'grupeer_parser_unknown_currency'
@@ -246,13 +225,6 @@ class P2PParserTests(unittest.TestCase):
             'iuvo', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
-    def test_iuvo_parser_missing_month(self):
-        """Test Iuvo parser if a month in date_range is missing."""
-        test_name = 'iuvo_parser_missing_month'
-        self.run_parser_test(
-            'iuvo', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
     def test_mintos_parser_unknown_cf(self):
         """
         Test parsing Mintos statement if unknown cashflow types are present.
@@ -272,28 +244,12 @@ class P2PParserTests(unittest.TestCase):
             'mintos', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
-    def test_mintos_parser_missing_month(self):
-        """
-        Test parsing Mintos statement if a month in date_range is missing.
-        """
-        test_name = 'mintos_parser_missing_month'
-        self.run_parser_test(
-            'mintos', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
     def test_peerberry_parser_no_cfs(self):
         """Test Peerberry parser if there were no cashflows in date_range."""
         test_name = 'peerberry_parser_no_cfs'
         self.run_parser_test(
             'peerberry', INPUT_PREFIX + test_name + '.csv',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
-
-    def test_peerberry_parser_missing_month(self):
-        """Test Peerberry parser if a month in date_range is missing."""
-        test_name = 'peerberry_parser_missing_month'
-        self.run_parser_test(
-            'peerberry', INPUT_PREFIX + test_name + '.csv',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def test_robocash_parser_unknown_cf(self):
         """
@@ -312,15 +268,6 @@ class P2PParserTests(unittest.TestCase):
             'robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
 
-    def test_robocash_parser_missing_month(self):
-        """
-        Test parsing Robocash statement if a month in date_range is missing.
-        """
-        test_name = 'robocash_parser_missing_month'
-        self.run_parser_test(
-            'robocash', INPUT_PREFIX + test_name + '.xls',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
-
     def test_swaper_parser_no_cfs(self):
         """
         Test parsing Swaper statement if there were no cashflows in date_range.
@@ -329,15 +276,6 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'swaper', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
-
-    def test_swaper_parser_missing_month(self):
-        """
-        Test parsing Swaper statement if a month in date_range is missing.
-        """
-        test_name = 'swaper_parser_missing_month'
-        self.run_parser_test(
-            'swaper', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def test_twino_parser_unknown_cf(self):
         """
@@ -366,13 +304,6 @@ class P2PParserTests(unittest.TestCase):
         self.run_parser_test(
             'twino', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv', self.date_range_no_cfs)
-
-    def test_twino_parser_missing_month(self):
-        """Test parsing Twino statement if a month in date_range is missing."""
-        test_name = 'twino_parser_missing_month'
-        self.run_parser_test(
-            'twino', INPUT_PREFIX + test_name + '.xlsx',
-            RESULT_PREFIX + test_name + '.csv', self.date_range_missing_month)
 
     def run_show_results(
             self, list_of_dfs: Sequence[pd.DataFrame], result_file: str,
