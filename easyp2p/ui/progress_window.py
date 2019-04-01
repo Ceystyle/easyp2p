@@ -10,14 +10,11 @@ from PyQt5.QtWidgets import QDialog
 from easyp2p.ui.Ui_progress_window import Ui_Dialog
 
 
-
-
-
 class ProgressWindow(QDialog, Ui_Dialog):
 
     """Contains code for handling events for the Progress Window."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         """
         Constructor.
 
@@ -29,7 +26,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
         self.setupUi(self)
 
     @pyqtSlot()
-    def on_pushButton_ok_clicked(self):
+    def on_pushButton_ok_clicked(self) -> None:
         """
         Close the progress window.
 
@@ -40,7 +37,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
         self.accept()
 
     @pyqtSlot()
-    def on_pushButton_abort_clicked(self):
+    def on_pushButton_abort_clicked(self) -> None:
         """
         Abort the evaluation of the selected P2P platforms.
 
@@ -52,7 +49,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
         self.reject()
 
     @pyqtSlot(int)
-    def on_progressBar_valueChanged(self, value):
+    def on_progressBar_valueChanged(self, value) -> None:
         """
         If progress bar reaches 100% make the OK button clickable.
 
