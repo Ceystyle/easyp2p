@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
+
+"""Package containing all platform specific classes."""
 
 import easyp2p.platforms.bondora
 import easyp2p.platforms.dofinance
