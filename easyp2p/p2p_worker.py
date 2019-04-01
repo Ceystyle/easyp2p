@@ -4,7 +4,6 @@
 """Module implementing WorkerThread."""
 
 from datetime import date
-import sys
 from typing import AbstractSet, Callable, List, Mapping, Optional, Tuple
 
 import pandas as pd
@@ -12,11 +11,7 @@ from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 
 import easyp2p.p2p_parser as p2p_parser
-# Ignore unused import warning: the platforms are implicitly used in
-# get_platform_method
-from easyp2p.platforms import (
-    bondora, dofinance, estateguru, grupeer, iuvo, mintos, peerberry, robocash,
-    swaper, twino)
+import easyp2p.platforms as p2p_platforms
 
 class WorkerThread(QThread):
 
@@ -80,8 +75,7 @@ class WorkerThread(QThread):
 
         """
         try:
-            class_ = getattr(getattr(
-                sys.modules[__name__], platform.lower()), platform)
+            class_ = getattr(getattr(p2p_platforms, platform.lower()), platform)
         except AttributeError:
             error_message = (
                 'Klasse {0} konnte nicht gefunden werden. Ist {1}.py '
