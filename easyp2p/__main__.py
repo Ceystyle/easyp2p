@@ -12,11 +12,12 @@ import sys
 from PyQt5 import QtWidgets
 from easyp2p.ui.main_window import MainWindow
 
-name = "easyp2p"
+name = "easyp2p" #pylint: disable=invalid-name
 
 def main():
+    """Open the main window of easyp2p."""
     app = QtWidgets.QApplication(sys.argv)
-    ui = MainWindow()
+    ui = MainWindow() #pylint: disable=invalid-name
     ui.show()
     sys.exit(app.exec_())
 

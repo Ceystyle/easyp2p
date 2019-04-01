@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
+# pylint: disable=invalid-name
 
 """Module implementing ProgressWindow."""
 

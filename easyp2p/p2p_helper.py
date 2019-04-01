@@ -145,7 +145,8 @@ def nbr_to_short_month(nbr: str) -> str:
     return map_nbr_to_short_month[nbr]
 
 
-class one_of_many_expected_conditions_true():
+class one_of_many_expected_conditions_true():  \
+    #pylint: disable=invalid-name, too-few-public-methods
     """
     An expectation for checking if (at least) one of several provided expected
     conditions for the Selenium webdriver is true.
@@ -176,6 +177,6 @@ class one_of_many_expected_conditions_true():
             try:
                 if condition(driver):
                     return True
-            except:
+            except: #pylint: disable=bare-except
                 pass
         return False
