@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# Copyright 2018-19 Niko Sandschneider
+
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(

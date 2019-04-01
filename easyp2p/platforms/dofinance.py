@@ -19,6 +19,12 @@ from easyp2p.p2p_platform import P2PPlatform
 
 class DoFinance:
 
+    """
+    Contains two public methods for downloading/parsing DoFinance account
+    statements.
+
+    """
+
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of DoFinance class.
@@ -30,6 +36,7 @@ class DoFinance:
         """
         self.name = 'DoFinance'
         self.date_range = date_range
+        self.statement_file_name = None
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """

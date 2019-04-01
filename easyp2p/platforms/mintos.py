@@ -20,6 +20,12 @@ from easyp2p.p2p_platform import P2PPlatform
 
 class Mintos:
 
+    """
+    Contains two public methods for downloading/parsing Mintos account
+    statements.
+
+    """
+
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of Mintos class.
@@ -31,6 +37,7 @@ class Mintos:
         """
         self.name = 'Mintos'
         self.date_range = date_range
+        self.statement_file_name = None
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -135,8 +142,8 @@ class Mintos:
                 parser.df['Mintos_Cashflow-Typ'].str.split(
                     ' Rebuy purpose').str[0]
         except KeyError as err:
-            raise RuntimeError('Mintos: unbekannte Spalte im Parser: '
-                + str(err))
+            raise RuntimeError(
+                'Mintos: unbekannte Spalte im Parser: ' + str(err))
 
         # Define mapping between Mintos and easyp2p cashflow types and column
         # names

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
 
 """
@@ -18,6 +19,12 @@ from easyp2p.p2p_platform import P2PPlatform
 
 class Swaper:
 
+    """
+    Contains two public methods for downloading/parsing Swaper account
+    statements.
+
+    """
+
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of Swaper class.
@@ -29,8 +36,9 @@ class Swaper:
         """
         self.name = 'Swaper'
         self.date_range = date_range
+        self.statement_file_name = None
 
-    def download_statement(self,  credentials: Tuple[str, str]) -> None:
+    def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Swaper account statement for given date range.
 

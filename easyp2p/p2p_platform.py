@@ -163,11 +163,11 @@ class P2PPlatform:
         """
         if statement_file is not None:
             return statement_file
-        else:
-            return os.path.join(
-                self.dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
-                    self.name.lower(), date_range[0].strftime('%Y%m%d'),
-                    date_range[1].strftime('%Y%m%d'), suffix))
+
+        return os.path.join(
+            self.dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
+                self.name.lower(), date_range[0].strftime('%Y%m%d'),
+                date_range[1].strftime('%Y%m%d'), suffix))
 
     def init_webdriver(self) -> None:
         """
@@ -674,7 +674,7 @@ class P2PPlatform:
 
         # Get actual file name of downloaded file
         file_name = [file for file in new_file_list if file not in file_list][0]
-        self._rename_statement(file_name,  download_file_name)
+        self._rename_statement(file_name, download_file_name)
 
     def wdwait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
         """

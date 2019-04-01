@@ -20,6 +20,12 @@ from easyp2p.p2p_platform import P2PPlatform
 
 class Iuvo:
 
+    """
+    Contains two public methods for downloading/parsing Iuvo account
+    statements.
+
+    """
+
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of Iuvo class.
@@ -31,6 +37,7 @@ class Iuvo:
         """
         self.name = 'Iuvo'
         self.date_range = date_range
+        self.statement_file_name = None
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """

@@ -18,6 +18,12 @@ from easyp2p.p2p_platform import P2PPlatform
 
 class Grupeer:
 
+    """
+    Contains two public methods for downloading/parsing Grupeer account
+    statements.
+
+    """
+
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of Grupeer class.
@@ -29,8 +35,9 @@ class Grupeer:
         """
         self.name = 'Grupeer'
         self.date_range = date_range
+        self.statement_file_name = None
 
-    def download_statement(self,  credentials: Tuple[str, str]) -> None:
+    def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Grupeer account statement.
 

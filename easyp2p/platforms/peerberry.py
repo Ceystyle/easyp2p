@@ -20,6 +20,12 @@ from easyp2p.p2p_platform import P2PPlatform
 
 class PeerBerry:
 
+    """
+    Contains two public methods for downloading/parsing PeerBerry account
+    statements.
+
+    """
+
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of PeerBerry class.
@@ -31,6 +37,7 @@ class PeerBerry:
         """
         self.name = 'PeerBerry'
         self.date_range = date_range
+        self.statement_file_name = None
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """

@@ -23,6 +23,12 @@ from easyp2p.p2p_platform import P2PPlatform
 
 class Bondora:
 
+    """
+    Contains two public methods for downloading/parsing Bondora account
+    statements.
+
+    """
+
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of Bondora class.
@@ -34,6 +40,7 @@ class Bondora:
         """
         self.name = 'Bondora'
         self.date_range = date_range
+        self.statement_file_name = None
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -121,9 +128,9 @@ class Bondora:
             try:
                 bondora.wdwait(
                     p2p_helper.one_of_many_expected_conditions_true(conditions))
-                _no_payments = bool('Keine Zahlungen gefunden' in
-                        driver.find_element_by_xpath(
-                            xpaths['no_payments']).text)
+                _no_payments = bool(
+                    'Keine Zahlungen gefunden' in
+                    driver.find_element_by_xpath(xpaths['no_payments']).text)
             except TimeoutException as err:
                 raise TimeoutException(err)
 
