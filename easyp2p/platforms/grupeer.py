@@ -3,8 +3,6 @@
 """
 Download and parse Grupeer statement.
 
-.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
-
 """
 
 from datetime import date

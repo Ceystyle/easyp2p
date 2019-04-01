@@ -4,8 +4,6 @@
 """
 Download and parse DoFinance statement.
 
-.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
-
 """
 
 from datetime import date

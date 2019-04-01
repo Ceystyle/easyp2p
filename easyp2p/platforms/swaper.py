@@ -3,8 +3,6 @@
 """
 Download and parse Swaper statement.
 
-.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
-
 """
 
 from datetime import date

@@ -2,22 +2,7 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """
-p2p_helper contains some helper functions/classes for easyP2P.
-
-Functions:
-
-* get_calendar_clicks: get number of calendar clicks necessary to get from \
-    provided start to target month.
-* get_df_from_file: read a pandas DataFrame from given input file.
-* get_list_of_months: returns a list of all months between provided start and \
-    end date.
-* short_month_to_nbr: translates month short name to number.
-* nbr_to_short_month: translates number to month short name.
-
-Classes:
-
-* one_of_many_expected_conditions_true: expected condition for the Selenium \
-    webdriver.
+p2p_helper contains some helper functions/classes for easyp2p.
 
 """
 

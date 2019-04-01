@@ -21,7 +21,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
         Constructor.
 
         Keyword Args:
-            parent (QWidget): reference to the parent widget
+            parent: Reference to the parent widget
 
         """
         super(ProgressWindow, self).__init__(parent)
@@ -56,7 +56,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
         If progress bar reaches 100% make the OK button clickable.
 
         Args:
-            value (int): Value of the progress bar, between 0 and 100
+            value: Value of the progress bar, between 0 and 100
 
         """
         if value == 100:

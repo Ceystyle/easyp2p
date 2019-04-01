@@ -3,8 +3,6 @@
 """
 Download and parse Iuvo statement.
 
-.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
-
 """
 
 from datetime import date

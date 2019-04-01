@@ -4,8 +4,6 @@
 """
 Download and parse Robocash statement.
 
-.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
-
 """
 
 from datetime import date

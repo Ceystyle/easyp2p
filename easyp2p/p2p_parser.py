@@ -9,8 +9,6 @@ purpose of this module is to provide parser methods to transform them into a
 single output format. The combined output is aggregated and written to an Excel
 file.
 
-.. moduleauthor:: Niko Sandschneider <nsandschn@gmx.de>
-
 """
 from datetime import date
 from typing import List, Mapping, Optional, Sequence, Tuple

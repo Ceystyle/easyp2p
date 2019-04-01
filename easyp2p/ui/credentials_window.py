@@ -27,10 +27,10 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         Constructor.
 
         Args:
-            platform (str): name of the P2P platform
+            platform: Name of the P2P platform
 
         Keyword Args:
-            parent (QWidget): reference to the parent widget
+            parent: Reference to the parent widget
 
         """
         super(CredentialsWindow, self).__init__(parent)
@@ -58,11 +58,10 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
     is toggled, the supplied credentials will be saved in the keyring.
 
     Args:
-        platform (str): name of the P2P platform
+        platform: Name of the P2P platform
 
     Returns:
-        Tuple[str, str]: (username, password) on success, None if user clicks
-            Cancel.
+        Tuple (username, password) on success, None if user clicks Cancel
 
     """
     _done = False
@@ -117,12 +116,12 @@ def save_credentials(platform: str, username: str, password: str) -> bool:
     is toggled, the supplied credentials will be saved in the keyring.
 
     Args:
-        platform (str): name of P2P platform
-        username (str): username for P2P platform
-        password (str): password for P2P platform
+        platform: Name of P2P platform
+        username: Username for P2P platform
+        password: Password for P2P platform
 
     Returns:
-        bool: True if credentials were saved successfully, False if not.
+        True if credentials were saved successfully, False if not
 
     """
     if keyring.get_keyring():
