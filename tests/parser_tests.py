@@ -61,8 +61,9 @@ class ParserTests(unittest.TestCase):
                 types
 
         """
-        class_ = getattr(sys.modules[__name__], platform)
-        platform_instance = class_(date_range)
+        platform_class = getattr(
+            getattr(p2p_platforms, platform.lower()), platform)
+        platform_instance = platform_class(date_range)
         (df, unknown_cf_types) = platform_instance.parse_statement(
             input_file)
         df_exp = pd.read_csv(
@@ -178,7 +179,8 @@ class ParserTests(unittest.TestCase):
 
     def test_dofinance_parser_wrong_column_names(self):
         """Test DoFinance parser if there are unknown column names."""
-        dofinance = DoFinance((date(2018, 9, 1), date(2018, 12, 31)))
+        dofinance = p2p_platforms.dofinance.DoFinance(
+            (date(2018, 9, 1), date(2018, 12, 31)))
         self.assertRaises(
             RuntimeError, dofinance.parse_statement,
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
@@ -341,7 +343,8 @@ class ParserTests(unittest.TestCase):
         """
         Test Twino parser if unknown column names are present in the statement.
         """
-        twino = Twino((date(2018, 9, 1), date(2018, 12, 31)))
+        twino = p2p_platforms.twino.Twino(
+            (date(2018, 9, 1), date(2018, 12, 31)))
         self.assertRaises(
             RuntimeError, twino.parse_statement,
             INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
