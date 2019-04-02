@@ -5,15 +5,12 @@
 
 from datetime import date
 import os
-import sys
 from typing import Optional, Sequence, Tuple
 import unittest
 
 import pandas as pd
 
-from .context import (
-    p2p_helper, p2p_parser, Bondora, DoFinance, Estateguru, Grupeer, Iuvo,
-    Mintos, PeerBerry, Robocash, Swaper, Twino)
+from tests.context import p2p_helper, p2p_parser, p2p_platforms
 
 PLATFORMS = {
     'Bondora': 'csv',

@@ -10,7 +10,7 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
 
-from .context import MainWindow, ProgressWindow
+from tests.context import MainWindow, ProgressWindow
 
 PLATFORMS = {
     'Bondora': 'csv',

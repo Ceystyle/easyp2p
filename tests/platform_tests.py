@@ -9,10 +9,9 @@ from typing import Tuple
 import unittest
 import keyring
 
-from .parser_tests import are_files_equal, RESULT_PREFIX
-from .context import (
-    Bondora, DoFinance, Estateguru, Grupeer, Iuvo,
-    Mintos, PeerBerry, Robocash, Swaper, Twino)
+from tests.parser_tests import are_files_equal, RESULT_PREFIX
+from tests.context import p2p_platforms
+
 
 class PlatformTests(unittest.TestCase):
 
