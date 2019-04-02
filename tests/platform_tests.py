@@ -43,47 +43,54 @@ class PlatformTests(unittest.TestCase):
 
         return (username, password)
 
+    def run_download_statement_test(
+            self, platform: str, result_file: str,
+            drop_header: bool = False) -> None:
+        """
+        Helper method for running the download tests.
+
+        Args:
+            platform: Name of the P2P platform
+            result_file: Name of the file with the expected results without
+                prefix
+
+        Keyword Args:
+            kwargs: Optional keyword arguments for the assertTrue function
+
+        """
+        credentials = self.get_credentials_from_keyring(platform)
+        platform_class = getattr(
+            getattr(p2p_platforms, platform.lower()), platform)
+        platform_instance = platform_class(self.date_range)
+        platform_instance.download_statement(credentials)
+        self.assertTrue(are_files_equal(
+            platform_instance.statement_file_name, RESULT_PREFIX + result_file,
+            drop_header=drop_header))
+
     def test_download_bondora_statement(self) -> None:
         """Test download_bondora_statement."""
-        credentials = self.get_credentials_from_keyring('Bondora')
-        bondora = Bondora(self.date_range)
-        bondora.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            bondora.statement_file_name,
-            RESULT_PREFIX + 'download_bondora_statement.csv'))
+        self.run_download_statement_test(
+            'Bondora', 'download_bondora_statement.csv')
 
     def test_download_bondora_statement_no_cfs(self) -> None:
         """Test Bondora download when there are no cashflows."""
-        credentials = self.get_credentials_from_keyring('Bondora')
-        bondora = Bondora(self.date_range_no_cfs)
-        bondora.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            bondora.statement_file_name,
-            RESULT_PREFIX + 'download_bondora_statement_no_cfs.csv'))
+        self.run_download_statement_test(
+            'Bondora', 'download_bondora_statement_no_cfs.csv')
 
     def test_download_dofinance_statement(self):
         """Test download_dofinance_statement function."""
-        credentials = self.get_credentials_from_keyring('DoFinance')
-        dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        dofinance = DoFinance(dofinance_date_range)
-        dofinance.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            dofinance.statement_file_name,
-            RESULT_PREFIX + 'download_dofinance_statement.xlsx'))
+        self.run_download_statement_test(
+            'DoFinance', 'download_dofinance_statement.xlsx')
 
     def test_download_dofinance_statement_no_cfs(self):
         """Test DoFinance download when there are no cashflows."""
-        credentials = self.get_credentials_from_keyring('DoFinance')
-        dofinance = DoFinance(self.date_range_no_cfs)
-        dofinance.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            dofinance.statement_file_name,
-            RESULT_PREFIX + 'download_dofinance_statement_no_cfs.xlsx'))
+        self.run_download_statement_test(
+            'DoFinance', 'download_dofinance_statement_no_cfs.xlsx')
 
     def test_download_estateguru_statement(self):
         """Test download_estateguru_statement."""
         credentials = self.get_credentials_from_keyring('Estateguru')
-        estateguru = Estateguru(self.date_range_no_cfs)
+        estateguru = p2p_platforms.estateguru.Estateguru(self.date_range_no_cfs)
         estateguru.download_statement(credentials)
         # The Estateguru statement contains all cashflows ever generated for
         # this account. Therefore it changes regularly and we cannot compare
@@ -94,131 +101,73 @@ class PlatformTests(unittest.TestCase):
 
     def test_download_grupeer_statement(self):
         """Test download_grupeer_statement."""
-        credentials = self.get_credentials_from_keyring('Grupeer')
-        grupeer = Grupeer(self.date_range)
-        grupeer.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            grupeer.statement_file_name,
-            RESULT_PREFIX + 'download_grupeer_statement.xlsx'))
+        self.run_download_statement_test(
+            'Grupeer', 'download_grupeer_statement.xlsx')
 
     def test_download_grupeer_statement_no_cfs(self):
         """Test Grupeer download when there are no cashflows in date_range."""
-        credentials = self.get_credentials_from_keyring('Grupeer')
-        grupeer = Grupeer(self.date_range_no_cfs)
-        grupeer.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            grupeer.statement_file_name,
-            RESULT_PREFIX + 'download_grupeer_statement_no_cfs.xlsx'))
+        self.run_download_statement_test(
+            'Grupeer', 'download_grupeer_statement_no_cfs.xlsx')
 
     def test_download_iuvo_statement(self):
         """Test download_iuvo_statement."""
-        credentials = self.get_credentials_from_keyring('Iuvo')
-        iuvo = Iuvo(self.date_range)
-        iuvo.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            iuvo.statement_file_name,
-            RESULT_PREFIX + 'download_iuvo_statement.xlsx'))
+        self.run_download_statement_test(
+            'Iuvo', 'download_iuvo_statement.xlsx')
 
     def test_download_iuvo_statement_no_cfs(self):
         """Test Iuvo download when there are no cashflows in date_range."""
-        credentials = self.get_credentials_from_keyring('Iuvo')
-        iuvo = Iuvo(self.date_range_no_cfs)
-        iuvo.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            iuvo.statement_file_name,
-            RESULT_PREFIX + 'download_iuvo_statement_no_cfs.xlsx'))
+        self.run_download_statement_test(
+            'Iuvo', 'download_iuvo_statement_no_cfs.xlsx')
 
     def test_download_mintos_statement(self):
         """Test download_mintos_statement."""
-        credentials = self.get_credentials_from_keyring('Mintos')
-        mintos = Mintos(self.date_range)
-        mintos.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            mintos.statement_file_name,
-            RESULT_PREFIX + 'download_mintos_statement.xlsx'))
+        self.run_download_statement_test(
+            'Mintos', 'download_mintos_statement.xlsx')
 
     def test_download_mintos_statement_no_cfs(self):
         """Test Mintos download when there are no cashflows."""
-        credentials = self.get_credentials_from_keyring('Mintos')
-        mintos = Mintos(self.date_range_no_cfs)
-        mintos.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            mintos.statement_file_name,
-            RESULT_PREFIX + 'download_mintos_statement_no_cfs.xlsx'))
+        self.run_download_statement_test(
+            'Mintos', 'download_mintos_statement_no_cfs.xlsx')
 
     def test_download_peerberry_statement(self):
         """Test download_peerberry_statement."""
-        credentials = self.get_credentials_from_keyring('PeerBerry')
-        peerberry = PeerBerry(self.date_range)
-        peerberry.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            peerberry.statement_file_name,
-            RESULT_PREFIX + 'download_peerberry_statement.csv'))
+        self.run_download_statement_test(
+            'PeerBerry', 'download_peerberry_statement.csv')
 
     def test_download_peerberry_statement_no_cfs(self):
         """Test Peerberry download when there are no cashflows."""
-        credentials = self.get_credentials_from_keyring('PeerBerry')
-        peerberry = PeerBerry(self.date_range_no_cfs)
-        peerberry.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            peerberry.statement_file_name,
-            RESULT_PREFIX + 'download_peerberry_statement_no_cfs.csv'))
+        self.run_download_statement_test(
+            'PeerBerry', 'download_peerberry_statement_no_cfs.csv')
 
     def test_download_robocash_statement(self):
         """Test download_robocash_statement function."""
-        credentials = self.get_credentials_from_keyring('Robocash')
-        robocash = Robocash(self.date_range)
-        robocash.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            robocash.statement_file_name,
-            RESULT_PREFIX + 'download_robocash_statement.xls'))
+        self.run_download_statement_test(
+            'Robocash', 'download_robocash_statement.xls')
 
     def test_download_robocash_statement_no_cfs(self):
         """Test Robocash download when there are no cashflows in date_range."""
-        credentials = self.get_credentials_from_keyring('Robocash')
-        robocash = Robocash(self.date_range_no_cfs)
-        robocash.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            robocash.statement_file_name,
-            RESULT_PREFIX + 'download_robocash_statement_no_cfs.xls'))
+        self.run_download_statement_test(
+            'Robocash', 'download_robocash_statement_no_cfs.xls')
 
     def test_download_swaper_statement(self):
         """Test download_swaper_statement function."""
-        credentials = self.get_credentials_from_keyring('Swaper')
-        swaper = Swaper(self.date_range)
-        swaper.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            swaper.statement_file_name,
-            RESULT_PREFIX + 'download_swaper_statement.xlsx'))
+        self.run_download_statement_test(
+            'Swaper', 'download_swaper_statement.xlsx')
 
     def test_download_swaper_statement_no_cfs(self) -> None:
         """Test Swaper download when there are no cashflows."""
-        credentials = self.get_credentials_from_keyring('Swaper')
-        swaper = Swaper(self.date_range_no_cfs)
-        swaper.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            swaper.statement_file_name,
-            RESULT_PREFIX + 'download_swaper_statement_no_cfs.xlsx'))
+        self.run_download_statement_test(
+            'Swaper', 'download_swaper_statement_no_cfs.xlsx')
 
     def test_download_twino_statement(self):
         """Test download_twino_statement."""
-        credentials = self.get_credentials_from_keyring('Twino')
-        twino = Twino(self.date_range)
-        twino.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            twino.statement_file_name,
-            RESULT_PREFIX + 'download_twino_statement.xlsx',
-            drop_header=True))
+        self.run_download_statement_test(
+            'Twino', 'download_twino_statement.xlsx', drop_header=True)
 
     def test_download_twino_statement_no_cfs(self):
         """Test Twino download when there are no cashflows."""
-        credentials = self.get_credentials_from_keyring('Twino')
-        twino = Twino(self.date_range_no_cfs)
-        twino.download_statement(credentials)
-        self.assertTrue(are_files_equal(
-            twino.statement_file_name,
-            RESULT_PREFIX + 'download_twino_statement_no_cfs.xlsx',
-            drop_header=True))
+        self.run_download_statement_test(
+            'Twino', 'download_twino_statement_no_cfs.xlsx', drop_header=True)
 
 
 if __name__ == '__main__':
