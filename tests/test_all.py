@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright 2019 Niko Sandschneider
+# pylint: disable=invalid-name
 
 """Helper module for running all easyp2p tests."""
 
