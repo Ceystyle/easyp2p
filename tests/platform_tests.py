@@ -10,7 +10,7 @@ import unittest
 import keyring
 
 from tests.parser_tests import are_files_equal, RESULT_PREFIX
-from tests.context import p2p_platforms
+import easyp2p.platforms as p2p_platforms
 
 
 class PlatformTests(unittest.TestCase):

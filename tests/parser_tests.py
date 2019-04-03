@@ -10,7 +10,9 @@ import unittest
 
 import pandas as pd
 
-from tests.context import p2p_helper, p2p_parser, p2p_platforms
+import easyp2p.p2p_helper as p2p_helper
+import easyp2p.p2p_parser as p2p_parser
+import easyp2p.platforms as p2p_platforms
 
 PLATFORMS = {
     'Bondora': 'csv',

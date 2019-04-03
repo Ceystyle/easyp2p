@@ -12,7 +12,8 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtTest import QTest
 
-from tests.context import MainWindow, ProgressWindow
+from easyp2p.ui.main_window import MainWindow
+from easyp2p.ui.progress_window import ProgressWindow
 
 PLATFORMS = {
     'Bondora': 'csv',
