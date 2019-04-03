@@ -121,7 +121,8 @@ class MainWindowTests(unittest.TestCase):
 
     def test_output_file_on_date_change_after_user_change(self) -> None:
         """Test output file after date change if user already changed file."""
-        self.form.lineEdit_output_file.text() == "Test.xlsx"
+        self.form.output_file = 'Test.xlsx'
+        self.form.on_lineEdit_output_file_textChanged(self.form.output_file)
         self.form.output_file_changed = True
         old_output_file = self.form.lineEdit_output_file.text()
         if date.today().month != 3:
