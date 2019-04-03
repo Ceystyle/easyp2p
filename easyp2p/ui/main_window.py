@@ -25,7 +25,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     """This class defines the main window of easyp2p."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         """
         Constructor of MainWindow.
 
@@ -40,30 +40,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker = None
         self.platforms = set([])
         self.credentials = dict()
+
         if date.today().month > 1:
             self.start_month = date.today().month - 1
             self.start_year = date.today().year
         else:
             self.start_month = 12
             self.start_year = date.today().year - 1
+
+        self.end_month = self.start_month
+        self.end_year = self.start_year
+
         self.comboBox_start_month.setCurrentIndex(
             self.comboBox_start_month.findText(
                 p2p_helper.nbr_to_short_month(str(self.start_month))))
         self.comboBox_start_year.setCurrentIndex(
             self.comboBox_start_year.findText(str(self.start_year)))
-        self.end_month = self.start_month
         self.comboBox_end_month.setCurrentIndex(
             self.comboBox_end_month.findText(
                 p2p_helper.nbr_to_short_month(str(self.end_month))))
-        self.end_year = self.start_year
         self.comboBox_end_year.setCurrentIndex(
             self.comboBox_end_year.findText(str(self.end_year)))
-        self.set_start_date()
-        self.set_end_date()
-        self.output_file = os.getcwd() + '/P2P_Ergebnisse_{0}-{1}.xlsx'.format(
-            self.start_date.strftime('%d.%m.%Y'),
-            self.end_date.strftime('%d.%m.%Y'))
-        QLineEdit.setText(self.lineEdit_output_file, self.output_file)
+
+        self._set_start_date()
+        self._set_end_date()
+        self.output_file_changed = False
+        self._set_output_file()
+
         self._connect_signals()
 
     def _connect_signals(self) -> None:
@@ -95,14 +98,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.platforms.remove(check_box.text().replace('&', ''))
 
-    def set_start_date(self) -> None:
+    def _set_start_date(self) -> None:
         """Helper method to set start date to first day of selected month."""
         self.start_date = date(self.start_year, self.start_month, 1)
 
-    def set_end_date(self) -> None:
+    def _set_end_date(self) -> None:
         """Helper method to set end date to last day of selected month."""
         end_of_month = calendar.monthrange(self.end_year, self.end_month)[1]
         self.end_date = date(self.end_year, self.end_month, end_of_month)
+
+    def _set_output_file(self) -> None:
+        """Helper method to set the name of the output file."""
+        if not self.output_file_changed:
+            self.output_file = os.path.join(
+                os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
+                    self.start_date.strftime('%d.%m.%Y'),
+                    self.end_date.strftime('%d.%m.%Y')))
+            QLineEdit.setText(self.lineEdit_output_file, self.output_file)
 
     @pyqtSlot(str)
     def on_comboBox_start_month_activated(self, month: str) -> None:
@@ -114,7 +126,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         self.start_month = int(p2p_helper.short_month_to_nbr(month))
-        self.set_start_date()
+        self._set_start_date()
+        self._set_output_file()
 
     @pyqtSlot(str)
     def on_comboBox_start_year_activated(self, year: str) -> None:
@@ -126,7 +139,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         self.start_year = int(year)
-        self.set_start_date()
+        self._set_start_date()
+        self._set_output_file()
 
     @pyqtSlot(str)
     def on_comboBox_end_month_activated(self, month: str) -> None:
@@ -138,7 +152,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         self.end_month = int(p2p_helper.short_month_to_nbr(month))
-        self.set_end_date()
+        self._set_end_date()
+        self._set_output_file()
 
     @pyqtSlot(str)
     def on_comboBox_end_year_activated(self, year: str) -> None:
@@ -150,7 +165,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         self.end_year = int(year)
-        self.set_end_date()
+        self._set_end_date()
+        self._set_output_file()
 
     @pyqtSlot(str)
     def on_lineEdit_output_file_textChanged(self, file_name: str) -> None:
@@ -179,6 +195,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not self.output_file.endswith('.xlsx'):
                 self.output_file = self.output_file + '.xlsx'
             self.on_lineEdit_output_file_textChanged(self.output_file)
+            self.output_file_changed = True
 
     @pyqtSlot(bool)
     def on_checkBox_select_all_toggled(self, checked: bool) -> None:
