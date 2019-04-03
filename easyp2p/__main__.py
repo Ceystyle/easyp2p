@@ -2,10 +2,8 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """
-easyp2p.
-
-Package for downloading and presenting investment results for several P2P
-lending platforms in a unified way.
+Application for downloading and presenting investment results for
+people-to-people (P2P) lending platforms.
 
 """
 import sys
