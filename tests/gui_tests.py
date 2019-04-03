@@ -3,6 +3,8 @@
 
 """Module containing all GUI tests for easyp2p."""
 
+from datetime import date
+import os
 import sys
 import unittest
 
@@ -63,7 +65,11 @@ class MainWindowTests(unittest.TestCase):
         self.assertFalse(self.form.checkBox_select_all.isChecked())
         self.assertFalse(self.form.checkBox_swaper.isChecked())
         self.assertFalse(self.form.checkBox_twino.isChecked())
-        # TODO: add tests for comboBoxes and output file name
+        self.assertTrue(self.form.lineEdit_output_file.text() == os.path.join(
+            os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
+                self.form.start_date.strftime('%d.%m.%Y'),
+                self.form.end_date.strftime('%d.%m.%Y'))))
+        # TODO: add tests for comboBoxes
 
     def test_select_all_platforms(self) -> None:
         """Test the Select All Platforms checkbox."""
@@ -97,6 +103,32 @@ class MainWindowTests(unittest.TestCase):
 
         # Check that the progress window did not open
         self.assertFalse(self.progress_window_open)
+
+    def test_output_file_on_date_change(self) -> None:
+        """Test output file name after a date change."""
+        old_output_file = self.form.lineEdit_output_file.text()
+        if date.today().month != 3:
+            self.form.on_comboBox_end_month_activated('Feb')
+        else:
+            self.form.on_comboBox_end_month_activated('Mrz')
+        new_output_file = self.form.lineEdit_output_file.text()
+        self.assertTrue(new_output_file != old_output_file)
+        self.assertTrue(new_output_file == os.path.join(
+            os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
+                self.form.start_date.strftime('%d.%m.%Y'),
+                self.form.end_date.strftime('%d.%m.%Y'))))
+
+    def test_output_file_on_date_change_after_user_change(self) -> None:
+        """Test output file after date change if user already changed file."""
+        self.form.lineEdit_output_file.text() == "Test.xlsx"
+        self.form.output_file_changed = True
+        old_output_file = self.form.lineEdit_output_file.text()
+        if date.today().month != 3:
+            self.form.on_comboBox_end_month_activated('Feb')
+        else:
+            self.form.on_comboBox_end_month_activated('Mrz')
+        new_output_file = self.form.lineEdit_output_file.text()
+        self.assertTrue(new_output_file == old_output_file)
 
     def is_message_box_open(self) -> bool:
         """Helper method to determine if a QMessageBox is open."""
