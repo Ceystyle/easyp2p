@@ -11,7 +11,7 @@ import tests.platform_tests
 
 # initialize the test suite
 loader = unittest.TestLoader()
-suite  = unittest.TestSuite()
+suite = unittest.TestSuite()
 
 # add tests to the test suite
 suite.addTests(loader.loadTestsFromModule(tests.gui_tests))

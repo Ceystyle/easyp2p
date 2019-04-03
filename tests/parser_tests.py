@@ -93,13 +93,13 @@ class ParserTests(unittest.TestCase):
                 self.assertTrue(df.equals(df_exp))
         except AssertionError:
             print('df:', df, df.dtypes)
-            print('df_exp:', df_exp,  df_exp.dtypes)
+            print('df_exp:', df_exp, df_exp.dtypes)
             raise AssertionError
 
         try:
             self.assertEqual(unknown_cf_types, unknown_cf_types_exp)
         except AssertionError:
-            print('unknown_cf_types:',  unknown_cf_types)
+            print('unknown_cf_types:', unknown_cf_types)
             print('unknown_cf_types_exp:')
             raise AssertionError
 
@@ -112,9 +112,9 @@ class ParserTests(unittest.TestCase):
             date_range = self.date_range
 
         self.run_parser_test(
-            platform, (INPUT_PREFIX + test_name + '.'
-            + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv',
-            date_range=date_range)
+            platform,
+            INPUT_PREFIX + test_name + '.' + PLATFORMS[platform],
+            RESULT_PREFIX + test_name + '.csv', date_range=date_range)
 
     def missing_month_parser_test(
             self, platform: str,
@@ -125,11 +125,12 @@ class ParserTests(unittest.TestCase):
             date_range = self.date_range_missing_month
 
         self.run_parser_test(
-            platform, (INPUT_PREFIX + test_name + '.'
-            + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv',
-            date_range=date_range)
+            platform,
+            INPUT_PREFIX + test_name + '.' + PLATFORMS[platform],
+            RESULT_PREFIX + test_name + '.csv', date_range=date_range)
 
-    def no_cfs_parser_test(self, platform: str,
+    def no_cfs_parser_test(
+            self, platform: str,
             date_range: Optional[Tuple[date, date]] = None) -> None:
         """Test parsing statements if there were no cashflows in date_range."""
         test_name = '{0}_parser_no_cfs'.format(platform.lower())
@@ -137,9 +138,9 @@ class ParserTests(unittest.TestCase):
             date_range = self.date_range_no_cfs
 
         self.run_parser_test(
-            platform, (INPUT_PREFIX + test_name + '.'
-            + PLATFORMS[platform]), RESULT_PREFIX + test_name + '.csv',
-            date_range=date_range)
+            platform,
+            INPUT_PREFIX + test_name + '.' + PLATFORMS[platform],
+            RESULT_PREFIX + test_name + '.csv', date_range=date_range)
 
     def test_bondora_parser(self):
         """Test parsing Bondora default statement."""

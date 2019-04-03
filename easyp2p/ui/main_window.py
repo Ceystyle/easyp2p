@@ -40,6 +40,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker = None
         self.platforms = set([])
         self.credentials = dict()
+        self.output_file = None
 
         if date.today().month > 1:
             self.start_month = date.today().month - 1

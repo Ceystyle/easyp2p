@@ -152,13 +152,12 @@ class ProgressWindowTests(unittest.TestCase):
 
     """Test the progress window of easyp2p."""
 
-    def setup_gui(self):
+    def setUp(self):
         """Initialize ProgressWindow."""
         self.form = ProgressWindow()
 
     def test_defaults(self):
         """Test default behaviour of ProgressWindow."""
-        self.setup_gui()
         self.assertEqual(self.form.progressBar.value(), 0)
         self.assertEqual(self.form.progressText.isReadOnly(), True)
         self.assertEqual(self.form.progressText.toPlainText(), '')
