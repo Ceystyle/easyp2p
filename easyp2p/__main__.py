@@ -8,6 +8,7 @@ people-to-people (P2P) lending platforms.
 """
 import sys
 from PyQt5 import QtWidgets
+
 from easyp2p.ui.main_window import MainWindow
 
 name = "easyp2p" #pylint: disable=invalid-name

@@ -7,6 +7,7 @@
 import calendar
 from datetime import date
 import os
+import sys
 from typing import Callable
 
 from PyQt5.QtCore import pyqtSlot
@@ -268,6 +269,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.output_file)
         worker.update_progress_bar.connect(self.update_progress_bar)
         worker.update_progress_text.connect(self.update_progress_text)
+        worker.abort_easyp2p.connect(self.abort_easyp2p)
         return worker
 
     def update_progress_bar(self, value: float) -> None:
@@ -298,3 +300,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.progress_window.progressText.setTextColor(color)
         self.progress_window.progressText.append(txt)
+
+    def abort_easyp2p(self, error_msg: str) -> None:
+        """
+        Abort the program in case of critical errors.
+
+        Args:
+            error_msg: Message to display to the user before aborting
+
+        """
+        self.progress_window.reject()
+        QMessageBox.critical(self, "Kritischer Fehler", error_msg,
+            QMessageBox.Close)
+        sys.exit()

@@ -28,6 +28,7 @@ class WorkerThread(QThread):
     # Signals for communicating with the MainWindow
     update_progress_bar = pyqtSignal(float)
     update_progress_text = pyqtSignal(str, QColor)
+    abort_easyp2p = pyqtSignal(str)
 
     # Colors for text output
     BLACK = QColor(0, 0, 0)
@@ -176,6 +177,7 @@ class WorkerThread(QThread):
         """
         list_of_dfs: List[pd.DataFrame] = []
         progress = 0.
+        success = False
         # Distribute 95% evenly across all selected platforms
         # The last 5 percent are for preparing the results
         step = 95/len(self.platforms)
@@ -189,7 +191,11 @@ class WorkerThread(QThread):
                 continue
 
             platform_instance = class_(self.date_range)
-            success = self.run_platform(platform, platform_instance)
+            try:
+                success = self.run_platform(platform, platform_instance)
+            except ModuleNotFoundError as err:
+                self.abort_easyp2p.emit(str(err))
+                #return
 
             if success:
                 if self.abort:
