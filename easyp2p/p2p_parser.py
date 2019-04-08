@@ -235,6 +235,8 @@ class P2PParser:
                 statement which contains the cash flow type
             value_column: Name of the DataFrame column which contains the
                 amounts to be aggregated
+            balance_column: Name of the column which contains the portfolio
+                balances
 
         Returns:
             Sorted comma separated string consisting of all unknown cash flow

@@ -177,6 +177,9 @@ class P2PPlatform:
         location to p2p_downloads relative to the current working directory
         and opens a new maximized browser window.
 
+        Raises:
+            ModuleNotFoundError: If Chromedriver cannot be found
+
         """
         options = webdriver.ChromeOptions()
 #        options.add_argument("--headless")
