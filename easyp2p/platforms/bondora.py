@@ -78,39 +78,20 @@ class Bondora:
             bondora.open_account_statement_page(
                 'Cashflow', (By.ID, 'StartYear'))
 
-            # Get the default values for start and end date
-            start_year = Select(
-                driver.find_element_by_id('StartYear')).first_selected_option\
-                .text
-            start_month = Select(
-                driver.find_element_by_id('StartMonth')).first_selected_option\
-                .text
-            end_year = Select(
-                driver.find_element_by_id('EndYear')).first_selected_option.text
-            end_month = Select(
-                driver.find_element_by_id('EndMonth')).first_selected_option\
-                .text
-
             # Change the date values to the given start and end dates
-            if start_year != self.date_range[0].year:
-                select = Select(driver.find_element_by_id('StartYear'))
-                select.select_by_visible_text(str(self.date_range[0].year))
+            select = Select(driver.find_element_by_id('StartYear'))
+            select.select_by_visible_text(str(self.date_range[0].year))
 
-            if (p2p_helper.short_month_to_nbr(start_month)
-                    != self.date_range[0].strftime('%m')):
-                select = Select(driver.find_element_by_id('StartMonth'))
-                select.select_by_visible_text(p2p_helper.nbr_to_short_month(
-                    self.date_range[0].strftime('%m')))
+            select = Select(driver.find_element_by_id('StartMonth'))
+            select.select_by_visible_text(p2p_helper.nbr_to_short_month(
+                self.date_range[0].strftime('%m')))
 
-            if end_year != self.date_range[1].year:
-                select = Select(driver.find_element_by_id('EndYear'))
-                select.select_by_visible_text(str(self.date_range[1].year))
+            select = Select(driver.find_element_by_id('EndYear'))
+            select.select_by_visible_text(str(self.date_range[1].year))
 
-            if p2p_helper.short_month_to_nbr(end_month) \
-                    != self.date_range[1].strftime('%m'):
-                select = Select(driver.find_element_by_id('EndMonth'))
-                select.select_by_visible_text(p2p_helper.nbr_to_short_month(
-                    self.date_range[1].strftime('%m')))
+            select = Select(driver.find_element_by_id('EndMonth'))
+            select.select_by_visible_text(p2p_helper.nbr_to_short_month(
+                self.date_range[1].strftime('%m')))
 
             # Start the account statement generation
             driver.find_element_by_xpath(xpaths['search_btn']).click()
