@@ -101,7 +101,8 @@ class Bondora:
             conditions = [
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['start_date']), '{0} {1}'.format(
-                        self.date_range[0].strftime('%b'),
+                        p2p_helper.nbr_to_short_month(
+                            self.date_range[0].strftime('%m')),
                         self.date_range[0].year)),
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['no_payments']),
