@@ -7,7 +7,6 @@ Download and parse Bondora statement.
 """
 
 from datetime import date
-import locale
 from typing import Tuple
 
 import pandas as pd
@@ -61,15 +60,13 @@ class Bondora:
             'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/'
                            'tbody/tr[2]/td[1]/a')}
 
-        with P2PPlatform(self.name, urls, EC.title_contains('Einloggen')) \
+        with P2PPlatform(
+            self.name, urls, EC.element_to_be_clickable((By.NAME, 'Email'))) \
             as bondora:
 
             driver = bondora.driver
             self.statement_file_name = bondora.set_statement_file_name(
-                self.date_range, 'csv')
-
-            # _no_payments is set True if there were no cashflows in date_range
-            _no_payments = False
+                self.date_range, 'xlsx')
 
             bondora.log_into_page(
                 'Email', 'Password', credentials,
@@ -96,8 +93,9 @@ class Bondora:
             # Start the account statement generation
             driver.find_element_by_xpath(xpaths['search_btn']).click()
 
-            # Wait until statement generation is finished. If there were no
-            # cashflows in date_range set _no_payments to True.
+            # Wait until statement generation is finished
+            no_payments_msg = 'Keine Zahlungen gefunden'
+
             conditions = [
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['start_date']), '{0} {1}'.format(
@@ -105,27 +103,17 @@ class Bondora:
                             self.date_range[0].strftime('%m')),
                         self.date_range[0].year)),
                 EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['no_payments']),
-                    'Keine Zahlungen gefunden')]
+                    (By.XPATH, xpaths['no_payments']), no_payments_msg)]
             try:
                 bondora.wdwait(
                     p2p_helper.one_of_many_expected_conditions_true(conditions))
-                _no_payments = bool(
-                    'Keine Zahlungen gefunden' in
-                    driver.find_element_by_xpath(xpaths['no_payments']).text)
             except TimeoutException as err:
                 raise TimeoutException(err)
 
-            if _no_payments:
-                df = pd.DataFrame()
-            else:
-                # Scrape cashflows from the web site and write them to csv file
-                cashflow_table = driver.find_element_by_id('cashflow-content')
-                df = pd.read_html(
-                    cashflow_table.get_attribute("innerHTML"), index_col=0,
-                    thousands='.', decimal=',')[0]
-
-            df.to_csv(self.statement_file_name)
+            bondora.download_statement(
+                'Cashflow.xlsx', self.statement_file_name,
+                (By.XPATH,
+                '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'))
 
 
     def parse_statement(self, statement_file_name: str = None) \
@@ -153,21 +141,6 @@ class Bondora:
             parser.parse_statement()
             return (parser.df, '')
 
-        # The first and last row only contain a summary
-        parser.df = parser.df[1:-1]
-
-        # Bondora uses month short names, thus we need to make sure the right
-        # locale is used
-        # TODO: make sure locale is installed or find better way to fix this
-        locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
-
-        # Fix the number format
-        parser.df.set_index('Zeitraum', inplace=True)
-        parser.df.replace(
-            {r'\.': '', ',': '.', '€': ''}, inplace=True, regex=True)
-        parser.df = parser.df.astype('float64')
-        parser.df.reset_index(inplace=True)
-
         # Calculate defaulted payments
         parser.df[parser.DEFAULTS] = (
             parser.df['Erhaltener Kapitalbetrag - gesamt']
@@ -176,12 +149,14 @@ class Bondora:
         # Define mapping between Bondora and easyP2P column names
         rename_columns = {
             'Eingesetztes Kapital (netto)': parser.INCOMING_PAYMENT,
+            'Endsaldo': parser.END_BALANCE_NAME,
             'Erhaltener Kapitalbetrag - gesamt': parser.REDEMPTION_PAYMENT,
             'Erhaltene Zinsen - gesamt': parser.INTEREST_PAYMENT,
             'Investitionen (netto)': parser.INVESTMENT_PAYMENT,
+            'Startguthaben': parser.START_BALANCE_NAME,
             'Zeitraum': parser.DATE}
 
         unknown_cf_types = parser.parse_statement(
-            '%b %Y', rename_columns=rename_columns)
+            '%d.%m.%Y', rename_columns=rename_columns)
 
         return (parser.df, unknown_cf_types)

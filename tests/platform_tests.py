@@ -70,12 +70,12 @@ class PlatformTests(unittest.TestCase):
     def test_download_bondora_statement(self) -> None:
         """Test download_bondora_statement."""
         self.run_download_statement_test(
-            'Bondora', 'download_bondora_statement.csv')
+            'Bondora', 'download_bondora_statement.xlsx')
 
     def test_download_bondora_statement_no_cfs(self) -> None:
         """Test Bondora download when there are no cashflows."""
         self.run_download_statement_test(
-            'Bondora', 'download_bondora_statement_no_cfs.csv')
+            'Bondora', 'download_bondora_statement_no_cfs.xlsx')
 
     def test_download_dofinance_statement(self):
         """Test download_dofinance_statement function."""
