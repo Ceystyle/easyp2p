@@ -16,17 +16,14 @@ import glob
 from pathlib import Path
 import os
 import time
-from typing import cast, Mapping, Optional, Tuple
+from typing import Mapping, Optional, Tuple
 
-from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import (
-    TimeoutException, NoSuchElementException, StaleElementReferenceException,
-    WebDriverException)
+    TimeoutException, NoSuchElementException, StaleElementReferenceException)
 from selenium.webdriver.common.action_chains import ActionChains
 
 import easyp2p.p2p_helper as p2p_helper
@@ -42,11 +39,7 @@ class P2PPlatform:
 
     """
 
-    def __init__(
-            self, name: str, urls: Mapping[str, str],
-            logout_wait_until: bool,
-            logout_locator: Optional[Tuple[str, str]] = None,
-            hover_locator: Optional[Tuple[str, str]] = None) -> None:
+    def __init__(self, name: str, urls: Mapping[str, str]) -> None:
         """
         Constructor of P2P class.
 
@@ -55,13 +48,6 @@ class P2PPlatform:
             urls: Dictionary with URLs for login page
                 (key: 'login'), account statement page (key: 'statement')
                 and optionally logout page (key: 'logout')
-            logout_wait_until: Expected condition in case
-                of successful logout
-
-        Keyword Args:
-            logout_locator: Locator of logout web element
-            hover_locator: Locator of web element where the
-                mouse needs to hover in order to make logout button visible
 
        Raises:
             RuntimeError: If no URL for login or statement page is provided
@@ -69,74 +55,22 @@ class P2PPlatform:
         """
         self.name = name
         self.urls = urls
-        self.logout_wait_until = logout_wait_until
-        self.logout_locator = logout_locator
-        self.hover_locator = hover_locator
-        self.logged_in = False
+        self.driver = None
+        self.wdwait = None
 
-        # self.driver will be initialized in __enter__ method to make sure it
-        # is always closed again by __exit__
-        self.driver = cast(webdriver.Chrome, None)
-
-        # Make sure URLs for login and statement page are provided
+        # Make sure URLs for login, logout and statement page are provided
         if 'login' not in urls:
-            raise RuntimeError('Keine Login-URL für {0} '
-                               'vorhanden!'.format(self.name))
+            raise RuntimeError(
+                '{0}: Keine Login-URL vorhanden!'.format(self.name))
         if 'statement' not in urls:
-            raise RuntimeError('Keine Kontoauszug-URLs für {0} '
-                               'vorhanden!'.format(self.name))
+            raise RuntimeError(
+                '{0}: Keine Kontoauszug-URLs für {0} vorhanden!'.format(
+                    self.name))
 
         # Set download directory and create it if it doesn't exist yet
         self.dl_dir = os.path.join(Path.home(), '.easyp2p', self.name.lower())
         if not os.path.isdir(self.dl_dir):
             os.makedirs(self.dl_dir)
-
-    def __enter__(self) -> 'P2PPlatform':
-        """
-        Start of context management protocol.
-
-        Returns:
-            P2Platform: Instance of P2P class
-
-        Raises:
-            RuntimeError: If neither logout URL or a locator for the logout
-                button are provided
-
-        """
-        if 'logout' not in self.urls and self.logout_locator is None:
-            raise RuntimeError(
-                '{0}: Keine Methode für Logout vorhanden!'
-                .format(self.name))
-
-        self.init_webdriver()
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_trace) -> None:
-        """
-        End of context management protocol.
-
-        Raises:
-            RuntimeError: If neither logout URL or a locator for the logout
-                button are provided
-
-        """
-        if self.logged_in:
-            if 'logout' in self.urls:
-                self.logout_by_url(self.logout_wait_until)
-            elif self.logout_locator is not None:
-                self.logout_by_button(
-                    self.logout_locator, self.logout_wait_until,
-                    hover_locator=self.hover_locator)
-            else:
-                raise RuntimeError(
-                    '{0}: Keine Methode für Logout vorhanden!'
-                    .format(self.name))
-
-            self.logged_in = False
-
-        self.driver.close()
-        if exc_type:
-            raise exc_type(exc_value)
 
     def set_statement_file_name(
             self, date_range: Tuple[date, date], suffix: str,
@@ -157,7 +91,7 @@ class P2PPlatform:
                 name
 
         Returns:
-            File name including path where the paltform account statement
+            File name including path where the platform account statement
             should be saved
 
         """
@@ -168,42 +102,6 @@ class P2PPlatform:
             self.dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
                 self.name.lower(), date_range[0].strftime('%Y%m%d'),
                 date_range[1].strftime('%Y%m%d'), suffix))
-
-    def init_webdriver(self) -> None:
-        """
-        Initialize Chromedriver as webdriver.
-
-        Initializes Chromedriver as webdriver, sets the default download
-        location to p2p_downloads relative to the current working directory
-        and opens a new maximized browser window.
-
-        Raises:
-            ModuleNotFoundError: If Chromedriver cannot be found
-
-        """
-        options = webdriver.ChromeOptions()
-#        options.add_argument("--headless")
-#        options.add_argument("--window-size=1920,1200")
-        prefs = {"download.default_directory": self.dl_dir}
-        options.add_experimental_option("prefs", prefs)
-
-        # TODO: Ubuntu doesn't put chromedriver in PATH so we need to
-        # explicitly specify its location. Find a better solution that works on
-        # all systems.
-        try:
-            if os.path.isfile('/usr/lib/chromium-browser/chromedriver'):
-                driver = webdriver.Chrome(
-                    executable_path=r'/usr/lib/chromium-browser/chromedriver',
-                    options=options)
-            else:
-                driver = webdriver.Chrome(options=options)
-        except WebDriverException:
-            raise ModuleNotFoundError(
-                'Chromedriver konnte nicht gefunden werden!\n'
-                'easyp2p wird beendet!')
-
-        driver.maximize_window()
-        self.driver = driver
 
     def log_into_page(
             self, name_field: str, password_field: str,
@@ -248,6 +146,7 @@ class P2PPlatform:
 
             if login_locator is not None:
                 self.wdwait(EC.element_to_be_clickable(login_locator))
+#                self.driver.wdwait(EC.element_to_be_clickable(login_locator))
                 self.driver.find_element(*login_locator).click()
 
             # Make sure that the correct URL was loaded
@@ -287,7 +186,7 @@ class P2PPlatform:
                 '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
                 .format(self.name))
 
-        self.logged_in = True
+        self.driver.logged_in = True
 
     def open_account_statement_page(
             self, check_title: str, check_locator: Tuple[str, str]) -> None:
@@ -316,7 +215,7 @@ class P2PPlatform:
         except (AssertionError, TimeoutException):
             raise RuntimeError(
                 '{0}-Kontoauszugsseite konnte nicht geladen werden!'
-                ''.format(self.name))
+                .format(self.name))
 
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
@@ -449,12 +348,13 @@ class P2PPlatform:
             if wait_until is not None:
                 self.wdwait(wait_until)
         except NoSuchElementException:
-            raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
-                               'gestartet werden.'.format(self.name))
+            raise RuntimeError(
+                'Generierung des {0}-Kontoauszugs konnte nicht gestartet '
+                'werden.'.format(self.name))
         except TimeoutException:
             raise RuntimeError(
                 'Generierung des {0}-Kontoauszugs hat zu lange gedauert.'
-                ''.format(self.name))
+                .format(self.name))
 
     def generate_statement_calendar(
             self, date_range: Tuple[date, date],
@@ -536,11 +436,13 @@ class P2PPlatform:
                 left_arrows[1], right_arrows[1], days_table)
 
         except NoSuchElementException:
-            raise RuntimeError('Generierung des {0}-Kontoauszugs konnte nicht '
-                               'gestartet werden.'.format(self.name))
+            raise RuntimeError(
+                'Generierung des {0}-Kontoauszugs konnte nicht gestartet '
+                'werden.'.format(self.name))
         except TimeoutException:
-            raise RuntimeError('Generierung des {0}-Kontoauszugs hat zu lange '
-                               'gedauert.'.format(self.name))
+            raise RuntimeError(
+                'Generierung des {0}-Kontoauszugs hat zu lange gedauert.'
+                .format(self.name))
 
     def set_date_in_calendar(
             self, calendar_: WebElement, day: int, months: int,
@@ -680,22 +582,6 @@ class P2PPlatform:
         # Get actual file name of downloaded file
         file_name = [file for file in new_file_list if file not in file_list][0]
         self._rename_statement(file_name, download_file_name)
-
-    def wdwait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
-        """
-        Shorthand for WebDriverWait.
-
-        Args:
-            wait_until: Expected condition for which the webdriver should wait
-
-        Keyword Args:
-            delay: Maximal waiting time in seconds
-
-        Returns:
-            WebElement which WebDriverWait waited for.
-
-        """
-        return WebDriverWait(self.driver, delay).until(wait_until)
 
     def _rename_statement(
             self, source_file_name: str, target_file_name: str) -> None:
