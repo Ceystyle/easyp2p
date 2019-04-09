@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class DoFinance:
@@ -34,9 +35,16 @@ class DoFinance:
                 statements must be generated
 
         """
+        urls = {
+            'login': 'https://www.dofinance.eu/de/users/login',
+            'logout': 'https://www.dofinance.eu/de/users/logout',
+            'statement': 'https://www.dofinance.eu/de/users/statement'}
+
         self.name = 'DoFinance'
+        self.platform = P2PPlatform(self.name, urls)
         self.date_range = date_range
-        self.statement_file_name = None
+        self.statement_file_name = self.platform.set_statement_file_name(
+            self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -46,34 +54,27 @@ class DoFinance:
             credentials: (username, password) for DoFinance
 
         """
-        urls = {
-            'login': 'https://www.dofinance.eu/de/users/login',
-            'logout': 'https://www.dofinance.eu/de/users/logout',
-            'statement': 'https://www.dofinance.eu/de/users/statement'}
         default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59*.xlsx'.format(
             self.date_range[0].strftime('%Y-%m-%d'),
             self.date_range[1].strftime('%Y-%m-%d'))
 
-        with P2PPlatform(
-                'DoFinance', urls,
-                EC.title_contains('Kreditvergabe Plattform')) as dofinance:
+        # TODO: do not rely on text in title for checking successful logout
+        with PlatformWebDriver(
+            self.platform, EC.title_contains('Kreditvergabe Plattform')):
 
-            self.statement_file_name = dofinance.set_statement_file_name(
-                self.date_range, 'xlsx')
-
-            dofinance.log_into_page(
+            self.platform.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN')))
 
-            dofinance.open_account_statement_page(
+            self.platform.open_account_statement_page(
                 'Transaktionen', (By.ID, 'date-from'))
 
-            dofinance.generate_statement_direct(
+            self.platform.generate_statement_direct(
                 self.date_range, (By.ID, 'date-from'), (By.ID, 'date-to'),
                 '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-            dofinance.download_statement(
+            self.platform.download_statement(
                 default_file_name, self.statement_file_name, (By.NAME, 'xls'))
 
 

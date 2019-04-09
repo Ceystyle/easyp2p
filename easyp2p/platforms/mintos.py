@@ -16,6 +16,7 @@ from selenium.common.exceptions import TimeoutException
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Mintos:
@@ -35,9 +36,15 @@ class Mintos:
                 statements must be generated
 
         """
+        urls = {
+            'login': 'https://www.mintos.com/de/login',
+            'statement': 'https://www.mintos.com/de/kontoauszug/'}
+
         self.name = 'Mintos'
+        self.platform = P2PPlatform(self.name, urls)
         self.date_range = date_range
-        self.statement_file_name = None
+        self.statement_file_name = self.platform.set_statement_file_name(
+            self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -47,30 +54,23 @@ class Mintos:
             credentials: (username, password) for Mintos
 
         """
-        urls = {
-            'login': 'https://www.mintos.com/de/login',
-            'statement': 'https://www.mintos.com/de/kontoauszug/'}
         xpaths = {
             'logout_btn': "//a[contains(@href,'logout')]"}
         default_file_name = '{0}-account-statement*.xlsx'.format(
             date.today().strftime('%Y%m%d'))
 
-        with P2PPlatform(
-                'Mintos', urls, EC.title_contains('Vielen Dank'),
-                logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
+        with PlatformWebDriver(
+            self.platform, EC.title_contains('Vielen Dank'),
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as webdriver:
 
-            driver = mintos.driver
-            self.statement_file_name = mintos.set_statement_file_name(
-                self.date_range, 'xlsx')
-
-            mintos.log_into_page(
+            self.platform.log_into_page(
                 '_username', '_password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-            mintos.open_account_statement_page(
+            self.platform.open_account_statement_page(
                 'Account Statement', (By.ID, 'period-from'))
 
-            mintos.generate_statement_direct(
+            self.platform.generate_statement_direct(
                 self.date_range, (By.ID, 'period-from'),
                 (By.ID, 'period-to'), '%d.%m.%Y',
                 submit_btn_locator=(By.ID, 'filter-button'))
@@ -81,12 +81,14 @@ class Mintos:
             # with start and end balance of 0. If that is the case write an
             # empty DataFrame to the file.
             try:
-                mintos.wdwait(
+                self.platform.wdwait(
                     EC.presence_of_element_located((By.ID, 'export-button')))
             except TimeoutException:
                 try:
-                    cashflow_table = driver.find_element_by_id('overview-results')
-                    df = pd.read_html(cashflow_table.get_attribute("innerHTML"))[0]
+                    cashflow_table = webdriver.driver.find_element_by_id(
+                        'overview-results')
+                    df = pd.read_html(
+                        cashflow_table.get_attribute("innerHTML"))[0]
                 except ValueError:
                     raise RuntimeError(
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
@@ -105,7 +107,7 @@ class Mintos:
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
                         'generiert werden')
             else:
-                mintos.download_statement(
+                self.platform.download_statement(
                     default_file_name, self.statement_file_name,
                     (By.ID, 'export-button'))
 

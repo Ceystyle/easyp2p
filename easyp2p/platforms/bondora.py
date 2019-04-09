@@ -18,6 +18,7 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Bondora:
@@ -37,9 +38,16 @@ class Bondora:
                 statements must be generated
 
         """
+        urls = {
+            'login': 'https://www.bondora.com/de/login',
+            'logout': 'https://www.bondora.com/de/authorize/logout',
+            'statement': 'https://www.bondora.com/de/cashflow'}
+
         self.name = 'Bondora'
+        self.platform = P2PPlatform(self.name, urls)
         self.date_range = date_range
-        self.statement_file_name = None
+        self.statement_file_name = self.platform.set_statement_file_name(
+            self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -49,10 +57,6 @@ class Bondora:
             credentials: (username, password) for Bondora
 
         """
-        urls = {
-            'login': 'https://www.bondora.com/de/login',
-            'logout': 'https://www.bondora.com/de/authorize/logout',
-            'statement': 'https://www.bondora.com/de/cashflow'}
         xpaths = {
             'no_payments': '/html/body/div[1]/div/div/div/div[3]/div',
             'search_btn': ('//*[@id="page-content-wrapper"]/div/div/div[1]/'
@@ -60,38 +64,36 @@ class Bondora:
             'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/'
                            'tbody/tr[2]/td[1]/a')}
 
-        with P2PPlatform(
-            self.name, urls, EC.element_to_be_clickable((By.NAME, 'Email'))) \
-            as bondora:
+        with PlatformWebDriver(
+            self.platform, EC.element_to_be_clickable((By.NAME, 'Email'))) \
+            as webdriver:
 
-            driver = bondora.driver
-            self.statement_file_name = bondora.set_statement_file_name(
-                self.date_range, 'xlsx')
+            wd = webdriver.driver
 
-            bondora.log_into_page(
+            self.platform.log_into_page(
                 'Email', 'Password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
 
-            bondora.open_account_statement_page(
+            self.platform.open_account_statement_page(
                 'Cashflow', (By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
-            select = Select(driver.find_element_by_id('StartYear'))
+            select = Select(wd.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(self.date_range[0].year))
 
-            select = Select(driver.find_element_by_id('StartMonth'))
+            select = Select(wd.find_element_by_id('StartMonth'))
             select.select_by_visible_text(p2p_helper.nbr_to_short_month(
                 self.date_range[0].strftime('%m')))
 
-            select = Select(driver.find_element_by_id('EndYear'))
+            select = Select(wd.find_element_by_id('EndYear'))
             select.select_by_visible_text(str(self.date_range[1].year))
 
-            select = Select(driver.find_element_by_id('EndMonth'))
+            select = Select(wd.find_element_by_id('EndMonth'))
             select.select_by_visible_text(p2p_helper.nbr_to_short_month(
                 self.date_range[1].strftime('%m')))
 
             # Start the account statement generation
-            driver.find_element_by_xpath(xpaths['search_btn']).click()
+            wd.find_element_by_xpath(xpaths['search_btn']).click()
 
             # Wait until statement generation is finished
             no_payments_msg = 'Keine Zahlungen gefunden'
@@ -105,12 +107,12 @@ class Bondora:
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['no_payments']), no_payments_msg)]
             try:
-                bondora.wdwait(
+                webdriver.wdwait(
                     p2p_helper.one_of_many_expected_conditions_true(conditions))
             except TimeoutException as err:
                 raise TimeoutException(err)
 
-            bondora.download_statement(
+            self.platform.download_statement(
                 'Cashflow.xlsx', self.statement_file_name,
                 (By.XPATH,
                 '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'))

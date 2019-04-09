@@ -16,6 +16,7 @@ from selenium.common.exceptions import TimeoutException
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class PeerBerry:
@@ -35,9 +36,15 @@ class PeerBerry:
                 statements must be generated
 
         """
+        urls = {
+            'login': 'https://peerberry.com/de/login',
+            'statement': 'https://peerberry.com/de/statement'}
+
         self.name = 'PeerBerry'
+        self.platform = P2PPlatform(self.name, urls)
         self.date_range = date_range
-        self.statement_file_name = None
+        self.statement_file_name = self.platform.set_statement_file_name(
+                self.date_range, 'csv')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -47,9 +54,6 @@ class PeerBerry:
             credentials (tuple[str, str]): (username, password) for PeerBerry
 
         """
-        urls = {
-            'login': 'https://peerberry.com/de/login',
-            'statement': 'https://peerberry.com/de/statement'}
         xpaths = {
             'cookie_policy': '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]',
             'download_btn': ('//*[@id="app"]/div/div/div/div[2]/div/div[2]/'
@@ -61,24 +65,22 @@ class PeerBerry:
             'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
                               'div[1]/div/div[2]/div/div[2]/div/span')}
 
-        with P2PPlatform(
-                'PeerBerry', urls, EC.title_contains('Einloggen'),
-                logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
+        with PlatformWebDriver(
+            self.platform, EC.title_contains('Einloggen'),
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as webdriver:
 
-            self.statement_file_name = peerberry.set_statement_file_name(
-                self.date_range, 'csv')
+            wd = webdriver.driver
 
-            peerberry.log_into_page(
+            self.platform.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-            peerberry.open_account_statement_page(
+            self.platform.open_account_statement_page(
                 'Kontoauszug', (By.NAME, 'startDate'))
 
             # Close the cookie policy, if present
             try:
-                peerberry.driver.find_element_by_xpath(
-                    xpaths['cookie_policy']).click()
+                wd.find_element_by_xpath(xpaths['cookie_policy']).click()
             except NoSuchElementException:
                 pass
 
@@ -93,16 +95,15 @@ class PeerBerry:
                           'id_from_calendar': False,
                           'table_id': 'class'}
 
-            peerberry.generate_statement_calendar(
+            self.platform.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
-            # After setting the dates, the statement button needs to be clicked in
-            # order to actually generate the statement
+            # After setting the dates, the statement button needs to be clicked
+            # in order to actually generate the statement
             try:
-                peerberry.driver.find_element_by_xpath(
-                    xpaths['statement_btn']).click()
-                peerberry.wdwait(
+                wd.find_element_by_xpath(xpaths['statement_btn']).click()
+                webdriver.wdwait(
                     EC.text_to_be_present_in_element(
                         ((By.XPATH, xpaths['start_balance'])),
                         'Eröffnungssaldo '+str(
@@ -114,7 +115,7 @@ class PeerBerry:
                 raise RuntimeError('Generierung des {0}-Kontoauszugs hat '
                                    'zu lange gedauert.'.format(self.name))
 
-            peerberry.download_statement(
+            self.platform.download_statement(
                 'transactions*.csv', self.statement_file_name,
                 (By.XPATH, xpaths['download_btn']), actions='move_to_element')
 

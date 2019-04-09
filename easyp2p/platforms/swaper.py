@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Swaper:
@@ -34,9 +35,15 @@ class Swaper:
                 statements must be generated
 
         """
+        urls = {
+            'login': 'https://www.swaper.com/#/dashboard',
+            'statement': 'https://www.swaper.com/#/overview/account-statement'}
+
         self.name = 'Swaper'
+        self.platform = P2PPlatform(self.name, urls)
         self.date_range = date_range
-        self.statement_file_name = None
+        self.statement_file_name = self.platform.set_statement_file_name(
+            self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -46,31 +53,24 @@ class Swaper:
             credentials: (username, password) for Swaper
 
         """
-        urls = {
-            'login': 'https://www.swaper.com/#/dashboard',
-            'statement': 'https://www.swaper.com/#/overview/account-statement'}
         xpaths = {
             'download_btn': ('//*[@id="account-statement"]/div[3]/div[4]/div/'
                              'div[1]/a/div[1]/div/span[2]'),
             'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
-        with P2PPlatform(
-                'Swaper', urls,
-                EC.presence_of_element_located((By.ID, 'about')),
-                logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
+        with PlatformWebDriver(
+            self.platform, EC.presence_of_element_located((By.ID, 'about')),
+            logout_locator=(By.XPATH, xpaths['logout_btn'])):
 
-            self.statement_file_name = swaper.set_statement_file_name(
-                self.date_range, 'xlsx')
-
-            swaper.log_into_page(
+            self.platform.log_into_page(
                 'email', 'password', credentials,
                 EC.presence_of_element_located((By.ID, 'open-investments')),
                 fill_delay=0.5)
 
-            swaper.open_account_statement_page(
+            self.platform.open_account_statement_page(
                 'Swaper', (By.ID, 'account-statement'))
 
-            # calendar_locator must be a tuple of locators, thus the , at the end
+            # calendar_locator must be tuple of locators, thus the , at the end
             calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )
             arrows = {'arrow_tag': 'div',
                       'left_arrow_class': 'icon icon icon-left',
@@ -81,11 +81,11 @@ class Swaper:
                           'table_id': 'id'}
             default_dates = (date.today().replace(day=1), date.today())
 
-            swaper.generate_statement_calendar(
+            self.platform.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
-            swaper.download_statement(
+            self.platform.download_statement(
                 'excel-storage*.xlsx', self.statement_file_name,
                 (By.XPATH, xpaths['download_btn']))
 
