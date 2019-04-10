@@ -16,7 +16,7 @@ import glob
 from pathlib import Path
 import os
 import time
-from typing import Mapping, Optional, Tuple
+from typing import AbstractSet, Mapping, Optional, Tuple
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -503,7 +503,7 @@ class P2PPlatform:
                     elem.click()
 
     def download_statement(
-            self, default_file_name: str, download_file_name: str,
+            self, platform_file_name: str, download_file_name: str,
             download_locator: Tuple[str, str], actions=None) -> None:
         """
         Download account statement by clicking the provided button.
@@ -516,7 +516,7 @@ class P2PPlatform:
         downloaded file to download_file_name.
 
         Args:
-            default_file_name: Default file name without path for account
+            platform_file_name: Default file name without path for account
                 statement downloads, chosen by the P2P platform
             download_file_name: File name including path where the downloaded
                 statement must be saved
@@ -534,9 +534,9 @@ class P2PPlatform:
                             default_file_name is found
 
         """
-        # Get a list of all files named default_file_name since it contains
+        # Get a list of all files named platform_file_name since it contains
         # wildcards for some P2P platforms
-        file_list = glob.glob(os.path.join(self.dl_dir, default_file_name))
+        file_list = glob.glob(os.path.join(self.dl_dir, platform_file_name))
 
         # Find and click the download button
         try:
@@ -549,38 +549,14 @@ class P2PPlatform:
             download_button.click()
         except NoSuchElementException:
             raise RuntimeError(
-                'Download des {0} Kontoauszugs konnte nicht gestartet werden.'
+                'Download des {0}-Kontoauszugs konnte nicht gestartet werden.'
                 .format(self.name))
 
         # Wait until download has finished
-        _download_finished = False
-        _waiting_time = 0
-        max_waiting_time = 4
-        while not _download_finished:
-            new_file_list = glob.glob(os.path.join(
-                self.dl_dir, default_file_name))
-            if len(new_file_list) - len(file_list) == 1:
-                _download_finished = True
-            elif new_file_list == file_list:
-                ongoing_downloads = glob.glob(os.path.join(
-                    self.dl_dir, '{0}.crdownload'.format(default_file_name)))
-                if not ongoing_downloads and _waiting_time > max_waiting_time:
-                    # If the download didn't start after more than
-                    # max_waiting_time something has gone wrong.
-                    raise RuntimeError(
-                        'Download des {0}-Kontoauszugs wurde abgebrochen!'
-                        .format(self.name))
+        file_name = self._wait_for_download_end(
+            platform_file_name, file_list)
 
-                time.sleep(1)
-                _waiting_time += 1
-            else:
-                # This should never happen
-                raise RuntimeError(
-                    'Mehr als ein aktiver Download des {0}-Kontoauszugs '
-                    'gefunden!'.format(self.name))
-
-        # Get actual file name of downloaded file
-        file_name = [file for file in new_file_list if file not in file_list][0]
+        # Rename downloaded file
         self._rename_statement(file_name, download_file_name)
 
     def _rename_statement(
@@ -606,3 +582,58 @@ class P2PPlatform:
             os.rename(source_file_name, target_file_name)
         except FileNotFoundError:
             raise RuntimeError(error_msg)
+
+    def _wait_for_download_end(
+            self, platform_file_name: str, file_list: AbstractSet[str],
+            max_waiting_time: float = 4.0) -> str:
+        """
+        Wait until download has finished and return name of downloaded file.
+
+        Args:
+            platform_file_name: Default file name without path for account
+                statement downloads, chosen by the P2P platform
+            file_list: List of all files named platform_file_name (which can
+                contain wildcards) in the download directory before the
+                download started
+
+        Keyword Args:
+            max_waiting_time: If there is no active or finished download after
+                max_waiting_time something has gone wrong
+
+        Returns:
+            Name including path of the downloaded file
+
+        Raises:
+            RuntimeError: - If the downloaded file cannot be found and there
+                            is no active download
+                          - If more than one active download of
+                            default_file_name is found
+
+        """
+        _download_finished = False
+        _waiting_time = 0
+        while not _download_finished:
+            new_file_list = glob.glob(os.path.join(
+                self.dl_dir, platform_file_name))
+            if len(new_file_list) - len(file_list) == 1:
+                _download_finished = True
+            elif new_file_list == file_list:
+                ongoing_downloads = glob.glob(os.path.join(
+                    self.dl_dir, '{0}.crdownload'.format(platform_file_name)))
+                if not ongoing_downloads and _waiting_time > max_waiting_time:
+                    # If the download didn't start after more than
+                    # max_waiting_time something has gone wrong.
+                    raise RuntimeError(
+                        'Download des {0}-Kontoauszugs wurde abgebrochen!'
+                        .format(self.name))
+
+                time.sleep(1)
+                _waiting_time += 1
+            else:
+                # This should never happen
+                raise RuntimeError(
+                    'Mehr als ein aktiver Download des {0}-Kontoauszugs '
+                    'gefunden!'.format(self.name))
+
+        file_name = [file for file in new_file_list if file not in file_list][0]
+        return file_name
