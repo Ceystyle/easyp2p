@@ -85,7 +85,7 @@ class Swaper:
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
-            self.platform.download_statement(
+            self.platform.start_statement_download(
                 'excel-storage*.xlsx', self.statement_file_name,
                 (By.XPATH, xpaths['download_btn']))
 

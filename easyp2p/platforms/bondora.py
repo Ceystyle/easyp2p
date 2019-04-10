@@ -112,7 +112,7 @@ class Bondora:
             except TimeoutException as err:
                 raise TimeoutException(err)
 
-            self.platform.download_statement(
+            self.platform.start_statement_download(
                 'Cashflow.xlsx', self.statement_file_name,
                 (By.XPATH,
                 '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'))

@@ -502,11 +502,11 @@ class P2PPlatform:
                         == days_table['current_day_id']):
                     elem.click()
 
-    def download_statement(
+    def start_statement_download(
             self, platform_file_name: str, download_file_name: str,
             download_locator: Tuple[str, str], actions=None) -> None:
         """
-        Download account statement by clicking the provided button.
+        Download account statement file by clicking the provided button.
 
         Downloads the generated account statement by clicking the provided
         download button. Some P2P sites require further actions before the

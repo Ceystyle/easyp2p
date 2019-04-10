@@ -107,7 +107,7 @@ class Mintos:
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
                         'generiert werden')
             else:
-                self.platform.download_statement(
+                self.platform.start_statement_download(
                     default_file_name, self.statement_file_name,
                     (By.ID, 'export-button'))
 

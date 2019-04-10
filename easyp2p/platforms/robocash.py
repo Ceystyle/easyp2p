@@ -107,7 +107,7 @@ class Robocash:
             # Robocash creates the download names randomly, therefore the
             # default name is not known like for the other P2PPlatform sites.
             # For now we use a generic * wildcard to find the file.
-            self.platform.download_statement(
+            self.platform.start_statement_download(
                 '*', self.statement_file_name, (By.ID, 'download_statement'))
 
     def parse_statement(self, statement_file_name: str = None) \

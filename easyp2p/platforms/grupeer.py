@@ -77,7 +77,7 @@ class Grupeer:
                     + str(self.date_range[0].strftime('%d.%m.%Y'))),
                 submit_btn_locator=(By.NAME, 'submit'))
 
-            self.platform.download_statement(
+            self.platform.start_statement_download(
                 'Account statement*.xlsx', self.statement_file_name,
                 (By.NAME, 'excel'))
 

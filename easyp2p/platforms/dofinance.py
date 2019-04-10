@@ -74,7 +74,7 @@ class DoFinance:
                 '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-            self.platform.download_statement(
+            self.platform.start_statement_download(
                 default_file_name, self.statement_file_name, (By.NAME, 'xls'))
 
 

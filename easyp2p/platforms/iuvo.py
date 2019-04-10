@@ -109,7 +109,7 @@ class Iuvo:
                 df = pd.DataFrame()
                 df.to_excel(self.statement_file_name)
             else:
-                self.platform.download_statement(
+                self.platform.start_statement_download(
                     'AccountStatement-{0}*'.format(
                         date.today().strftime('%Y%m%d')),
                     self.statement_file_name,

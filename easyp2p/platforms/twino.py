@@ -82,7 +82,7 @@ class Twino:
                 wait_until=EC.element_to_be_clickable(
                     (By.CSS_SELECTOR, '.accStatement__pdf')))
 
-            self.platform.download_statement(
+            self.platform.start_statement_download(
                 'account_statement_*.xlsx', self.statement_file_name,
                 (By.CSS_SELECTOR, '.accStatement__pdf'))
 
