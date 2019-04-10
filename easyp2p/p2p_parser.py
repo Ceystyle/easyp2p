@@ -215,7 +215,7 @@ class P2PParser:
         if not df_balances.empty:
             self.df = self.df.merge(df_balances, on=self.DATE)
 
-    def parse_statement(
+    def start_parser(
             self, date_format: Optional[str] = None,
             rename_columns: Optional[Mapping[str, str]] = None,
             cashflow_types: Optional[Mapping[str, str]] = None,

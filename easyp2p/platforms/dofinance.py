@@ -103,7 +103,7 @@ class DoFinance:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         # Drop the last two rows which only contain a summary
@@ -125,7 +125,7 @@ class DoFinance:
 
         rename_columns = {'Bearbeitungsdatum': parser.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%d.%m.%Y', rename_columns, cashflow_types, 'Art der Transaktion',
             'Betrag, €')
 

@@ -103,7 +103,7 @@ class Grupeer:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         # Convert amount and balance to float64
@@ -123,7 +123,7 @@ class Grupeer:
             'Principal': parser.REDEMPTION_PAYMENT}
         rename_columns = {'Date': parser.DATE, 'Currency': parser.CURRENCY}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount',
             'Balance')
 

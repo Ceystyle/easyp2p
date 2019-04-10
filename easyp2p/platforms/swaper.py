@@ -111,7 +111,7 @@ class Swaper:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         # Define mapping between Swaper and easyP2P cashflow types and column
@@ -126,7 +126,7 @@ class Swaper:
             'WITHDRAWAL': parser.OUTGOING_PAYMENT}
         rename_columns = {'Booking date': parser.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%d.%m.%Y', rename_columns, cashflow_types,
             'Transaction type', 'Amount')
 

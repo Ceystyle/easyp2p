@@ -115,7 +115,7 @@ class Twino:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         # Create a new column for identifying cashflow types
@@ -141,7 +141,7 @@ class Twino:
             }
         rename_columns = {'Processing Date': parser.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%d.%m.%Y %H:%M', rename_columns, cashflow_types,
             'Twino_Cashflow-Typ', 'Amount, EUR')
 

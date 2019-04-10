@@ -132,7 +132,7 @@ class Robocash:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         # Define mapping between Robocash and easyP2P cashflow types and
@@ -147,7 +147,7 @@ class Robocash:
             'Zinsenzahlung': parser.INTEREST_PAYMENT}
         rename_columns = {'Datum und Laufzeit': parser.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Operation', 'Betrag', 'Der Saldo des Portfolios')
 

@@ -133,7 +133,7 @@ class Mintos:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         try:
@@ -163,7 +163,7 @@ class Mintos:
             'Reversed incoming client payment': parser.OUTGOING_PAYMENT}
         rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Mintos_Cashflow-Typ', 'Turnover', 'Balance')
 

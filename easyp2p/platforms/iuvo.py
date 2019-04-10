@@ -137,7 +137,7 @@ class Iuvo:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         # Format the header of the table
@@ -161,7 +161,7 @@ class Iuvo:
             'payment_principal_early': parser.REDEMPTION_PAYMENT}
         rename_columns = {'Date': parser.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Transaction Type', 'Turnover', 'Balance')
 

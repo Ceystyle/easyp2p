@@ -114,7 +114,7 @@ class Estateguru:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.parse_statement()
+            parser.start_parser()
             return (parser.df, '')
 
         # Drop last line which only contains a summary
@@ -134,7 +134,7 @@ class Estateguru:
             'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
             'Bestätigungsdatum': parser.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = parser.start_parser(
             '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
             'Estateguru_Cashflow-Typ', 'Betrag', 'Verfügbar für Investitionen')
 
