@@ -21,7 +21,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Bondora:
+class Bondora(P2PPlatform, P2PParser):
 
     """
     Contains two public methods for downloading/parsing Bondora account
@@ -43,11 +43,12 @@ class Bondora:
             'logout': 'https://www.bondora.com/de/authorize/logout',
             'statement': 'https://www.bondora.com/de/cashflow'}
 
-        self.name = 'Bondora'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Bondora', urls)
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
+        self.statement_file_name = self.set_statement_file_name(
             self.date_range, 'xlsx')
+        P2PParser.__init__(
+            self, self.name, self.date_range, self.statement_file_name)
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -65,17 +66,15 @@ class Bondora:
                            'tbody/tr[2]/td[1]/a')}
 
         with PlatformWebDriver(
-            self.platform, EC.element_to_be_clickable((By.NAME, 'Email'))) \
-            as webdriver:
+            self, EC.element_to_be_clickable((By.NAME, 'Email'))) as webdriver:
 
             wd = webdriver.driver
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'Email', 'Password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
 
-            self.platform.open_account_statement_page(
-                'Cashflow', (By.ID, 'StartYear'))
+            self.open_account_statement_page('Cashflow', (By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
             select = Select(wd.find_element_by_id('StartYear'))
@@ -112,7 +111,7 @@ class Bondora:
             except TimeoutException as err:
                 raise TimeoutException(err)
 
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 'Cashflow.xlsx', self.statement_file_name,
                 (By.XPATH,
                 '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'))
@@ -133,32 +132,30 @@ class Bondora:
             element is a set containing all unknown cash flow types.
 
         """
-        if statement_file_name is not None:
-            self.statement_file_name = statement_file_name
-
-        parser = P2PParser(self.name, self.date_range, self.statement_file_name)
+        # Load statement
+        self.get_statement_from_file(statement_file_name)
 
         # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.parse_statement()
-            return (parser.df, '')
+        if self.df.empty:
+            self.parse_statement()
+            return (self.df, '')
 
         # Calculate defaulted payments
-        parser.df[parser.DEFAULTS] = (
-            parser.df['Erhaltener Kapitalbetrag - gesamt']
-            - parser.df['Geplanter Kapitalbetrag - gesamt'])
+        self.df[self.DEFAULTS] = (
+            self.df['Erhaltener Kapitalbetrag - gesamt']
+            - self.df['Geplanter Kapitalbetrag - gesamt'])
 
         # Define mapping between Bondora and easyP2P column names
         rename_columns = {
-            'Eingesetztes Kapital (netto)': parser.INCOMING_PAYMENT,
-            'Endsaldo': parser.END_BALANCE_NAME,
-            'Erhaltener Kapitalbetrag - gesamt': parser.REDEMPTION_PAYMENT,
-            'Erhaltene Zinsen - gesamt': parser.INTEREST_PAYMENT,
-            'Investitionen (netto)': parser.INVESTMENT_PAYMENT,
-            'Startguthaben': parser.START_BALANCE_NAME,
-            'Zeitraum': parser.DATE}
+            'Eingesetztes Kapital (netto)': self.INCOMING_PAYMENT,
+            'Endsaldo': self.END_BALANCE_NAME,
+            'Erhaltener Kapitalbetrag - gesamt': self.REDEMPTION_PAYMENT,
+            'Erhaltene Zinsen - gesamt': self.INTEREST_PAYMENT,
+            'Investitionen (netto)': self.INVESTMENT_PAYMENT,
+            'Startguthaben': self.START_BALANCE_NAME,
+            'Zeitraum': self.DATE}
 
-        unknown_cf_types = parser.parse_statement(
+        unknown_cf_types = self.start_parser(
             '%d.%m.%Y', rename_columns=rename_columns)
 
-        return (parser.df, unknown_cf_types)
+        return (self.df, unknown_cf_types)
