@@ -65,22 +65,23 @@ class P2PParser:
         TOTAL_INCOME]
 
     def __init__(
-            self, platform: str, date_range: Tuple[date, date],
-            input_file: str) -> None:
+            self, name: str, date_range: Tuple[date, date],
+            statement_file_name: str) -> None:
         """
         Constructor of P2PParser class.
 
         Args:
-            platform: Name of the P2P platform
+            name: Name of the P2P platform
             date_range: Date range (start_date, end_date) for which the account
                 statement was generated
-            input_file: File name including absolute path of the
+            statement_file_name: File name including absolute path of the
                 downloaded account statement for this platform
 
         """
-        self.platform = platform
+        self.name = name
         self.date_range = date_range
-        self.df = p2p_helper.get_df_from_file(input_file)
+        self.statement_file_name = statement_file_name
+        self.df = p2p_helper.get_df_from_file(self.statement_file_name)
 
     def _add_missing_months(self) -> None:
         """
@@ -261,7 +262,7 @@ class P2PParser:
             except KeyError:
                 raise RuntimeError(
                     '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
-                    .format(self.platform))
+                    .format(self.name))
 
         if cashflow_types:
             try:
@@ -271,7 +272,7 @@ class P2PParser:
             except KeyError:
                 raise RuntimeError(
                     '{0}: Cashflowspalte nicht im Kontoauszug vorhanden!'
-                    .format(self.platform))
+                    .format(self.name))
         else:
             unknown_cf_types = ''
 
@@ -286,7 +287,7 @@ class P2PParser:
             self._get_balances(balance_column, value_column, orig_df)
         self._add_missing_months()
         self._calculate_total_income()
-        self.df[self.PLATFORM] = self.platform
+        self.df[self.PLATFORM] = self.name
 
         # Add missing columns
         for col in [
