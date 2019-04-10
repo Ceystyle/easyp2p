@@ -243,7 +243,16 @@ class P2PParser:
             Sorted comma separated string consisting of all unknown cash flow
             types
 
+        Raises:
+            RuntimeError: - If get_statement_from_file was not called first
+                          - If date or cashflow columns cannot be found in
+                            DataFrame
+
         """
+        # Check if account statement exists
+        if self.df is None:
+            raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!')
+
         if rename_columns:
             self.df.rename(columns=rename_columns, inplace=True)
 
