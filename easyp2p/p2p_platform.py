@@ -145,8 +145,9 @@ class P2PPlatform:
             self.driver.get(self.urls['login'])
 
             if login_locator is not None:
-                self.wdwait(EC.element_to_be_clickable(login_locator))
-                self.driver.find_element(*login_locator).click()
+                login_btn = self.wdwait(
+                    EC.element_to_be_clickable(login_locator))
+                login_btn.click()
 
             # Make sure that the correct URL was loaded
             if self.driver.current_url != self.urls['login']:
@@ -160,9 +161,8 @@ class P2PPlatform:
 
         # Enter credentials in name and password field
         try:
-            self.wdwait(
+            elem = self.wdwait(
                 EC.element_to_be_clickable((By.NAME, name_field)))
-            elem = self.driver.find_element_by_name(name_field)
             elem.clear()
             elem.send_keys(credentials[0])
             time.sleep(fill_delay)
@@ -247,9 +247,10 @@ class P2PPlatform:
                 elem = self.driver.find_element(*hover_locator)
                 hover = ActionChains(self.driver).move_to_element(elem)
                 hover.perform()
-                self.wdwait(EC.element_to_be_clickable(logout_locator))
 
-            self.driver.find_element(*logout_locator).click()
+            logout_btn = self.wdwait(
+                EC.element_to_be_clickable(logout_locator))
+            logout_btn.click()
             self.wdwait(wait_until)
         except (NoSuchElementException, TimeoutException):
             raise RuntimeWarning(
@@ -332,13 +333,13 @@ class P2PPlatform:
                 date_to.send_keys(date.strftime(date_range[1], date_format))
 
             if submit_btn_locator is not None:
-                button = self.wdwait(EC.element_to_be_clickable(
+                submit_btn = self.wdwait(EC.element_to_be_clickable(
                     submit_btn_locator))
                 if self.name == 'Mintos':
                     # Mintos needs some time until the button really works
                     # TODO: find better fix
                     time.sleep(1)
-                button.click()
+                submit_btn.click()
 
             # Iuvo needs some time to update the field if there were cashflows
             # TODO: find better fix
