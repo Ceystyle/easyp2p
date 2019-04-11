@@ -51,7 +51,8 @@ class PlatformWebDriver:
 
         if 'logout' not in self.platform.urls and self.logout_locator is None:
             raise RuntimeError(
-                '{0}: Keine Methode für Logout vorhanden!'.format(self.name))
+                '{0}: Keine Methode für Logout vorhanden!'.format(
+                    self.platform.name))
 
         # self.driver will be initialized in __enter__ method to make sure it
         # is always closed again by __exit__
