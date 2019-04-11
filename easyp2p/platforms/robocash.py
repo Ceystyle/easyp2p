@@ -19,7 +19,7 @@ from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
-class Robocash:
+class Robocash(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing Robocash account
@@ -41,10 +41,9 @@ class Robocash:
             'logout': 'https://robo.cash/de/logout',
             'statement': 'https://robo.cash/de/cabinet/statement'}
 
-        self.name = 'Robocash'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Robocash', urls)
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
+        self.statement_file_name = self.set_statement_file_name(
             self.date_range, 'xls')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
@@ -63,24 +62,24 @@ class Robocash:
 
         # TODO: do not rely on text in title for checking successful logout
         with PlatformWebDriver(
-            self.platform, EC.title_contains('Willkommen')) as webdriver:
+            self, EC.title_contains('Willkommen')) as webdriver:
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
                 login_locator=(By.XPATH, xpaths['login_field']))
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Kontoauszug', (By.ID, 'new_statement'))
 
             try:
                 webdriver.driver.find_element_by_id('new_statement').click()
             except NoSuchElementException:
                 raise RuntimeError(
-                    'Generierung des Robocash-Kontoauszugs konnte nicht gestartet '
-                    'werden.')
+                    'Generierung des Robocash-Kontoauszugs konnte nicht '
+                    'gestartet werden.')
 
-            self.platform.generate_statement_direct(
+            self.generate_statement_direct(
                 self.date_range, (By.ID, 'date-after'),
                 (By.ID, 'date-before'), '%Y-%m-%d')
 
@@ -91,8 +90,7 @@ class Robocash:
             wait = 0
             while not present:
                 try:
-#                    self.platform.driver.get(self.platform.urls['statement'])
-                    webdriver.driver.get(self.platform.urls['statement'])
+                    webdriver.driver.get(self.urls['statement'])
                     webdriver.wdwait(
                         EC.element_to_be_clickable(
                             (By.ID, 'download_statement')))
@@ -107,7 +105,7 @@ class Robocash:
             # Robocash creates the download names randomly, therefore the
             # default name is not known like for the other P2PPlatform sites.
             # For now we use a generic * wildcard to find the file.
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 '*', self.statement_file_name, (By.ID, 'download_statement'))
 
     def parse_statement(self, statement_file_name: str = None) \

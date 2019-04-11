@@ -18,7 +18,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Swaper:
+class Swaper(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing Swaper account
@@ -39,10 +39,9 @@ class Swaper:
             'login': 'https://www.swaper.com/#/dashboard',
             'statement': 'https://www.swaper.com/#/overview/account-statement'}
 
-        self.name = 'Swaper'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Swaper', urls)
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
+        self.statement_file_name = self.set_statement_file_name(
             self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
@@ -59,15 +58,15 @@ class Swaper:
             'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
         with PlatformWebDriver(
-            self.platform, EC.presence_of_element_located((By.ID, 'about')),
+            self, EC.presence_of_element_located((By.ID, 'about')),
             logout_locator=(By.XPATH, xpaths['logout_btn'])):
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'email', 'password', credentials,
                 EC.presence_of_element_located((By.ID, 'open-investments')),
                 fill_delay=0.5)
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Swaper', (By.ID, 'account-statement'))
 
             # calendar_locator must be tuple of locators, thus the , at the end
@@ -81,11 +80,11 @@ class Swaper:
                           'table_id': 'id'}
             default_dates = (date.today().replace(day=1), date.today())
 
-            self.platform.generate_statement_calendar(
+            self.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 'excel-storage*.xlsx', self.statement_file_name,
                 (By.XPATH, xpaths['download_btn']))
 

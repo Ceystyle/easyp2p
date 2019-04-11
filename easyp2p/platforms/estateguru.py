@@ -17,7 +17,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Estateguru:
+class Estateguru(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing Estateguru account
@@ -39,8 +39,7 @@ class Estateguru:
             'logout': 'https://estateguru.co/portal/logout/index',
             'statement': 'https://estateguru.co/portal/portfolio/account'}
 
-        self.name = 'Estateguru'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Estateguru', urls)
         self.date_range = date_range
         self.statement_file_name = self.platform.set_statement_file_name(
             self.date_range, 'csv')
@@ -55,36 +54,34 @@ class Estateguru:
         """
         xpaths = {
             'account_statement_check': ('/html/body/section/div/div/div/div[2]/'
-                                        'section[1]/div/div/div[2]/div/form/'
-                                        'div[2]/ul/li[5]/a'),
+                'section[1]/div/div/div[2]/div/form/div[2]/ul/li[5]/a'),
             'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
-                           'div[1]/div[2]/button')}
+                'div[1]/div[2]/button')}
         default_file_name = 'payments_{0}*.csv'.format(
             date.today().strftime('%Y-%m-%d'))
 
         with PlatformWebDriver(
-            self.platform,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
+            self, EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
             as webdriver:
 
             wd = webdriver.driver
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'username', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND')),
                 login_locator=(By.LINK_TEXT, 'Einloggen'))
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Übersicht', (By.XPATH, xpaths['account_statement_check']))
 
             # Estateguru does not provide functionality for filtering payment
             # dates. Therefore we download the statement which includes all
             # cashflows ever generated for this account. That also means that
-            # date_range is not used for self.platform. We keep it as input
+            # date_range is not used for self. We keep it as input
             # variable anyway to be consistent with the other platform classes.
             wd.find_element_by_xpath(xpaths['select_btn']).click()
             webdriver.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 default_file_name, self.statement_file_name,
                 (By.LINK_TEXT, 'CSV'))
 

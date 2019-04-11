@@ -40,10 +40,9 @@ class Twino:
             'statement': ('https://www.twino.eu/de/profile/investor/'
                           'my-investments/account-transactions')}
 
-        self.name = 'Twino'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Twino', urls)
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
+        self.statement_file_name = self.set_statement_file_name(
             self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
@@ -64,25 +63,24 @@ class Twino:
                           'individual-investments"]')}
 
         with PlatformWebDriver(
-            self.platform,
-            EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
+            self, EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             logout_locator=(By.XPATH, xpaths['logout_btn'])):
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'email', 'login-password', credentials,
                 EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
                 login_locator=(By.XPATH, xpaths['login_btn']))
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'TWINO', (By.XPATH, xpaths['start_date']))
 
-            self.platform.generate_statement_direct(
+            self.generate_statement_direct(
                 self.date_range, (By.XPATH, xpaths['start_date']),
                 (By.XPATH, xpaths['end_date']), '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable(
                     (By.CSS_SELECTOR, '.accStatement__pdf')))
 
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 'account_statement_*.xlsx', self.statement_file_name,
                 (By.CSS_SELECTOR, '.accStatement__pdf'))
 

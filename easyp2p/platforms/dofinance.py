@@ -18,7 +18,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class DoFinance:
+class DoFinance(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing DoFinance account
@@ -40,10 +40,9 @@ class DoFinance:
             'logout': 'https://www.dofinance.eu/de/users/logout',
             'statement': 'https://www.dofinance.eu/de/users/statement'}
 
-        self.name = 'DoFinance'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'DoFinance', urls)
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
+        self.statement_file_name = self.set_statement_file_name(
             self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
@@ -60,21 +59,21 @@ class DoFinance:
 
         # TODO: do not rely on text in title for checking successful logout
         with PlatformWebDriver(
-            self.platform, EC.title_contains('Kreditvergabe Plattform')):
+            self, EC.title_contains('Kreditvergabe Plattform')):
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN')))
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Transaktionen', (By.ID, 'date-from'))
 
-            self.platform.generate_statement_direct(
+            self.generate_statement_direct(
                 self.date_range, (By.ID, 'date-from'), (By.ID, 'date-to'),
                 '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 default_file_name, self.statement_file_name, (By.NAME, 'xls'))
 
 

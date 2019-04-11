@@ -19,7 +19,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Iuvo:
+class Iuvo(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing Iuvo account
@@ -40,8 +40,7 @@ class Iuvo:
             'login': 'https://www.iuvo-group.com/de/login/',
             'statement': 'https://www.iuvo-group.com/de/account-statement/'}
 
-        self.name = 'Iuvo'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Iuvo', urls)
         self.date_range = date_range
         self.statement_file_name = self.platform.set_statement_file_name(
             self.date_range, 'xlsx')
@@ -59,11 +58,11 @@ class Iuvo:
                                 'div/div/strong[3]')}
 
         with PlatformWebDriver(
-            self.platform, EC.element_to_be_clickable((By.ID, 'einloggen')),
+            self, EC.element_to_be_clickable((By.ID, 'einloggen')),
             logout_locator=(By.ID, 'p2p_logout'),
             hover_locator=(By.LINK_TEXT, 'User name')) as webdriver:
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'login', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
@@ -74,7 +73,7 @@ class Iuvo:
             except NoSuchElementException:
                 pass
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Kontoauszug', (By.ID, 'date_from'))
 
             check_txt = '{0} - {1}'.format(
@@ -90,7 +89,7 @@ class Iuvo:
                 EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'text-center'), 'Keine passenden Daten!')]
 
-            self.platform.generate_statement_direct(
+            self.generate_statement_direct(
                 (self.date_range[0], self.date_range[1]), (By.ID, 'date_from'),
                 (By.ID, 'date_to'), '%Y-%m-%d',
                 wait_until=p2p_helper.one_of_many_expected_conditions_true(
@@ -99,7 +98,7 @@ class Iuvo:
 
             try:
                 no_cashflows = bool(
-                    self.platform.driver.find_element_by_class_name(
+                    self.driver.find_element_by_class_name(
                         'text-center').text == 'Keine passenden Daten!')
             except NoSuchElementException:
                 no_cashflows = False
@@ -109,7 +108,7 @@ class Iuvo:
                 df = pd.DataFrame()
                 df.to_excel(self.statement_file_name)
             else:
-                self.platform.start_statement_download(
+                self.start_statement_download(
                     'AccountStatement-{0}*'.format(
                         date.today().strftime('%Y%m%d')),
                     self.statement_file_name,

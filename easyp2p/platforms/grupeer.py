@@ -17,7 +17,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Grupeer:
+class Grupeer(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing Grupeer account
@@ -38,8 +38,7 @@ class Grupeer:
             'login': 'https://www.grupeer.com/de/login',
             'statement': 'https://www.grupeer.com/de/account-statement'}
 
-        self.name = 'Grupeer'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Grupeer', urls)
         self.date_range = date_range
         self.statement_file_name = self.platform.set_statement_file_name(
             self.date_range, 'xlsx')
@@ -57,19 +56,18 @@ class Grupeer:
                              'div/div/ul/li/a/span')}
 
         with PlatformWebDriver(
-            self.platform,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
+            self, EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
             (By.LINK_TEXT, 'Ausloggen'),
             hover_locator=(By.XPATH, xpaths['logout_hover'])):
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Account Statement', (By.ID, 'from'))
 
-            self.platform.generate_statement_direct(
+            self.generate_statement_direct(
                 self.date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
                 wait_until=EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'balance-block'),
@@ -77,7 +75,7 @@ class Grupeer:
                     + str(self.date_range[0].strftime('%d.%m.%Y'))),
                 submit_btn_locator=(By.NAME, 'submit'))
 
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 'Account statement*.xlsx', self.statement_file_name,
                 (By.NAME, 'excel'))
 

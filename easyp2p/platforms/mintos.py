@@ -19,7 +19,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Mintos:
+class Mintos(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing Mintos account
@@ -40,10 +40,9 @@ class Mintos:
             'login': 'https://www.mintos.com/de/login',
             'statement': 'https://www.mintos.com/de/kontoauszug/'}
 
-        self.name = 'Mintos'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'Mintos', urls)
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
+        self.statement_file_name = self.set_statement_file_name(
             self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
@@ -60,17 +59,17 @@ class Mintos:
             date.today().strftime('%Y%m%d'))
 
         with PlatformWebDriver(
-            self.platform, EC.title_contains('Vielen Dank'),
+            self, EC.title_contains('Vielen Dank'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as webdriver:
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 '_username', '_password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Account Statement', (By.ID, 'period-from'))
 
-            self.platform.generate_statement_direct(
+            self.generate_statement_direct(
                 self.date_range, (By.ID, 'period-from'),
                 (By.ID, 'period-to'), '%d.%m.%Y',
                 submit_btn_locator=(By.ID, 'filter-button'))
@@ -81,7 +80,7 @@ class Mintos:
             # with start and end balance of 0. If that is the case write an
             # empty DataFrame to the file.
             try:
-                self.platform.wdwait(
+                self.wdwait(
                     EC.presence_of_element_located((By.ID, 'export-button')))
             except TimeoutException:
                 try:
@@ -107,7 +106,7 @@ class Mintos:
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
                         'generiert werden')
             else:
-                self.platform.start_statement_download(
+                self.start_statement_download(
                     default_file_name, self.statement_file_name,
                     (By.ID, 'export-button'))
 

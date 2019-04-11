@@ -19,7 +19,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class PeerBerry:
+class PeerBerry(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing PeerBerry account
@@ -40,10 +40,9 @@ class PeerBerry:
             'login': 'https://peerberry.com/de/login',
             'statement': 'https://peerberry.com/de/statement'}
 
-        self.name = 'PeerBerry'
-        self.platform = P2PPlatform(self.name, urls)
+        P2PPlatform.__init__(self, 'PeerBerry', urls)
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
+        self.statement_file_name = self.set_statement_file_name(
                 self.date_range, 'csv')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
@@ -66,16 +65,16 @@ class PeerBerry:
                               'div[1]/div/div[2]/div/div[2]/div/span')}
 
         with PlatformWebDriver(
-            self.platform, EC.title_contains('Einloggen'),
+            self, EC.title_contains('Einloggen'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as webdriver:
 
             wd = webdriver.driver
 
-            self.platform.log_into_page(
+            self.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-            self.platform.open_account_statement_page(
+            self.open_account_statement_page(
                 'Kontoauszug', (By.NAME, 'startDate'))
 
             # Close the cookie policy, if present
@@ -95,7 +94,7 @@ class PeerBerry:
                           'id_from_calendar': False,
                           'table_id': 'class'}
 
-            self.platform.generate_statement_calendar(
+            self.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
@@ -115,7 +114,7 @@ class PeerBerry:
                 raise RuntimeError('Generierung des {0}-Kontoauszugs hat '
                                    'zu lange gedauert.'.format(self.name))
 
-            self.platform.start_statement_download(
+            self.start_statement_download(
                 'transactions*.csv', self.statement_file_name,
                 (By.XPATH, xpaths['download_btn']), actions='move_to_element')
 
