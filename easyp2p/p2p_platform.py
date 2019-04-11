@@ -18,13 +18,14 @@ import os
 import time
 from typing import AbstractSet, Mapping, Optional, Tuple
 
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.common.exceptions import (
     TimeoutException, NoSuchElementException, StaleElementReferenceException)
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 import easyp2p.p2p_helper as p2p_helper
 
@@ -56,7 +57,6 @@ class P2PPlatform:
         self.name = name
         self.urls = urls
         self.driver = None
-        self.wdwait = None
 
         # Make sure URLs for login, logout and statement page are provided
         if 'login' not in urls:
@@ -146,7 +146,6 @@ class P2PPlatform:
 
             if login_locator is not None:
                 self.wdwait(EC.element_to_be_clickable(login_locator))
-#                self.driver.wdwait(EC.element_to_be_clickable(login_locator))
                 self.driver.find_element(*login_locator).click()
 
             # Make sure that the correct URL was loaded
@@ -161,7 +160,8 @@ class P2PPlatform:
 
         # Enter credentials in name and password field
         try:
-            self.wdwait(EC.element_to_be_clickable((By.NAME, name_field)))
+            self.wdwait(
+                EC.element_to_be_clickable((By.NAME, name_field)))
             elem = self.driver.find_element_by_name(name_field)
             elem.clear()
             elem.send_keys(credentials[0])
@@ -637,3 +637,19 @@ class P2PPlatform:
 
         file_name = [file for file in new_file_list if file not in file_list][0]
         return file_name
+
+    def wdwait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
+        """
+        Shorthand for WebDriverWait.
+
+        Args:
+            wait_until: Expected condition for which the webdriver should wait
+
+        Keyword Args:
+            delay: Maximal waiting time in seconds
+
+        Returns:
+            WebElement which WebDriverWait waited for.
+
+        """
+        return WebDriverWait(self.driver, delay).until(wait_until)

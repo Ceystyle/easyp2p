@@ -10,8 +10,6 @@ from typing import cast, Optional, Tuple
 
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import WebDriverWait
 
 from easyp2p.p2p_platform import P2PPlatform
 
@@ -68,7 +66,6 @@ class PlatformWebDriver:
         """
         self.init_webdriver()
         self.platform.driver = self.driver
-        self.platform.wdwait = self.wdwait
         return self
 
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
@@ -134,19 +131,3 @@ class PlatformWebDriver:
 
         driver.maximize_window()
         self.driver = driver
-
-    def wdwait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
-        """
-        Shorthand for WebDriverWait.
-
-        Args:
-            wait_until: Expected condition for which the webdriver should wait
-
-        Keyword Args:
-            delay: Maximal waiting time in seconds
-
-        Returns:
-            WebElement which WebDriverWait waited for.
-
-        """
-        return WebDriverWait(self.driver, delay).until(wait_until)

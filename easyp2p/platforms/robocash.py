@@ -91,7 +91,7 @@ class Robocash(P2PPlatform):
             while not present:
                 try:
                     webdriver.driver.get(self.urls['statement'])
-                    webdriver.wdwait(
+                    self.wdwait(
                         EC.element_to_be_clickable(
                             (By.ID, 'download_statement')))
                     present = True

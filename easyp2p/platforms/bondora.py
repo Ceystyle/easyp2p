@@ -104,7 +104,7 @@ class Bondora(P2PPlatform):
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['no_payments']), no_payments_msg)]
             try:
-                webdriver.wdwait(
+                self.wdwait(
                     p2p_helper.one_of_many_expected_conditions_true(conditions))
             except TimeoutException as err:
                 raise TimeoutException(err)

@@ -102,7 +102,7 @@ class PeerBerry(P2PPlatform):
             # in order to actually generate the statement
             try:
                 wd.find_element_by_xpath(xpaths['statement_btn']).click()
-                webdriver.wdwait(
+                self.wdwait(
                     EC.text_to_be_present_in_element(
                         ((By.XPATH, xpaths['start_balance'])),
                         'Eröffnungssaldo '+str(

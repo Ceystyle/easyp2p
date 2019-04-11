@@ -80,7 +80,7 @@ class Estateguru(P2PPlatform):
             # date_range is not used for self. We keep it as input
             # variable anyway to be consistent with the other platform classes.
             wd.find_element_by_xpath(xpaths['select_btn']).click()
-            webdriver.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+            self.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
             self.start_statement_download(
                 default_file_name, self.statement_file_name,
                 (By.LINK_TEXT, 'CSV'))
