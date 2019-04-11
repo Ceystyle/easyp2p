@@ -309,19 +309,6 @@ class P2PParser:
 
         return unknown_cf_types
 
-    def get_statement_from_file(self, statement_file_name: str = None) -> None:
-        """
-        Load account statement from input_file and save it as DataFrame.
-
-        Keyword Args:
-            statement_file_name: Name including path of the account statement
-                file
-
-        """
-        if statement_file_name is None:
-            self.df = p2p_helper.get_df_from_file(self.statement_file_name)
-        else:
-            self.df = p2p_helper.get_df_from_file(statement_file_name)
 
 def show_results(
         list_of_dfs: Sequence[pd.DataFrame], output_file: str) -> bool:

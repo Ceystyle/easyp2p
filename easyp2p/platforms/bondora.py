@@ -21,7 +21,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Bondora(P2PPlatform, P2PParser):
+class Bondora(P2PPlatform):
 
     """
     Contains two public methods for downloading/parsing Bondora account
@@ -47,8 +47,6 @@ class Bondora(P2PPlatform, P2PParser):
         self.date_range = date_range
         self.statement_file_name = self.set_statement_file_name(
             self.date_range, 'xlsx')
-        P2PParser.__init__(
-            self, self.name, self.date_range, self.statement_file_name)
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -132,30 +130,32 @@ class Bondora(P2PPlatform, P2PParser):
             element is a set containing all unknown cash flow types.
 
         """
-        # Load statement
-        self.get_statement_from_file(statement_file_name)
+        if statement_file_name is not None:
+            self.statement_file_name = statement_file_name
+
+        parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
         # Create a DataFrame with zero entries if there were no cashflows
-        if self.df.empty:
-            self.parse_statement()
-            return (self.df, '')
+        if parser.df.empty:
+            parser.parse_statement()
+            return (parser.df, '')
 
         # Calculate defaulted payments
-        self.df[self.DEFAULTS] = (
-            self.df['Erhaltener Kapitalbetrag - gesamt']
-            - self.df['Geplanter Kapitalbetrag - gesamt'])
+        parser.df[parser.DEFAULTS] = (
+            parser.df['Erhaltener Kapitalbetrag - gesamt']
+            - parser.df['Geplanter Kapitalbetrag - gesamt'])
 
         # Define mapping between Bondora and easyP2P column names
         rename_columns = {
-            'Eingesetztes Kapital (netto)': self.INCOMING_PAYMENT,
-            'Endsaldo': self.END_BALANCE_NAME,
-            'Erhaltener Kapitalbetrag - gesamt': self.REDEMPTION_PAYMENT,
-            'Erhaltene Zinsen - gesamt': self.INTEREST_PAYMENT,
-            'Investitionen (netto)': self.INVESTMENT_PAYMENT,
-            'Startguthaben': self.START_BALANCE_NAME,
-            'Zeitraum': self.DATE}
+            'Eingesetztes Kapital (netto)': parser.INCOMING_PAYMENT,
+            'Endsaldo': parser.END_BALANCE_NAME,
+            'Erhaltener Kapitalbetrag - gesamt': parser.REDEMPTION_PAYMENT,
+            'Erhaltene Zinsen - gesamt': parser.INTEREST_PAYMENT,
+            'Investitionen (netto)': parser.INVESTMENT_PAYMENT,
+            'Startguthaben': parser.START_BALANCE_NAME,
+            'Zeitraum': parser.DATE}
 
-        unknown_cf_types = self.start_parser(
+        unknown_cf_types = parser.start_parser(
             '%d.%m.%Y', rename_columns=rename_columns)
 
-        return (self.df, unknown_cf_types)
+        return (parser.df, unknown_cf_types)
