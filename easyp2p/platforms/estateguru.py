@@ -126,6 +126,7 @@ class Estateguru(P2PPlatform):
             'Entschädigung': parser.LATE_FEE_PAYMENT,
             'Hauptbetrag': parser.REDEMPTION_PAYMENT,
             'Investition(Auto Investieren)': parser.INVESTMENT_PAYMENT,
+            'Strafe': parser.LATE_FEE_PAYMENT,
             'Zins': parser.INTEREST_PAYMENT}
         rename_columns = {
             'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
