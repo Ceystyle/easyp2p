@@ -15,7 +15,6 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Grupeer:
@@ -55,12 +54,11 @@ class Grupeer:
             'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
                              'div/div/ul/li/a/span')}
 
-        grupeer = P2PPlatform(self.name, urls, self.statement_file_name)
-
-        with PlatformWebDriver(
-            grupeer, EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
-            (By.LINK_TEXT, 'Ausloggen'),
-            hover_locator=(By.XPATH, xpaths['logout_hover'])):
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
+            logout_locator=(By.LINK_TEXT, 'Ausloggen'),
+            hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
             grupeer.log_into_page(
                 'email', 'password', credentials,

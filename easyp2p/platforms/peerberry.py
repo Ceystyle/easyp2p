@@ -17,7 +17,6 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class PeerBerry:
@@ -64,11 +63,10 @@ class PeerBerry:
             'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
                               'div[1]/div/div[2]/div/div[2]/div/span')}
 
-        peerberry = P2PPlatform(self.name, urls, self.statement_file_name)
-
-        with PlatformWebDriver(
-            peerberry, EC.title_contains('Einloggen'),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])) as webdriver:
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.title_contains('Einloggen'),
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
 
             peerberry.log_into_page(
                 'email', 'password', credentials,
@@ -78,7 +76,7 @@ class PeerBerry:
 
             # Close the cookie policy, if present
             try:
-                webdriver.driver.find_element_by_xpath(
+                peerberry.driver.find_element_by_xpath(
                     xpaths['cookie_policy']).click()
             except NoSuchElementException:
                 pass
@@ -101,7 +99,7 @@ class PeerBerry:
             # After setting the dates, the statement button needs to be clicked
             # in order to actually generate the statement
             try:
-                webdriver.driver.find_element_by_xpath(
+                peerberry.driver.find_element_by_xpath(
                     xpaths['statement_btn']).click()
                 peerberry.wdwait(
                     EC.text_to_be_present_in_element(

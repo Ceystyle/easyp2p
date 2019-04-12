@@ -15,7 +15,6 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Estateguru:
@@ -58,13 +57,10 @@ class Estateguru:
             'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
                 'div[1]/div[2]/button')}
 
-        estateguru = P2PPlatform(self.name, urls, self.statement_file_name)
-
-        with PlatformWebDriver(
-            estateguru, EC.element_to_be_clickable(
-                (By.LINK_TEXT, 'Einloggen'))) as webdriver:
-
-            wd = webdriver.driver
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
+            as estateguru:
 
             estateguru.log_into_page(
                 'username', 'password', credentials,
@@ -79,7 +75,8 @@ class Estateguru:
             # cashflows ever generated for this account. That also means that
             # date_range is not used for self. We keep it as input
             # variable anyway to be consistent with the other platform classes.
-            wd.find_element_by_xpath(xpaths['select_btn']).click()
+            estateguru.driver.find_element_by_xpath(
+                xpaths['select_btn']).click()
             estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
             estateguru.download_statement((By.LINK_TEXT, 'CSV'))
 

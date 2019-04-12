@@ -16,7 +16,6 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Twino:
@@ -62,11 +61,10 @@ class Twino:
             'statement': ('//a[@href="/de/profile/investor/my-investments/'
                           'individual-investments"]')}
 
-        twino = P2PPlatform(self.name, urls, self.statement_file_name)
-
-        with PlatformWebDriver(
-            twino, EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])):
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as twino:
 
             twino.log_into_page(
                 'email', 'login-password', credentials,

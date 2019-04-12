@@ -18,7 +18,7 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
+
 
 class Robocash:
 
@@ -60,11 +60,10 @@ class Robocash:
             'statement': 'https://robo.cash/de/cabinet/statement'}
         xpaths = {'login_field': '/html/body/header/div/div[2]/a'}
 
-        robocash = P2PPlatform(self.name, urls, self.statement_file_name)
-
         # TODO: do not rely on text in title for checking successful logout
-        with PlatformWebDriver(
-            robocash, EC.title_contains('Willkommen')) as webdriver:
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.title_contains('Willkommen')) as robocash:
 
             robocash.log_into_page(
                 'email', 'password', credentials,
@@ -74,7 +73,7 @@ class Robocash:
             robocash.open_account_statement_page((By.ID, 'new_statement'))
 
             try:
-                webdriver.driver.find_element_by_id('new_statement').click()
+                robocash.driver.find_element_by_id('new_statement').click()
             except NoSuchElementException:
                 raise RuntimeError(
                     'Generierung des Robocash-Kontoauszugs konnte nicht '
@@ -91,7 +90,7 @@ class Robocash:
             wait = 0
             while not present:
                 try:
-                    webdriver.driver.get(self.urls['statement'])
+                    robocash.driver.get(self.urls['statement'])
                     robocash.wdwait(
                         EC.element_to_be_clickable(
                             (By.ID, 'download_statement')))

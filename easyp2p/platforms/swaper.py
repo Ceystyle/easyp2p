@@ -16,7 +16,6 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Swaper:
@@ -57,11 +56,10 @@ class Swaper:
                              'div[1]/a/div[1]/div/span[2]'),
             'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
-        swaper = P2PPlatform(self.name, urls, self.statement_file_name)
-
-        with PlatformWebDriver(
-            swaper, EC.presence_of_element_located((By.ID, 'about')),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])):
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.presence_of_element_located((By.ID, 'about')),
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
 
             swaper.log_into_page(
                 'email', 'password', credentials,

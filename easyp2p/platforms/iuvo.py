@@ -16,7 +16,6 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Iuvo:
@@ -56,12 +55,11 @@ class Iuvo:
             'statement_check': ('/html/body/div[5]/main/div/div/div/div[6]/div/'
                 'div/div/strong[3]')}
 
-        iuvo = P2PPlatform(self.name, urls, self.statement_file_name)
-
-        with PlatformWebDriver(
-            iuvo, EC.element_to_be_clickable((By.ID, 'einloggen')),
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.element_to_be_clickable((By.ID, 'einloggen')),
             logout_locator=(By.ID, 'p2p_logout'),
-            hover_locator=(By.LINK_TEXT, 'User name')) as webdriver:
+            hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
             iuvo.log_into_page(
                 'login', 'password', credentials,
@@ -69,7 +67,7 @@ class Iuvo:
 
             # Click away cookie policy, if present
             try:
-                webdriver.driver.find_element_by_id(
+                iuvo.driver.find_element_by_id(
                     'CybotCookiebotDialogBodyButtonAccept').click()
             except NoSuchElementException:
                 pass
@@ -98,7 +96,7 @@ class Iuvo:
 
             try:
                 no_cashflows = bool(
-                    webdriver.driver.find_element_by_class_name(
+                    iuvo.driver.find_element_by_class_name(
                         'text-center').text == 'Keine passenden Daten!')
             except NoSuchElementException:
                 no_cashflows = False

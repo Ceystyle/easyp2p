@@ -17,7 +17,6 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Mintos:
@@ -56,12 +55,11 @@ class Mintos:
         xpaths = {
             'logout_btn': "//a[contains(@href,'logout')]"}
 
-        mintos = P2PPlatform(self.name, urls, self.statement_file_name)
-
         # TODO: do not rely on title to check successful logout
-        with PlatformWebDriver(
-            mintos, EC.title_contains('Vielen Dank'),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])) as webdriver:
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.title_contains('Vielen Dank'),
+            logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
             mintos.log_into_page(
                 '_username', '_password', credentials,
@@ -84,7 +82,7 @@ class Mintos:
                     EC.presence_of_element_located((By.ID, 'export-button')))
             except TimeoutException:
                 try:
-                    cashflow_table = webdriver.driver.find_element_by_id(
+                    cashflow_table = mintos.driver.find_element_by_id(
                         'overview-results')
                     df = pd.read_html(
                         cashflow_table.get_attribute("innerHTML"))[0]

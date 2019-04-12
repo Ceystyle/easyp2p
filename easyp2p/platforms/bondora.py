@@ -18,7 +18,6 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class Bondora:
@@ -64,13 +63,9 @@ class Bondora:
             'download_btn': '/html/body/div[1]/div/div/div/div[1]/form/div[4]/'
                 'div/a'}
 
-        bondora = P2PPlatform(self.name, urls, self.statement_file_name)
-
-        with PlatformWebDriver(
-            bondora, EC.element_to_be_clickable((By.NAME, 'Email'))) \
-            as webdriver:
-
-            wd = webdriver.driver
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
 
             bondora.log_into_page(
                 'Email', 'Password', credentials,
@@ -79,22 +74,22 @@ class Bondora:
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
-            select = Select(wd.find_element_by_id('StartYear'))
+            select = Select(bondora.driver.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(self.date_range[0].year))
 
-            select = Select(wd.find_element_by_id('StartMonth'))
+            select = Select(bondora.driver.find_element_by_id('StartMonth'))
             select.select_by_visible_text(p2p_helper.nbr_to_short_month(
                 self.date_range[0].strftime('%m')))
 
-            select = Select(wd.find_element_by_id('EndYear'))
+            select = Select(bondora.driver.find_element_by_id('EndYear'))
             select.select_by_visible_text(str(self.date_range[1].year))
 
-            select = Select(wd.find_element_by_id('EndMonth'))
+            select = Select(bondora.driver.find_element_by_id('EndMonth'))
             select.select_by_visible_text(p2p_helper.nbr_to_short_month(
                 self.date_range[1].strftime('%m')))
 
             # Start the account statement generation
-            wd.find_element_by_xpath(xpaths['search_btn']).click()
+            bondora.driver.find_element_by_xpath(xpaths['search_btn']).click()
 
             # Wait until statement generation is finished
             no_payments_msg = 'Keine Zahlungen gefunden'

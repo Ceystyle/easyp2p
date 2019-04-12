@@ -16,7 +16,6 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
 class DoFinance:
@@ -54,11 +53,10 @@ class DoFinance:
             'logout': 'https://www.dofinance.eu/de/users/logout',
             'statement': 'https://www.dofinance.eu/de/users/statement'}
 
-        dofinance = P2PPlatform(self.name, urls, self.statement_file_name)
-
         # TODO: do not rely on text in title for checking successful logout
-        with PlatformWebDriver(
-            dofinance, EC.title_contains('Kreditvergabe Plattform')):
+        with P2PPlatform(
+            self.name, urls, self.statement_file_name,
+            EC.title_contains('Kreditvergabe Plattform')) as dofinance:
 
             dofinance.log_into_page(
                 'email', 'password', credentials,
