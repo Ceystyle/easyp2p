@@ -71,8 +71,7 @@ class Robocash:
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
                 login_locator=(By.XPATH, xpaths['login_field']))
 
-            robocash.open_account_statement_page(
-                'Kontoauszug', (By.ID, 'new_statement'))
+            robocash.open_account_statement_page((By.ID, 'new_statement'))
 
             try:
                 webdriver.driver.find_element_by_id('new_statement').click()

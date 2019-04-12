@@ -74,7 +74,7 @@ class Estateguru:
                 login_locator=(By.LINK_TEXT, 'Einloggen'))
 
             estateguru.open_account_statement_page(
-                'Übersicht', (By.XPATH, xpaths['account_statement_check']))
+                (By.XPATH, xpaths['account_statement_check']))
 
             # Estateguru does not provide functionality for filtering payment
             # dates. Therefore we download the statement which includes all

@@ -66,8 +66,7 @@ class Grupeer:
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
 
-            grupeer.open_account_statement_page(
-                'Account Statement', (By.ID, 'from'))
+            grupeer.open_account_statement_page((By.ID, 'from'))
 
             grupeer.generate_statement_direct(
                 self.date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',

@@ -73,8 +73,7 @@ class Twino:
                 EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
                 login_locator=(By.XPATH, xpaths['login_btn']))
 
-            twino.open_account_statement_page(
-                'TWINO', (By.XPATH, xpaths['start_date']))
+            twino.open_account_statement_page((By.XPATH, xpaths['start_date']))
 
             twino.generate_statement_direct(
                 self.date_range, (By.XPATH, xpaths['start_date']),

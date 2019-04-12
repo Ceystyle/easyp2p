@@ -155,9 +155,8 @@ class P2PPlatform:
 
         self.driver.logged_in = True
 
-    # TODO: get rid of check_title
     def open_account_statement_page(
-            self, check_title: str, check_locator: Tuple[str, str]) -> None:
+            self, check_locator: Tuple[str, str]) -> None:
         """
         Open account statement page of the P2P platform.
 
@@ -166,8 +165,6 @@ class P2PPlatform:
         attribute of the P2P class.
 
         Args:
-            check_title: String which must be contained in the account
-                statement page window title if the page loaded successfully
             check_locator: Locator of a web element which must be present if
                 the account statement page loaded successfully
 
@@ -177,10 +174,10 @@ class P2PPlatform:
 
         """
         try:
+            # TODO: catch error if url cannot be loaded
             self.driver.get(self.urls['statement'])
             self.wdwait(EC.presence_of_element_located(check_locator))
-            assert check_title in self.driver.title
-        except (AssertionError, TimeoutException):
+        except TimeoutException:
             raise RuntimeError(
                 '{0}-Kontoauszugsseite konnte nicht geladen werden!'
                 .format(self.name))

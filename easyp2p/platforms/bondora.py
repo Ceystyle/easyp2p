@@ -76,8 +76,7 @@ class Bondora:
                 'Email', 'Password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
 
-            bondora.open_account_statement_page(
-                'Cashflow', (By.ID, 'StartYear'))
+            bondora.open_account_statement_page((By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
             select = Select(wd.find_element_by_id('StartYear'))

@@ -69,8 +69,7 @@ class Mintos:
                 '_username', '_password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-            mintos.open_account_statement_page(
-                'Account Statement', (By.ID, 'period-from'))
+            mintos.open_account_statement_page((By.ID, 'period-from'))
 
             mintos.generate_statement_direct(
                 self.date_range, (By.ID, 'period-from'),

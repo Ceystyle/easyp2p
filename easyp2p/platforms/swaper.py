@@ -68,8 +68,7 @@ class Swaper:
                 EC.presence_of_element_located((By.ID, 'open-investments')),
                 fill_delay=0.5)
 
-            swaper.open_account_statement_page(
-                'Swaper', (By.ID, 'account-statement'))
+            swaper.open_account_statement_page((By.ID, 'account-statement'))
 
             # calendar_locator must be tuple of locators, thus the , at the end
             calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )

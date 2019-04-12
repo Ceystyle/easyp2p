@@ -74,8 +74,7 @@ class Iuvo:
             except NoSuchElementException:
                 pass
 
-            iuvo.open_account_statement_page(
-                'Kontoauszug', (By.ID, 'date_from'))
+            iuvo.open_account_statement_page((By.ID, 'date_from'))
 
             check_txt = '{0} - {1}'.format(
                 self.date_range[0].strftime('%Y-%m-%d'),

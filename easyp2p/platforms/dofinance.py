@@ -67,8 +67,7 @@ class DoFinance:
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN')))
 
-            dofinance.open_account_statement_page(
-                'Transaktionen', (By.ID, 'date-from'))
+            dofinance.open_account_statement_page((By.ID, 'date-from'))
 
             dofinance.generate_statement_direct(
                 self.date_range, (By.ID, 'date-from'), (By.ID, 'date-to'),

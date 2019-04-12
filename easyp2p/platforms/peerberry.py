@@ -74,8 +74,7 @@ class PeerBerry:
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-            peerberry.open_account_statement_page(
-                'Kontoauszug', (By.NAME, 'startDate'))
+            peerberry.open_account_statement_page((By.NAME, 'startDate'))
 
             # Close the cookie policy, if present
             try:
