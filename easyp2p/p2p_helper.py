@@ -8,8 +8,9 @@ p2p_helper contains some helper functions/classes for easyp2p.
 
 import calendar
 from datetime import date, timedelta
+import os
 from pathlib import Path
-from typing import Callable, List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from selenium import webdriver
 import pandas as pd
@@ -143,6 +144,47 @@ def nbr_to_short_month(nbr: str) -> str:
         '9': 'Sep', '09': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Dez'}
 
     return map_nbr_to_short_month[nbr]
+
+
+def create_statement_location(
+        name: str, date_range: Tuple[date, date], suffix: str,
+        statement_file: Optional[str] = None) -> str:
+    """
+    Helper function for creating the account statement download location.
+
+    Default file name will be 'platform name'_statement-'start_date'-
+    'end-date'.suffix. statement_file can be used to override the default.
+    This is mainly useful for the tests.
+
+    Args:
+        name: Name of the P2P platform
+        date_range: Date range (start_date, end_date) for which the account
+            statement must be generated
+        suffix: Suffix of the statement file
+
+    Keyword Args:
+        statement_file: if not None this will override the default file
+            name
+
+    Returns:
+        File name including path where the platform account statement
+        should be saved
+
+    """
+    if statement_file is None:
+        dl_dir = os.path.join(Path.home(), '.easyp2p', name.lower())
+        statement_file = os.path.join(
+            dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
+            name.lower(), date_range[0].strftime('%Y%m%d'),
+            date_range[1].strftime('%Y%m%d'), suffix))
+    else:
+        dl_dir = os.path.dirname(statement_file)
+
+    # Create download directory if it doesn't exist yet
+    if not os.path.isdir(dl_dir):
+        os.makedirs(dl_dir)
+
+    return statement_file
 
 
 class one_of_many_expected_conditions_true():  \
