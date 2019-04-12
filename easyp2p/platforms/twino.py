@@ -126,12 +126,13 @@ class Twino:
             raise RuntimeError(
                 'Twino: Cashflowspalte nicht im Kontoauszug vorhanden!')
 
-        # Define mapping between Twino and easyP2P cashflow types and column
+        # Define mapping between Twino and easyp2p cashflow types and column
         # names
         cashflow_types = {
             'BUYBACK INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
             'BUYBACK PRINCIPAL': parser.BUYBACK_PAYMENT,
             'BUY_SHARES PRINCIPAL': parser.INVESTMENT_PAYMENT,
+            'CURRENCY_FLUCTUATION INTEREST': parser.INTEREST_PAYMENT,
             'EXTENSION INTEREST': parser.INTEREST_PAYMENT,
             'REPAYMENT INTEREST': parser.INTEREST_PAYMENT,
             'REPAYMENT PRINCIPAL': parser.REDEMPTION_PAYMENT,
