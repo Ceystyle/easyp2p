@@ -81,10 +81,7 @@ class Twino:
                 wait_until=EC.element_to_be_clickable(
                     (By.CSS_SELECTOR, '.accStatement__pdf')))
 
-            twino.download_statement(
-                'account_statement_*.xlsx',
-                (By.CSS_SELECTOR, '.accStatement__pdf'))
-
+            twino.download_statement((By.CSS_SELECTOR, '.accStatement__pdf'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

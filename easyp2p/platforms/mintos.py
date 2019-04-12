@@ -55,8 +55,6 @@ class Mintos:
             'statement': 'https://www.mintos.com/de/kontoauszug/'}
         xpaths = {
             'logout_btn': "//a[contains(@href,'logout')]"}
-        default_file_name = '{0}-account-statement*.xlsx'.format(
-            date.today().strftime('%Y%m%d'))
 
         mintos = P2PPlatform(self.name, urls, self.statement_file_name)
 
@@ -108,8 +106,7 @@ class Mintos:
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
                         'generiert werden')
             else:
-                mintos.download_statement(
-                    default_file_name, (By.ID, 'export-button'))
+                mintos.download_statement((By.ID, 'export-button'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

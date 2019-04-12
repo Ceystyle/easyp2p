@@ -85,8 +85,7 @@ class Swaper:
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
-            swaper.download_statement(
-                'excel-storage*.xlsx', (By.XPATH, xpaths['download_btn']))
+            swaper.download_statement((By.XPATH, xpaths['download_btn']))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

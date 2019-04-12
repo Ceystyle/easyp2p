@@ -76,8 +76,7 @@ class Grupeer:
                     + str(self.date_range[0].strftime('%d.%m.%Y'))),
                 submit_btn_locator=(By.NAME, 'submit'))
 
-            grupeer.download_statement(
-                'Account statement*.xlsx', (By.NAME, 'excel'))
+            grupeer.download_statement((By.NAME, 'excel'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

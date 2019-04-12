@@ -53,9 +53,6 @@ class DoFinance:
             'login': 'https://www.dofinance.eu/de/users/login',
             'logout': 'https://www.dofinance.eu/de/users/logout',
             'statement': 'https://www.dofinance.eu/de/users/statement'}
-        default_file_name = 'Statement_{0} 00_00_00-{1} 23_59_59*.xlsx'.format(
-            self.date_range[0].strftime('%Y-%m-%d'),
-            self.date_range[1].strftime('%Y-%m-%d'))
 
         dofinance = P2PPlatform(self.name, urls, self.statement_file_name)
 
@@ -74,7 +71,7 @@ class DoFinance:
                 '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-            dofinance.download_statement(default_file_name, (By.NAME, 'xls'))
+            dofinance.download_statement((By.NAME, 'xls'))
 
 
     def parse_statement(self, statement_file_name: str = None) \

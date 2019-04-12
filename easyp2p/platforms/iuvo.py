@@ -109,8 +109,6 @@ class Iuvo:
                 df.to_excel(self.statement_file_name)
             else:
                 iuvo.download_statement(
-                    'AccountStatement-{0}*'.format(
-                        date.today().strftime('%Y%m%d')),
                     (By.CLASS_NAME, 'p2p-download-full-list'))
 
     def parse_statement(self, statement_file_name: str = None) \

@@ -57,8 +57,6 @@ class Estateguru:
                 'section[1]/div/div/div[2]/div/form/div[2]/ul/li[5]/a'),
             'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
                 'div[1]/div[2]/button')}
-        default_file_name = 'payments_{0}*.csv'.format(
-            date.today().strftime('%Y-%m-%d'))
 
         estateguru = P2PPlatform(self.name, urls, self.statement_file_name)
 
@@ -83,8 +81,7 @@ class Estateguru:
             # variable anyway to be consistent with the other platform classes.
             wd.find_element_by_xpath(xpaths['select_btn']).click()
             estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
-            estateguru.download_statement(
-                default_file_name, (By.LINK_TEXT, 'CSV'))
+            estateguru.download_statement((By.LINK_TEXT, 'CSV'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

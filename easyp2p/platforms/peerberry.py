@@ -115,8 +115,7 @@ class PeerBerry:
                 raise RuntimeError('Generierung des {0}-Kontoauszugs hat '
                                    'zu lange gedauert.'.format(self.name))
 
-            peerberry.download_statement(
-                'transactions*.csv', (By.XPATH, xpaths['download_btn']),
+            peerberry.download_statement((By.XPATH, xpaths['download_btn']),
                 actions='move_to_element')
 
     def parse_statement(self, statement_file_name: str = None) \

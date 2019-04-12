@@ -469,8 +469,7 @@ class P2PPlatform:
                     elem.click()
 
     def download_statement(
-            self, platform_file_name: str,
-            download_locator: Tuple[str, str], actions=None) -> None:
+            self, download_locator: Tuple[str, str], actions=None) -> None:
         """
         Download account statement file by clicking the provided button.
 
@@ -482,8 +481,6 @@ class P2PPlatform:
         downloaded file to self.statement_file_name.
 
         Args:
-            platform_file_name: Default file name without path for account
-                statement downloads, chosen by the P2P platform
             download_locator: Locator of the download button
 
         Keyword Args:
@@ -498,10 +495,9 @@ class P2PPlatform:
                             default_file_name is found
 
         """
-        # Get a list of all files named platform_file_name since it contains
-        # wildcards for some P2P platforms
+        # Get a list of all files in the download directory
         dl_dir = os.path.dirname(self.statement_file_name)
-        file_list = glob.glob(os.path.join(dl_dir, platform_file_name))
+        file_list = glob.glob(os.path.join(dl_dir, '*'))
 
         # Find and click the download button
         try:
@@ -518,8 +514,7 @@ class P2PPlatform:
                 .format(self.name))
 
         # Wait until download has finished
-        file_name = self._wait_for_download_end(
-            platform_file_name, file_list, dl_dir)
+        file_name = self._wait_for_download_end(file_list, dl_dir)
 
         # Rename downloaded file
         self._rename_statement(file_name, self.statement_file_name)
@@ -549,16 +544,13 @@ class P2PPlatform:
             raise RuntimeError(error_msg)
 
     def _wait_for_download_end(
-            self, platform_file_name: str, file_list: Sequence[str],
-            dl_dir: str, max_waiting_time: float = 4.0) -> str:
+            self, file_list: Sequence[str], dl_dir: str,
+            max_waiting_time: float = 4.0) -> str:
         """
         Wait until download has finished and return name of downloaded file.
 
         Args:
-            platform_file_name: Default file name without path for account
-                statement downloads, chosen by the P2P platform
-            file_list: List of all files named platform_file_name (which can
-                contain wildcards) in the download directory before the
+            file_list: List of all files in the download directory before the
                 download started
             dl_dir: Download directory
 
@@ -579,12 +571,14 @@ class P2PPlatform:
         _download_finished = False
         _waiting_time = 0
         while not _download_finished:
-            new_file_list = glob.glob(os.path.join(dl_dir, platform_file_name))
+            new_file_list = glob.glob(os.path.join(dl_dir, '*'))
             if len(new_file_list) - len(file_list) == 1:
                 _download_finished = True
             elif new_file_list == file_list:
+                # TODO: make sure that there were no leftover downloads from
+                # a failed run in the past
                 ongoing_downloads = glob.glob(os.path.join(
-                    dl_dir, '{0}.crdownload'.format(platform_file_name)))
+                    dl_dir, '*.crdownload'))
                 if not ongoing_downloads and _waiting_time > max_waiting_time:
                     # If the download didn't start after more than
                     # max_waiting_time something has gone wrong.

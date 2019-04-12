@@ -103,10 +103,7 @@ class Robocash:
                             'Generierung des {0}-Kontoauszugs hat zu lange '
                             'gedauert!'.format(self.name))
 
-            # Robocash creates the download names randomly, therefore the
-            # default name is not known like for the other P2PPlatform sites.
-            # Therefore we use a generic * wildcard to find the file.
-            robocash.download_statement('*', (By.ID, 'download_statement'))
+            robocash.download_statement((By.ID, 'download_statement'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
@@ -133,7 +130,7 @@ class Robocash:
             parser.start_parser()
             return (parser.df, '')
 
-        # Define mapping between Robocash and easyP2P cashflow types and
+        # Define mapping between Robocash and easyp2p cashflow types and
         # column names
         cashflow_types = {
             'Darlehenskauf': parser.INVESTMENT_PAYMENT,

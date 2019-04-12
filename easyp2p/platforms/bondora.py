@@ -113,8 +113,7 @@ class Bondora:
             except TimeoutException as err:
                 raise TimeoutException(err)
 
-            bondora.download_statement(
-                'Cashflow.xlsx', (By.XPATH, xpaths['download_btn']))
+            bondora.download_statement((By.XPATH, xpaths['download_btn']))
 
 
     def parse_statement(self, statement_file_name: str = None) \
@@ -147,7 +146,7 @@ class Bondora:
             parser.df['Erhaltener Kapitalbetrag - gesamt']
             - parser.df['Geplanter Kapitalbetrag - gesamt'])
 
-        # Define mapping between Bondora and easyP2P column names
+        # Define mapping between Bondora and easyp2p column names
         rename_columns = {
             'Eingesetztes Kapital (netto)': parser.INCOMING_PAYMENT,
             'Endsaldo': parser.END_BALANCE_NAME,
