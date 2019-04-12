@@ -13,11 +13,11 @@ uses Chromedriver as webdriver.
 
 from datetime import date
 import glob
-from pathlib import Path
 import os
 import time
-from typing import AbstractSet, Mapping, Optional, Tuple
+from typing import cast, Mapping, Optional, Sequence, Tuple
 
+from selenium import webdriver
 from selenium.common.exceptions import (
     TimeoutException, NoSuchElementException, StaleElementReferenceException)
 from selenium.webdriver.common.action_chains import ActionChains
@@ -40,7 +40,9 @@ class P2PPlatform:
 
     """
 
-    def __init__(self, name: str, urls: Mapping[str, str]) -> None:
+    def __init__(
+            self, name: str, urls: Mapping[str, str],
+            statement_file_name: str) -> None:
         """
         Constructor of P2P class.
 
@@ -56,9 +58,10 @@ class P2PPlatform:
         """
         self.name = name
         self.urls = urls
-        self.driver = None
+        self.statement_file_name = statement_file_name
+        self.driver = cast(webdriver.Chrome, None)
 
-        # Make sure URLs for login, logout and statement page are provided
+        # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
             raise RuntimeError(
                 '{0}: Keine Login-URL vorhanden!'.format(self.name))
@@ -66,42 +69,6 @@ class P2PPlatform:
             raise RuntimeError(
                 '{0}: Keine Kontoauszug-URLs für {0} vorhanden!'.format(
                     self.name))
-
-        # Set download directory and create it if it doesn't exist yet
-        self.dl_dir = os.path.join(Path.home(), '.easyp2p', self.name.lower())
-        if not os.path.isdir(self.dl_dir):
-            os.makedirs(self.dl_dir)
-
-    def set_statement_file_name(
-            self, date_range: Tuple[date, date], suffix: str,
-            statement_file: str = None) -> str:
-        """
-        Helper method for setting the account statement download file name.
-
-        Default file name will be 'platform name'_statement-'start_date'-
-        'end-date'.suffix. statement_file can be used to override the default.
-
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statement must be generated
-            suffix: Suffix of the statement file
-
-        Keyword Args:
-            statement_file: if not None this will override the default file
-                name
-
-        Returns:
-            File name including path where the platform account statement
-            should be saved
-
-        """
-        if statement_file is not None:
-            return statement_file
-
-        return os.path.join(
-            self.dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
-                self.name.lower(), date_range[0].strftime('%Y%m%d'),
-                date_range[1].strftime('%Y%m%d'), suffix))
 
     def log_into_page(
             self, name_field: str, password_field: str,
@@ -188,6 +155,7 @@ class P2PPlatform:
 
         self.driver.logged_in = True
 
+    # TODO: get rid of check_title
     def open_account_statement_page(
             self, check_title: str, check_locator: Tuple[str, str]) -> None:
         """
@@ -503,8 +471,8 @@ class P2PPlatform:
                         == days_table['current_day_id']):
                     elem.click()
 
-    def start_statement_download(
-            self, platform_file_name: str, download_file_name: str,
+    def download_statement(
+            self, platform_file_name: str,
             download_locator: Tuple[str, str], actions=None) -> None:
         """
         Download account statement file by clicking the provided button.
@@ -514,13 +482,11 @@ class P2PPlatform:
         button is clickable, which can be provided by the optional actions
         variable. The method also checks if the download was successful.
         If true, the _rename_statement method is called to rename the
-        downloaded file to download_file_name.
+        downloaded file to self.statement_file_name.
 
         Args:
             platform_file_name: Default file name without path for account
                 statement downloads, chosen by the P2P platform
-            download_file_name: File name including path where the downloaded
-                statement must be saved
             download_locator: Locator of the download button
 
         Keyword Args:
@@ -537,7 +503,8 @@ class P2PPlatform:
         """
         # Get a list of all files named platform_file_name since it contains
         # wildcards for some P2P platforms
-        file_list = glob.glob(os.path.join(self.dl_dir, platform_file_name))
+        dl_dir = os.path.dirname(self.statement_file_name)
+        file_list = glob.glob(os.path.join(dl_dir, platform_file_name))
 
         # Find and click the download button
         try:
@@ -555,10 +522,10 @@ class P2PPlatform:
 
         # Wait until download has finished
         file_name = self._wait_for_download_end(
-            platform_file_name, file_list)
+            platform_file_name, file_list, dl_dir)
 
         # Rename downloaded file
-        self._rename_statement(file_name, download_file_name)
+        self._rename_statement(file_name, self.statement_file_name)
 
     def _rename_statement(
             self, source_file_name: str, target_file_name: str) -> None:
@@ -585,8 +552,8 @@ class P2PPlatform:
             raise RuntimeError(error_msg)
 
     def _wait_for_download_end(
-            self, platform_file_name: str, file_list: AbstractSet[str],
-            max_waiting_time: float = 4.0) -> str:
+            self, platform_file_name: str, file_list: Sequence[str],
+            dl_dir: str, max_waiting_time: float = 4.0) -> str:
         """
         Wait until download has finished and return name of downloaded file.
 
@@ -596,6 +563,7 @@ class P2PPlatform:
             file_list: List of all files named platform_file_name (which can
                 contain wildcards) in the download directory before the
                 download started
+            dl_dir: Download directory
 
         Keyword Args:
             max_waiting_time: If there is no active or finished download after
@@ -614,13 +582,12 @@ class P2PPlatform:
         _download_finished = False
         _waiting_time = 0
         while not _download_finished:
-            new_file_list = glob.glob(os.path.join(
-                self.dl_dir, platform_file_name))
+            new_file_list = glob.glob(os.path.join(dl_dir, platform_file_name))
             if len(new_file_list) - len(file_list) == 1:
                 _download_finished = True
             elif new_file_list == file_list:
                 ongoing_downloads = glob.glob(os.path.join(
-                    self.dl_dir, '{0}.crdownload'.format(platform_file_name)))
+                    dl_dir, '{0}.crdownload'.format(platform_file_name)))
                 if not ongoing_downloads and _waiting_time > max_waiting_time:
                     # If the download didn't start after more than
                     # max_waiting_time something has gone wrong.

@@ -111,7 +111,8 @@ class PlatformWebDriver:
         options = webdriver.ChromeOptions()
 #        options.add_argument("--headless")
 #        options.add_argument("--window-size=1920,1200")
-        prefs = {"download.default_directory": self.platform.dl_dir}
+        prefs = {"download.default_directory": os.path.dirname(
+            self.platform.statement_file_name)}
         options.add_experimental_option("prefs", prefs)
 
         # TODO: Ubuntu doesn't put chromedriver in PATH so we need to

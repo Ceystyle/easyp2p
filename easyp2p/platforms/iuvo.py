@@ -19,7 +19,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Iuvo(P2PPlatform):
+class Iuvo:
 
     """
     Contains two public methods for downloading/parsing Iuvo account
@@ -36,14 +36,10 @@ class Iuvo(P2PPlatform):
                 statements must be generated
 
         """
-        urls = {
-            'login': 'https://www.iuvo-group.com/de/login/',
-            'statement': 'https://www.iuvo-group.com/de/account-statement/'}
-
-        P2PPlatform.__init__(self, 'Iuvo', urls)
+        self.name = 'Iuvo'
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
-            self.date_range, 'xlsx')
+        self.statement_file_name = p2p_helper.create_statement_location(
+            self.name, self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -53,16 +49,21 @@ class Iuvo(P2PPlatform):
             credentials: (username, password) for Iuvo
 
         """
+        urls = {
+            'login': 'https://www.iuvo-group.com/de/login/',
+            'statement': 'https://www.iuvo-group.com/de/account-statement/'}
         xpaths = {
             'statement_check': ('/html/body/div[5]/main/div/div/div/div[6]/div/'
-                                'div/div/strong[3]')}
+                'div/div/strong[3]')}
+
+        iuvo = P2PPlatform(self.name, urls, self.statement_file_name)
 
         with PlatformWebDriver(
-            self, EC.element_to_be_clickable((By.ID, 'einloggen')),
+            iuvo, EC.element_to_be_clickable((By.ID, 'einloggen')),
             logout_locator=(By.ID, 'p2p_logout'),
             hover_locator=(By.LINK_TEXT, 'User name')) as webdriver:
 
-            self.log_into_page(
+            iuvo.log_into_page(
                 'login', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
@@ -73,7 +74,7 @@ class Iuvo(P2PPlatform):
             except NoSuchElementException:
                 pass
 
-            self.open_account_statement_page(
+            iuvo.open_account_statement_page(
                 'Kontoauszug', (By.ID, 'date_from'))
 
             check_txt = '{0} - {1}'.format(
@@ -89,7 +90,7 @@ class Iuvo(P2PPlatform):
                 EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'text-center'), 'Keine passenden Daten!')]
 
-            self.generate_statement_direct(
+            iuvo.generate_statement_direct(
                 (self.date_range[0], self.date_range[1]), (By.ID, 'date_from'),
                 (By.ID, 'date_to'), '%Y-%m-%d',
                 wait_until=p2p_helper.one_of_many_expected_conditions_true(
@@ -98,7 +99,7 @@ class Iuvo(P2PPlatform):
 
             try:
                 no_cashflows = bool(
-                    self.driver.find_element_by_class_name(
+                    webdriver.driver.find_element_by_class_name(
                         'text-center').text == 'Keine passenden Daten!')
             except NoSuchElementException:
                 no_cashflows = False
@@ -108,10 +109,9 @@ class Iuvo(P2PPlatform):
                 df = pd.DataFrame()
                 df.to_excel(self.statement_file_name)
             else:
-                self.start_statement_download(
+                iuvo.download_statement(
                     'AccountStatement-{0}*'.format(
                         date.today().strftime('%Y%m%d')),
-                    self.statement_file_name,
                     (By.CLASS_NAME, 'p2p-download-full-list'))
 
     def parse_statement(self, statement_file_name: str = None) \

@@ -13,6 +13,7 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
@@ -35,15 +36,10 @@ class Twino:
                 statements must be generated
 
         """
-        urls = {
-            'login': 'https://www.twino.eu/de/',
-            'statement': ('https://www.twino.eu/de/profile/investor/'
-                          'my-investments/account-transactions')}
-
-        P2PPlatform.__init__(self, 'Twino', urls)
+        self.name = 'Twino'
         self.date_range = date_range
-        self.statement_file_name = self.set_statement_file_name(
-            self.date_range, 'xlsx')
+        self.statement_file_name = p2p_helper.create_statement_location(
+            self.name, self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -53,6 +49,10 @@ class Twino:
             credentials: (username, password) for Twino
 
         """
+        urls = {
+            'login': 'https://www.twino.eu/de/',
+            'statement': ('https://www.twino.eu/de/profile/investor/'
+                          'my-investments/account-transactions')}
         xpaths = {
             'end_date': '//*[@date-picker="filterData.processingDateTo"]',
             'login_btn': ('/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/'
@@ -62,26 +62,28 @@ class Twino:
             'statement': ('//a[@href="/de/profile/investor/my-investments/'
                           'individual-investments"]')}
 
+        twino = P2PPlatform(self.name, urls, self.statement_file_name)
+
         with PlatformWebDriver(
-            self, EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
+            twino, EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             logout_locator=(By.XPATH, xpaths['logout_btn'])):
 
-            self.log_into_page(
+            twino.log_into_page(
                 'email', 'login-password', credentials,
                 EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
                 login_locator=(By.XPATH, xpaths['login_btn']))
 
-            self.open_account_statement_page(
+            twino.open_account_statement_page(
                 'TWINO', (By.XPATH, xpaths['start_date']))
 
-            self.generate_statement_direct(
+            twino.generate_statement_direct(
                 self.date_range, (By.XPATH, xpaths['start_date']),
                 (By.XPATH, xpaths['end_date']), '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable(
                     (By.CSS_SELECTOR, '.accStatement__pdf')))
 
-            self.start_statement_download(
-                'account_statement_*.xlsx', self.statement_file_name,
+            twino.download_statement(
+                'account_statement_*.xlsx',
                 (By.CSS_SELECTOR, '.accStatement__pdf'))
 
 

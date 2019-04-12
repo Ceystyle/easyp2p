@@ -21,7 +21,7 @@ from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Bondora(P2PPlatform):
+class Bondora:
 
     """
     Contains two public methods for downloading/parsing Bondora account
@@ -38,15 +38,10 @@ class Bondora(P2PPlatform):
                 statements must be generated
 
         """
-        urls = {
-            'login': 'https://www.bondora.com/de/login',
-            'logout': 'https://www.bondora.com/de/authorize/logout',
-            'statement': 'https://www.bondora.com/de/cashflow'}
-
-        P2PPlatform.__init__(self, 'Bondora', urls)
+        self.name = 'Bondora'
         self.date_range = date_range
-        self.statement_file_name = self.set_statement_file_name(
-            self.date_range, 'xlsx')
+        self.statement_file_name = p2p_helper.create_statement_location(
+            self.name, self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -56,23 +51,33 @@ class Bondora(P2PPlatform):
             credentials: (username, password) for Bondora
 
         """
+        urls = {
+            'login': 'https://www.bondora.com/de/login',
+            'logout': 'https://www.bondora.com/de/authorize/logout',
+            'statement': 'https://www.bondora.com/de/cashflow'}
         xpaths = {
             'no_payments': '/html/body/div[1]/div/div/div/div[3]/div',
             'search_btn': ('//*[@id="page-content-wrapper"]/div/div/div[1]/'
-                           'form/div[3]/button'),
+                'form/div[3]/button'),
             'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/'
-                           'tbody/tr[2]/td[1]/a')}
+                'tbody/tr[2]/td[1]/a'),
+            'download_btn': '/html/body/div[1]/div/div/div/div[1]/form/div[4]/'
+                'div/a'}
+
+        bondora = P2PPlatform(self.name, urls, self.statement_file_name)
 
         with PlatformWebDriver(
-            self, EC.element_to_be_clickable((By.NAME, 'Email'))) as webdriver:
+            bondora, EC.element_to_be_clickable((By.NAME, 'Email'))) \
+            as webdriver:
 
             wd = webdriver.driver
 
-            self.log_into_page(
+            bondora.log_into_page(
                 'Email', 'Password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
 
-            self.open_account_statement_page('Cashflow', (By.ID, 'StartYear'))
+            bondora.open_account_statement_page(
+                'Cashflow', (By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
             select = Select(wd.find_element_by_id('StartYear'))
@@ -104,15 +109,13 @@ class Bondora(P2PPlatform):
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['no_payments']), no_payments_msg)]
             try:
-                self.wdwait(
+                bondora.wdwait(
                     p2p_helper.one_of_many_expected_conditions_true(conditions))
             except TimeoutException as err:
                 raise TimeoutException(err)
 
-            self.start_statement_download(
-                'Cashflow.xlsx', self.statement_file_name,
-                (By.XPATH,
-                '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'))
+            bondora.download_statement(
+                'Cashflow.xlsx', (By.XPATH, xpaths['download_btn']))
 
 
     def parse_statement(self, statement_file_name: str = None) \

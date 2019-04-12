@@ -12,12 +12,13 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Estateguru(P2PPlatform):
+class Estateguru:
 
     """
     Contains two public methods for downloading/parsing Estateguru account
@@ -34,15 +35,10 @@ class Estateguru(P2PPlatform):
                 statements must be generated
 
         """
-        urls = {
-            'login': 'https://estateguru.co/de/?switch=de',
-            'logout': 'https://estateguru.co/portal/logout/index',
-            'statement': 'https://estateguru.co/portal/portfolio/account'}
-
-        P2PPlatform.__init__(self, 'Estateguru', urls)
+        self.name = 'Estateguru'
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
-            self.date_range, 'csv')
+        self.statement_file_name = p2p_helper.create_statement_location(
+            self.name, self.date_range, 'csv')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -52,6 +48,10 @@ class Estateguru(P2PPlatform):
             credentials: (username, password) for Estateguru
 
         """
+        urls = {
+            'login': 'https://estateguru.co/de/?switch=de',
+            'logout': 'https://estateguru.co/portal/logout/index',
+            'statement': 'https://estateguru.co/portal/portfolio/account'}
         xpaths = {
             'account_statement_check': ('/html/body/section/div/div/div/div[2]/'
                 'section[1]/div/div/div[2]/div/form/div[2]/ul/li[5]/a'),
@@ -60,18 +60,20 @@ class Estateguru(P2PPlatform):
         default_file_name = 'payments_{0}*.csv'.format(
             date.today().strftime('%Y-%m-%d'))
 
+        estateguru = P2PPlatform(self.name, urls, self.statement_file_name)
+
         with PlatformWebDriver(
-            self, EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
-            as webdriver:
+            estateguru, EC.element_to_be_clickable(
+                (By.LINK_TEXT, 'Einloggen'))) as webdriver:
 
             wd = webdriver.driver
 
-            self.log_into_page(
+            estateguru.log_into_page(
                 'username', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND')),
                 login_locator=(By.LINK_TEXT, 'Einloggen'))
 
-            self.open_account_statement_page(
+            estateguru.open_account_statement_page(
                 'Übersicht', (By.XPATH, xpaths['account_statement_check']))
 
             # Estateguru does not provide functionality for filtering payment
@@ -80,11 +82,9 @@ class Estateguru(P2PPlatform):
             # date_range is not used for self. We keep it as input
             # variable anyway to be consistent with the other platform classes.
             wd.find_element_by_xpath(xpaths['select_btn']).click()
-            self.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
-            self.start_statement_download(
-                default_file_name, self.statement_file_name,
-                (By.LINK_TEXT, 'CSV'))
-
+            estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+            estateguru.download_statement(
+                default_file_name, (By.LINK_TEXT, 'CSV'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
@@ -117,7 +117,7 @@ class Estateguru(P2PPlatform):
         # Drop last line which only contains a summary
         parser.df = parser.df[:-1]
 
-        # Define mapping between Estateguru and easyP2P cashflow types and
+        # Define mapping between Estateguru and easyp2p cashflow types and
         # column names
         cashflow_types = {
             # Treat bonus payments as normal interest payments

@@ -12,12 +12,13 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Grupeer(P2PPlatform):
+class Grupeer:
 
     """
     Contains two public methods for downloading/parsing Grupeer account
@@ -34,14 +35,10 @@ class Grupeer(P2PPlatform):
                 statements must be generated
 
         """
-        urls = {
-            'login': 'https://www.grupeer.com/de/login',
-            'statement': 'https://www.grupeer.com/de/account-statement'}
-
-        P2PPlatform.__init__(self, 'Grupeer', urls)
+        self.name = 'Grupeer'
         self.date_range = date_range
-        self.statement_file_name = self.platform.set_statement_file_name(
-            self.date_range, 'xlsx')
+        self.statement_file_name = p2p_helper.create_statement_location(
+            self.name, self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -51,23 +48,28 @@ class Grupeer(P2PPlatform):
             credentials: (username, password) for Grupeer.
 
         """
+        urls = {
+            'login': 'https://www.grupeer.com/de/login',
+            'statement': 'https://www.grupeer.com/de/account-statement'}
         xpaths = {
             'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
                              'div/div/ul/li/a/span')}
 
+        grupeer = P2PPlatform(self.name, urls, self.statement_file_name)
+
         with PlatformWebDriver(
-            self, EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
+            grupeer, EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
             (By.LINK_TEXT, 'Ausloggen'),
             hover_locator=(By.XPATH, xpaths['logout_hover'])):
 
-            self.log_into_page(
+            grupeer.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
 
-            self.open_account_statement_page(
+            grupeer.open_account_statement_page(
                 'Account Statement', (By.ID, 'from'))
 
-            self.generate_statement_direct(
+            grupeer.generate_statement_direct(
                 self.date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
                 wait_until=EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'balance-block'),
@@ -75,9 +77,8 @@ class Grupeer(P2PPlatform):
                     + str(self.date_range[0].strftime('%d.%m.%Y'))),
                 submit_btn_locator=(By.NAME, 'submit'))
 
-            self.start_statement_download(
-                'Account statement*.xlsx', self.statement_file_name,
-                (By.NAME, 'excel'))
+            grupeer.download_statement(
+                'Account statement*.xlsx', (By.NAME, 'excel'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

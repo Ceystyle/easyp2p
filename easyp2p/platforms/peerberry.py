@@ -14,12 +14,13 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 
+import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class PeerBerry(P2PPlatform):
+class PeerBerry:
 
     """
     Contains two public methods for downloading/parsing PeerBerry account
@@ -36,14 +37,10 @@ class PeerBerry(P2PPlatform):
                 statements must be generated
 
         """
-        urls = {
-            'login': 'https://peerberry.com/de/login',
-            'statement': 'https://peerberry.com/de/statement'}
-
-        P2PPlatform.__init__(self, 'PeerBerry', urls)
+        self.name = 'PeerBerry'
         self.date_range = date_range
-        self.statement_file_name = self.set_statement_file_name(
-                self.date_range, 'csv')
+        self.statement_file_name = p2p_helper.create_statement_location(
+            self.name, self.date_range, 'csv')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -53,6 +50,9 @@ class PeerBerry(P2PPlatform):
             credentials (tuple[str, str]): (username, password) for PeerBerry
 
         """
+        urls = {
+            'login': 'https://peerberry.com/de/login',
+            'statement': 'https://peerberry.com/de/statement'}
         xpaths = {
             'cookie_policy': '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]',
             'download_btn': ('//*[@id="app"]/div/div/div/div[2]/div/div[2]/'
@@ -64,22 +64,23 @@ class PeerBerry(P2PPlatform):
             'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
                               'div[1]/div/div[2]/div/div[2]/div/span')}
 
+        peerberry = P2PPlatform(self.name, urls, self.statement_file_name)
+
         with PlatformWebDriver(
-            self, EC.title_contains('Einloggen'),
+            peerberry, EC.title_contains('Einloggen'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as webdriver:
 
-            wd = webdriver.driver
-
-            self.log_into_page(
+            peerberry.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
 
-            self.open_account_statement_page(
+            peerberry.open_account_statement_page(
                 'Kontoauszug', (By.NAME, 'startDate'))
 
             # Close the cookie policy, if present
             try:
-                wd.find_element_by_xpath(xpaths['cookie_policy']).click()
+                webdriver.driver.find_element_by_xpath(
+                    xpaths['cookie_policy']).click()
             except NoSuchElementException:
                 pass
 
@@ -94,15 +95,16 @@ class PeerBerry(P2PPlatform):
                           'id_from_calendar': False,
                           'table_id': 'class'}
 
-            self.generate_statement_calendar(
+            peerberry.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
             # After setting the dates, the statement button needs to be clicked
             # in order to actually generate the statement
             try:
-                wd.find_element_by_xpath(xpaths['statement_btn']).click()
-                self.wdwait(
+                webdriver.driver.find_element_by_xpath(
+                    xpaths['statement_btn']).click()
+                peerberry.wdwait(
                     EC.text_to_be_present_in_element(
                         ((By.XPATH, xpaths['start_balance'])),
                         'Eröffnungssaldo '+str(
@@ -114,9 +116,9 @@ class PeerBerry(P2PPlatform):
                 raise RuntimeError('Generierung des {0}-Kontoauszugs hat '
                                    'zu lange gedauert.'.format(self.name))
 
-            self.start_statement_download(
-                'transactions*.csv', self.statement_file_name,
-                (By.XPATH, xpaths['download_btn']), actions='move_to_element')
+            peerberry.download_statement(
+                'transactions*.csv', (By.XPATH, xpaths['download_btn']),
+                actions='move_to_element')
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
@@ -143,7 +145,7 @@ class PeerBerry(P2PPlatform):
             parser.start_parser()
             return (parser.df, '')
 
-        # Define mapping between PeerBerry and easyP2P cashflow types and column
+        # Define mapping between PeerBerry and easyp2p cashflow types and column
         # names
         cashflow_types = {
             'Amount of interest payment received': parser.INTEREST_PAYMENT,

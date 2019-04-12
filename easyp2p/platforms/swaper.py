@@ -13,12 +13,13 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import PlatformWebDriver
 
 
-class Swaper(P2PPlatform):
+class Swaper:
 
     """
     Contains two public methods for downloading/parsing Swaper account
@@ -35,14 +36,10 @@ class Swaper(P2PPlatform):
                 statements must be generated
 
         """
-        urls = {
-            'login': 'https://www.swaper.com/#/dashboard',
-            'statement': 'https://www.swaper.com/#/overview/account-statement'}
-
-        P2PPlatform.__init__(self, 'Swaper', urls)
+        self.name = 'Swaper'
         self.date_range = date_range
-        self.statement_file_name = self.set_statement_file_name(
-            self.date_range, 'xlsx')
+        self.statement_file_name = p2p_helper.create_statement_location(
+            self.name, self.date_range, 'xlsx')
 
     def download_statement(self, credentials: Tuple[str, str]) -> None:
         """
@@ -52,21 +49,26 @@ class Swaper(P2PPlatform):
             credentials: (username, password) for Swaper
 
         """
+        urls = {
+            'login': 'https://www.swaper.com/#/dashboard',
+            'statement': 'https://www.swaper.com/#/overview/account-statement'}
         xpaths = {
             'download_btn': ('//*[@id="account-statement"]/div[3]/div[4]/div/'
                              'div[1]/a/div[1]/div/span[2]'),
             'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
+        swaper = P2PPlatform(self.name, urls, self.statement_file_name)
+
         with PlatformWebDriver(
-            self, EC.presence_of_element_located((By.ID, 'about')),
+            swaper, EC.presence_of_element_located((By.ID, 'about')),
             logout_locator=(By.XPATH, xpaths['logout_btn'])):
 
-            self.log_into_page(
+            swaper.log_into_page(
                 'email', 'password', credentials,
                 EC.presence_of_element_located((By.ID, 'open-investments')),
                 fill_delay=0.5)
 
-            self.open_account_statement_page(
+            swaper.open_account_statement_page(
                 'Swaper', (By.ID, 'account-statement'))
 
             # calendar_locator must be tuple of locators, thus the , at the end
@@ -80,13 +82,12 @@ class Swaper(P2PPlatform):
                           'table_id': 'id'}
             default_dates = (date.today().replace(day=1), date.today())
 
-            self.generate_statement_calendar(
+            swaper.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
-            self.start_statement_download(
-                'excel-storage*.xlsx', self.statement_file_name,
-                (By.XPATH, xpaths['download_btn']))
+            swaper.download_statement(
+                'excel-storage*.xlsx', (By.XPATH, xpaths['download_btn']))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
@@ -113,7 +114,7 @@ class Swaper(P2PPlatform):
             parser.start_parser()
             return (parser.df, '')
 
-        # Define mapping between Swaper and easyP2P cashflow types and column
+        # Define mapping between Swaper and easyp2p cashflow types and column
         # names
         cashflow_types = {
             'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
