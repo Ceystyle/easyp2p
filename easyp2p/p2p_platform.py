@@ -5,9 +5,9 @@
 Module implementing P2PPlatform, a class representing a P2P platform.
 
 This module defines the P2PPlatform class. It contains code for performing log
-in, opening the account statement page and downloading the account statement.
-It relies mainly on functionality provided by the Selenium webdriver. easyp2p
-uses Chromedriver as webdriver.
+in, log out, opening the account statement page and generating and downloading
+the account statement. It relies mainly on functionality provided by the
+Selenium webdriver. easyp2p uses Chromedriver as webdriver.
 
 """
 
