@@ -56,7 +56,7 @@ class WorkerThread(QThread):
             parent: Reference to the parent thread
 
         """
-        super(WorkerThread, self).__init__(parent)
+        super().__init__(parent)
         self.platforms = platforms
         self.credentials = credentials
         self.date_range = date_range
@@ -99,7 +99,7 @@ class WorkerThread(QThread):
         self.update_progress_text.emit(
             '{0} wird ignoriert!'.format(platform), self.RED)
 
-    def parse_result(
+    def parse_statements(
             self, platform: str, list_of_dfs: List[pd.DataFrame],
             platform_instance: Callable[[Tuple[date, date]], None]) \
             -> List[pd.DataFrame]:
@@ -133,7 +133,7 @@ class WorkerThread(QThread):
 
         return list_of_dfs
 
-    def run_platform(
+    def download_statements(
             self, platform: str,
             platform_instance: Callable[[Tuple[date, date]], None]) -> bool:
         """
@@ -192,7 +192,7 @@ class WorkerThread(QThread):
 
             platform_instance = class_(self.date_range)
             try:
-                success = self.run_platform(platform, platform_instance)
+                success = self.download_statements(platform, platform_instance)
             except ModuleNotFoundError as err:
                 self.abort_easyp2p.emit(str(err))
                 #return
@@ -207,7 +207,7 @@ class WorkerThread(QThread):
                     '{0} erfolgreich ausgewertet!'.format(platform),
                     self.BLACK)
 
-                list_of_dfs = self.parse_result(
+                list_of_dfs = self.parse_statements(
                     platform, list_of_dfs, platform_instance)
 
         if self.abort:
