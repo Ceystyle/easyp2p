@@ -157,7 +157,7 @@
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
+          <layout class="QHBoxLayout" name="horizontalLayout_date_range">
            <item>
             <widget class="QGroupBox" name="groupBox_start_date">
              <property name="title">

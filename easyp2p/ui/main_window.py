@@ -8,7 +8,7 @@ import calendar
 from datetime import date
 import os
 import sys
-from typing import Callable
+from typing import Sequence, Set, Tuple
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QColor
@@ -39,147 +39,91 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.progress_window = None
         self.worker = None
-        self.platforms = set([])
         self.credentials = dict()
-        self.output_file = None
+        self.init_date_combo_boxes()
+        self.output_file_changed = False
+        self.set_output_file()
 
+    def init_date_combo_boxes(self) -> None:
+        """Initialize date combo boxes with previous month."""
         if date.today().month > 1:
-            self.start_month = date.today().month - 1
-            self.start_year = date.today().year
+            start_month = p2p_helper.nbr_to_short_month(
+                str(date.today().month - 1))
+            start_year = str(date.today().year)
         else:
-            self.start_month = 12
-            self.start_year = date.today().year - 1
-
-        self.end_month = self.start_month
-        self.end_year = self.start_year
+            start_month = 'Dez'
+            start_year = str(date.today().year - 1)
 
         self.comboBox_start_month.setCurrentIndex(
-            self.comboBox_start_month.findText(
-                p2p_helper.nbr_to_short_month(str(self.start_month))))
+            self.comboBox_start_month.findText(start_month))
         self.comboBox_start_year.setCurrentIndex(
-            self.comboBox_start_year.findText(str(self.start_year)))
+            self.comboBox_start_year.findText(start_year))
         self.comboBox_end_month.setCurrentIndex(
-            self.comboBox_end_month.findText(
-                p2p_helper.nbr_to_short_month(str(self.end_month))))
+            self.comboBox_end_month.findText(start_month))
         self.comboBox_end_year.setCurrentIndex(
-            self.comboBox_end_year.findText(str(self.end_year)))
+            self.comboBox_end_year.findText(start_year))
 
-        self._set_start_date()
-        self._set_end_date()
-        self.output_file_changed = False
-        self._set_output_file()
+    def get_date_range(self) -> Tuple[date, date]:
+        """
+        Get currently selected date range from combo boxes.
 
-        self._connect_signals()
+        Returns:
+            Date range (start_date, end_date)
 
-    def _connect_signals(self) -> None:
-        """Connect signals to methods."""
+        """
+        start_month = int(p2p_helper.short_month_to_nbr(
+            str(self.comboBox_start_month.currentText())))
+        start_year = int(self.comboBox_start_year.currentText())
+        end_month = int(p2p_helper.short_month_to_nbr(
+            str(self.comboBox_end_month.currentText())))
+        end_year = int(self.comboBox_end_year.currentText())
+        last_day_of_month = calendar.monthrange(end_year, end_month)[1]
+        return (date(start_year, start_month, 1),
+                date(end_year, end_month, last_day_of_month))
+
+    def get_platforms(self) -> Set[str]:
+        """
+        Get list of all platforms selected by the user.
+
+        Returns:
+            Set of P2P platforms
+
+        """
+        platforms = set()
         for check_box in self.groupBox_platforms.findChildren(QCheckBox):
-            if check_box != self.checkBox_select_all:
-                check_box.stateChanged.connect(self._bind_box(check_box))
+            if check_box.isChecked():
+                platforms.add(check_box.text().replace('&', ''))
+        return platforms
 
-    def _bind_box(self, box: QCheckBox) -> Callable:
-        """
-        Helper method for connecting check boxes to add_platform.
-
-        Args:
-            box: Checkbox which needs to be connected
-
-        """
-        return lambda: self.add_platform(box)
-
-    def add_platform(self, check_box: QCheckBox):
-        """
-        Add/remove platform to/from platform list if check_box is checked.
-
-        Args:
-            check_box: Toggled checkbox
-
-        """
-        if check_box.isChecked():
-            self.platforms.add(check_box.text().replace('&', ''))
-        else:
-            self.platforms.remove(check_box.text().replace('&', ''))
-
-    def _set_start_date(self) -> None:
-        """Helper method to set start date to first day of selected month."""
-        self.start_date = date(self.start_year, self.start_month, 1)
-
-    def _set_end_date(self) -> None:
-        """Helper method to set end date to last day of selected month."""
-        end_of_month = calendar.monthrange(self.end_year, self.end_month)[1]
-        self.end_date = date(self.end_year, self.end_month, end_of_month)
-
-    def _set_output_file(self) -> None:
+    def set_output_file(self) -> None:
         """Helper method to set the name of the output file."""
+        date_range = self.get_date_range()
         if not self.output_file_changed:
-            self.output_file = os.path.join(
+            output_file = os.path.join(
                 os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
-                    self.start_date.strftime('%d.%m.%Y'),
-                    self.end_date.strftime('%d.%m.%Y')))
-            QLineEdit.setText(self.lineEdit_output_file, self.output_file)
+                    date_range[0].strftime('%d.%m.%Y'),
+                    date_range[1].strftime('%d.%m.%Y')))
+            QLineEdit.setText(self.lineEdit_output_file, output_file)
 
     @pyqtSlot(str)
-    def on_comboBox_start_month_activated(self, month: str) -> None:
-        """
-        Update start date if the user changed start month in the combo box.
-
-        Args:
-            month: short month name chosen by the user in the combo box
-
-        """
-        self.start_month = int(p2p_helper.short_month_to_nbr(month))
-        self._set_start_date()
-        self._set_output_file()
+    def on_comboBox_start_month_activated(self) -> None:
+        """Update output file if user changed start month in the combo box."""
+        self.set_output_file()
 
     @pyqtSlot(str)
-    def on_comboBox_start_year_activated(self, year: str) -> None:
-        """
-        Update start date if the user changed start year in the combo box.
-
-        Args:
-            year: year chosen by the user in the combo box
-
-        """
-        self.start_year = int(year)
-        self._set_start_date()
-        self._set_output_file()
+    def on_comboBox_start_year_activated(self) -> None:
+        """Update output file if user changed start year in the combo box."""
+        self.set_output_file()
 
     @pyqtSlot(str)
-    def on_comboBox_end_month_activated(self, month: str) -> None:
-        """
-        Update end date if the user changed end month in the combo box.
-
-        Args:
-            month: short month name chosen by the user in the combo box
-
-        """
-        self.end_month = int(p2p_helper.short_month_to_nbr(month))
-        self._set_end_date()
-        self._set_output_file()
+    def on_comboBox_end_month_activated(self) -> None:
+        """Update output file if user changed end month in the combo box."""
+        self.set_output_file()
 
     @pyqtSlot(str)
     def on_comboBox_end_year_activated(self, year: str) -> None:
-        """
-        Update end date if the user changed end year in the combo box.
-
-        Args:
-            year: year chosen by the user in the combo box
-
-        """
-        self.end_year = int(year)
-        self._set_end_date()
-        self._set_output_file()
-
-    @pyqtSlot(str)
-    def on_lineEdit_output_file_textChanged(self, file_name: str) -> None:
-        """
-        Update location where the results file should be saved.
-
-        Args:
-            file_name: file name entered by the user
-
-        """
-        QLineEdit.setText(self.lineEdit_output_file, file_name)
+        """Update output file if user changed end year in the combo box."""
+        self.set_output_file()
 
     @pyqtSlot()
     def on_pushButton_file_chooser_clicked(self) -> None:
@@ -188,15 +132,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        self.output_file, _ = QFileDialog.getSaveFileName(
-            self, "Ausgabedatei wählen", self.output_file,
+        output_file, _ = QFileDialog.getSaveFileName(
+            self, "Ausgabedatei wählen", self.lineEdit_output_file.text(),
             "MS Excel Dateien (*.xlsx)", options=options)
-        if self.output_file:
+        if output_file:
             # The file name must include xlsx file format. Otherwise the Excel
             # writer will crash later.
-            if not self.output_file.endswith('.xlsx'):
-                self.output_file = self.output_file + '.xlsx'
-            self.on_lineEdit_output_file_textChanged(self.output_file)
+            if not output_file.endswith('.xlsx'):
+                output_file += '.xlsx'
+            QLineEdit.setText(self.lineEdit_output_file, output_file)
             self.output_file_changed = True
 
     @pyqtSlot(bool)
@@ -221,26 +165,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Progress is tracked in ProgressWindow.
 
         """
+        date_range = self.get_date_range()
+        platforms = self.get_platforms()
+
         # Check that start date is before end date
-        if self.start_date > self.end_date:
+        if date_range[0] > date_range[1]:
             QMessageBox.warning(
                 self, 'Startdatum liegt nach Enddatum!',
                 'Das Startdatum darf nicht nach dem Enddatum liegen!')
             return
 
         # Check that at least one platform is selected
-        if not self.platforms:
+        if not platforms:
             QMessageBox.warning(
                 self, 'Keine P2P Plattform ausgewählt!',
                 'Bitte wähle mindestens eine P2P Plattform aus')
             return
 
         # Get credentials from user/keyring for all selected platforms
-        for platform in self.platforms:
+        for platform in platforms:
             self.credentials[platform] = get_credentials(platform)
 
         # Set up and start worker thread
-        worker = self.setup_worker_thread()
+        worker = self.setup_worker_thread(platforms, date_range)
         worker.start()
 
         # Open progress window
@@ -251,17 +198,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.progress_window.result() == 0:
             worker.abort = True
 
-    def setup_worker_thread(self) -> 'WorkerThread':
+    def setup_worker_thread(
+            self, platforms: Sequence[str], date_range: Tuple[date, date]) \
+            -> 'WorkerThread':
         """
         Setup the worker thread and its attributes.
+
+        Args:
+            platforms: List of P2P platforms to evaluate
+            date_range: Date range for account statement generation
 
         Returns:
             Handle of the worker thread
 
         """
         worker = WorkerThread(
-            self.platforms, self.credentials, (self.start_date, self.end_date),
-            self.output_file)
+            platforms, self.credentials, date_range,
+            self.lineEdit_output_file.text())
         worker.update_progress_bar.connect(self.update_progress_bar)
         worker.update_progress_text.connect(self.update_progress_text)
         worker.abort_easyp2p.connect(self.abort_easyp2p)
@@ -305,6 +258,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         self.progress_window.reject()
-        QMessageBox.critical(self, "Kritischer Fehler", error_msg,
-            QMessageBox.Close)
+        QMessageBox.critical(
+            self, "Kritischer Fehler", error_msg, QMessageBox.Close)
         sys.exit()
