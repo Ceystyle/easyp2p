@@ -235,11 +235,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Bitte wähle mindestens eine P2P Plattform aus')
             return
 
-        # Check if download directory exists, if not create it
-        dl_location = './p2p_downloads'
-        if not os.path.isdir(dl_location):
-            os.makedirs(dl_location)
-
         # Get credentials from user/keyring for all selected platforms
         for platform in self.platforms:
             self.credentials[platform] = get_credentials(platform)
