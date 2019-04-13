@@ -11,9 +11,8 @@ import sys
 from typing import Sequence, Set, Tuple
 
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLineEdit, QCheckBox
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import (
+    QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_worker import WorkerThread
@@ -186,12 +185,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for platform in platforms:
             self.credentials[platform] = get_credentials(platform)
 
+        # Create progress window
+        self.progress_window = ProgressWindow()
+
         # Set up and start worker thread
         worker = self.setup_worker_thread(platforms, date_range)
         worker.start()
 
         # Open progress window
-        self.progress_window = ProgressWindow()
         self.progress_window.exec_()
 
         # Abort the worker thread if user clicked the cancel button
@@ -215,39 +216,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         worker = WorkerThread(
             platforms, self.credentials, date_range,
             self.lineEdit_output_file.text())
-        worker.update_progress_bar.connect(self.update_progress_bar)
-        worker.update_progress_text.connect(self.update_progress_text)
+        worker.update_progress_bar.connect(
+            self.progress_window.update_progress_bar)
+        worker.update_progress_text.connect(
+            self.progress_window.update_progress_text)
         worker.abort_easyp2p.connect(self.abort_easyp2p)
         return worker
-
-    def update_progress_bar(self, value: float) -> None:
-        """
-        Update the progress bar in ProgressWindow to new value.
-
-        Args:
-            value: Value of the progress bar, between 0 and 100
-
-        """
-        if not 0 <= value <= 100:
-            error_message = ('Fortschrittsindikator beträgt: {0}. Er muss '
-                             'zwischen 0 und 100 liegen!'.format(value))
-            QMessageBox.warning(
-                self, 'Fehler!', error_message)
-            return
-
-        self.progress_window.progressBar.setValue(value)
-
-    def update_progress_text(self, txt: str, color: QColor) -> None:
-        """
-        Append a new line to the progress text in ProgressWindow.
-
-        Args:
-            txt: String to add to progress text
-            color: Color in which the message should be displayed
-
-        """
-        self.progress_window.progressText.setTextColor(color)
-        self.progress_window.progressText.append(txt)
 
     def abort_easyp2p(self, error_msg: str) -> None:
         """

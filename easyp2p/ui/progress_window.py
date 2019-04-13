@@ -5,7 +5,8 @@
 """Module implementing ProgressWindow."""
 
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import (QDialog, QMessageBox)
 
 from easyp2p.ui.Ui_progress_window import Ui_Dialog
 
@@ -59,3 +60,32 @@ class ProgressWindow(QDialog, Ui_Dialog):
         """
         if value == 100:
             self.pushButton_ok.setEnabled(True)
+
+    def update_progress_bar(self, value: float) -> None:
+        """
+        Update the progress bar in ProgressWindow to new value.
+
+        Args:
+            value: Value of the progress bar, between 0 and 100
+
+        """
+        if not 0 <= value <= 100:
+            error_message = ('Fortschrittsindikator beträgt: {0}. Er muss '
+                             'zwischen 0 und 100 liegen!'.format(value))
+            QMessageBox.warning(
+                self, 'Fehler!', error_message)
+            return
+
+        self.progressBar.setValue(value)
+
+    def update_progress_text(self, txt: str, color: QColor) -> None:
+        """
+        Append a new line to the progress text in ProgressWindow.
+
+        Args:
+            txt: String to add to progress text
+            color: Color in which the message should be displayed
+
+        """
+        self.progressText.setTextColor(color)
+        self.progressText.append(txt)
