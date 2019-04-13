@@ -90,7 +90,7 @@ class Robocash:
             wait = 0
             while not present:
                 try:
-                    robocash.driver.get(self.urls['statement'])
+                    robocash.driver.get(urls['statement'])
                     robocash.wdwait(
                         EC.element_to_be_clickable(
                             (By.ID, 'download_statement')))
