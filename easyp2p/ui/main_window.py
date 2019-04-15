@@ -7,15 +7,13 @@
 import calendar
 from datetime import date
 import os
-import sys
-from typing import Sequence, Set, Tuple
+from typing import Set, Tuple
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (
     QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
 import easyp2p.p2p_helper as p2p_helper
-from easyp2p.p2p_worker import WorkerThread
 from easyp2p.ui.credentials_window import get_credentials
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
@@ -35,9 +33,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
-
-        self.progress_window = None
-        self.worker = None
         self.credentials = dict()
         self.init_date_combo_boxes()
         self.output_file_changed = False
@@ -185,53 +180,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for platform in platforms:
             self.credentials[platform] = get_credentials(platform)
 
-        # Create progress window
-        self.progress_window = ProgressWindow()
-
-        # Set up and start worker thread
-        worker = self.setup_worker_thread(platforms, date_range)
-        worker.start()
-
         # Open progress window
-        self.progress_window.exec_()
-
-        # Abort the worker thread if user clicked the cancel button
-        if self.progress_window.result() == 0:
-            worker.abort = True
-
-    def setup_worker_thread(
-            self, platforms: Sequence[str], date_range: Tuple[date, date]) \
-            -> 'WorkerThread':
-        """
-        Setup the worker thread and its attributes.
-
-        Args:
-            platforms: List of P2P platforms to evaluate
-            date_range: Date range for account statement generation
-
-        Returns:
-            Handle of the worker thread
-
-        """
-        worker = WorkerThread(
+        progress_window = ProgressWindow(
             platforms, self.credentials, date_range,
             self.lineEdit_output_file.text())
-        worker.update_progress_bar.connect(
-            self.progress_window.update_progress_bar)
-        worker.update_progress_text.connect(
-            self.progress_window.update_progress_text)
-        worker.abort_easyp2p.connect(self.abort_easyp2p)
-        return worker
-
-    def abort_easyp2p(self, error_msg: str) -> None:
-        """
-        Abort the program in case of critical errors.
-
-        Args:
-            error_msg: Message to display to the user before aborting
-
-        """
-        self.progress_window.reject()
-        QMessageBox.critical(
-            self, "Kritischer Fehler", error_msg, QMessageBox.Close)
-        sys.exit()
+        progress_window.exec_()
