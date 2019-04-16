@@ -9,9 +9,10 @@ import keyring
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QMessageBox, QWidget
 
-from .Ui_credentials_window import Ui_CredentialsWindow
+from easyp2p.ui.Ui_credentials_window import Ui_CredentialsWindow
 
 
+# TODO: add methods for changing/deleting credentials
 class CredentialsWindow(QDialog, Ui_CredentialsWindow):
 
     """
