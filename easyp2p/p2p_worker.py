@@ -151,6 +151,8 @@ class WorkerThread(QThread):
 
         try:
             platform.download_statement(self.credentials[name])
+        except ModuleNotFoundError as err:
+            self.abort_easyp2p.emit(str(err))
         except RuntimeError as err:
             self.ignore_platform(name, str(err))
             return False
@@ -170,7 +172,6 @@ class WorkerThread(QThread):
 
         """
         for name in self.platforms:
-            success = False
 
             if self.abort:
                 return
@@ -180,21 +181,16 @@ class WorkerThread(QThread):
                 continue
 
             platform = Platform(self.date_range)
-            try:
-                success = self.download_statements(platform, platform_instance)
-            except ModuleNotFoundError as err:
-                self.abort_easyp2p.emit(str(err))
 
-            if success:
+            if self.download_statements(name, platform):
                 if self.abort:
                     return
 
-                success = self.parse_statements(name, platform)
-                self.update_progress_bar.emit()
-                if success:
+                if self.parse_statements(name, platform):
                     self.add_progress_text.emit(
-                        '{0} erfolgreich ausgewertet!'.format(name),
-                        self.BLACK)
+                        '{0} erfolgreich ausgewertet!'.format(name), self.BLACK)
+
+            self.update_progress_bar.emit()
 
         if self.abort:
             return
