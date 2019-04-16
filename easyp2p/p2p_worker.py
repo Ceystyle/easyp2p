@@ -97,7 +97,7 @@ class WorkerThread(QThread):
             '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_statements(
-            self, platform: str, list_of_dfs: List[pd.DataFrame],
+            self, platform: str, df_result: pd.DataFrame,
             platform_instance: Callable[[Tuple[date, date]], None]) \
             -> List[pd.DataFrame]:
         """
@@ -105,22 +105,21 @@ class WorkerThread(QThread):
 
         Args:
             platform: Name of the P2P platform
-            list_of_dfs: List of DataFrames, one DataFrame for each
-                successfully parsed P2P platform
+            df_result: DataFrame containing the parsed results from all
+                previously parsed platforms
             platform_instance: platform class with parse_statement method
 
         Returns:
-            If successful the provided list_of_dfs with one DataFrame for this
-            platform appended, if not successful the original list_of_dfs is
-            returned
+            On success the provided df_result with results for this platform
+            platform appended, otherwise the original df_result
 
         """
         try:
             (df, unknown_cf_types) = platform_instance.parse_statement()
-            list_of_dfs.append(df)
+            df_result = df_result.append(df, sort=True)
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
-            return list_of_dfs
+            return df_result
 
         if unknown_cf_types:
             warning_msg = (
@@ -128,7 +127,7 @@ class WorkerThread(QThread):
                 'ignoriert: {1}'.format(platform, unknown_cf_types))
             self.add_progress_text.emit(warning_msg, self.RED)
 
-        return list_of_dfs
+        return df_result
 
     def download_statements(
             self, platform: str,
@@ -173,7 +172,7 @@ class WorkerThread(QThread):
         each finished platform the progress bar is increased.
 
         """
-        list_of_dfs: List[pd.DataFrame] = []
+        df_result = pd.DataFrame()
         success = False
 
         for platform in self.platforms:
@@ -194,9 +193,9 @@ class WorkerThread(QThread):
                 if self.abort:
                     return
 
-                list_of_dfs = self.parse_statements(
-                    platform, list_of_dfs, platform_instance)
-
+                # TODO: handle case when parsing is not successful
+                df_result = self.parse_statements(
+                    platform, df_result, platform_instance)
                 self.update_progress_bar.emit()
                 self.add_progress_text.emit(
                     '{0} erfolgreich ausgewertet!'.format(platform),
@@ -206,6 +205,6 @@ class WorkerThread(QThread):
             return
 
         if not p2p_parser.show_results(
-                list_of_dfs, self.output_file):
+                df_result, self.output_file):
             self.add_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)

@@ -11,7 +11,7 @@ file.
 
 """
 from datetime import date
-from typing import List, Mapping, Optional, Sequence, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 import pandas as pd
 import xlsxwriter
@@ -298,20 +298,13 @@ class P2PParser:
         self._calculate_total_income()
         self.df[self.PLATFORM] = self.name
 
-        # Add missing columns
-        for col in [
-                col for col in self.TARGET_COLUMNS
-                if col not in self.df.columns]:
-            self.df[col] = 'NaN'
-
         self.df.set_index(
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
 
         return unknown_cf_types
 
 
-def show_results(
-        list_of_dfs: Sequence[pd.DataFrame], output_file: str) -> bool:
+def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
     """
     Sum up the results contained in data frames and write them to Excel file.
 
@@ -320,61 +313,58 @@ def show_results(
     period between start and end date.
 
     Args:
-        list_of_dfs: List of data frames containing the parsed account
-            statements from the P2P platforms
+        df_result: DataFrame containing the parsed results from all selected
+            P2P platforms
         output_file: Absolute path of the output file
 
     Returns:
         True on success, False on failure
 
     """
-    df_monthly = pd.DataFrame()
-    df_total = pd.DataFrame()
+    # Create Month column
+    df_result.reset_index(inplace=True)
+    df_result[P2PParser.DATE] = pd.to_datetime(
+        df_result[P2PParser.DATE], format='%Y-%m-%d')
+    df_result[P2PParser.MONTH] = pd.to_datetime(
+        df_result[P2PParser.DATE], format='%d.%m.%Y').dt.to_period('M')
 
-    for df in list_of_dfs:
-        df.reset_index(inplace=True)
-        df[P2PParser.DATE] = pd.to_datetime(
-            df[P2PParser.DATE], format='%Y-%m-%d')
-        df[P2PParser.MONTH] = pd.to_datetime(
-            df[P2PParser.DATE], format='%d.%m.%Y').dt.to_period('M')
+    # Calculate results per month and platform
+    values = [column for column in P2PParser.TARGET_COLUMNS \
+        if column in df_result.columns]
+    df_monthly = pd.pivot_table(
+        df_result, values=values,
+        index=[P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH],
+        aggfunc=sum, dropna=False, fill_value=0.)
 
-        # We need to fill the NaNs with a dummy value so they don't disappear
-        # when creating the pivot tables
-        df.fillna('', inplace=True)
-
-        df_pivot = pd.pivot_table(
-            df, values=P2PParser.TARGET_COLUMNS,
-            index=[P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH],
-            aggfunc=sum, dropna=False)
-
-        # If start and end balance columns were present they were also summed
-        # up which is obviously not correct. Drop them and fill in the correct
-        # values from the original DataFrame.
-        try:
-            df_pivot.drop(
-                [P2PParser.START_BALANCE_NAME, P2PParser.END_BALANCE_NAME],
-                axis=1, inplace=True)
-            start_balances = df.groupby(P2PParser.MONTH).first()[
+    # If start and end balance columns were present they were also summed
+    # up which is obviously not correct. Drop them and fill in the correct
+    # values from the original DataFrame.
+    try:
+        df_monthly.drop(
+            [P2PParser.START_BALANCE_NAME, P2PParser.END_BALANCE_NAME],
+            axis=1, inplace=True)
+        start_balances = df_result.groupby(
+            [P2PParser.PLATFORM, P2PParser.MONTH]).first()[
                 P2PParser.START_BALANCE_NAME]
-            end_balances = df.groupby(P2PParser.MONTH).last()[
+        end_balances = df_result.groupby(
+            [P2PParser.PLATFORM, P2PParser.MONTH]).last()[
                 P2PParser.END_BALANCE_NAME]
 
-            df_pivot = df_pivot.reset_index().merge(
-                start_balances.to_frame(), how='left', on=P2PParser.MONTH)\
-                .set_index(
-                    [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
-            df_pivot = df_pivot.reset_index().merge(
-                end_balances.to_frame(), how='left', on=P2PParser.MONTH)\
-                .set_index(
-                    [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
-        except KeyError:
-            pass
+        df_monthly = df_monthly.reset_index().merge(
+            start_balances.to_frame(), how='left',
+            on=[P2PParser.PLATFORM, P2PParser.MONTH]).set_index(
+                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
+        df_monthly = df_monthly.reset_index().merge(
+            end_balances.to_frame(), how='left',
+            on=[P2PParser.PLATFORM, P2PParser.MONTH]).set_index(
+                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
+    except KeyError:
+        pass
 
-        df_monthly = df_monthly.append(df_pivot, sort=True)
-        df_pivot = pd.pivot_table(
-            df, values=P2PParser.TARGET_COLUMNS,
-            index=[P2PParser.PLATFORM, P2PParser.CURRENCY], aggfunc=sum)
-        df_total = df_total.append(df_pivot, sort=True)
+    # Calculate results per platform
+    df_total = pd.pivot_table(
+        df_monthly, values=values,
+        index=[P2PParser.PLATFORM, P2PParser.CURRENCY], aggfunc=sum)
 
     if df_total.empty:
         return False
@@ -383,15 +373,9 @@ def show_results(
     df_monthly = df_monthly.round(2)
     df_total = df_total.round(2)
 
-    # Make sure all target columns are present
-    for column in P2PParser.TARGET_COLUMNS:
-        if column not in df_monthly.columns:
-            df_monthly[column] = ''
-            df_total[column] = ''
-
     # Sort columns
-    df_monthly = df_monthly[P2PParser.TARGET_COLUMNS]
-    df_total = df_total[P2PParser.TARGET_COLUMNS]
+    df_monthly = df_monthly[values]
+    df_total = df_total[values]
 
     # Write monthly results to file
     writer = pd.ExcelWriter(
@@ -410,6 +394,8 @@ def show_results(
         for index in df_total.index.levels[0]:
             end_balance = df_monthly.loc[index][P2PParser.END_BALANCE_NAME][-1]
             df_total.loc[index, P2PParser.END_BALANCE_NAME] = end_balance
+
+    #TODO: add a total row with the sum over all platforms to df_total
 
     # Write total results to file
     df_total.to_excel(writer, 'Gesamtergebnis')
