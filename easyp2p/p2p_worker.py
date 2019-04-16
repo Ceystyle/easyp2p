@@ -4,7 +4,7 @@
 """Module implementing WorkerThread."""
 
 from datetime import date
-from typing import AbstractSet, Callable, List, Mapping, Optional, Tuple
+from typing import AbstractSet, Callable, Mapping, Optional, Tuple
 
 import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
@@ -59,6 +59,7 @@ class WorkerThread(QThread):
         self.date_range = date_range
         self.output_file = output_file
         self.abort = False
+        self.df_result = pd.DataFrame()
 
     def get_platform_class(self, platform: str) \
             -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
@@ -97,29 +98,25 @@ class WorkerThread(QThread):
             '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_statements(
-            self, platform: str, df_result: pd.DataFrame,
-            platform_instance: Callable[[Tuple[date, date]], None]) \
-            -> List[pd.DataFrame]:
+            self, platform: str,
+            platform_instance: Callable[[Tuple[date, date]], None]) -> bool:
         """
         Helper method for calling the parser and appending the dataframe list.
 
         Args:
             platform: Name of the P2P platform
-            df_result: DataFrame containing the parsed results from all
-                previously parsed platforms
             platform_instance: platform class with parse_statement method
 
         Returns:
-            On success the provided df_result with results for this platform
-            platform appended, otherwise the original df_result
+            True on success, False on failure
 
         """
         try:
             (df, unknown_cf_types) = platform_instance.parse_statement()
-            df_result = df_result.append(df, sort=True)
+            self.df_result = self.df_result.append(df, sort=True)
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
-            return df_result
+            return False
 
         if unknown_cf_types:
             warning_msg = (
@@ -127,7 +124,7 @@ class WorkerThread(QThread):
                 'ignoriert: {1}'.format(platform, unknown_cf_types))
             self.add_progress_text.emit(warning_msg, self.RED)
 
-        return df_result
+        return True
 
     def download_statements(
             self, platform: str,
@@ -172,10 +169,9 @@ class WorkerThread(QThread):
         each finished platform the progress bar is increased.
 
         """
-        df_result = pd.DataFrame()
-        success = False
-
         for platform in self.platforms:
+            success = False
+
             if self.abort:
                 return
 
@@ -193,18 +189,16 @@ class WorkerThread(QThread):
                 if self.abort:
                     return
 
-                # TODO: handle case when parsing is not successful
-                df_result = self.parse_statements(
-                    platform, df_result, platform_instance)
+                success = self.parse_statements(platform, platform_instance)
                 self.update_progress_bar.emit()
-                self.add_progress_text.emit(
-                    '{0} erfolgreich ausgewertet!'.format(platform),
-                    self.BLACK)
+                if success:
+                    self.add_progress_text.emit(
+                        '{0} erfolgreich ausgewertet!'.format(platform),
+                        self.BLACK)
 
         if self.abort:
             return
 
-        if not p2p_parser.show_results(
-                df_result, self.output_file):
+        if not p2p_parser.show_results(self.df_result, self.output_file):
             self.add_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
