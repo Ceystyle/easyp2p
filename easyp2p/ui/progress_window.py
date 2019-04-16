@@ -88,8 +88,6 @@ class ProgressWindow(QDialog, Ui_Dialog):
 
         """
         self.progressBar.setValue(self.progressBar.value() + 1)
-        print(self.progressBar.value())
-        print(self.progressBar.maximum())
         if self.progressBar.value() == self.progressBar.maximum():
             self.pushButton_ok.setEnabled(True)
 

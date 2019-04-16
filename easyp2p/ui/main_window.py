@@ -80,11 +80,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Get list of all platforms selected by the user.
 
         Returns:
-            Set of P2P platforms
+            Set of P2P platform names
 
         """
         platforms = set()
-        for check_box in self.groupBox_platforms.findChildren(QCheckBox):
+        for check_box in self.group_box_platforms.findChildren(QCheckBox):
             if check_box.isChecked():
                 platforms.add(check_box.text().replace('&', ''))
         return platforms
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.output_file_changed = True
 
     @pyqtSlot(bool)
-    def on_checkBox_select_all_toggled(self, checked: bool) -> None:
+    def on_check_box_select_all_toggled(self, checked: bool) -> None:
         """
         Toggle/untoggle all P2P platforms.
 
@@ -147,7 +147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 all check boxes
 
         """
-        for check_box in self.groupBox_platforms.findChildren(QCheckBox):
+        for check_box in self.group_box_platforms.findChildren(QCheckBox):
             check_box.setChecked(checked)
 
     @pyqtSlot()
