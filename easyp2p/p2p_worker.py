@@ -61,16 +61,16 @@ class WorkerThread(QThread):
         self.abort = False
         self.df_result = pd.DataFrame()
 
-    def get_platform_class(self, name: str) \
-            -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
+    def get_platform_instance(self, name: str) \
+            -> Optional[Callable[[Tuple[date, date]], None]]:
         """
-        Helper method to get methods from the platform modules.
+        Helper method to get an instance of the platform class.
 
         Args:
             name: Name of the P2P platform/module
 
         Returns:
-            P2PPlatform class or None if the class cannot be found
+            Platform class or None if the class cannot be found
 
         """
         try:
@@ -82,7 +82,7 @@ class WorkerThread(QThread):
             self.add_progress_text.emit(error_message, self.RED)
             return None
         else:
-            return Platform
+            return Platform(self.date_range)
 
     def ignore_platform(self, name: str, error_msg: str) -> None:
         """
@@ -176,11 +176,9 @@ class WorkerThread(QThread):
             if self.abort:
                 return
 
-            Platform = self.get_platform_class(name)
-            if Platform is None:
+            platform = self.get_platform_instance(name)
+            if platform is None:
                 continue
-
-            platform = Platform(self.date_range)
 
             if self.download_statements(name, platform):
                 if self.abort:
