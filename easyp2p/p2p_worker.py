@@ -13,6 +13,7 @@ from PyQt5.QtGui import QColor
 import easyp2p.p2p_parser as p2p_parser
 import easyp2p.platforms as p2p_platforms
 
+
 class WorkerThread(QThread):
 
     """
@@ -26,9 +27,9 @@ class WorkerThread(QThread):
     """
 
     # Signals for communicating with the MainWindow
-    update_progress_bar = pyqtSignal(float)
-    update_progress_text = pyqtSignal(str, QColor)
     abort_easyp2p = pyqtSignal(str)
+    update_progress_bar = pyqtSignal()
+    add_progress_text = pyqtSignal(str, QColor)
 
     # Colors for text output
     BLACK = QColor(0, 0, 0)
@@ -77,7 +78,7 @@ class WorkerThread(QThread):
             error_message = (
                 'Klasse {0} konnte nicht gefunden werden. Ist {1}.py '
                 'vorhanden?'.format(platform, platform.lower()))
-            self.update_progress_text.emit(error_message, self.RED)
+            self.add_progress_text.emit(error_message, self.RED)
             return None
         else:
             return class_
@@ -91,8 +92,8 @@ class WorkerThread(QThread):
             error_msg: Error message to print
 
         """
-        self.update_progress_text.emit(error_msg, self.RED)
-        self.update_progress_text.emit(
+        self.add_progress_text.emit(error_msg, self.RED)
+        self.add_progress_text.emit(
             '{0} wird ignoriert!'.format(platform), self.RED)
 
     def parse_statements(
@@ -125,7 +126,7 @@ class WorkerThread(QThread):
             warning_msg = (
                 '{0}: unbekannter Cashflow-Typ wird im Ergebnis '
                 'ignoriert: {1}'.format(platform, unknown_cf_types))
-            self.update_progress_text.emit(warning_msg, self.RED)
+            self.add_progress_text.emit(warning_msg, self.RED)
 
         return list_of_dfs
 
@@ -144,20 +145,21 @@ class WorkerThread(QThread):
 
         """
         if self.credentials[platform] is None:
-            self.update_progress_text.emit(
+            self.add_progress_text.emit(
                 'Keine Zugangsdaten für {0} vorhanden!'.format(platform),
                 self.RED)
             return False
 
-        self.update_progress_text.emit(
+        self.add_progress_text.emit(
             'Start der Auswertung von {0}...'.format(platform), self.BLACK)
+
         try:
             platform_instance.download_statement(self.credentials[platform])
         except RuntimeError as err:
             self.ignore_platform(platform, str(err))
             return False
         except RuntimeWarning as warning:
-            self.update_progress_text.emit(str(warning), self.RED)
+            self.add_progress_text.emit(str(warning), self.RED)
             # Continue anyway
 
         return True
@@ -172,11 +174,7 @@ class WorkerThread(QThread):
 
         """
         list_of_dfs: List[pd.DataFrame] = []
-        progress = 0.
         success = False
-        # Distribute 95% evenly across all selected platforms
-        # The last 5 percent are for preparing the results
-        step = 95/len(self.platforms)
 
         for platform in self.platforms:
             if self.abort:
@@ -191,27 +189,24 @@ class WorkerThread(QThread):
                 success = self.download_statements(platform, platform_instance)
             except ModuleNotFoundError as err:
                 self.abort_easyp2p.emit(str(err))
-                #return
 
             if success:
+                # TODO: use terminate method instead of self.abort
                 if self.abort:
                     return
 
-                progress += step
-                self.update_progress_bar.emit(progress)
-                self.update_progress_text.emit(
-                    '{0} erfolgreich ausgewertet!'.format(platform),
-                    self.BLACK)
-
                 list_of_dfs = self.parse_statements(
                     platform, list_of_dfs, platform_instance)
+
+                self.update_progress_bar.emit()
+                self.add_progress_text.emit(
+                    '{0} erfolgreich ausgewertet!'.format(platform),
+                    self.BLACK)
 
         if self.abort:
             return
 
         if not p2p_parser.show_results(
                 list_of_dfs, self.output_file):
-            self.update_progress_text.emit(
+            self.add_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
-
-        self.update_progress_bar.emit(100)

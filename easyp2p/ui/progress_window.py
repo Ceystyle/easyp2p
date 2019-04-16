@@ -40,14 +40,19 @@ class ProgressWindow(QDialog, Ui_Dialog):
         """
         super().__init__()
         self.setupUi(self)
+
+        # Initialize progress bar
+        self.progressBar.setMaximum(len(platforms))
+        self.progressBar.setValue(0)
+
+        # Initialize and start worker thread
         self.worker = WorkerThread(
             platforms, credentials, date_range, output_file)
         self.worker.abort_easyp2p.connect(self.abort_easyp2p)
         self.worker.update_progress_bar.connect(
             self.update_progress_bar)
-        self.worker.update_progress_text.connect(
-            self.update_progress_text)
-        self.worker.abort_easyp2p.connect(self.abort_easyp2p)
+        self.worker.add_progress_text.connect(
+            self.add_progress_text)
         self.worker.start()
 
     @pyqtSlot()
@@ -73,19 +78,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
         """
         self.reject()
 
-    @pyqtSlot(int)
-    def on_progressBar_valueChanged(self, value) -> None:
-        """
-        If progress bar reaches 100% make the OK button clickable.
-
-        Args:
-            value: Value of the progress bar, between 0 and 100
-
-        """
-        if value == 100:
-            self.pushButton_ok.setEnabled(True)
-
-    def update_progress_bar(self, value: float) -> None:
+    def update_progress_bar(self) -> None:
         """
         Update the progress bar in ProgressWindow to new value.
 
@@ -93,16 +86,13 @@ class ProgressWindow(QDialog, Ui_Dialog):
             value: Value of the progress bar, between 0 and 100
 
         """
-        if not 0 <= value <= 100:
-            error_message = ('Fortschrittsindikator beträgt: {0}. Er muss '
-                             'zwischen 0 und 100 liegen!'.format(value))
-            QMessageBox.warning(
-                self, 'Fehler!', error_message)
-            return
+        self.progressBar.setValue(self.progressBar.value() + 1)
+        print(self.progressBar.value())
+        print(self.progressBar.maximum())
+        if self.progressBar.value() == self.progressBar.maximum():
+            self.pushButton_ok.setEnabled(True)
 
-        self.progressBar.setValue(value)
-
-    def update_progress_text(self, txt: str, color: QColor) -> None:
+    def add_progress_text(self, txt: str, color: QColor) -> None:
         """
         Append a new line to the progress text in ProgressWindow.
 
