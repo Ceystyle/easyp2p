@@ -37,26 +37,22 @@ class WorkerThread(QThread):
     def __init__(
             self, platforms: AbstractSet[str],
             credentials: Mapping[str, Tuple[str, str]],
-            date_range: Tuple[date, date], output_file: str,
-            parent: QThread = None) -> None:
+            date_range: Tuple[date, date], output_file: str) -> None:
         """
-        Constructor.
+        Constructor of WorkerThread.
 
         Args:
             platforms: Set containing the names of all selected P2P
                 platforms
-            credentials: Dictionary where keys are the names of the
-                P2P platforms, values are tuples (username, password)
+            credentials: Dictionary containing tuples (username, password) for
+                each selected P2P platform
             date_range: Date range (start_date, end_date) for which the
                 account statements must be generated
             output_file: Name of the Excel file (including absolute path)
                 to which the results will be written
 
-        Keyword Args:
-            parent: Reference to the parent thread
-
         """
-        super().__init__(parent)
+        QThread.__init__(self)
         self.platforms = platforms
         self.credentials = credentials
         self.date_range = date_range

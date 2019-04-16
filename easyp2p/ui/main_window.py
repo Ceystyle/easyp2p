@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
 import easyp2p.p2p_helper as p2p_helper
-from easyp2p.ui.credentials_window import get_credentials
+import easyp2p.ui.credentials_window as credentials_window
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
 
@@ -176,12 +176,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Bitte wähle mindestens eine P2P Plattform aus')
             return
 
-        # Get credentials from user/keyring for all selected platforms
+        # Get credentials for the selected platforms
+        credentials = {}
         for platform in platforms:
-            self.credentials[platform] = get_credentials(platform)
+            credentials[platform] = credentials_window.get_credentials(platform)
 
         # Open progress window
         progress_window = ProgressWindow(
-            platforms, self.credentials, date_range,
+            platforms, credentials, date_range,
             self.lineEdit_output_file.text())
         progress_window.exec_()

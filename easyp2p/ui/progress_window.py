@@ -6,7 +6,7 @@
 
 from datetime import date
 import sys
-from typing import AbstractSet, Tuple
+from typing import AbstractSet, Mapping, Tuple
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QColor
@@ -21,19 +21,28 @@ class ProgressWindow(QDialog, Ui_Dialog):
     """Contains code for handling events for the Progress Window."""
 
     def __init__(
-        self, platforms: AbstractSet, credentials: Tuple[str, str],
-        date_range: Tuple[date, date], output_file: str, parent=None) -> None:
+        self, platforms: AbstractSet,
+        credentials: Mapping[str, Tuple[str, str]],
+        date_range: Tuple[date, date], output_file: str) -> None:
         """
-        Constructor.
+        Constructor of ProgressWindow class.
 
-        Keyword Args:
-            parent: Reference to the parent widget
+        Args:
+            platforms: Set containing the names of all selected P2P
+                platforms
+            credentials: Dictionary containing tuples (username, password) for
+                each selected P2P platform
+            date_range: Date range (start_date, end_date) for which the
+                account statements must be generated
+            output_file: Name of the Excel file (including absolute path)
+                to which the results will be written
 
         """
-        super(ProgressWindow, self).__init__(parent)
+        super().__init__()
         self.setupUi(self)
         self.worker = WorkerThread(
             platforms, credentials, date_range, output_file)
+        self.worker.abort_easyp2p.connect(self.abort_easyp2p)
         self.worker.update_progress_bar.connect(
             self.update_progress_bar)
         self.worker.update_progress_text.connect(
