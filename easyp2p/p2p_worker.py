@@ -61,98 +61,98 @@ class WorkerThread(QThread):
         self.abort = False
         self.df_result = pd.DataFrame()
 
-    def get_platform_class(self, platform: str) \
+    def get_platform_class(self, name: str) \
             -> Optional[Callable[[Tuple[date, date], Tuple[str, str]], None]]:
         """
         Helper method to get methods from the platform modules.
 
         Args:
-            platform: Name of the P2P platform/module
+            name: Name of the P2P platform/module
 
         Returns:
-            platform class or None if the class cannot be found
+            P2PPlatform class or None if the class cannot be found
 
         """
         try:
-            class_ = getattr(getattr(p2p_platforms, platform.lower()), platform)
+            Platform = getattr(getattr(p2p_platforms, name.lower()), name)
         except AttributeError:
             error_message = (
                 'Klasse {0} konnte nicht gefunden werden. Ist {1}.py '
-                'vorhanden?'.format(platform, platform.lower()))
+                'vorhanden?'.format(name, name.lower()))
             self.add_progress_text.emit(error_message, self.RED)
             return None
         else:
-            return class_
+            return Platform
 
-    def ignore_platform(self, platform: str, error_msg: str) -> None:
+    def ignore_platform(self, name: str, error_msg: str) -> None:
         """
         Helper method for printing ignore and error message to GUI.
 
         Args:
-            platform: Name of the P2P platform
+            name: Name of the P2P platform
             error_msg: Error message to print
 
         """
         self.add_progress_text.emit(error_msg, self.RED)
         self.add_progress_text.emit(
-            '{0} wird ignoriert!'.format(platform), self.RED)
+            '{0} wird ignoriert!'.format(name), self.RED)
 
     def parse_statements(
-            self, platform: str,
-            platform_instance: Callable[[Tuple[date, date]], None]) -> bool:
+            self, name: str,
+            platform: Callable[[Tuple[date, date]], None]) -> bool:
         """
         Helper method for calling the parser and appending the dataframe list.
 
         Args:
-            platform: Name of the P2P platform
-            platform_instance: platform class with parse_statement method
+            name: Name of the P2P platform
+            platform_instance: Instance of P2PPlatform class
 
         Returns:
             True on success, False on failure
 
         """
         try:
-            (df, unknown_cf_types) = platform_instance.parse_statement()
+            (df, unknown_cf_types) = platform.parse_statement()
             self.df_result = self.df_result.append(df, sort=True)
         except RuntimeError as err:
-            self.ignore_platform(platform, str(err))
+            self.ignore_platform(name, str(err))
             return False
 
         if unknown_cf_types:
             warning_msg = (
                 '{0}: unbekannter Cashflow-Typ wird im Ergebnis '
-                'ignoriert: {1}'.format(platform, unknown_cf_types))
+                'ignoriert: {1}'.format(name, unknown_cf_types))
             self.add_progress_text.emit(warning_msg, self.RED)
 
         return True
 
     def download_statements(
-            self, platform: str,
-            platform_instance: Callable[[Tuple[date, date]], None]) -> bool:
+            self, name: str,
+            platform: Callable[[Tuple[date, date]], None]) -> bool:
         """
         Helper method for calling the download_statement functions.
 
         Args:
-            platform: Name of the P2P platform
-            platform_instance: platform class with download_statement method
+            name: Name of the P2P platform
+            platform: Instance of P2PPlatform class
 
         Returns:
             True if download finished without errors, False otherwise
 
         """
-        if self.credentials[platform] is None:
+        if self.credentials[name] is None:
             self.add_progress_text.emit(
-                'Keine Zugangsdaten für {0} vorhanden!'.format(platform),
+                'Keine Zugangsdaten für {0} vorhanden!'.format(name),
                 self.RED)
             return False
 
         self.add_progress_text.emit(
-            'Start der Auswertung von {0}...'.format(platform), self.BLACK)
+            'Start der Auswertung von {0}...'.format(name), self.BLACK)
 
         try:
-            platform_instance.download_statement(self.credentials[platform])
+            platform.download_statement(self.credentials[name])
         except RuntimeError as err:
-            self.ignore_platform(platform, str(err))
+            self.ignore_platform(name, str(err))
             return False
         except RuntimeWarning as warning:
             self.add_progress_text.emit(str(warning), self.RED)
@@ -169,17 +169,17 @@ class WorkerThread(QThread):
         each finished platform the progress bar is increased.
 
         """
-        for platform in self.platforms:
+        for name in self.platforms:
             success = False
 
             if self.abort:
                 return
 
-            class_ = self.get_platform_class(platform)
-            if class_ is None:
+            Platform = self.get_platform_class(name)
+            if Platform is None:
                 continue
 
-            platform_instance = class_(self.date_range)
+            platform = Platform(self.date_range)
             try:
                 success = self.download_statements(platform, platform_instance)
             except ModuleNotFoundError as err:
@@ -189,11 +189,11 @@ class WorkerThread(QThread):
                 if self.abort:
                     return
 
-                success = self.parse_statements(platform, platform_instance)
+                success = self.parse_statements(name, platform)
                 self.update_progress_bar.emit()
                 if success:
                     self.add_progress_text.emit(
-                        '{0} erfolgreich ausgewertet!'.format(platform),
+                        '{0} erfolgreich ausgewertet!'.format(name),
                         self.BLACK)
 
         if self.abort:
