@@ -76,6 +76,7 @@ class ProgressWindow(QDialog, Ui_Dialog):
         immediately to ensure a clean logout of the P2P site.
 
         """
+        self.worker.abort = True
         self.reject()
 
     def update_progress_bar(self) -> None:

@@ -191,7 +191,6 @@ class WorkerThread(QThread):
                 self.abort_easyp2p.emit(str(err))
 
             if success:
-                # TODO: use terminate method instead of self.abort
                 if self.abort:
                     return
 
