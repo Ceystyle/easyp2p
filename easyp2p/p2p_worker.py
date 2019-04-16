@@ -178,6 +178,7 @@ class WorkerThread(QThread):
 
             platform = self.get_platform_instance(name)
             if platform is None:
+                self.update_progress_bar.emit()
                 continue
 
             if self.download_statements(name, platform):
