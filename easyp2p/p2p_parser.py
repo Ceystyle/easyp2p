@@ -21,7 +21,7 @@ import easyp2p.p2p_helper as p2p_helper
 class P2PParser:
 
     """
-    Parser for transforming P2P platform account statements to easyp2p format.
+    Parser class to transform P2P account statements into easyp2p format.
 
     Each P2P platform uses a unique format for their account statements. The
     purpose of P2PParser is to provide parser methods for transforming those
@@ -337,27 +337,15 @@ def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
         aggfunc=sum, dropna=False, fill_value=0.)
 
     # If start and end balance columns were present they were also summed
-    # up which is obviously not correct. Drop them and fill in the correct
-    # values from the original DataFrame.
+    # up which is obviously not correct. Fill in the correct values from the
+    # original df_result DataFrame.
     try:
-        df_monthly.drop(
-            [P2PParser.START_BALANCE_NAME, P2PParser.END_BALANCE_NAME],
-            axis=1, inplace=True)
-        start_balances = df_result.groupby(
-            [P2PParser.PLATFORM, P2PParser.MONTH]).first()[
+        df_monthly[P2PParser.START_BALANCE_NAME] = df_result.groupby(
+            [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH]).first()[
                 P2PParser.START_BALANCE_NAME]
-        end_balances = df_result.groupby(
-            [P2PParser.PLATFORM, P2PParser.MONTH]).last()[
+        df_monthly[P2PParser.END_BALANCE_NAME] = df_result.groupby(
+            [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH]).last()[
                 P2PParser.END_BALANCE_NAME]
-
-        df_monthly = df_monthly.reset_index().merge(
-            start_balances.to_frame(), how='left',
-            on=[P2PParser.PLATFORM, P2PParser.MONTH]).set_index(
-                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
-        df_monthly = df_monthly.reset_index().merge(
-            end_balances.to_frame(), how='left',
-            on=[P2PParser.PLATFORM, P2PParser.MONTH]).set_index(
-                [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
     except KeyError:
         pass
 
@@ -368,6 +356,19 @@ def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
 
     if df_total.empty:
         return False
+
+    # Start and end balance columns were summed up as well if they are present.
+    # That's obviously not correct, so we will look up the correct values
+    # in the monthly table and overwrite the sums.
+    try:
+        df_total[P2PParser.START_BALANCE_NAME] = df_monthly.groupby(
+            [P2PParser.PLATFORM, P2PParser.CURRENCY]).first()[
+                P2PParser.START_BALANCE_NAME]
+        df_total[P2PParser.END_BALANCE_NAME] = df_monthly.groupby(
+            [P2PParser.PLATFORM, P2PParser.CURRENCY]).last()[
+                P2PParser.END_BALANCE_NAME]
+    except KeyError:
+        pass
 
     # Round all results to 2 digits
     df_monthly = df_monthly.round(2)
@@ -381,19 +382,6 @@ def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
     writer = pd.ExcelWriter(
         output_file, date_format='%d.%m.%Y', engine='xlsxwriter')
     df_monthly.to_excel(writer, 'Monatsergebnisse')
-
-    # Start and end balance columns were summed up as well if they are present.
-    # That's obviously not correct, so we will look up the correct values
-    # in the monthly table and overwrite the sums.
-    if P2PParser.START_BALANCE_NAME in df_total.columns:
-        for index in df_total.index.levels[0]:
-            start_balance = \
-                df_monthly.loc[index][P2PParser.START_BALANCE_NAME][0]
-            df_total.loc[index, P2PParser.START_BALANCE_NAME] = start_balance
-    if P2PParser.END_BALANCE_NAME in df_total.columns:
-        for index in df_total.index.levels[0]:
-            end_balance = df_monthly.loc[index][P2PParser.END_BALANCE_NAME][-1]
-            df_total.loc[index, P2PParser.END_BALANCE_NAME] = end_balance
 
     #TODO: add a total row with the sum over all platforms to df_total
 
