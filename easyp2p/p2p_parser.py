@@ -328,13 +328,13 @@ def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
     df_result[P2PParser.MONTH] = pd.to_datetime(
         df_result[P2PParser.DATE], format='%d.%m.%Y').dt.to_period('M')
 
-    # Calculate results per month and platform
-    values = [column for column in P2PParser.TARGET_COLUMNS \
+    # Calculate results per month and platform, keeping the NaNs
+    value_columns = [column for column in P2PParser.TARGET_COLUMNS \
         if column in df_result.columns]
     df_monthly = pd.pivot_table(
-        df_result, values=values,
+        df_result, values=value_columns,
         index=[P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH],
-        aggfunc=sum, dropna=False, fill_value=0.)
+        aggfunc=lambda x: x.sum(min_count=1))
 
     # If start and end balance columns were present they were also summed
     # up which is obviously not correct. Fill in the correct values from the
@@ -351,8 +351,10 @@ def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
 
     # Calculate results per platform
     df_total = pd.pivot_table(
-        df_monthly, values=values,
-        index=[P2PParser.PLATFORM, P2PParser.CURRENCY], aggfunc=sum)
+        df_monthly, values=value_columns,
+        index=[P2PParser.PLATFORM, P2PParser.CURRENCY],
+        aggfunc=lambda x: x.sum(min_count=1), margins=True,
+        margins_name='Total')
 
     if df_total.empty:
         return False
@@ -375,15 +377,17 @@ def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
     df_total = df_total.round(2)
 
     # Sort columns
-    df_monthly = df_monthly[values]
-    df_total = df_total[values]
+    df_monthly = df_monthly[value_columns]
+    df_total = df_total[value_columns]
+
+    # Fill empty cells with N/A
+    df_monthly.fillna('N/A', inplace=True)
+    df_total.fillna('N/A', inplace=True)
 
     # Write monthly results to file
     writer = pd.ExcelWriter(
         output_file, date_format='%d.%m.%Y', engine='xlsxwriter')
     df_monthly.to_excel(writer, 'Monatsergebnisse')
-
-    #TODO: add a total row with the sum over all platforms to df_total
 
     # Write total results to file
     df_total.to_excel(writer, 'Gesamtergebnis')
