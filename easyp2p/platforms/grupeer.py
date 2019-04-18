@@ -96,11 +96,6 @@ class Grupeer:
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.start_parser()
-            return (parser.df, '')
-
         # Convert amount and balance to float64
         parser.df['Amount'] = parser.df['Amount'].apply(
             lambda x: x.replace(',', '.')).astype('float64')

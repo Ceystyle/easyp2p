@@ -131,11 +131,6 @@ class Bondora:
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.parse_statement()
-            return (parser.df, '')
-
         # Calculate defaulted payments
         parser.df[parser.DEFAULTS] = (
             parser.df['Erhaltener Kapitalbetrag - gesamt']

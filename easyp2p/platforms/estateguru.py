@@ -103,11 +103,6 @@ class Estateguru:
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.start_parser()
-            return (parser.df, '')
-
         # Drop last line which only contains a summary
         parser.df = parser.df[:-1]
 

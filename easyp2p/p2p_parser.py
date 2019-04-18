@@ -221,10 +221,13 @@ class P2PParser:
                 & (self.df[self.DATE] <= end_date)]
             # Convert date column from datetime to date:
             self.df[self.DATE] = self.df[self.DATE].dt.date
-        except KeyError:
-            raise RuntimeError(
-                '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
-                .format(self.name))
+        except KeyError as err:
+            if self.df.empty:
+                pass
+            else:
+                raise RuntimeError(
+                    '{0}: Spalte {1} nicht im Kontoauszug vorhanden!'
+                    .format(self.name, str(err)))
 
     def _map_cashflow_types(
             self, cashflow_types: Optional[Mapping[str, str]],
@@ -320,11 +323,25 @@ class P2PParser:
         """
         # Rename columns in DataFrame
         if rename_columns:
-            self.df.rename(columns=rename_columns, inplace=True)
+            try:
+                self.df.rename(columns=rename_columns, inplace=True)
+            except KeyError as err:
+                if self.df.empty:
+                    pass
+                else:
+                    raise RuntimeError(
+                        '{0}: Spalte {1} ist nicht im Kontoauszug vorhanden!'
+                        .format(self.name, str(err)))
 
         # Make sure we only show results between start and end date
         if date_format:
             self._filter_date_range(date_format)
+
+        # Check if there were cashflows in date_range, if not add a zero row
+        # for each month in date_range
+        if self.df.empty:
+            self.add_zero_cashflows()
+            return ''
 
         # Convert cashflow types from platform to easyp2p types
         unknown_cf_types = self._map_cashflow_types(
@@ -338,7 +355,6 @@ class P2PParser:
         # Sum up the results per date and currency
         self._aggregate_results(value_column, balance_column)
 
-        self._add_missing_months()
         self._calculate_total_income()
         self.df[self.PLATFORM] = self.name
         self.df.set_index(

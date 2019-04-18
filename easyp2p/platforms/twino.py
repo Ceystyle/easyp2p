@@ -107,11 +107,6 @@ class Twino:
         parser.df = parser.df[1:] # Remove the first row
         parser.df.columns = new_header # Set the new header
 
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.start_parser()
-            return (parser.df, '')
-
         # Create a new column for identifying cashflow types
         try:
             parser.df['Twino_Cashflow-Typ'] = parser.df['Type'] + ' ' \

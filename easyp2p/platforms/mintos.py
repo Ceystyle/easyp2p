@@ -126,11 +126,6 @@ class Mintos:
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.start_parser()
-            return (parser.df, '')
-
         try:
             # Create new columns for identifying cashflow types
             parser.df['Mintos_Cashflow-Typ'], parser.df['Loan ID'] = \
@@ -138,9 +133,8 @@ class Mintos:
             parser.df['Mintos_Cashflow-Typ'] = \
                 parser.df['Mintos_Cashflow-Typ'].str.split(
                     ' Rebuy purpose').str[0]
-        except KeyError as err:
-            raise RuntimeError(
-                'Mintos: unbekannte Spalte im Parser: ' + str(err))
+        except KeyError:
+            pass
 
         # Define mapping between Mintos and easyp2p cashflow types and column
         # names

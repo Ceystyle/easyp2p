@@ -136,11 +136,6 @@ class PeerBerry:
 
         parser = P2PParser(self.name, self.date_range, self.statement_file_name)
 
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.start_parser()
-            return (parser.df, '')
-
         # Define mapping between PeerBerry and easyp2p cashflow types and column
         # names
         cashflow_types = {

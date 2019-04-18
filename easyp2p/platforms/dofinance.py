@@ -98,11 +98,6 @@ class DoFinance:
         # Drop the last two rows which only contain a summary
         parser.df = parser.df[:-2]
 
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.start_parser()
-            return (parser.df, '')
-
         # Define mapping between DoFinance and easyp2p cashflow types and
         # column names
         cashflow_types = {

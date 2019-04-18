@@ -131,7 +131,7 @@ class Iuvo:
 
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
-            parser.start_parser()
+            parser.add_zero_cashflows()
             return (parser.df, '')
 
         # Format the header of the table
