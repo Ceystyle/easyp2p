@@ -217,7 +217,7 @@ class P2PParser:
             self.df = self.df.merge(df_balances, on=self.DATE)
 
     def start_parser(
-            self, date_format: Optional[str] = None,
+            self, date_format: str,
             rename_columns: Optional[Mapping[str, str]] = None,
             cashflow_types: Optional[Mapping[str, str]] = None,
             orig_cf_column: Optional[str] = None,
@@ -226,12 +226,14 @@ class P2PParser:
         """
         Parse the account statement from platform format to easyp2p format.
 
-        Keyword Args:
+        Args:
             date_format: Date format which the platform uses
+
+        Keyword Args:
             rename_columns: Dictionary containing a mapping between platform
-                and easyP2P column names
+                and easyp2p column names
             cashflow_types: Dictionary containing a mapping between platform
-                and easyP2P cashflow types
+                and easyp2p cashflow types
             orig_cf_column: Name of the column in the platform account
                 statement which contains the cash flow type
             value_column: Name of the DataFrame column which contains the
@@ -260,18 +262,16 @@ class P2PParser:
         start_date = pd.Timestamp(self.date_range[0])
         end_date = pd.Timestamp(self.date_range[1]).replace(
             hour=23, minute=59, second=59)
-
-        if date_format:
-            try:
-                self.df[self.DATE] = pd.to_datetime(
-                    self.df[self.DATE], format=date_format)
-                self.df = self.df[(self.df[self.DATE] >= start_date) \
-                    & (self.df[self.DATE] <= end_date)]
-                self.df[self.DATE] = self.df[self.DATE].dt.date
-            except KeyError:
-                raise RuntimeError(
-                    '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
-                    .format(self.name))
+        try:
+            self.df[self.DATE] = pd.to_datetime(
+                self.df[self.DATE], format=date_format)
+            self.df = self.df[(self.df[self.DATE] >= start_date) \
+                & (self.df[self.DATE] <= end_date)]
+            self.df[self.DATE] = self.df[self.DATE].dt.date
+        except KeyError:
+            raise RuntimeError(
+                '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
+                .format(self.name))
 
         if cashflow_types:
             try:
