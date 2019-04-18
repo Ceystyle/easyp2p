@@ -81,7 +81,7 @@ def get_df_from_file(input_file: str) -> pd.DataFrame:
 def get_list_of_months(date_range: Tuple[date, date]) \
         -> List[Tuple[date, date]]:
     """
-    Get list of months between (including) start and end date.
+    Get list of months between (and including) start and end date.
 
     Args:
         date_range: Tuple (start_date, end_date)
@@ -95,11 +95,11 @@ def get_list_of_months(date_range: Tuple[date, date]) \
     current_date = date_range[0]
     while current_date < date_range[1]:
         start_of_month = date(current_date.year, current_date.month, 1)
-        end_of_month = date(
-            current_date.year, current_date.month, calendar.monthrange(
-                current_date.year, current_date.month)[1])
+        _, days_in_month = calendar.monthrange(
+            start_of_month.year, start_of_month.month)
+        end_of_month = start_of_month + timedelta(days=days_in_month - 1)
         months.append((start_of_month, end_of_month))
-        current_date += timedelta(days=31)
+        current_date += timedelta(days=days_in_month)
 
     return months
 
