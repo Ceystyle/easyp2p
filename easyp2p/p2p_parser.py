@@ -83,6 +83,7 @@ class P2PParser:
         self.date_range = date_range
         self.statement_file_name = statement_file_name
         self.df = p2p_helper.get_df_from_file(self.statement_file_name)
+        self.df[self.PLATFORM] = name
 
     def _add_missing_months(self) -> None:
         """
@@ -175,7 +176,8 @@ class P2PParser:
         orig_df = self.df
         if value_column:
             self.df = pd.pivot_table(
-                self.df, values=value_column, index=[self.DATE, self.CURRENCY],
+                self.df, values=value_column,
+                index=[self.PLATFORM, self.DATE, self.CURRENCY],
                 columns=[self.CF_TYPE], aggfunc=sum)
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
@@ -301,12 +303,11 @@ class P2PParser:
         if self.CURRENCY not in self.df.columns:
             self.df[self.CURRENCY] = 'EUR'
 
-        # Sum up the results per month and currency
+        # Sum up the results per date and currency
         self._aggregate_results(value_column, balance_column)
 
         self._add_missing_months()
         self._calculate_total_income()
-        self.df[self.PLATFORM] = self.name
 
         self.df.set_index(
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
