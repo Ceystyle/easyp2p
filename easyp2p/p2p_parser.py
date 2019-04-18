@@ -239,6 +239,31 @@ class P2PParser:
                 '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
                 .format(self.name))
 
+    def _map_cashflow_types(
+            self, cashflow_types: Optional[Mapping[str, str]],
+            orig_cf_column: Optional[str]) -> str:
+        """
+        Map platform cashflow types to easyp2p cashflow types.
+
+        Args:
+            cashflow_types: Dictionary containing a mapping between platform
+                and easyp2p cashflow types
+            orig_cf_column: Name of the column in the platform account
+                statement which contains the cash flow type
+
+        """
+        if cashflow_types:
+            try:
+                self.df['Cashflow-Typ'] = self.df[orig_cf_column].map(
+                    cashflow_types)
+                return self._check_unknown_cf_types(orig_cf_column)
+            except KeyError:
+                raise RuntimeError(
+                    '{0}: Cashflowspalte {1} nicht im Kontoauszug vorhanden!'
+                    .format(self.name, orig_cf_column))
+        else:
+            return ''
+
     def start_parser(
             self, date_format: str, rename_columns: Mapping[str, str],
             cashflow_types: Optional[Mapping[str, str]] = None,
@@ -283,17 +308,9 @@ class P2PParser:
         # Make sure we only show results between start and end date
         self._filter_date_range(date_format)
 
-        if cashflow_types:
-            try:
-                self.df['Cashflow-Typ'] = self.df[orig_cf_column].map(
-                    cashflow_types)
-                unknown_cf_types = self._check_unknown_cf_types(orig_cf_column)
-            except KeyError:
-                raise RuntimeError(
-                    '{0}: Cashflowspalte nicht im Kontoauszug vorhanden!'
-                    .format(self.name))
-        else:
-            unknown_cf_types = ''
+        # Convert cashflow types from platform to easyp2p types
+        unknown_cf_types = self._map_cashflow_types(
+            cashflow_types, orig_cf_column)
 
         # If the platform does not explicitly report currencies assume that
         # currency is EUR
