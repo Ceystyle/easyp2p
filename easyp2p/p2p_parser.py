@@ -216,6 +216,29 @@ class P2PParser:
         if not df_balances.empty:
             self.df = self.df.merge(df_balances, on=self.DATE)
 
+    def _filter_date_range(self, date_format: str) -> None:
+        """
+        Only keep dates in data range self.date_range in DataFrame self.df.
+
+        Args:
+            date_format: Date format which the platform uses
+
+        """
+        start_date = pd.Timestamp(self.date_range[0])
+        end_date = pd.Timestamp(self.date_range[1]).replace(
+            hour=23, minute=59, second=59)
+        try:
+            self.df[self.DATE] = pd.to_datetime(
+                self.df[self.DATE], format=date_format)
+            self.df = self.df[(self.df[self.DATE] >= start_date) \
+                & (self.df[self.DATE] <= end_date)]
+            # Convert date column from datetime to date:
+            self.df[self.DATE] = self.df[self.DATE].dt.date
+        except KeyError:
+            raise RuntimeError(
+                '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
+                .format(self.name))
+
     def start_parser(
             self, date_format: str,
             rename_columns: Optional[Mapping[str, str]] = None,
@@ -259,19 +282,7 @@ class P2PParser:
             self.df.rename(columns=rename_columns, inplace=True)
 
         # Make sure we only show results between start and end date
-        start_date = pd.Timestamp(self.date_range[0])
-        end_date = pd.Timestamp(self.date_range[1]).replace(
-            hour=23, minute=59, second=59)
-        try:
-            self.df[self.DATE] = pd.to_datetime(
-                self.df[self.DATE], format=date_format)
-            self.df = self.df[(self.df[self.DATE] >= start_date) \
-                & (self.df[self.DATE] <= end_date)]
-            self.df[self.DATE] = self.df[self.DATE].dt.date
-        except KeyError:
-            raise RuntimeError(
-                '{0}: Datumsspalte nicht im Kontoauszug vorhanden!'
-                .format(self.name))
+        self._filter_date_range(date_format)
 
         if cashflow_types:
             try:
