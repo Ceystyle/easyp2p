@@ -78,11 +78,21 @@ class P2PParser:
             statement_file_name: File name including absolute path of the
                 downloaded account statement for this platform
 
+        Raises:
+            RuntimeError: If the account statement could not be loaded from
+                statement file
+
         """
         self.name = name
         self.date_range = date_range
         self.statement_file_name = statement_file_name
         self.df = p2p_helper.get_df_from_file(self.statement_file_name)
+
+        # Check if account statement exists
+        if self.df is None:
+            raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!'
+                .format(self.name))
+
         self.df[self.PLATFORM] = name
 
     def _add_missing_months(self) -> None:
@@ -278,16 +288,10 @@ class P2PParser:
             types
 
         Raises:
-            RuntimeError: - If get_statement_from_file was not called first
-                          - If date or cashflow columns cannot be found in
-                            DataFrame
+            RuntimeError: If date or cashflow columns cannot be found in
+                DataFrame
 
         """
-        # Check if account statement exists
-        if self.df is None:
-            raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!'
-                .format(self.name))
-
         # Rename columns in DataFrame
         if rename_columns:
             self.df.rename(columns=rename_columns, inplace=True)
