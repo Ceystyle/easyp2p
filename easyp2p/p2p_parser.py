@@ -11,7 +11,7 @@ file.
 
 """
 from datetime import date
-from typing import List, Mapping, Optional, Tuple
+from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
 import xlsxwriter
@@ -259,6 +259,35 @@ class P2PParser:
                     .format(self.name, orig_cf_column))
         else:
             return ''
+
+    def add_zero_cashflows(self, date_list: Sequence[date] = None):
+        """
+        Add a zero cashflow row to self.df for each date in date_list.
+
+        If no date_list is provided, one zero row will be added for each month
+        in self.date_range.
+
+        Keyword Args:
+            date_list: List of dates for which to add zero entries.
+
+        """
+        if not date_list:
+            list_of_months = p2p_helper.get_list_of_months(self.date_range)
+            date_list = [month[0] for month in list_of_months]
+
+        df = pd.DataFrame()
+        df[self.DATE] = date_list
+        df[self.PLATFORM] = self.name
+        df[self.CURRENCY] = 'EUR'
+        for column in self.TARGET_COLUMNS:
+            df[column] = 0.
+        df.set_index([self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
+
+        if self.df.empty:
+            self.df = df
+        else:
+            self.df = self.df.append(df, sort=True)
+        self.df.dropna(axis=1, inplace=True)
 
     def start_parser(
             self, date_format: str = None,
