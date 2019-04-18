@@ -159,23 +159,6 @@ class P2PParser:
         for col in [col for col in self.df.columns if col in income_columns]:
             self.df[self.TOTAL_INCOME] += self.df[col]
 
-    def _check_unknown_cf_types(self, orig_cf_column: str) -> str:
-        """
-        Helper method to identify any unknown cash flow types.
-
-        Args:
-            orig_cf_column: Name of data frame column which contains
-                the cash flow types as reported by the P2P platform
-
-        Returns:
-            Sorted comma separated string consisting of all unknown cash flow
-            types
-
-        """
-        unknown_cf_types = set(self.df[orig_cf_column].where(
-            self.df['Cashflow-Typ'].isna()).dropna().tolist())
-        return ', '.join(sorted(unknown_cf_types))
-
     def _aggregate_df(self, value_column: Optional[str] = None) -> None:
         """
         Helper method to aggregate results by date and currency.
@@ -251,12 +234,18 @@ class P2PParser:
             orig_cf_column: Name of the column in the platform account
                 statement which contains the cash flow type
 
+        Returns:
+            Sorted comma separated string consisting of all unknown cash flow
+            types
+
         """
         if cashflow_types:
             try:
                 self.df['Cashflow-Typ'] = self.df[orig_cf_column].map(
                     cashflow_types)
-                return self._check_unknown_cf_types(orig_cf_column)
+                unknown_cf_types = set(self.df[orig_cf_column].where(
+                    self.df['Cashflow-Typ'].isna()).dropna().tolist())
+                return ', '.join(sorted(unknown_cf_types))
             except KeyError:
                 raise RuntimeError(
                     '{0}: Cashflowspalte {1} nicht im Kontoauszug vorhanden!'
