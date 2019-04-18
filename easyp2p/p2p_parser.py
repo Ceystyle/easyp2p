@@ -240,8 +240,7 @@ class P2PParser:
                 .format(self.name))
 
     def start_parser(
-            self, date_format: str,
-            rename_columns: Optional[Mapping[str, str]] = None,
+            self, date_format: str, rename_columns: Mapping[str, str],
             cashflow_types: Optional[Mapping[str, str]] = None,
             orig_cf_column: Optional[str] = None,
             value_column: Optional[str] = None,
@@ -251,10 +250,10 @@ class P2PParser:
 
         Args:
             date_format: Date format which the platform uses
-
-        Keyword Args:
             rename_columns: Dictionary containing a mapping between platform
                 and easyp2p column names
+
+        Keyword Args:
             cashflow_types: Dictionary containing a mapping between platform
                 and easyp2p cashflow types
             orig_cf_column: Name of the column in the platform account
@@ -278,8 +277,8 @@ class P2PParser:
         if self.df is None:
             raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!')
 
-        if rename_columns:
-            self.df.rename(columns=rename_columns, inplace=True)
+        # Rename columns in DataFrame
+        self.df.rename(columns=rename_columns, inplace=True)
 
         # Make sure we only show results between start and end date
         self._filter_date_range(date_format)
