@@ -251,7 +251,8 @@ class P2PParser:
             return ''
 
     def start_parser(
-            self, date_format: str, rename_columns: Mapping[str, str],
+            self, date_format: str = None,
+            rename_columns: Mapping[str, str] = None,
             cashflow_types: Optional[Mapping[str, str]] = None,
             orig_cf_column: Optional[str] = None,
             value_column: Optional[str] = None,
@@ -259,12 +260,10 @@ class P2PParser:
         """
         Parse the account statement from platform format to easyp2p format.
 
-        Args:
+        Keyword Args:
             date_format: Date format which the platform uses
             rename_columns: Dictionary containing a mapping between platform
                 and easyp2p column names
-
-        Keyword Args:
             cashflow_types: Dictionary containing a mapping between platform
                 and easyp2p cashflow types
             orig_cf_column: Name of the column in the platform account
@@ -286,13 +285,16 @@ class P2PParser:
         """
         # Check if account statement exists
         if self.df is None:
-            raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!')
+            raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!'
+                .format(self.name))
 
         # Rename columns in DataFrame
-        self.df.rename(columns=rename_columns, inplace=True)
+        if rename_columns:
+            self.df.rename(columns=rename_columns, inplace=True)
 
         # Make sure we only show results between start and end date
-        self._filter_date_range(date_format)
+        if date_format:
+            self._filter_date_range(date_format)
 
         # Convert cashflow types from platform to easyp2p types
         unknown_cf_types = self._map_cashflow_types(
