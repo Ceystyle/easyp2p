@@ -187,10 +187,12 @@ class P2PParser:
             # The start balance value of each day already includes the first
             # daily cashflow which needs to be subtracted again
             self.df[self.START_BALANCE_NAME] = \
-                orig_df.groupby(self.DATE).first()[balance_column] \
-                - orig_df.groupby(self.DATE).first()[value_column]
+                (orig_df.groupby(self.DATE).first()[balance_column] \
+                - orig_df.groupby(self.DATE).first()[value_column])\
+                .reset_index()[0]
             self.df[self.END_BALANCE_NAME] = \
-                orig_df.groupby(self.DATE).last()[balance_column]
+                orig_df.groupby(self.DATE).last()[balance_column]\
+                .reset_index()[balance_column]
 
     def _filter_date_range(self, date_format: str) -> None:
         """
