@@ -93,8 +93,6 @@ class P2PParser:
             raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!'
                 .format(self.name))
 
-        self.df[self.PLATFORM] = name
-
     def _add_missing_months(self) -> None:
         """
         Add a zero row for all months in date_range without cashflows.
@@ -186,8 +184,7 @@ class P2PParser:
         orig_df = self.df
         if value_column:
             self.df = pd.pivot_table(
-                self.df, values=value_column,
-                index=[self.PLATFORM, self.DATE, self.CURRENCY],
+                self.df, values=value_column, index=[self.DATE, self.CURRENCY],
                 columns=[self.CF_TYPE], aggfunc=sum)
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
@@ -343,7 +340,7 @@ class P2PParser:
 
         self._add_missing_months()
         self._calculate_total_income()
-
+        self.df[self.PLATFORM] = self.name
         self.df.set_index(
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
 
