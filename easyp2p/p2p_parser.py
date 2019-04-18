@@ -160,15 +160,19 @@ class P2PParser:
         for col in [col for col in self.df.columns if col in income_columns]:
             self.df[self.TOTAL_INCOME] += self.df[col]
 
-    def _aggregate_df(self, value_column: Optional[str] = None) -> None:
+    def _aggregate_results(
+            self, value_column: Optional[str],
+            balance_column: Optional[str]) -> None:
         """
-        Helper method to aggregate results by date and currency.
+        Aggregate results in value_column by date and currency.
 
         Args:
             value_column: Name of the DataFrame column which contains the
                 data to be aggregated
+            balance_column: DataFrame column which contains the balances
 
         """
+        orig_df = self.df
         if value_column:
             self.df = pd.pivot_table(
                 self.df, values=value_column, index=[self.DATE, self.CURRENCY],
@@ -176,29 +180,17 @@ class P2PParser:
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
 
-    def _get_balances(
-            self, balance_column: str, value_column: str,
-            df: pd.DataFrame) -> None:
-        """
-        Helper method to determine start and end balances.
-
-        Args:
-            balance_column: DataFrame column which contains the balances
-            value_column: DataFrame column which contains the amounts
-            df: DataFrame which contains the balances
-
-        """
-        df_balances = pd.DataFrame()
-        # The first balance value of each day already includes the first daily
-        # cashflow which needs to be subtracted again
-        df_balances[self.START_BALANCE_NAME] = \
-            df.groupby(self.DATE).first()[balance_column] \
-            - df.groupby(self.DATE).first()[value_column]
-        df_balances[self.END_BALANCE_NAME] = \
-            df.groupby(self.DATE).last()[balance_column]
-
-        if not df_balances.empty:
-            self.df = self.df.merge(df_balances, on=self.DATE)
+        # Start and end balance columns were summed up as well if they were
+        # present. That's obviously not correct, so we will look up the correct
+        # values in the original DataFrame and overwrite the sums.
+        if balance_column:
+            # The start balance value of each day already includes the first
+            # daily cashflow which needs to be subtracted again
+            self.df[self.START_BALANCE_NAME] = \
+                orig_df.groupby(self.DATE).first()[balance_column] \
+                - orig_df.groupby(self.DATE).first()[value_column]
+            self.df[self.END_BALANCE_NAME] = \
+                orig_df.groupby(self.DATE).last()[balance_column]
 
     def _filter_date_range(self, date_format: str) -> None:
         """
@@ -307,10 +299,9 @@ class P2PParser:
         if self.CURRENCY not in self.df.columns:
             self.df[self.CURRENCY] = 'EUR'
 
-        orig_df = self.df
-        self._aggregate_df(value_column)
-        if balance_column is not None:
-            self._get_balances(balance_column, value_column, orig_df)
+        # Sum up the results per month and currency
+        self._aggregate_results(value_column, balance_column)
+
         self._add_missing_months()
         self._calculate_total_income()
         self.df[self.PLATFORM] = self.name
