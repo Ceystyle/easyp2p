@@ -49,6 +49,7 @@ class P2PParser:
     MONTH = 'Monat'
     PLATFORM = 'Plattform'
     CURRENCY = 'Währung'
+    CF_TYPE = 'Cashflow-Typ'
 
     # TARGET_COLUMNS are the columns which will be shown in the final result
     # file
@@ -171,7 +172,7 @@ class P2PParser:
         if value_column:
             self.df = pd.pivot_table(
                 self.df, values=value_column, index=[self.DATE, self.CURRENCY],
-                columns=['Cashflow-Typ'], aggfunc=sum)
+                columns=[self.CF_TYPE], aggfunc=sum)
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
 
@@ -241,10 +242,10 @@ class P2PParser:
         """
         if cashflow_types:
             try:
-                self.df['Cashflow-Typ'] = self.df[orig_cf_column].map(
+                self.df[self.CF_TYPE] = self.df[orig_cf_column].map(
                     cashflow_types)
                 unknown_cf_types = set(self.df[orig_cf_column].where(
-                    self.df['Cashflow-Typ'].isna()).dropna().tolist())
+                    self.df[self.CF_TYPE].isna()).dropna().tolist())
                 return ', '.join(sorted(unknown_cf_types))
             except KeyError:
                 raise RuntimeError(
