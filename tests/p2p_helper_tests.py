@@ -4,17 +4,40 @@
 """
 This module contains functions for preparing test files with expected results.
 
-The files will be used by easyp2p_tests to compare the actual to the expected
+The files will be used by parser_tests to compare the actual to the expected
 results.
 
 """
 from datetime import date
+import os
+import sys
 
-from context import *
-import easyp2p_tests
+import parser_tests
+import easyp2p.platforms as p2p_platforms
+import easyp2p.p2p_helper as p2p_helper
 
 
-def generate_parser_results():
+def _generate_parser_results(platform, date_range, input_file, output_file):
+    if os.path.isfile(output_file):
+        df_old = p2p_helper.get_df_from_file(output_file)
+    platform_class = getattr(
+        getattr(p2p_platforms, platform.lower()), platform)
+    platform_instance = platform_class(date_range)
+    (df, _) = platform_instance.parse_statement(input_file)
+    if os.path.isfile(output_file):
+        print('New df:\n', df)
+        print('Old df:\n', df_old)
+        choice = input('Do you want to replace old with new df (y/n)? ')
+        if choice != 'y':
+            return
+    else:
+        print('Df:\n', df)
+        choice = input('Do you want to save the df (y/n)? ')
+        if choice != 'y':
+            return
+    df.to_csv(output_file)
+
+def main():
     """
     Generate the expected result files for the unit tests.
 
@@ -25,84 +48,76 @@ def generate_parser_results():
     before using them!
 
     """
-    for elem in easyp2p_tests.PLATFORMS:
-        # DoFinance has its own date range
-        if elem == 'DoFinance':
-            date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        else:
-            date_range = (date(2018, 9, 1), date(2018, 12, 31))
-        input_file = easyp2p_tests.INPUT_PREFIX + '{0}_parser.{1}'.format(
-            elem.lower(), easyp2p_tests.PLATFORMS[elem])
-        output_file = easyp2p_tests.RESULT_PREFIX + '{0}_parser.csv'.format(
-            elem.lower())
-        parser = getattr(
-            getattr(sys.modules[__name__], elem.lower()),
-            'parse_statement')
-        (df, _) = parser(date_range, input_file)
-        df.to_csv(output_file)
+    print('WARNING: this will overwrite expected test results!\n')
+    choice = input('Do you want to continue (y/n): ')
+    if choice.lower() != 'y':
+        sys.exit()
 
-    for elem in ['Estateguru', 'Mintos', 'Grupeer', 'DoFinance', 'Twino']:
-        #TODO: generate the unknown cf input files
-        if elem == 'DoFinance':
-            date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        else:
-            date_range = (date(2018, 9, 1), date(2018, 12, 31))
-        input_file = easyp2p_tests.INPUT_PREFIX \
-            + '{0}_parser_unknown_cf.{1}'.format(
-                elem.lower(), easyp2p_tests.PLATFORMS[elem])
-        output_file = easyp2p_tests.RESULT_PREFIX \
-            + '{0}_parser_unknown_cf.csv'.format(
-                elem.lower())
-        parser = getattr(
-            getattr(sys.modules[__name__], elem.lower()),
-            'parse_statement')
-        (df, _) = parser(date_range, input_file)
-        df.to_csv(output_file)
+    platform_list = [
+        'Bondora', 'DoFinance', 'Estateguru', 'Grupeer', 'Iuvo', 'Mintos',
+        'PeerBerry', 'Robocash', 'Swaper']
 
-    for elem in easyp2p_tests.PLATFORMS:
-        input_file = easyp2p_tests.INPUT_PREFIX \
-            + '{0}_parser_missing_month.{1}'.format(
-                elem.lower(), easyp2p_tests.PLATFORMS[elem])
-        output_file = easyp2p_tests.RESULT_PREFIX \
-            + '{0}_parser_missing_month.csv'.format(
-                elem.lower())
-        parser = getattr(
-            getattr(sys.modules[__name__], elem.lower()),
-            'parse_statement')
+    choice = input('Generate default parser results (y/n)? ')
+    if choice.lower() == 'y':
+        for platform in platform_list:
+            # DoFinance has its own date range
+            if platform == 'DoFinance':
+                date_range = (date(2018, 5, 1), date(2018, 9, 30))
+            else:
+                date_range = (date(2018, 9, 1), date(2018, 12, 31))
+            input_file = parser_tests.INPUT_PREFIX + '{0}_parser.{1}'.format(
+                platform.lower(), parser_tests.PLATFORMS[platform])
+            output_file = parser_tests.RESULT_PREFIX + '{0}_parser.csv'.format(
+                platform.lower())
+            _generate_parser_results(
+                platform, date_range, input_file, output_file)
 
-        # DoFinance has its own date range
-        if elem == 'DoFinance':
-            date_range = (date(2018, 5, 1), date(2018, 9, 30))
-        else:
-            date_range = (date(2018, 8, 1), date(2018, 12, 31))
-        (df, _) = parser(date_range, input_file)
-        df.to_csv(output_file)
+    choice = input('Generate unknown cashflow parser results (y/n)? ')
+    if choice.lower() == 'y':
+        for platform in platform_list:
+            if platform in ['Estateguru', 'Mintos', 'Grupeer', 'DoFinance',
+                'Robocash', 'Twino']:
+                #TODO: generate the unknown cf input files
+                if platform == 'DoFinance':
+                    date_range = (date(2018, 5, 1), date(2018, 9, 30))
+                else:
+                    date_range = (date(2018, 9, 1), date(2018, 12, 31))
+                input_file = parser_tests.INPUT_PREFIX \
+                    + '{0}_parser_unknown_cf.{1}'.format(
+                        platform.lower(), parser_tests.PLATFORMS[platform])
+                output_file = parser_tests.RESULT_PREFIX \
+                    + '{0}_parser_unknown_cf.csv'.format(platform.lower())
+                _generate_parser_results(
+                    platform, date_range, input_file, output_file)
 
-    for elem in easyp2p_tests.PLATFORMS:
-        input_file = easyp2p_tests.INPUT_PREFIX \
-            + '{0}_parser_no_cfs.{1}'.format(
-                elem.lower(), easyp2p_tests.PLATFORMS[elem])
-        output_file = easyp2p_tests.RESULT_PREFIX \
-            + '{0}_parser_no_cfs.csv'.format(
-                elem.lower())
-        parser = getattr(
-            getattr(sys.modules[__name__], elem.lower()),
-            'parse_statement')
-        (df, _) = parser((date(2016, 9, 1), date(2016, 12, 31)), input_file)
-        df.to_csv(output_file)
+    choice = input('Generate missing month parser results (y/n)? ')
+    if choice.lower() == 'y':
+        for platform in platform_list:
+            # DoFinance has its own date range
+            if platform == 'DoFinance':
+                date_range = (date(2018, 5, 1), date(2018, 9, 30))
+            else:
+                date_range = (date(2018, 8, 1), date(2018, 12, 31))
+            input_file = parser_tests.INPUT_PREFIX \
+                + '{0}_parser_missing_month.{1}'.format(
+                    platform.lower(), parser_tests.PLATFORMS[platform])
+            output_file = parser_tests.RESULT_PREFIX \
+                + '{0}_parser_missing_month.csv'.format(platform.lower())
+            _generate_parser_results(
+                    platform, date_range, input_file, output_file)
 
-    for elem in ['Grupeer']:
-        input_file = easyp2p_tests.INPUT_PREFIX \
-            + '{0}_parser_unknown_currency.{1}'.format(
-                elem.lower(), easyp2p_tests.PLATFORMS[elem])
-        output_file = easyp2p_tests.RESULT_PREFIX \
-            + '{0}_parser_unknown_currency.csv'.format(
-                elem.lower())
-        parser = getattr(
-            getattr(sys.modules[__name__], elem.lower()),
-            'parse_statement')
-        (df, _) = parser(date_range, input_file)
-        df.to_csv(output_file)
+    choice = input('Generate no cashflows parser results (y/n)? ')
+    if choice.lower() == 'y':
+        for platform in platform_list:
+            date_range = (date(2016, 9, 1), date(2016, 12, 31))
+            input_file = parser_tests.INPUT_PREFIX \
+                + '{0}_parser_no_cfs.{1}'.format(
+                    platform.lower(), parser_tests.PLATFORMS[platform])
+            output_file = parser_tests.RESULT_PREFIX \
+                + '{0}_parser_no_cfs.csv'.format(platform.lower())
+            _generate_parser_results(
+                    platform, date_range, input_file, output_file)
+
 
 if __name__ == '__main__':
-    generate_parser_results()
+    main()
