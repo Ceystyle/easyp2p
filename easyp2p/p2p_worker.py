@@ -194,6 +194,6 @@ class WorkerThread(QThread):
         if self.abort:
             return
 
-        if not p2p_parser.show_results(self.df_result, self.output_file):
+        if not p2p_parser.write_results(self.df_result, self.output_file):
             self.add_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)

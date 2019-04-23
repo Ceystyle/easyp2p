@@ -363,7 +363,7 @@ class P2PParser:
         return unknown_cf_types
 
 
-def show_results(df_result: pd.DataFrame, output_file: str) -> bool:
+def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     """
     Sum up the results contained in data frames and write them to Excel file.
 

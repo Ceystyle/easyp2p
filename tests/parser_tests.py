@@ -5,7 +5,7 @@
 
 from datetime import date
 import os
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Tuple
 import unittest
 
 import pandas as pd
@@ -353,7 +353,7 @@ class ParserTests(unittest.TestCase):
             INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
 
     def run_show_results(
-            self, list_of_dfs: Sequence[pd.DataFrame], result_file: str,
+            self, df_result: pd.DataFrame, result_file: str,
             exp_result_file: str) -> None:
         """
         Test the show_results functionality for the given platforms.
@@ -362,13 +362,12 @@ class ParserTests(unittest.TestCase):
         in exp_result_file first.
 
         Args:
-            list_of_dfs: List with the parsed account statements
+            df_result: DataFrame containing the parsed results
             result_file: output file of show_results
             exp_result_file: file with expected results
 
         """
-        p2p_parser.show_results(
-            list_of_dfs, result_file)
+        p2p_parser.write_results(df_result, result_file)
 
         month_pivot_table = pd.read_excel(
             result_file, 'Monatsergebnisse')
@@ -384,17 +383,17 @@ class ParserTests(unittest.TestCase):
 
     def test_show_results_all(self):
         """Test show_results for all supported platforms."""
-        list_of_dfs = []
+        df_result = pd.DataFrame()
 
         for platform in PLATFORMS:
             df = p2p_helper.get_df_from_file(
                 RESULT_PREFIX + '{0}_parser.csv'.format(
                     platform.lower()))
             df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
-            list_of_dfs.append(df)
+            df_result = df_result.append(df, sort=True)
 
         self.run_show_results(
-            list_of_dfs, 'test_show_results_all.xlsx',
+            df_result, 'test_show_results_all.xlsx',
             RESULT_PREFIX + 'show_results_all.xlsx')
 
     def test_show_results_estateguru(self):
