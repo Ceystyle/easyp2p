@@ -1,5 +1,5 @@
-Plattform,Datum,Währung,Gesamteinnahmen,Startguthaben,Endsaldo,Investitionen,Tilgungszahlungen,Rückkäufe,Zinszahlungen,Zinszahlungen aus Rückkäufen,Verzugsgebühren,Ausfälle
-Swaper,2016-09-01,EUR,0.0,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
-Swaper,2016-10-01,EUR,0.0,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
-Swaper,2016-11-01,EUR,0.0,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
-Swaper,2016-12-01,EUR,0.0,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
+Plattform,Datum,Währung,Startguthaben,Endsaldo,Investitionen,Tilgungszahlungen,Rückkäufe,Zinszahlungen,Zinszahlungen aus Rückkäufen,Verzugsgebühren,Ausfälle,Gesamteinnahmen
+Swaper,2016-09-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Swaper,2016-10-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Swaper,2016-11-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Swaper,2016-12-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
