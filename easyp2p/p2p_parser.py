@@ -367,9 +367,9 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     """
     Sum up the results contained in data frames and write them to Excel file.
 
-    The results are presented in two ways: on a monthly basis (in the Excel tab
-    'Monatsergebnisse') and the total sums (in tab 'Gesamtergebnis') for the
-    period between start and end date.
+    The results are presented in three ways: on a daily (in the Excel tab
+    'Tagesergebnisse') and monthly ('Monatsergebnisse') basis and the total
+    sums ('Gesamtergebnis') for the period between start and end date.
 
     Args:
         df_result: DataFrame containing the parsed results from all selected
@@ -380,6 +380,9 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         True on success, False on failure
 
     """
+    # No calculation necessary to get daily results
+    df_daily = df_result.copy()
+
     # Create Month column
     df_result.reset_index(inplace=True)
     df_result[P2PParser.DATE] = pd.to_datetime(
@@ -411,28 +414,36 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         return False
 
     # Round all results to 2 digits
+    df_daily = df_daily.round(2)
     df_monthly = df_monthly.round(2)
     df_total = df_total.round(2)
 
     # Sort columns
+    df_daily = df_daily[value_columns]
     df_monthly = df_monthly[value_columns]
     df_total = df_total[value_columns]
 
     # Fill empty cells with N/A
+    df_daily.fillna('N/A', inplace=True)
     df_monthly.fillna('N/A', inplace=True)
     df_total.fillna('N/A', inplace=True)
 
     # Write monthly results to file
     writer = pd.ExcelWriter(
         output_file, date_format='%d.%m.%Y', engine='xlsxwriter')
+    df_daily.to_excel(writer, 'Tagesergebnisse')
     df_monthly.to_excel(writer, 'Monatsergebnisse')
     df_total.to_excel(writer, 'Gesamtergebnis')
 
     # Format columns in the Excel sheets
     workbook = writer.book
     money_format = workbook.add_format({'num_format': '0.00'})
+    daily_ws = writer.sheets['Tagesergebnisse']
     monthly_ws = writer.sheets['Monatsergebnisse']
     total_ws = writer.sheets['Gesamtergebnis']
+
+    daily_ws.set_column('D:M', None, money_format)
+    _set_excel_column_width(daily_ws, df_daily)
 
     monthly_ws.set_column('D:M', None, money_format)
     _set_excel_column_width(monthly_ws, df_monthly)
