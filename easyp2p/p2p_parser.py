@@ -394,42 +394,21 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         df_result, values=value_columns,
         index=[P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH],
         aggfunc=lambda x: x.sum(min_count=1))
+    _correct_balances(
+        df_monthly, df_result,
+        [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
 
-    # If start and end balance columns were present they were also summed
-    # up which is obviously not correct. Fill in the correct values from the
-    # original df_result DataFrame.
-    try:
-        df_monthly[P2PParser.START_BALANCE_NAME] = df_result.groupby(
-            [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH]).first()[
-                P2PParser.START_BALANCE_NAME]
-        df_monthly[P2PParser.END_BALANCE_NAME] = df_result.groupby(
-            [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH]).last()[
-                P2PParser.END_BALANCE_NAME]
-    except KeyError:
-        pass
-
-    # Calculate results per platform
+    # Calculate total results per platform
     df_total = pd.pivot_table(
         df_monthly, values=value_columns,
         index=[P2PParser.PLATFORM, P2PParser.CURRENCY],
         aggfunc=lambda x: x.sum(min_count=1), margins=True,
         margins_name='Total')
+    _correct_balances(
+        df_total, df_monthly, [P2PParser.PLATFORM, P2PParser.CURRENCY])
 
     if df_total.empty:
         return False
-
-    # Start and end balance columns were summed up as well if they are present.
-    # That's obviously not correct, so we will look up the correct values
-    # in the monthly table and overwrite the sums.
-    try:
-        df_total[P2PParser.START_BALANCE_NAME] = df_monthly.groupby(
-            [P2PParser.PLATFORM, P2PParser.CURRENCY]).first()[
-                P2PParser.START_BALANCE_NAME]
-        df_total[P2PParser.END_BALANCE_NAME] = df_monthly.groupby(
-            [P2PParser.PLATFORM, P2PParser.CURRENCY]).last()[
-                P2PParser.END_BALANCE_NAME]
-    except KeyError:
-        pass
 
     # Round all results to 2 digits
     df_monthly = df_monthly.round(2)
@@ -447,8 +426,6 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     writer = pd.ExcelWriter(
         output_file, date_format='%d.%m.%Y', engine='xlsxwriter')
     df_monthly.to_excel(writer, 'Monatsergebnisse')
-
-    # Write total results to file
     df_total.to_excel(writer, 'Gesamtergebnis')
 
     # Format columns in the Excel sheets
@@ -481,3 +458,27 @@ def _set_excel_column_width(
     column_offset = len(df.index.names)
     for i, width in enumerate(length_list):
         worksheet.set_column(i + column_offset, i + column_offset, width)
+
+def _correct_balances(
+        df: pd.DataFrame, df_correct: pd.DataFrame, groupby: Sequence[str]) \
+        -> None:
+    """
+    Correction of balances which were incorrectly summed up.
+
+    During creation of the pivot table df start and end balance columns were
+    summed up as well if they were present. That's obviously not correct, so we
+    will look up the correct values in df_correct and overwrite the sums.
+
+    Args:
+        df: DataFrame containing pivot table with the wrong balances
+        df_correct: DataFrame containing the correct balances
+        groupby: List of column names used to create the pivot table
+
+    """
+    try:
+        df[P2PParser.START_BALANCE_NAME] = df_correct.groupby(groupby).first()[
+                P2PParser.START_BALANCE_NAME]
+        df[P2PParser.END_BALANCE_NAME] = df_correct.groupby(groupby).last()[
+                P2PParser.END_BALANCE_NAME]
+    except KeyError:
+        pass
