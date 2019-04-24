@@ -382,6 +382,11 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     """
     # No calculation necessary to get daily results
     df_daily = df_result.copy()
+    df_daily.reset_index(inplace=True)
+    df_daily[P2PParser.DATE] = pd.to_datetime(
+        df_daily[P2PParser.DATE], format='%Y-%m-%d').dt.strftime('%d.%m.%Y')
+    df_daily.set_index(
+        [P2PParser.PLATFORM, P2PParser.CURRENCY,  P2PParser.DATE], inplace=True)
 
     # Create Month column
     df_result.reset_index(inplace=True)
