@@ -410,7 +410,7 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     df_total = pd.pivot_table(
         df_monthly, values=value_columns,
         index=[P2PParser.PLATFORM, P2PParser.CURRENCY],
-        aggfunc=lambda x: x.sum(min_count=1), margins=True,
+        aggfunc=lambda x: x.sum(min_count=1), margins=True, dropna=False,
         margins_name='Total')
     _correct_balances(
         df_total, df_monthly, [P2PParser.PLATFORM, P2PParser.CURRENCY])
