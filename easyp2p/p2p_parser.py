@@ -413,20 +413,9 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     if df_total.empty:
         return False
 
-    # Round all results to 2 digits
-    df_daily = df_daily.round(2)
-    df_monthly = df_monthly.round(2)
-    df_total = df_total.round(2)
-
-    # Sort columns
-    df_daily = df_daily[value_columns]
-    df_monthly = df_monthly[value_columns]
-    df_total = df_total[value_columns]
-
-    # Fill empty cells with N/A
-    df_daily.fillna('N/A', inplace=True)
-    df_monthly.fillna('N/A', inplace=True)
-    df_total.fillna('N/A', inplace=True)
+    df_daily = _format_columns(df_daily, value_columns)
+    df_monthly = _format_columns(df_monthly, value_columns)
+    df_total = _format_columns(df_total, value_columns)
 
     # Write monthly results to file
     writer = pd.ExcelWriter(
@@ -493,3 +482,27 @@ def _correct_balances(
                 P2PParser.END_BALANCE_NAME]
     except KeyError:
         pass
+
+def _format_columns(df: pd.DataFrame, sort_columns: Sequence[str]) \
+        -> pd.DataFrame:
+    """
+    Round, sort and fill N/As in all provided Dataframes.
+
+    Args:
+        df: DataFrame which needs to be formatted
+        sort_columns: List of column names in the order how they must be sorted
+
+    Returns:
+        The formatted DataFrame
+
+    """
+    # Round all results to 2 digits
+    df = df.round(2)
+
+    # Sort columns
+    df = df[sort_columns]
+
+    # Fill empty cells with N/A
+    df.fillna('N/A', inplace=True)
+
+    return df
