@@ -116,19 +116,6 @@ class ParserTests(unittest.TestCase):
             INPUT_PREFIX + test_name + '.' + PLATFORMS[platform],
             RESULT_PREFIX + test_name + '.csv', date_range=date_range)
 
-    def missing_month_parser_test(
-            self, platform: str,
-            date_range: Optional[Tuple[date, date]] = None) -> None:
-        """Test parsing statements if a month in date_range is missing."""
-        test_name = '{0}_parser_missing_month'.format(platform.lower())
-        if date_range is None:
-            date_range = self.date_range_missing_month
-
-        self.run_parser_test(
-            platform,
-            INPUT_PREFIX + test_name + '.' + PLATFORMS[platform],
-            RESULT_PREFIX + test_name + '.csv', date_range=date_range)
-
     def no_cfs_parser_test(
             self, platform: str,
             date_range: Optional[Tuple[date, date]] = None) -> None:
@@ -146,10 +133,6 @@ class ParserTests(unittest.TestCase):
         """Test parsing Bondora default statement."""
         self.default_parser_test('Bondora')
 
-    def test_bondora_parser_missing_month(self):
-        """Test Bondora parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Bondora')
-
     def test_bondora_parser_no_cfs(self):
         """Test Bondora parser if there were no cashflows in date_range."""
         self.no_cfs_parser_test('Bondora')
@@ -157,11 +140,6 @@ class ParserTests(unittest.TestCase):
     def test_dofinance_parser(self):
         """Test parsing DoFinance default statement."""
         self.default_parser_test(
-            'DoFinance', date_range=(date(2018, 5, 1), date(2018, 9, 30)))
-
-    def test_dofinance_parser_missing_month(self):
-        """Test DoFinance parser if a month in date_range is missing."""
-        self.missing_month_parser_test(
             'DoFinance', date_range=(date(2018, 5, 1), date(2018, 9, 30)))
 
     def test_dofinance_parser_no_cfs(self):
@@ -192,10 +170,6 @@ class ParserTests(unittest.TestCase):
         """Test parsing Estateguru default statement."""
         self.default_parser_test('Estateguru')
 
-    def test_estateguru_parser_missing_month(self):
-        """Test Estateguru parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Estateguru')
-
     def test_estateguru_parser_no_cfs(self):
         """Test Estateguru parser if there were no cashflows in date_range."""
         self.no_cfs_parser_test('Estateguru')
@@ -211,10 +185,6 @@ class ParserTests(unittest.TestCase):
     def test_grupeer_parser(self):
         """Test parsing Grupeer default statement."""
         self.default_parser_test('Grupeer')
-
-    def test_grupeer_parser_missing_month(self):
-        """Test Grupeer parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Grupeer')
 
     def test_grupeer_parser_no_cfs(self):
         """Test Grupeer parser if there were no cashflows in date_range."""
@@ -234,10 +204,6 @@ class ParserTests(unittest.TestCase):
         """Test parsing Iuvo default statement."""
         self.default_parser_test('Iuvo')
 
-    def test_iuvo_parser_missing_month(self):
-        """Test Iuvo parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Iuvo')
-
     def test_iuvo_parser_no_cfs(self):
         """Test Iuvo parser if there were no cashflows in date_range."""
         self.no_cfs_parser_test('Iuvo')
@@ -255,10 +221,6 @@ class ParserTests(unittest.TestCase):
     def test_mintos_parser(self):
         """Test parsing Mintos default statement."""
         self.default_parser_test('Mintos')
-
-    def test_mintos_parser_missing_month(self):
-        """Test Mintos parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Mintos')
 
     def test_mintos_parser_no_cfs(self):
         """Test Mintos parser if there were no cashflows in date_range."""
@@ -278,10 +240,6 @@ class ParserTests(unittest.TestCase):
         """Test parsing PeerBerry default statement."""
         self.default_parser_test('PeerBerry')
 
-    def test_peerberry_parser_missing_month(self):
-        """Test PeerBerry parser if a month in date_range is missing."""
-        self.missing_month_parser_test('PeerBerry')
-
     def test_peerberry_parser_no_cfs(self):
         """Test PeerBerry parser if there were no cashflows in date_range."""
         self.no_cfs_parser_test('PeerBerry')
@@ -289,10 +247,6 @@ class ParserTests(unittest.TestCase):
     def test_robocash_parser(self):
         """Test parsing Robocash default statement."""
         self.default_parser_test('Robocash')
-
-    def test_robocash_parser_missing_month(self):
-        """Test Robocash parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Robocash')
 
     def test_robocash_parser_no_cfs(self):
         """Test Robocash parser if there were no cashflows in date_range."""
@@ -312,10 +266,6 @@ class ParserTests(unittest.TestCase):
         """Test parsing Swaper default statement."""
         self.default_parser_test('Swaper')
 
-    def test_swaper_parser_missing_month(self):
-        """Test Swaper parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Swaper')
-
     def test_swaper_parser_no_cfs(self):
         """Test Swaper parser if there were no cashflows in date_range."""
         self.no_cfs_parser_test('Swaper')
@@ -323,10 +273,6 @@ class ParserTests(unittest.TestCase):
     def test_twino_parser(self):
         """Test parsing Twino default statement."""
         self.default_parser_test('Twino')
-
-    def test_twino_parser_missing_month(self):
-        """Test Twino parser if a month in date_range is missing."""
-        self.missing_month_parser_test('Twino')
 
     def test_twino_parser_no_cfs(self):
         """Test Twino parser if there were no cashflows in date_range."""
@@ -352,37 +298,42 @@ class ParserTests(unittest.TestCase):
             RuntimeError, twino.parse_statement,
             INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
 
-    def run_show_results(
+    def run_write_results(
             self, df_result: pd.DataFrame, result_file: str,
             exp_result_file: str) -> None:
         """
-        Test the show_results functionality for the given platforms.
+        Test the write_results functionality for the given platforms.
 
         In order to run these tests the known correct results need to be saved
         in exp_result_file first.
 
         Args:
             df_result: DataFrame containing the parsed results
-            result_file: output file of show_results
-            exp_result_file: file with expected results
+            result_file: Output file of write_results
+            exp_result_file: File with expected results
 
         """
         p2p_parser.write_results(df_result, result_file)
 
-        month_pivot_table = pd.read_excel(
+        daily_pivot_table = pd.read_excel(
+            result_file, 'Tagesergebnisse')
+        daily_pivot_table_exp = pd.read_excel(
+            exp_result_file, 'Tagesergebnisse')
+        monthly_pivot_table = pd.read_excel(
             result_file, 'Monatsergebnisse')
-        month_pivot_table_exp = pd.read_excel(
+        monthly_pivot_table_exp = pd.read_excel(
             exp_result_file, 'Monatsergebnisse')
         totals_pivot_table = pd.read_excel(
             result_file, 'Gesamtergebnis')
         totals_pivot_table_exp = pd.read_excel(
             exp_result_file, 'Gesamtergebnis')
 
-        self.assertTrue(month_pivot_table.equals(month_pivot_table_exp))
+        self.assertTrue(daily_pivot_table.equals(daily_pivot_table_exp))
+        self.assertTrue(monthly_pivot_table.equals(monthly_pivot_table_exp))
         self.assertTrue(totals_pivot_table.equals(totals_pivot_table_exp))
 
-    def test_show_results_all(self):
-        """Test show_results for all supported platforms."""
+    def test_write_results_all(self):
+        """Test write_results for all supported platforms."""
         df_result = pd.DataFrame()
 
         for platform in PLATFORMS:
@@ -392,20 +343,9 @@ class ParserTests(unittest.TestCase):
             df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
             df_result = df_result.append(df, sort=True)
 
-        self.run_show_results(
-            df_result, 'test_show_results_all.xlsx',
-            RESULT_PREFIX + 'show_results_all.xlsx')
-
-    def test_show_results_estateguru(self):
-        """Test show_results for Estateguru."""
-
-        df = p2p_helper.get_df_from_file(
-            RESULT_PREFIX + 'estateguru_parser.csv')
-        df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
-
-        self.run_show_results(
-            [df], 'test_show_results_estateguru.xlsx',
-            RESULT_PREFIX + 'show_results_estateguru.xlsx')
+        self.run_write_results(
+            df_result, 'test_write_results_all.xlsx',
+            RESULT_PREFIX + 'write_results_all.xlsx')
 
 
 def are_files_equal(
