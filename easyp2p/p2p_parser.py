@@ -14,7 +14,7 @@ from datetime import date
 from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
-import xlsxwriter
+
 import easyp2p.p2p_helper as p2p_helper
 
 
@@ -418,51 +418,20 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     if df_total.empty:
         return False
 
-    df_daily = _format_columns(df_daily, value_columns)
-    df_monthly = _format_columns(df_monthly, value_columns)
-    df_total = _format_columns(df_total, value_columns)
+    df_daily = _format_df_columns(df_daily, value_columns)
+    df_monthly = _format_df_columns(df_monthly, value_columns)
+    df_total = _format_df_columns(df_total, value_columns)
 
     # Write monthly results to file
     writer = pd.ExcelWriter(
         output_file, date_format='%d.%m.%Y', engine='xlsxwriter')
-    df_daily.to_excel(writer, 'Tagesergebnisse')
-    df_monthly.to_excel(writer, 'Monatsergebnisse')
-    df_total.to_excel(writer, 'Gesamtergebnis')
-
-    # Format columns in the Excel sheets
-    workbook = writer.book
-    money_format = workbook.add_format({'num_format': '0.00'})
-    daily_ws = writer.sheets['Tagesergebnisse']
-    monthly_ws = writer.sheets['Monatsergebnisse']
-    total_ws = writer.sheets['Gesamtergebnis']
-
-    daily_ws.set_column('D:M', None, money_format)
-    _set_excel_column_width(daily_ws, df_daily)
-
-    monthly_ws.set_column('D:M', None, money_format)
-    _set_excel_column_width(monthly_ws, df_monthly)
-
-    total_ws.set_column('C:L', None, money_format)
-    _set_excel_column_width(total_ws, df_total)
-
+    _write_worksheet(writer, 'Tagesergebnisse', df_daily)
+    _write_worksheet(writer, 'Monatsergebnisse', df_monthly)
+    _write_worksheet(writer, 'Gesamtergebnis', df_total)
     writer.save()
 
     return True
 
-def _set_excel_column_width(
-        worksheet: xlsxwriter.worksheet, df: pd.DataFrame) -> None:
-    """
-    Helper function to set Excel column width to header length + 1.
-
-    Args:
-        worksheet: Worksheet containing the columns to be formatted
-        df: DataFrame which was used for creating the worksheet
-
-    """
-    length_list = [len(x) + 1 for x in df.columns]
-    column_offset = len(df.index.names)
-    for i, width in enumerate(length_list):
-        worksheet.set_column(i + column_offset, i + column_offset, width)
 
 def _correct_balances(
         df: pd.DataFrame, df_correct: pd.DataFrame, groupby: Sequence[str]) \
@@ -488,7 +457,8 @@ def _correct_balances(
     except KeyError:
         pass
 
-def _format_columns(df: pd.DataFrame, sort_columns: Sequence[str]) \
+
+def _format_df_columns(df: pd.DataFrame, sort_columns: Sequence[str]) \
         -> pd.DataFrame:
     """
     Round, sort and fill N/As in all provided Dataframes.
@@ -511,3 +481,35 @@ def _format_columns(df: pd.DataFrame, sort_columns: Sequence[str]) \
     df.fillna('N/A', inplace=True)
 
     return df
+
+
+def _write_worksheet(
+        writer: pd.ExcelWriter, worksheet_name: str, df: pd.DataFrame) -> None:
+    """
+    Write DataFrame to Excel worksheet and format columns.
+
+    For each column in the worksheet the width is set to the maximum length
+    * 1,2 of all entries in the column. For all non-index columns the_format
+    is set to money_format.
+
+    Args:
+        writer: Handle of ExcelWriter
+        worksheet_name: Name of the worksheet where DataFrame should be saved
+        df: DataFrame containing the data to be written to the worksheet
+
+    """
+    workbook = writer.book
+    money_format = workbook.add_format({'num_format': '#,##0.00'})
+    df.to_excel(writer, worksheet_name)
+    ws = writer.sheets[worksheet_name]
+    index_length = len(df.index.names)
+    df = df.reset_index()
+    for index, col in enumerate(df.columns):
+        header_length = len(col)
+        data_length = df[col].map(lambda x: len(str(x))).max()
+        if index < index_length:
+            ws.set_column(index, index, max(header_length, data_length) * 1.2)
+        else:
+            ws.set_column(
+                index, index, max(header_length, data_length) * 1.2,
+                money_format)
