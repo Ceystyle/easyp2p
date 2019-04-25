@@ -94,8 +94,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not self.output_file_changed:
             output_file = os.path.join(
                 os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
-                    date_range[0].strftime('%d.%m.%Y'),
-                    date_range[1].strftime('%d.%m.%Y')))
+                    date_range[0].strftime('%d%m%Y'),
+                    date_range[1].strftime('%d%m%Y')))
             QLineEdit.setText(self.line_edit_output_file, output_file)
 
     @pyqtSlot(str)
