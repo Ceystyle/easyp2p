@@ -9,6 +9,7 @@ from typing import AbstractSet, Callable, Mapping, Optional, Tuple
 import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
+from selenium.common.exceptions import WebDriverException
 
 import easyp2p.p2p_parser as p2p_parser
 import easyp2p.platforms as p2p_platforms
@@ -151,7 +152,7 @@ class WorkerThread(QThread):
 
         try:
             platform.download_statement(self.credentials[name])
-        except ModuleNotFoundError as err:
+        except WebDriverException as err:
             self.abort_easyp2p.emit(str(err))
             self.abort = True
             return False

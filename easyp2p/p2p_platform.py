@@ -160,10 +160,10 @@ class P2PPlatform:
                     options=options)
             else:
                 driver = webdriver.Chrome(options=options)
-        except WebDriverException:
-            raise ModuleNotFoundError(
+        except WebDriverException as err:
+            raise WebDriverException(
                 'Chromedriver konnte nicht gefunden werden!\n'
-                'easyp2p wird beendet!')
+                'easyp2p wird beendet!\n', err)
 
         driver.maximize_window()
         self.driver = driver
