@@ -174,7 +174,7 @@ class P2PPlatform:
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.) -> None:
         """
-        Log into the P2P platform with using the provided credentials.
+        Log into the P2P platform using the provided credentials.
 
         This method performs the login procedure for the P2P website.
         It opens the login page and fills in user name and password.
