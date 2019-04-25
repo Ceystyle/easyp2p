@@ -9,9 +9,10 @@ import sys
 import unittest
 
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QLineEdit, QMessageBox
 from PyQt5.QtTest import QTest
 
+import easyp2p.p2p_helper as p2p_helper
 from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
 
@@ -40,112 +41,179 @@ class MainWindowTests(unittest.TestCase):
         self.message_box_open = False
         self.progress_window_open = False
 
-    def set_test_dates(self) -> None:
-        """Set start and end dates in the GUI."""
-        self.form.comboBox_start_month.setCurrentIndex(
-            self.form.comboBox_start_month.findText('Sep'))
-        self.form.comboBox_start_year.setCurrentIndex(
-            self.form.comboBox_start_month.findText('2018'))
-        self.form.comboBox_end_month.setCurrentIndex(
-            self.form.comboBox_start_month.findText('Jan'))
-        self.form.comboBox_end_year.setCurrentIndex(
-            self.form.comboBox_start_month.findText('2019'))
+    def set_test_dates(
+            self, start_month: str = 'Sep', start_year: str = '2018',
+            end_month: str = 'Jan', end_year: str = '2019') -> None:
+        """
+        Set start and end dates in the GUI.
+
+        Keyword Args:
+            start_month: Start month
+            start_year: Start year
+            end_month: End month
+            end_year: End year
+
+        """
+        self.form.combo_box_start_month.setCurrentIndex(
+            self.form.combo_box_start_month.findText(start_month))
+        self.form.combo_box_start_year.setCurrentIndex(
+            self.form.combo_box_start_year.findText(start_year))
+        self.form.combo_box_end_month.setCurrentIndex(
+            self.form.combo_box_end_month.findText(end_month))
+        self.form.combo_box_end_year.setCurrentIndex(
+            self.form.combo_box_end_year.findText(end_year))
 
     def test_defaults(self) -> None:
         """Test GUI in default state."""
 
         # All checkboxes are unchecked in default state
-        self.assertFalse(self.form.checkBox_bondora.isChecked())
-        self.assertFalse(self.form.checkBox_dofinance.isChecked())
-        self.assertFalse(self.form.checkBox_estateguru.isChecked())
-        self.assertFalse(self.form.checkBox_grupeer.isChecked())
-        self.assertFalse(self.form.checkBox_iuvo.isChecked())
-        self.assertFalse(self.form.checkBox_mintos.isChecked())
-        self.assertFalse(self.form.checkBox_peerberry.isChecked())
-        self.assertFalse(self.form.checkBox_robocash.isChecked())
-        self.assertFalse(self.form.checkBox_select_all.isChecked())
-        self.assertFalse(self.form.checkBox_swaper.isChecked())
-        self.assertFalse(self.form.checkBox_twino.isChecked())
-        self.assertTrue(self.form.lineEdit_output_file.text() == os.path.join(
+        self.assertFalse(self.form.check_box_bondora.isChecked())
+        self.assertFalse(self.form.check_box_dofinance.isChecked())
+        self.assertFalse(self.form.check_box_estateguru.isChecked())
+        self.assertFalse(self.form.check_box_grupeer.isChecked())
+        self.assertFalse(self.form.check_box_iuvo.isChecked())
+        self.assertFalse(self.form.check_box_mintos.isChecked())
+        self.assertFalse(self.form.check_box_peerberry.isChecked())
+        self.assertFalse(self.form.check_box_robocash.isChecked())
+        self.assertFalse(self.form.check_box_select_all.isChecked())
+        self.assertFalse(self.form.check_box_swaper.isChecked())
+        self.assertFalse(self.form.check_box_twino.isChecked())
+
+        # Check if output file name is set correctly
+        date_range = self.form.get_date_range()
+        self.assertTrue(self.form.line_edit_output_file.text() == os.path.join(
             os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
-                self.form.start_date.strftime('%d.%m.%Y'),
-                self.form.end_date.strftime('%d.%m.%Y'))))
-        # TODO: add tests for comboBoxes
+                date_range[0].strftime('%d%m%Y'),
+                date_range[1].strftime('%d%m%Y'))))
+
+        # Check if combo boxes are set correctly
+        start_month = int(p2p_helper.short_month_to_nbr(
+            str(self.form.combo_box_start_month.currentText())))
+        start_year = self.form.combo_box_start_year.currentText()
+        end_month = int(p2p_helper.short_month_to_nbr(
+            str(self.form.combo_box_end_month.currentText())))
+        end_year = self.form.combo_box_end_year.currentText()
+        if date.today().month > 1:
+            self.assertEqual(date.today().month - 1, start_month)
+            self.assertEqual(str(date.today().year), start_year)
+            self.assertEqual(date.today().month - 1, end_month)
+            self.assertEqual(str(date.today().year), end_year)
+        else:
+            self.assertEqual(12, start_month)
+            self.assertEqual(str(date.today().year - 1), start_year)
+            self.assertEqual(12, end_month)
+            self.assertEqual(str(date.today().year -1), end_year)
 
     def test_select_all_platforms(self) -> None:
         """Test the Select All Platforms checkbox."""
         # Toggle the 'Select all platforms' checkbox
-        self.form.checkBox_select_all.setChecked(True)
+        self.form.check_box_select_all.setChecked(True)
 
         # Test that all platform check boxes are checked
-        self.assertTrue(self.form.checkBox_bondora.isChecked())
-        self.assertTrue(self.form.checkBox_dofinance.isChecked())
-        self.assertTrue(self.form.checkBox_estateguru.isChecked())
-        self.assertTrue(self.form.checkBox_grupeer.isChecked())
-        self.assertTrue(self.form.checkBox_iuvo.isChecked())
-        self.assertTrue(self.form.checkBox_mintos.isChecked())
-        self.assertTrue(self.form.checkBox_peerberry.isChecked())
-        self.assertTrue(self.form.checkBox_robocash.isChecked())
-        self.assertTrue(self.form.checkBox_select_all.isChecked())
-        self.assertTrue(self.form.checkBox_swaper.isChecked())
-        self.assertTrue(self.form.checkBox_twino.isChecked())
+        self.assertTrue(self.form.check_box_bondora.isChecked())
+        self.assertTrue(self.form.check_box_dofinance.isChecked())
+        self.assertTrue(self.form.check_box_estateguru.isChecked())
+        self.assertTrue(self.form.check_box_grupeer.isChecked())
+        self.assertTrue(self.form.check_box_iuvo.isChecked())
+        self.assertTrue(self.form.check_box_mintos.isChecked())
+        self.assertTrue(self.form.check_box_peerberry.isChecked())
+        self.assertTrue(self.form.check_box_robocash.isChecked())
+        self.assertTrue(self.form.check_box_select_all.isChecked())
+        self.assertTrue(self.form.check_box_swaper.isChecked())
+        self.assertTrue(self.form.check_box_twino.isChecked())
 
-        # Test if the platform list is correct
-        self.assertEqual(self.form.platforms, PLATFORMS.keys())
+    def test_select_all_platforms_twice(self) -> None:
+        """Test the Select All Platforms checkbox."""
+        # Toggle the 'Select all platforms' checkbox
+        self.form.check_box_select_all.setChecked(True)
+
+        # Untoggle the 'Select all platforms' checkbox again
+        self.form.check_box_select_all.setChecked(False)
+
+        # Test that all platform check boxes are unchecked again
+        self.assertFalse(self.form.check_box_bondora.isChecked())
+        self.assertFalse(self.form.check_box_dofinance.isChecked())
+        self.assertFalse(self.form.check_box_estateguru.isChecked())
+        self.assertFalse(self.form.check_box_grupeer.isChecked())
+        self.assertFalse(self.form.check_box_iuvo.isChecked())
+        self.assertFalse(self.form.check_box_mintos.isChecked())
+        self.assertFalse(self.form.check_box_peerberry.isChecked())
+        self.assertFalse(self.form.check_box_robocash.isChecked())
+        self.assertFalse(self.form.check_box_select_all.isChecked())
+        self.assertFalse(self.form.check_box_swaper.isChecked())
+        self.assertFalse(self.form.check_box_twino.isChecked())
 
     def test_no_platform_selected(self) -> None:
         """Test clicking start without any selected platform."""
         # Push the start button without selecting any platform first
         QTimer.singleShot(500, self.is_message_box_open)
-        self.form.pushButton_start.click()
+        self.form.push_button_start.click()
 
         # Check that a warning message pops up
         self.assertTrue(self.message_box_open)
 
         # Check that the progress window did not open
-        self.assertFalse(self.progress_window_open)
+        self.assertFalse(self.is_progress_window_open())
 
     def test_output_file_on_date_change(self) -> None:
         """Test output file name after a date change."""
-        old_output_file = self.form.lineEdit_output_file.text()
-        if date.today().month != 3:
-            self.form.on_comboBox_end_month_activated('Feb')
-        else:
-            self.form.on_comboBox_end_month_activated('Mrz')
-        new_output_file = self.form.lineEdit_output_file.text()
-        self.assertTrue(new_output_file != old_output_file)
-        self.assertTrue(new_output_file == os.path.join(
-            os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
-                self.form.start_date.strftime('%d.%m.%Y'),
-                self.form.end_date.strftime('%d.%m.%Y'))))
+        old_output_file = self.form.line_edit_output_file.text()
+
+        # Change start and/or end date
+        self.set_test_dates('Feb', '2017', 'Sep', '2017')
+        self.form.on_combo_box_start_month_activated()
+
+        new_output_file = self.form.line_edit_output_file.text()
+        self.assertNotEqual(new_output_file, old_output_file)
+        self.assertEqual(new_output_file, os.path.join(
+            os.getcwd(), 'P2P_Ergebnisse_01022017-30092017.xlsx'))
 
     def test_output_file_on_date_change_after_user_change(self) -> None:
         """Test output file after date change if user already changed file."""
-        self.form.output_file = 'Test.xlsx'
-        self.form.on_lineEdit_output_file_textChanged(self.form.output_file)
+        QLineEdit.setText(self.form.line_edit_output_file, 'Test.xlsx')
         self.form.output_file_changed = True
-        old_output_file = self.form.lineEdit_output_file.text()
-        if date.today().month != 3:
-            self.form.on_comboBox_end_month_activated('Feb')
-        else:
-            self.form.on_comboBox_end_month_activated('Mrz')
-        new_output_file = self.form.lineEdit_output_file.text()
-        self.assertTrue(new_output_file == old_output_file)
+
+        # Change start and/or end date
+        self.set_test_dates('Feb', '2017', 'Sep', '2017')
+        self.form.on_combo_box_start_month_activated()
+
+        # Check that the output file name was not changed
+        self.assertEqual(self.form.line_edit_output_file.text(), 'Test.xlsx')
+
+    def test_end_date_before_start_date(self) -> None:
+        """Test clicking start with end date set before start date."""
+        self.set_test_dates('Feb', '2017', 'Sep', '2016')
+
+        # Push the start button
+        QTimer.singleShot(500, self.is_message_box_open)
+        self.form.push_button_start.click()
+
+        # Check that a warning message pops up
+        self.assertTrue(self.message_box_open)
+
+        # Check that the progress window did not open
+        self.assertFalse(self.is_progress_window_open())
 
     def is_message_box_open(self) -> bool:
         """Helper method to determine if a QMessageBox is open."""
-        allToplevelWidgets = QApplication.topLevelWidgets()
-        for widget in allToplevelWidgets:
+        all_top_level_widgets = QApplication.topLevelWidgets()
+        for widget in all_top_level_widgets:
             if isinstance(widget, QMessageBox):
-                self.message_box_open = True
                 QTest.keyClick(widget, Qt.Key_Enter)
+                self.message_box_open = True
+                return True
+        self.message_box_open = False
+        return False
 
-    def is_progress_window_open(self):
+    def is_progress_window_open(self) -> bool:
         """Helper method to determine if a ProgressWindow is open."""
-        allToplevelWidgets = QApplication.topLevelWidgets()
-        for widget in allToplevelWidgets:
+        all_top_level_widgets = QApplication.topLevelWidgets()
+        for widget in all_top_level_widgets:
             if isinstance(widget, ProgressWindow):
                 self.progress_window_open = True
+                return True
+        self.progress_window_open = False
+        return False
 
 
 class ProgressWindowTests(unittest.TestCase):
