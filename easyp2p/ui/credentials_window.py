@@ -41,12 +41,12 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
                                     'Passwort für {0} ein:'.format(platform))
 
     @pyqtSlot()
-    def on_buttonBox_accepted(self) -> None:
+    def on_button_box_accepted(self) -> None:
         """Send accept() signal if OK button is clicked."""
         self.accept()
 
     @pyqtSlot()
-    def on_buttonBox_rejected(self) -> None:
+    def on_button_box_rejected(self) -> None:
         """Send reject() signal if Cancel button is clicked."""
         self.reject()
 
@@ -88,8 +88,8 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
             if not credentials_window.exec_():
                 # User clicked the Cancel button
                 return None
-            username = credentials_window.lineEdit_username.text()
-            password = credentials_window.lineEdit_password.text()
+            username = credentials_window.line_edit_username.text()
+            password = credentials_window.line_edit_password.text()
 
             if not username or not password:
                 QMessageBox.warning(
@@ -98,7 +98,7 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
             else:
                 _done = True
                 _save_in_keyring = (
-                    credentials_window.checkBox_save_in_keyring.isChecked())
+                    credentials_window.check_box_save_in_keyring.isChecked())
 
     if _save_in_keyring:
         if not save_credentials(platform, username, password):
