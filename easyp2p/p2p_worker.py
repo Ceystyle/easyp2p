@@ -74,7 +74,7 @@ class WorkerThread(QThread):
 
         """
         try:
-            Platform = getattr(getattr(p2p_platforms, name.lower()), name)
+            platform = getattr(getattr(p2p_platforms, name.lower()), name)
         except AttributeError:
             error_message = (
                 'Klasse {0} konnte nicht gefunden werden. Ist {1}.py '
@@ -82,7 +82,7 @@ class WorkerThread(QThread):
             self.add_progress_text.emit(error_message, self.RED)
             return None
         else:
-            return Platform(self.date_range)
+            return platform(self.date_range)
 
     def ignore_platform(self, name: str, error_msg: str) -> None:
         """
