@@ -161,7 +161,7 @@ class ParserTests(unittest.TestCase):
     def test_dofinance_parser_wrong_column_names(self):
         """Test DoFinance parser if there are unknown column names."""
         dofinance = p2p_platforms.dofinance.DoFinance(
-            (date(2018, 9, 1), date(2018, 12, 31)))
+            (date(2018, 5, 1), date(2018, 9, 30)))
         self.assertRaises(
             RuntimeError, dofinance.parse_statement,
             INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
