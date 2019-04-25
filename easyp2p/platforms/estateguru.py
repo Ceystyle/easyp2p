@@ -106,6 +106,9 @@ class Estateguru:
         # Drop last line which only contains a summary
         parser.df = parser.df[:-1]
 
+        # Only consider valid cashflows
+        parser.df = parser.df[parser.df['Cashflow-Status']=='Genehmigt']
+
         # Define mapping between Estateguru and easyp2p cashflow types and
         # column names
         cashflow_types = {
