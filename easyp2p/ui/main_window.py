@@ -172,7 +172,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not platforms:
             QMessageBox.warning(
                 self, 'Keine P2P Plattform ausgewählt!',
-                'Bitte wähle mindestens eine P2P Plattform aus')
+                'Bitte wähle mindestens eine P2P Plattform aus!')
             return
 
         # Get credentials for the selected platforms

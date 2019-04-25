@@ -37,8 +37,8 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         """
         super(CredentialsWindow, self).__init__(parent)
         self.setupUi(self)
-        self.label_platform.setText('Bitte geben Sie Benutzername und '
-                                    'Passwort für {0} ein:'.format(platform))
+        self.label_platform.setText('Bitte Benutzername und Passwort für {0} '
+                                    'eingeben:'.format(platform))
 
     @pyqtSlot()
     def on_button_box_accepted(self) -> None:
@@ -94,7 +94,7 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
             if not username or not password:
                 QMessageBox.warning(
                     credentials_window, 'Felder nicht ausgefüllt', 'Bitte '
-                    'füllen Sie die Felder für Benutzername und Passwort aus!')
+                    'Felder für Benutzername und Passwort ausfüllen!')
             else:
                 _done = True
                 _save_in_keyring = (
