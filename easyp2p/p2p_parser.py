@@ -90,8 +90,8 @@ class P2PParser:
 
         # Check if account statement exists
         if self.df is None:
-            raise RuntimeError('{0}-Parser: kein Kontoauszug vorhanden!'
-                .format(self.name))
+            raise RuntimeError(
+                '{0}-Parser: kein Kontoauszug vorhanden!'.format(self.name))
 
     def _add_missing_months(self) -> None:
         """
@@ -386,7 +386,7 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     df_daily[P2PParser.DATE] = pd.to_datetime(
         df_daily[P2PParser.DATE], format='%Y-%m-%d').dt.strftime('%d.%m.%Y')
     df_daily.set_index(
-        [P2PParser.PLATFORM, P2PParser.CURRENCY,  P2PParser.DATE], inplace=True)
+        [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.DATE], inplace=True)
 
     # Create Month column
     df_result.reset_index(inplace=True)
@@ -451,9 +451,9 @@ def _correct_balances(
     """
     try:
         df[P2PParser.START_BALANCE_NAME] = df_correct.groupby(groupby).first()[
-                P2PParser.START_BALANCE_NAME]
+            P2PParser.START_BALANCE_NAME]
         df[P2PParser.END_BALANCE_NAME] = df_correct.groupby(groupby).last()[
-                P2PParser.END_BALANCE_NAME]
+            P2PParser.END_BALANCE_NAME]
     except KeyError:
         pass
 
@@ -501,15 +501,16 @@ def _write_worksheet(
     workbook = writer.book
     money_format = workbook.add_format({'num_format': '#,##0.00'})
     df.to_excel(writer, worksheet_name)
-    ws = writer.sheets[worksheet_name]
+    worksheet = writer.sheets[worksheet_name]
     index_length = len(df.index.names)
     df = df.reset_index()
     for index, col in enumerate(df.columns):
         header_length = len(col)
         data_length = df[col].map(lambda x: len(str(x))).max()
         if index < index_length:
-            ws.set_column(index, index, max(header_length, data_length) * 1.2)
+            worksheet.set_column(
+                index, index, max(header_length, data_length) * 1.2)
         else:
-            ws.set_column(
+            worksheet.set_column(
                 index, index, max(header_length, data_length) * 1.2,
                 money_format)
