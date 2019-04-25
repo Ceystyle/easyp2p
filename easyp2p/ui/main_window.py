@@ -119,7 +119,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.set_output_file()
 
     @pyqtSlot()
-    def on_pushButton_file_chooser_clicked(self) -> None:
+    def on_push_button_file_chooser_clicked(self) -> None:
         """
         Open dialog window for changing the save location of the results file.
         """
@@ -150,7 +150,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             check_box.setChecked(checked)
 
     @pyqtSlot()
-    def on_pushButton_start_clicked(self) -> None:
+    def on_push_button_start_clicked(self) -> None:
         """
         Start evaluation for selected P2P platforms and the given date range.
 
