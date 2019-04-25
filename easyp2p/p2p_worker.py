@@ -153,6 +153,8 @@ class WorkerThread(QThread):
             platform.download_statement(self.credentials[name])
         except ModuleNotFoundError as err:
             self.abort_easyp2p.emit(str(err))
+            self.abort = True
+            return False
         except RuntimeError as err:
             self.ignore_platform(name, str(err))
             return False
