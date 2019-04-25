@@ -380,6 +380,9 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         True on success, False on failure
 
     """
+    if df_result.empty:
+        return False
+
     # No calculation necessary to get daily results
     df_daily = df_result.copy()
     df_daily.reset_index(inplace=True)
@@ -414,9 +417,6 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         margins_name='Total')
     _correct_balances(
         df_total, df_monthly, [P2PParser.PLATFORM, P2PParser.CURRENCY])
-
-    if df_total.empty:
-        return False
 
     df_daily = _format_df_columns(df_daily, value_columns)
     df_monthly = _format_df_columns(df_monthly, value_columns)
