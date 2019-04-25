@@ -176,7 +176,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <item>
-                 <widget class="QComboBox" name="comboBox_start_month">
+                 <widget class="QComboBox" name="combo_box_start_month">
                   <item>
                    <property name="text">
                     <string>Jan</string>
@@ -240,7 +240,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="comboBox_start_year">
+                 <widget class="QComboBox" name="combo_box_start_year">
                   <item>
                    <property name="text">
                     <string>2010</string>
@@ -310,7 +310,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <item>
-                 <widget class="QComboBox" name="comboBox_end_month">
+                 <widget class="QComboBox" name="combo_box_end_month">
                   <item>
                    <property name="text">
                     <string>Jan</string>
@@ -374,7 +374,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="comboBox_end_year">
+                 <widget class="QComboBox" name="combo_box_end_year">
                   <item>
                    <property name="text">
                     <string>2010</string>
@@ -446,14 +446,14 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
-               <widget class="QLineEdit" name="lineEdit_output_file">
+               <widget class="QLineEdit" name="line_edit_output_file">
                 <property name="readOnly">
                  <bool>true</bool>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_file_chooser">
+               <widget class="QPushButton" name="push_button_file_chooser">
                 <property name="text">
                  <string>Datei wählen</string>
                 </property>
@@ -465,7 +465,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_start">
+          <widget class="QPushButton" name="push_button_start">
            <property name="text">
             <string>Starte Auswertung</string>
            </property>

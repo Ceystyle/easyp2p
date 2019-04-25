@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
-# pylint: disable=invalid-name
 
 """Module implementing MainWindow, the main window of easyp2p."""
 
@@ -48,14 +47,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             start_month = 'Dez'
             start_year = str(date.today().year - 1)
 
-        self.comboBox_start_month.setCurrentIndex(
-            self.comboBox_start_month.findText(start_month))
-        self.comboBox_start_year.setCurrentIndex(
-            self.comboBox_start_year.findText(start_year))
-        self.comboBox_end_month.setCurrentIndex(
-            self.comboBox_end_month.findText(start_month))
-        self.comboBox_end_year.setCurrentIndex(
-            self.comboBox_end_year.findText(start_year))
+        self.combo_box_start_month.setCurrentIndex(
+            self.combo_box_start_month.findText(start_month))
+        self.combo_box_start_year.setCurrentIndex(
+            self.combo_box_start_year.findText(start_year))
+        self.combo_box_end_month.setCurrentIndex(
+            self.combo_box_end_month.findText(start_month))
+        self.combo_box_end_year.setCurrentIndex(
+            self.combo_box_end_year.findText(start_year))
 
     def get_date_range(self) -> Tuple[date, date]:
         """
@@ -66,11 +65,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         """
         start_month = int(p2p_helper.short_month_to_nbr(
-            str(self.comboBox_start_month.currentText())))
-        start_year = int(self.comboBox_start_year.currentText())
+            str(self.combo_box_start_month.currentText())))
+        start_year = int(self.combo_box_start_year.currentText())
         end_month = int(p2p_helper.short_month_to_nbr(
-            str(self.comboBox_end_month.currentText())))
-        end_year = int(self.comboBox_end_year.currentText())
+            str(self.combo_box_end_month.currentText())))
+        end_year = int(self.combo_box_end_year.currentText())
         last_day_of_month = calendar.monthrange(end_year, end_month)[1]
         return (date(start_year, start_month, 1),
                 date(end_year, end_month, last_day_of_month))
@@ -97,25 +96,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
                     date_range[0].strftime('%d.%m.%Y'),
                     date_range[1].strftime('%d.%m.%Y')))
-            QLineEdit.setText(self.lineEdit_output_file, output_file)
+            QLineEdit.setText(self.line_edit_output_file, output_file)
 
     @pyqtSlot(str)
-    def on_comboBox_start_month_activated(self) -> None:
+    def on_combo_box_start_month_activated(self) -> None:
         """Update output file if user changed start month in the combo box."""
         self.set_output_file()
 
     @pyqtSlot(str)
-    def on_comboBox_start_year_activated(self) -> None:
+    def on_combo_box_start_year_activated(self) -> None:
         """Update output file if user changed start year in the combo box."""
         self.set_output_file()
 
     @pyqtSlot(str)
-    def on_comboBox_end_month_activated(self) -> None:
+    def on_combo_box_end_month_activated(self) -> None:
         """Update output file if user changed end month in the combo box."""
         self.set_output_file()
 
     @pyqtSlot(str)
-    def on_comboBox_end_year_activated(self, year: str) -> None:
+    def on_combo_box_end_year_activated(self, year: str) -> None:
         """Update output file if user changed end year in the combo box."""
         self.set_output_file()
 
@@ -127,14 +126,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         output_file, _ = QFileDialog.getSaveFileName(
-            self, "Ausgabedatei wählen", self.lineEdit_output_file.text(),
+            self, "Ausgabedatei wählen", self.line_edit_output_file.text(),
             "MS Excel Dateien (*.xlsx)", options=options)
         if output_file:
             # The file name must include xlsx file format. Otherwise the Excel
             # writer will crash later.
             if not output_file.endswith('.xlsx'):
                 output_file += '.xlsx'
-            QLineEdit.setText(self.lineEdit_output_file, output_file)
+            QLineEdit.setText(self.line_edit_output_file, output_file)
             self.output_file_changed = True
 
     @pyqtSlot(bool)
@@ -184,5 +183,5 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Open progress window
         progress_window = ProgressWindow(
             platforms, credentials, date_range,
-            self.lineEdit_output_file.text())
+            self.line_edit_output_file.text())
         progress_window.exec_()
