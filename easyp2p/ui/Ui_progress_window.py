@@ -8,53 +8,52 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(412, 286)
-        Dialog.setSizeGripEnabled(True)
-        self.layoutWidget = QtWidgets.QWidget(Dialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(7, 7, 391, 268))
-        self.layoutWidget.setObjectName("layoutWidget")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.layoutWidget)
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+class Ui_ProgressWindow(object):
+    def setupUi(self, ProgressWindow):
+        ProgressWindow.setObjectName("ProgressWindow")
+        ProgressWindow.resize(412, 286)
+        ProgressWindow.setSizeGripEnabled(True)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(ProgressWindow)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.progressBar = QtWidgets.QProgressBar(self.layoutWidget)
+        self.progressBar = QtWidgets.QProgressBar(ProgressWindow)
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
         self.verticalLayout.addWidget(self.progressBar)
-        self.progressText = QtWidgets.QTextBrowser(self.layoutWidget)
+        self.progressText = QtWidgets.QTextBrowser(ProgressWindow)
         self.progressText.setObjectName("progressText")
         self.verticalLayout.addWidget(self.progressText)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.pushButton_ok = QtWidgets.QPushButton(self.layoutWidget)
+        self.pushButton_ok = QtWidgets.QPushButton(ProgressWindow)
         self.pushButton_ok.setEnabled(False)
         self.pushButton_ok.setObjectName("pushButton_ok")
         self.horizontalLayout.addWidget(self.pushButton_ok)
-        self.pushButton_abort = QtWidgets.QPushButton(self.layoutWidget)
+        self.pushButton_abort = QtWidgets.QPushButton(ProgressWindow)
         self.pushButton_abort.setObjectName("pushButton_abort")
         self.horizontalLayout.addWidget(self.pushButton_abort)
         self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout_2.addLayout(self.verticalLayout)
 
-        self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(ProgressWindow)
+        QtCore.QMetaObject.connectSlotsByName(ProgressWindow)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, ProgressWindow):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "easyP2P"))
-        self.pushButton_ok.setText(_translate("Dialog", "OK"))
-        self.pushButton_abort.setText(_translate("Dialog", "Abbrechen"))
+        ProgressWindow.setWindowTitle(_translate("ProgressWindow", "easyP2P"))
+        self.pushButton_ok.setText(_translate("ProgressWindow", "OK"))
+        self.pushButton_abort.setText(_translate("ProgressWindow", "Abbrechen"))
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    Dialog = QtWidgets.QDialog()
-    ui = Ui_Dialog()
-    ui.setupUi(Dialog)
-    Dialog.show()
+    ProgressWindow = QtWidgets.QDialog()
+    ui = Ui_ProgressWindow()
+    ui.setupUi(ProgressWindow)
+    ProgressWindow.show()
     sys.exit(app.exec_())
 

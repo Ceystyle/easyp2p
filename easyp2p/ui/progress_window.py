@@ -13,10 +13,10 @@ from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (QDialog, QMessageBox)
 
 from easyp2p.p2p_worker import WorkerThread
-from easyp2p.ui.Ui_progress_window import Ui_Dialog
+from easyp2p.ui.Ui_progress_window import Ui_ProgressWindow
 
 
-class ProgressWindow(QDialog, Ui_Dialog):
+class ProgressWindow(QDialog, Ui_ProgressWindow):
 
     """Contains code for handling events for the Progress Window."""
 
