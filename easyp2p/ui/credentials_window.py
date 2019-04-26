@@ -21,18 +21,25 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
 
     """
 
-    def __init__(self, platform: str) -> None:
+    def __init__(self, platform: str, save_in_keyring: bool = False) -> None:
         """
         Constructor of CredentialsWindow.
 
         Args:
             platform: Name of the P2P platform
 
+        Keyword Args:
+            save_in_keyring: If True the save_in_keyring checkbox will be
+                checked and disabled
+
         """
         super().__init__()
         self.setupUi(self)
         self.label_platform.setText('Bitte Benutzername und Passwort für {0} '
             'eingeben:'.format(platform))
+        if save_in_keyring:
+            self.check_box_save_in_keyring.setChecked(True)
+            self.check_box_save_in_keyring.setEnabled(False)
 
 
 def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
@@ -93,7 +100,8 @@ def save_credentials_in_keyring(
     return False
 
 def get_credentials_from_user(
-        platform: str) -> Tuple[Optional[str], Optional[str]]:
+        platform: str, save_in_keyring: bool = False) \
+        -> Tuple[Optional[str], Optional[str]]:
     """
     Ask user for P2P platform credentials.
 
@@ -106,7 +114,7 @@ def get_credentials_from_user(
     """
     username, password = None, None
     while not username or not password:
-        credentials_window = CredentialsWindow(platform)
+        credentials_window = CredentialsWindow(platform, save_in_keyring)
 
         if not credentials_window.exec_():
             # User clicked the Cancel button

@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
 import easyp2p.p2p_helper as p2p_helper
 import easyp2p.ui.credentials_window as credentials_window
 from easyp2p.ui.progress_window import ProgressWindow
+from easyp2p.ui.settings_window import SettingsWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
 
 
@@ -74,9 +75,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return (date(start_year, start_month, 1),
                 date(end_year, end_month, last_day_of_month))
 
-    def get_platforms(self) -> Set[str]:
+    def get_platforms(self, checked: bool = True) -> Set[str]:
         """
         Get list of all platforms selected by the user.
+
+        Keyword Args:
+            checked: If True only the platforms selected by the user will
+                be returned, if False all platforms will be returned
 
         Returns:
             Set of P2P platform names
@@ -84,7 +89,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         platforms = set()
         for check_box in self.group_box_platforms.findChildren(QCheckBox):
-            if check_box.isChecked():
+            if not checked:
+                platforms.add(check_box.text().replace('&', ''))
+            elif check_box.isChecked():
                 platforms.add(check_box.text().replace('&', ''))
         return platforms
 
@@ -185,3 +192,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             platforms, credentials, date_range,
             self.line_edit_output_file.text())
         progress_window.exec_()
+
+    @pyqtSlot()
+    def on_tool_button_settings_clicked(self) -> None:
+        """Open the settings window."""
+        settings_window = SettingsWindow(self.get_platforms(False))
+        settings_window.exec_()

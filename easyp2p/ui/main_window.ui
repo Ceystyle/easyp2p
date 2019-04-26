@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>736</width>
-    <height>462</height>
+    <height>464</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,144 +16,124 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="title">
-         <string/>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
+     <widget class="QGroupBox" name="group_box_platform_top">
+      <property name="title">
+       <string>Für welche P2P-Plattformen sollen Ergebnisse geladen werden?</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QGroupBox" name="group_box_platform_top">
+          <widget class="QGroupBox" name="group_box_platforms">
            <property name="title">
-            <string>Für welche P2P-Plattformen sollen Ergebnisse geladen werden?</string>
+            <string/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item>
-             <layout class="QGridLayout" name="gridLayout">
-              <item row="1" column="0" colspan="2">
-               <widget class="QGroupBox" name="group_box_platforms">
-                <property name="title">
-                 <string/>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <layout class="QGridLayout" name="gridLayout_2">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="check_box_bondora">
+                <property name="text">
+                 <string notr="true">Bondora</string>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_3">
-                 <item row="0" column="0">
-                  <layout class="QGridLayout" name="gridLayout_2">
-                   <property name="spacing">
-                    <number>6</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QCheckBox" name="check_box_bondora">
-                     <property name="text">
-                      <string notr="true">Bondora</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QCheckBox" name="check_box_mintos">
-                     <property name="text">
-                      <string notr="true">Mintos</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QCheckBox" name="check_box_dofinance">
-                     <property name="text">
-                      <string notr="true">DoFinance</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="1">
-                    <widget class="QCheckBox" name="check_box_peerberry">
-                     <property name="text">
-                      <string notr="true">PeerBerry</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="0">
-                    <widget class="QCheckBox" name="check_box_estateguru">
-                     <property name="text">
-                      <string notr="true">Estateguru</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="1">
-                    <widget class="QCheckBox" name="check_box_robocash">
-                     <property name="text">
-                      <string notr="true">Robocash</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="0">
-                    <widget class="QCheckBox" name="check_box_grupeer">
-                     <property name="text">
-                      <string notr="true">Grupeer</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="1">
-                    <widget class="QCheckBox" name="check_box_swaper">
-                     <property name="text">
-                      <string notr="true">Swaper</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="0">
-                    <widget class="QCheckBox" name="check_box_iuvo">
-                     <property name="text">
-                      <string notr="true">Iuvo</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="1">
-                    <widget class="QCheckBox" name="check_box_twino">
-                     <property name="text">
-                      <string notr="true">Twino</string>
-                     </property>
-                     <property name="shortcut">
-                      <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
                </widget>
               </item>
-              <item row="2" column="0" colspan="2">
-               <widget class="QCheckBox" name="check_box_select_all">
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="check_box_mintos">
                 <property name="text">
-                 <string>Alle aus-/abwählen</string>
+                 <string notr="true">Mintos</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QCheckBox" name="check_box_dofinance">
+                <property name="text">
+                 <string notr="true">DoFinance</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QCheckBox" name="check_box_peerberry">
+                <property name="text">
+                 <string notr="true">PeerBerry</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QCheckBox" name="check_box_estateguru">
+                <property name="text">
+                 <string notr="true">Estateguru</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QCheckBox" name="check_box_robocash">
+                <property name="text">
+                 <string notr="true">Robocash</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QCheckBox" name="check_box_grupeer">
+                <property name="text">
+                 <string notr="true">Grupeer</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QCheckBox" name="check_box_swaper">
+                <property name="text">
+                 <string notr="true">Swaper</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QCheckBox" name="check_box_iuvo">
+                <property name="text">
+                 <string notr="true">Iuvo</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QCheckBox" name="check_box_twino">
+                <property name="text">
+                 <string notr="true">Twino</string>
+                </property>
+                <property name="shortcut">
+                 <string notr="true"/>
                 </property>
                </widget>
               </item>
@@ -163,315 +143,333 @@
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_date_range">
-           <item>
-            <widget class="QGroupBox" name="groupBox_start_date">
-             <property name="title">
-              <string>Startdatum</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_3">
-                <item>
-                 <widget class="QComboBox" name="combo_box_start_month">
-                  <item>
-                   <property name="text">
-                    <string>Jan</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Feb</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Mrz</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Apr</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Mai</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Jun</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Jul</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Aug</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Sep</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Okt</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Nov</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Dez</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="combo_box_start_year">
-                  <item>
-                   <property name="text">
-                    <string>2010</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2011</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2012</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2013</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2014</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2015</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2016</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2017</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2018</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2019</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="groupBox_end_date">
-             <property name="title">
-              <string>Enddatum</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_4">
-                <item>
-                 <widget class="QComboBox" name="combo_box_end_month">
-                  <item>
-                   <property name="text">
-                    <string>Jan</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Feb</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Mrz</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Apr</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Mai</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Jun</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Jul</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Aug</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Sep</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Okt</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Nov</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Dez</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="combo_box_end_year">
-                  <item>
-                   <property name="text">
-                    <string>2010</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2011</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2012</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2013</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2014</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2015</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2016</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2017</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2018</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>2019</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_5">
-           <property name="title">
-            <string>In welcher Datei sollen die Ergebnisse gespeichert werden?</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
-              <item>
-               <widget class="QLineEdit" name="line_edit_output_file">
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="push_button_file_chooser">
-                <property name="text">
-                 <string>Datei wählen</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="push_button_start">
+          <widget class="QCheckBox" name="check_box_select_all">
            <property name="text">
-            <string>Starte Auswertung</string>
+            <string>Alle aus-/abwählen</string>
            </property>
           </widget>
          </item>
         </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_date_range">
+      <item>
+       <widget class="QGroupBox" name="groupBox_start_date">
+        <property name="title">
+         <string>Startdatum</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QComboBox" name="combo_box_start_month">
+             <item>
+              <property name="text">
+               <string>Jan</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Feb</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Mrz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Apr</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Mai</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Jun</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Jul</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Aug</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Sep</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Okt</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Nov</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Dez</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="combo_box_start_year">
+             <item>
+              <property name="text">
+               <string>2010</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2011</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2012</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2013</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2014</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2015</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2016</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2017</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2018</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2019</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_end_date">
+        <property name="title">
+         <string>Enddatum</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QComboBox" name="combo_box_end_month">
+             <item>
+              <property name="text">
+               <string>Jan</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Feb</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Mrz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Apr</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Mai</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Jun</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Jul</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Aug</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Sep</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Okt</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Nov</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Dez</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="combo_box_end_year">
+             <item>
+              <property name="text">
+               <string>2010</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2011</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2012</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2013</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2014</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2015</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2016</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2017</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2018</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2019</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_5">
+      <property name="title">
+       <string>In welcher Datei sollen die Ergebnisse gespeichert werden?</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLineEdit" name="line_edit_output_file">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="push_button_file_chooser">
+           <property name="text">
+            <string>Datei wählen</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="push_button_start">
+        <property name="text">
+         <string>Starte Auswertung</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="tool_button_settings">
+        <property name="text">
+         <string>...</string>
+        </property>
        </widget>
       </item>
      </layout>

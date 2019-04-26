@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(736, 462)
+        MainWindow.resize(736, 464)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralWidget)
@@ -188,9 +188,15 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.addWidget(self.push_button_file_chooser)
         self.verticalLayout_5.addLayout(self.horizontalLayout_6)
         self.verticalLayout.addWidget(self.groupBox_5)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.push_button_start = QtWidgets.QPushButton(self.groupBox)
         self.push_button_start.setObjectName("push_button_start")
-        self.verticalLayout.addWidget(self.push_button_start)
+        self.horizontalLayout.addWidget(self.push_button_start)
+        self.tool_button_settings = QtWidgets.QToolButton(self.groupBox)
+        self.tool_button_settings.setObjectName("tool_button_settings")
+        self.horizontalLayout.addWidget(self.tool_button_settings)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2.addWidget(self.groupBox)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
         MainWindow.setCentralWidget(self.centralWidget)
@@ -252,6 +258,7 @@ class Ui_MainWindow(object):
         self.groupBox_5.setTitle(_translate("MainWindow", "In welcher Datei sollen die Ergebnisse gespeichert werden?"))
         self.push_button_file_chooser.setText(_translate("MainWindow", "Datei wählen"))
         self.push_button_start.setText(_translate("MainWindow", "Starte Auswertung"))
+        self.tool_button_settings.setText(_translate("MainWindow", "..."))
 
 
 if __name__ == "__main__":
