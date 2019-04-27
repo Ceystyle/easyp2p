@@ -39,6 +39,7 @@ class Ui_ProgressWindow(object):
         self.verticalLayout_2.addLayout(self.verticalLayout)
 
         self.retranslateUi(ProgressWindow)
+        self.pushButton_ok.clicked.connect(ProgressWindow.accept)
         QtCore.QMetaObject.connectSlotsByName(ProgressWindow)
 
     def retranslateUi(self, ProgressWindow):

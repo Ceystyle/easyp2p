@@ -56,17 +56,6 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.worker.start()
 
     @pyqtSlot()
-    def on_pushButton_ok_clicked(self) -> None:
-        """
-        Close the progress window.
-
-        Only clickable after the progress bar reaches 100%, i.e. after all
-        selected P2P platforms were evaluated.
-
-        """
-        self.accept()
-
-    @pyqtSlot()
     def on_pushButton_abort_clicked(self) -> None:
         """
         Abort the evaluation of the selected P2P platforms.

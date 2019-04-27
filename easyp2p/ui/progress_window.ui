@@ -68,5 +68,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButton_ok</sender>
+   <signal>clicked()</signal>
+   <receiver>ProgressWindow</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>271</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>205</x>
+     <y>142</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
