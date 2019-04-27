@@ -7,7 +7,7 @@ import keyring
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox
 
-from easyp2p.ui.credentials_window import get_credentials_from_user
+import easyp2p.p2p_credentials as p2p_credentials
 from easyp2p.ui.Ui_settings_window import Ui_SettingsWindow
 
 
@@ -50,7 +50,8 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt werden?',
             not_saved_platforms, 0, False)
         if platform and accepted:
-            (username, _) = get_credentials_from_user(platform, True)
+            (username, _) = p2p_credentials.get_credentials_from_user(
+                platform, True)
             if username:
                 self.list_widget_platforms.addItem(platform)
                 self.saved_platforms.add(platform)
@@ -59,7 +60,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
     def on_push_button_change_clicked(self) -> None:
         """Change credentials for selected platform in the keyring."""
         platform = self.list_widget_platforms.currentItem().text()
-        get_credentials_from_user(platform, True)
+        p2p_credentials.get_credentials_from_user(platform, True)
 
     @pyqtSlot()
     def on_push_button_delete_clicked(self) -> None:
@@ -69,11 +70,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             self, 'Zugangsdaten löschen?',
             'Zugangsdaten für {0} wirklich löschen?'.format(platform))
         if msg == QMessageBox.Yes:
-            try:
-                username = keyring.get_password(platform, 'username')
-                keyring.delete_password(platform, username)
-                keyring.delete_password(platform, 'username')
-            except TypeError:
+            if not p2p_credentials.delete_credentials_from_keyring(platform):
                 QMessageBox.warning(
                     self, 'Löschen nicht erfolgreich!', ('Leider konnten die '
                     '{0}-Zugangsdaten nicht gelöscht werden!'.format(platform)))
