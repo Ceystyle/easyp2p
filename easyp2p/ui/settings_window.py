@@ -70,7 +70,11 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             self, 'Zugangsdaten löschen?',
             'Zugangsdaten für {0} wirklich löschen?'.format(platform))
         if msg == QMessageBox.Yes:
-            if not p2p_credentials.delete_credentials_from_keyring(platform):
+            try:
+                username = keyring.get_password(platform, 'username')
+                keyring.delete_password(platform, username)
+                keyring.delete_password(platform, 'username')
+            except TypeError:
                 QMessageBox.warning(
                     self, 'Löschen nicht erfolgreich!', ('Leider konnten die '
                     '{0}-Zugangsdaten nicht gelöscht werden!'.format(platform)))

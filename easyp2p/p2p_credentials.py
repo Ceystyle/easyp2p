@@ -6,7 +6,6 @@ Module for getting and saving credentials in the system keyring / from the user.
 
 """
 import keyring
-from PyQt5.QtWidgets import QMessageBox
 from typing import Optional, Tuple
 
 from easyp2p.ui.credentials_window import CredentialsWindow
@@ -14,7 +13,7 @@ from easyp2p.ui.credentials_window import CredentialsWindow
 
 def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
     """
-    Get credentials for P2P platform from keyring.
+    Get credentials for P2P platform from keyring or user.
 
     If a keyring exists, try to get credentials from it. If not or if they
     cannot be found, ask user for credentials.
@@ -46,51 +45,6 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
     return (username, password)
 
 
-def save_credentials_in_keyring(
-        platform: str, username: str, password: str) -> bool:
-    """
-    Save credentials for P2P platform in keyring.
-
-    Args:
-        platform: Name of P2P platform
-        username: Username for P2P platform
-        password: Password for P2P platform
-
-    Returns:
-        True if credentials were saved successfully, False if not
-
-    """
-    if keyring.get_keyring():
-        try:
-            keyring.set_password(platform, 'username', username)
-            keyring.set_password(platform, username, password)
-            return True
-        except keyring.errors.PasswordSetError:
-            return False
-
-    return False
-
-
-def delete_credentials_from_keyring(platform: str) -> bool:
-    """
-    Delete credentials for P2P platform from keyring.
-
-    Args:
-        platform: Name of P2P platform
-
-    Returns:
-        True if credentials were deleted successfully, False if not
-
-    """
-    try:
-        username = keyring.get_password(platform, 'username')
-        keyring.delete_password(platform, username)
-        keyring.delete_password(platform, 'username')
-    except TypeError:
-        return False
-    return True
-
-
 def get_credentials_from_user(
         platform: str, save_in_keyring: bool = False) \
         -> Tuple[Optional[str], Optional[str]]:
@@ -114,12 +68,5 @@ def get_credentials_from_user(
 
         username = credentials_window.line_edit_username.text()
         password = credentials_window.line_edit_password.text()
-
-    if credentials_window.check_box_save_in_keyring.isChecked():
-        if not save_credentials_in_keyring(platform, username, password):
-            QMessageBox.warning(
-                credentials_window, 'Speichern im Keyring fehlgeschlagen!',
-                'Speichern des Passworts im Keyring war leider nicht '
-                'erfolgreich!')
 
     return (username, password)

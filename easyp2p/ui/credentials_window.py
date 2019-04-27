@@ -3,6 +3,7 @@
 
 """Module implementing CredentialsWindow."""
 
+import keyring
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
@@ -34,9 +35,12 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         """
         super().__init__()
         self.setupUi(self)
+        self.platform = platform
         self.label_platform.setText('Bitte Benutzername und Passwort für {0} '
             'eingeben:'.format(platform))
-        if save_in_keyring:
+        if not keyring.get_keyring():
+            self.check_box_save_in_keyring.setEnabled(False)
+        elif save_in_keyring:
             self.check_box_save_in_keyring.setChecked(True)
             self.check_box_save_in_keyring.setEnabled(False)
 
@@ -47,5 +51,19 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
             QMessageBox.warning(
                 self, 'Felder nicht ausgefüllt', 'Bitte Felder für '
                 'Benutzername und Passwort ausfüllen!')
-        else:
-            self.accept()
+            return
+
+        if self.check_box_save_in_keyring.isChecked():
+            try:
+                keyring.set_password(
+                    self.platform, 'username', self.line_edit_username.text())
+                keyring.set_password(
+                    self.platform, self.line_edit_username.text(),
+                    self.line_edit_password.text())
+            except keyring.errors.PasswordSetError:
+                QMessageBox.warning(
+                    self, 'Speichern im Keyring fehlgeschlagen!',
+                    'Speichern des Passworts im Keyring war leider nicht '
+                    'erfolgreich!')
+
+        self.accept()
