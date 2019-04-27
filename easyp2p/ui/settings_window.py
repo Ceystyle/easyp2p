@@ -45,10 +45,18 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         not_saved_platforms = {platform for platform in self.platforms
             if platform not in self.saved_platforms}
 
-        platform, accepted = QInputDialog.getItem(
-            self, 'P2P-Plattform auswählen',
-            'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt werden?',
-            not_saved_platforms, 0, False)
+        if not_saved_platforms:
+            platform, accepted = QInputDialog.getItem(
+                self, 'P2P-Plattform auswählen',
+                'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt werden?',
+                not_saved_platforms, 0, False)
+        else:
+            QMessageBox.information(
+                self, 'Keine weiteren Plattformen verfügbar!',
+                ('Es sind bereits Zugangsdaten für alle unterstützten '
+                'Plattformen vorhanden!'))
+            return
+
         if platform and accepted:
             (username, _) = p2p_credentials.get_credentials_from_user(
                 platform, True)
