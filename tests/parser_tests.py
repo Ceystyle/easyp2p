@@ -328,9 +328,26 @@ class ParserTests(unittest.TestCase):
         totals_pivot_table_exp = pd.read_excel(
             exp_result_file, 'Gesamtergebnis')
 
-        self.assertTrue(daily_pivot_table.equals(daily_pivot_table_exp))
-        self.assertTrue(monthly_pivot_table.equals(monthly_pivot_table_exp))
-        self.assertTrue(totals_pivot_table.equals(totals_pivot_table_exp))
+        try:
+            self.assertTrue(daily_pivot_table.equals(daily_pivot_table_exp))
+        except AssertionError:
+            print('Actual result:\n', daily_pivot_table)
+            print('Expected result:\n', daily_pivot_table_exp)
+            raise AssertionError
+
+        try:
+            self.assertTrue(monthly_pivot_table.equals(monthly_pivot_table_exp))
+        except AssertionError:
+            print('Actual result:\n', monthly_pivot_table)
+            print('Expected result:\n', monthly_pivot_table_exp)
+            raise AssertionError
+
+        try:
+            self.assertTrue(totals_pivot_table.equals(totals_pivot_table_exp))
+        except AssertionError:
+            print('Actual result:\n', totals_pivot_table)
+            print('Expected result:\n', totals_pivot_table_exp)
+            raise AssertionError
 
     def test_write_results_all(self):
         """Test write_results for all supported platforms."""
