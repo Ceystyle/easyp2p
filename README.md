@@ -52,7 +52,7 @@ Momentan leider noch nicht unterstützt.
 
 Die Benutzeroberfläche von easyp2p ist (hoffentlich) weitgehend selbsterklärend:
 
-![Hauptfenster von easyp2p](ceystyle.github.com/easyp2p/docs/main_window_screenshot.png)
+![Hauptfenster von easyp2p](docs/main_window_screenshot.png)
 
 Im oberen Teil können die P2P-Plattformen ausgewählt werden, für die Ergebnisse erzeugt werden sollen. Im Feld darunter wird der Berichtszeitraum eingestellt. easyp2p unterstützt nur volle Monate. Die Ergebnisse werden in Form einer Excel-Datei ausgegeben, die im nächsten Feld ausgewählt werden kann. Mit dem Button "Starte Auswertung" kann die Auswertung gestartet werden.
 
