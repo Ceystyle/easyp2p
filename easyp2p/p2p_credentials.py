@@ -8,7 +8,7 @@ Module for getting and saving credentials in the system keyring / from the user.
 import keyring
 from typing import Optional, Tuple
 
-from easyp2p.ui.credentials_window import CredentialsWindow
+import easyp2p.ui.credentials_window as credentials_window
 
 
 def keyring_exists() -> bool:
@@ -71,14 +71,15 @@ def get_credentials_from_user(
     """
     username, password = None, None
     while not username or not password:
-        credentials_window = CredentialsWindow(platform, save_in_keyring)
+        cred_window = credentials_window.CredentialsWindow(
+            platform, save_in_keyring)
 
-        if not credentials_window.exec_():
+        if not cred_window.exec_():
             # User clicked the Cancel button
             return (None, None)
 
-        username = credentials_window.line_edit_username.text()
-        password = credentials_window.line_edit_password.text()
+        username = cred_window.line_edit_username.text()
+        password = cred_window.line_edit_password.text()
 
     return (username, password)
 
