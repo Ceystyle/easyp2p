@@ -216,21 +216,49 @@ class MainWindowTests(unittest.TestCase):
         self.window_open = False
         return False
 
+
 class ProgressWindowTests(unittest.TestCase):
 
     """Test the progress window of easyp2p."""
 
     def setUp(self):
         """Initialize ProgressWindow."""
-        self.form = ProgressWindow()
+        self.form = ProgressWindow(
+            {'test_platform1', 'test_platform2'},
+            {'test_platform': ('username', 'password')},
+            (date(2018, 9, 1), date(2018, 12, 31)),
+            os.path.join(os.getcwd(), 'test.xlsx'))
+
+    def tearDown(self):
+        """Stop the worker thread after test is done."""
+        self.form.worker.quit()
+        self.form.worker.wait()
 
     def test_defaults(self):
         """Test default behaviour of ProgressWindow."""
-        self.assertEqual(self.form.progressBar.value(), 0)
-        self.assertEqual(self.form.progressText.isReadOnly(), True)
-        self.assertEqual(self.form.progressText.toPlainText(), '')
-        self.assertEqual(self.form.pushButton_ok.isEnabled(), False)
-        self.assertEqual(self.form.pushButton_abort.isEnabled(), True)
+        self.assertEqual(self.form.progress_bar.value(), 0)
+        self.assertEqual(self.form.progress_text.isReadOnly(), True)
+        self.assertEqual(self.form.progress_text.toPlainText(), '')
+        self.assertEqual(self.form.push_button_ok.isEnabled(), False)
+        self.assertEqual(self.form.push_button_abort.isEnabled(), True)
+
+    def test_progress_text(self):
+        """Test appending a line to progress_text."""
+        self.form.worker.add_progress_text.emit(
+            'Test message', self.form.worker.BLACK)
+        self.assertEqual(self.form.progress_text.toPlainText(), 'Test message')
+
+    def test_progress_bar(self):
+        """Test updating progress_bar to maximum value."""
+        self.form.worker.update_progress_bar.emit()
+        self.assertEqual(self.form.progress_bar.value(), 1)
+        self.form.worker.update_progress_bar.emit()
+        self.assertEqual(self.form.progress_bar.value(), 2)
+        # Two is the maximum value so the ok button must be enabled
+        self.assertEqual(self.form.push_button_ok.isEnabled(), True)
+        # Further increasing the progress_bar should not work
+        self.form.worker.update_progress_bar.emit()
+        self.assertEqual(self.form.progress_bar.value(), 2)
 
 
 if __name__ == "__main__":
