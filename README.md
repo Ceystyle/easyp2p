@@ -36,18 +36,15 @@ Um easyp2p verwenden zu können sind Zugangsdaten zu mindestens einer der unters
 
 ### Linux
 
+Auf Linux-basierten Systemen ist Python 3.x in der Regel schon vorinstalliert. Daher muss als externe Abhängigkeit lediglich ChromeDriver installiert werden, das von easyp2p benutzt wird, um auf die Webseiten der P2P-Plattformen zuzugreifen:
 
-Auf Debian-basierten Systemen ist Python 3.x schon vorinstalliert. Eventuell muss pip noch nachinstalliert werden. Außerdem nutzt easyp2p ChromeDriver, um auf die
-Webseiten der P2P-Plattformen zuzugreifen:
-
-    sudo apt-get install chromium-driver, python3-pip
+    sudo apt-get install chromium-driver
 
 Anschließend kann easyp2p durch den folgenden Befehl installiert werden:
 
-    pip3 easyp2p
+    python3 setup.py install
 
 ### Windows & Mac
-
 
 Momentan leider noch nicht unterstützt.
 
@@ -55,16 +52,9 @@ Momentan leider noch nicht unterstützt.
 
 Die Benutzeroberfläche von easyp2p ist (hoffentlich) weitgehend selbsterklärend:
 
-.. image:: main_window_screenshot2.png
-    :alt: Hauptfenster von easyp2p
+![Hauptfenster von easyp2p](ceystyle.github.com/easyp2p/docs/main_window_screenshot.png)
 
-Im oberen Teil 1 können die P2P-Plattformen ausgewählt werden, für die die Ergebnisse erzeugt werden sollen. Im Feld 2 darunter wird der Berichtszeitraum eingestellt.
-easyp2p unterstützt nur volle Monate. Die Ergebnisse werden in Form einer Excel-Datei ausgegeben, die im nächsten Feld 3 ausgewählt werden kann. Mit dem Button 4 kann die
-Auswertung gestartet werden.
+Im oberen Teil können die P2P-Plattformen ausgewählt werden, für die Ergebnisse erzeugt werden sollen. Im Feld darunter wird der Berichtszeitraum eingestellt. easyp2p unterstützt nur volle Monate. Die Ergebnisse werden in Form einer Excel-Datei ausgegeben, die im nächsten Feld ausgewählt werden kann. Mit dem Button "Starte Auswertung" kann die Auswertung gestartet werden.
 
-Zunächst öffnet sich ein Fenster, um die Zugangsdaten zu den ausgewählten P2P-Plattformen abzufragen. Diese können entweder jedes Mal aufs Neue eingegeben werden oder (sofern vom Betriebssystem
-unterstützt) im Keyring gespeichert werden. Ist letzteres gewünscht, so muss der Haken in der Checkbox gesetzt werden. Für Plattformen, die bereits im Keyring gespeichert sind, werden die
-Zugangsdaten nicht erneut abgefragt. Sollen die im Keyring gespeicherten Zugangsdaten gelöscht oder geändert werden, z.B. nach einer Aktualisierung des Passworts, so muss dies direkt im Keyring
-geschehen.
-Nachdem alle Zugangsdaten abgefragt wurdem, öffnet sich ein neues Fenster, in dem der Fortschritt zu sehen ist. Neben allgemeinen Informationen zum Status werden hier auch evtl.
-Fehlermeldungen angezeigt.
+Zunächst öffnet sich ein Fenster, um die Zugangsdaten zu den ausgewählten P2P-Plattformen abzufragen. Diese können entweder jedes Mal aufs Neue eingegeben werden oder (sofern vom Betriebssystem unterstützt) im Keyring gespeichert werden. Ist letzteres gewünscht, so muss der Haken in der Checkbox gesetzt werden. Für Plattformen, die bereits im Keyring gespeichert sind, werden die Zugangsdaten nicht erneut abgefragt. Sollen die im Keyring gespeicherten Zugangsdaten gelöscht oder geändert werden, z.B. nach einer Aktualisierung des Passworts, so kann dies im Einstellungsfenster, das man über den Button mit den drei Punkten erreicht, geschehen.
+Nachdem alle Zugangsdaten abgefragt wurdem, öffnet sich ein neues Fenster, in dem der Fortschritt zu sehen ist. Neben allgemeinen Informationen zum Status werden hier auch evtl. Fehlermeldungen angezeigt.
