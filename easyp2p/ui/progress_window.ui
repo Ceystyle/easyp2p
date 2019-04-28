@@ -20,14 +20,14 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QProgressBar" name="progressBar">
+      <widget class="QProgressBar" name="progress_bar">
        <property name="value">
         <number>0</number>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QTextBrowser" name="progressText"/>
+      <widget class="QTextBrowser" name="progress_text"/>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -45,7 +45,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_ok">
+        <widget class="QPushButton" name="push_button_ok">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -55,7 +55,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_abort">
+        <widget class="QPushButton" name="push_button_abort">
          <property name="text">
           <string>Abbrechen</string>
          </property>
@@ -70,7 +70,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>pushButton_ok</sender>
+   <sender>push_button_ok</sender>
    <signal>clicked()</signal>
    <receiver>ProgressWindow</receiver>
    <slot>accept()</slot>

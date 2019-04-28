@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
-# pylint: disable=invalid-name
 
 """Module implementing ProgressWindow."""
 
@@ -10,7 +9,7 @@ from typing import AbstractSet, Mapping, Tuple
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import (QDialog, QMessageBox)
+from PyQt5.QtWidgets import QDialog, QMessageBox
 
 from easyp2p.p2p_worker import WorkerThread
 from easyp2p.ui.Ui_progress_window import Ui_ProgressWindow
@@ -42,8 +41,8 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.setupUi(self)
 
         # Initialize progress bar
-        self.progressBar.setMaximum(len(platforms))
-        self.progressBar.setValue(0)
+        self.progress_bar.setMaximum(len(platforms))
+        self.progress_bar.setValue(0)
 
         # Initialize and start worker thread
         self.worker = WorkerThread(
@@ -56,7 +55,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.worker.start()
 
     @pyqtSlot()
-    def on_pushButton_abort_clicked(self) -> None:
+    def on_push_button_abort_clicked(self) -> None:
         """
         Abort the evaluation of the selected P2P platforms.
 
@@ -76,9 +75,9 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             value: Value of the progress bar, between 0 and 100
 
         """
-        self.progressBar.setValue(self.progressBar.value() + 1)
-        if self.progressBar.value() == self.progressBar.maximum():
-            self.pushButton_ok.setEnabled(True)
+        self.progress_bar.setValue(self.progress_bar.value() + 1)
+        if self.progress_bar.value() == self.progress_bar.maximum():
+            self.push_button_ok.setEnabled(True)
 
     def add_progress_text(self, txt: str, color: QColor) -> None:
         """
@@ -89,8 +88,8 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             color: Color in which the message should be displayed
 
         """
-        self.progressText.setTextColor(color)
-        self.progressText.append(txt)
+        self.progress_text.setTextColor(color)
+        self.progress_text.append(txt)
 
     def abort_easyp2p(self, error_msg: str) -> None:
         """
