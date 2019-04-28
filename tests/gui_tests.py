@@ -4,17 +4,22 @@
 """Module containing all GUI tests for easyp2p."""
 
 from datetime import date
+import functools
 import os
 import sys
+from typing import Union
 import unittest
 
+import keyring
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit, QMessageBox
 from PyQt5.QtTest import QTest
 
 import easyp2p.p2p_helper as p2p_helper
+from easyp2p.ui.credentials_window import CredentialsWindow
 from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
+from easyp2p.ui.settings_window import SettingsWindow
 
 PLATFORMS = {
     'Bondora': 'csv',
@@ -40,6 +45,7 @@ class MainWindowTests(unittest.TestCase):
         self.form = MainWindow()
         self.message_box_open = False
         self.progress_window_open = False
+        self.window_open = False
 
     def set_test_dates(
             self, start_month: str = 'Sep', start_year: str = '2018',
@@ -120,13 +126,13 @@ class MainWindowTests(unittest.TestCase):
         """Test clicking start without any selected platform."""
         # Push the start button without selecting any platform first
         QTimer.singleShot(500, self.is_message_box_open)
+        QTimer.singleShot(
+            500, functools.partial(self.is_window_open, ProgressWindow))
         self.form.push_button_start.click()
 
-        # Check that a warning message pops up
+        # Check that warning message pops up and ProgressWindow did not open
         self.assertTrue(self.message_box_open)
-
-        # Check that the progress window did not open
-        self.assertFalse(self.is_progress_window_open())
+        self.assertFalse(self.window_open)
 
     def test_output_file_on_date_change(self) -> None:
         """Test output file name after a date change."""
@@ -159,13 +165,32 @@ class MainWindowTests(unittest.TestCase):
 
         # Push the start button
         QTimer.singleShot(500, self.is_message_box_open)
+        QTimer.singleShot(
+            500, functools.partial(self.is_window_open, ProgressWindow))
         self.form.push_button_start.click()
 
-        # Check that a warning message pops up
+        # Check that warning message pops up and ProgressWindow did not open
         self.assertTrue(self.message_box_open)
+        self.assertFalse(self.window_open)
 
-        # Check that the progress window did not open
-        self.assertFalse(self.is_progress_window_open())
+    def test_push_start_button_with_bondora_selected(self) -> None:
+        """Test pushing start button after selecting Bondora."""
+        self.form.check_box_bondora.setChecked(True)
+        QTimer.singleShot(
+            500, functools.partial(self.is_window_open, ProgressWindow))
+        QTest.mouseClick(self.form.push_button_start, Qt.LeftButton)
+
+        # Check that the progress window opened
+        self.assertTrue(self.window_open)
+
+    def test_push_tool_button_settings(self) -> None:
+        """Test pushing settings button."""
+        QTimer.singleShot(
+            500, functools.partial(self.is_window_open, SettingsWindow))
+        QTest.mouseClick(self.form.tool_button_settings, Qt.LeftButton)
+
+        # Check that the progress window opened
+        self.assertTrue(self.window_open)
 
     def is_message_box_open(self) -> bool:
         """Helper method to determine if a QMessageBox is open."""
@@ -178,16 +203,18 @@ class MainWindowTests(unittest.TestCase):
         self.message_box_open = False
         return False
 
-    def is_progress_window_open(self) -> bool:
-        """Helper method to determine if a ProgressWindow is open."""
+    def is_window_open(
+            self, window: Union[
+                CredentialsWindow, ProgressWindow, SettingsWindow]) -> bool:
+        """Helper method to determine if a window is open."""
         all_top_level_widgets = QApplication.topLevelWidgets()
         for widget in all_top_level_widgets:
-            if isinstance(widget, ProgressWindow):
-                self.progress_window_open = True
+            if isinstance(widget, window):
+                widget.reject()
+                self.window_open = True
                 return True
-        self.progress_window_open = False
+        self.window_open = False
         return False
-
 
 class ProgressWindowTests(unittest.TestCase):
 
