@@ -17,7 +17,7 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-with open("README.rst", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -28,7 +28,7 @@ setuptools.setup(
     description="Application for downloading and presenting investment results \
         for people-to-people (P2P) lending platforms.",
     long_description=long_description,
-    #url="https://github.com/pypa/sampleproject",
+    url="https://github.com/ceystyle/easyp2p",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
