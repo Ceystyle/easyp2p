@@ -9,7 +9,7 @@ import sys
 import unittest
 
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit, QMessageBox
 from PyQt5.QtTest import QTest
 
 import easyp2p.p2p_helper as p2p_helper
@@ -66,18 +66,9 @@ class MainWindowTests(unittest.TestCase):
     def test_defaults(self) -> None:
         """Test GUI in default state."""
 
-        # All checkboxes are unchecked in default state
-        self.assertFalse(self.form.check_box_bondora.isChecked())
-        self.assertFalse(self.form.check_box_dofinance.isChecked())
-        self.assertFalse(self.form.check_box_estateguru.isChecked())
-        self.assertFalse(self.form.check_box_grupeer.isChecked())
-        self.assertFalse(self.form.check_box_iuvo.isChecked())
-        self.assertFalse(self.form.check_box_mintos.isChecked())
-        self.assertFalse(self.form.check_box_peerberry.isChecked())
-        self.assertFalse(self.form.check_box_robocash.isChecked())
-        self.assertFalse(self.form.check_box_select_all.isChecked())
-        self.assertFalse(self.form.check_box_swaper.isChecked())
-        self.assertFalse(self.form.check_box_twino.isChecked())
+        # All check boxes are unchecked in default state
+        for check_box in self.form.group_box_platforms.findChildren(QCheckBox):
+            self.assertFalse(check_box.isChecked())
 
         # Check if output file name is set correctly
         date_range = self.form.get_date_range()
@@ -110,17 +101,8 @@ class MainWindowTests(unittest.TestCase):
         self.form.check_box_select_all.setChecked(True)
 
         # Test that all platform check boxes are checked
-        self.assertTrue(self.form.check_box_bondora.isChecked())
-        self.assertTrue(self.form.check_box_dofinance.isChecked())
-        self.assertTrue(self.form.check_box_estateguru.isChecked())
-        self.assertTrue(self.form.check_box_grupeer.isChecked())
-        self.assertTrue(self.form.check_box_iuvo.isChecked())
-        self.assertTrue(self.form.check_box_mintos.isChecked())
-        self.assertTrue(self.form.check_box_peerberry.isChecked())
-        self.assertTrue(self.form.check_box_robocash.isChecked())
-        self.assertTrue(self.form.check_box_select_all.isChecked())
-        self.assertTrue(self.form.check_box_swaper.isChecked())
-        self.assertTrue(self.form.check_box_twino.isChecked())
+        for check_box in self.form.group_box_platforms.findChildren(QCheckBox):
+            self.assertTrue(check_box.isChecked())
 
     def test_select_all_platforms_twice(self) -> None:
         """Test the Select All Platforms checkbox."""
@@ -131,17 +113,8 @@ class MainWindowTests(unittest.TestCase):
         self.form.check_box_select_all.setChecked(False)
 
         # Test that all platform check boxes are unchecked again
-        self.assertFalse(self.form.check_box_bondora.isChecked())
-        self.assertFalse(self.form.check_box_dofinance.isChecked())
-        self.assertFalse(self.form.check_box_estateguru.isChecked())
-        self.assertFalse(self.form.check_box_grupeer.isChecked())
-        self.assertFalse(self.form.check_box_iuvo.isChecked())
-        self.assertFalse(self.form.check_box_mintos.isChecked())
-        self.assertFalse(self.form.check_box_peerberry.isChecked())
-        self.assertFalse(self.form.check_box_robocash.isChecked())
-        self.assertFalse(self.form.check_box_select_all.isChecked())
-        self.assertFalse(self.form.check_box_swaper.isChecked())
-        self.assertFalse(self.form.check_box_twino.isChecked())
+        for check_box in self.form.group_box_platforms.findChildren(QCheckBox):
+            self.assertFalse(check_box.isChecked())
 
     def test_no_platform_selected(self) -> None:
         """Test clicking start without any selected platform."""
