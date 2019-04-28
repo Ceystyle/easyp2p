@@ -3,10 +3,10 @@
 
 """Module implementing CredentialsWindow."""
 
-import keyring
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
+import easyp2p.p2p_credentials as p2p_cred
 from easyp2p.ui.Ui_credentials_window import Ui_CredentialsWindow
 
 
@@ -38,7 +38,7 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         self.platform = platform
         self.label_platform.setText('Bitte Benutzername und Passwort für {0} '
             'eingeben:'.format(platform))
-        if not keyring.get_keyring():
+        if not p2p_cred.keyring_exists():
             self.check_box_save_in_keyring.setEnabled(False)
         elif save_in_keyring:
             self.check_box_save_in_keyring.setChecked(True)
@@ -54,13 +54,9 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
             return
 
         if self.check_box_save_in_keyring.isChecked():
-            try:
-                keyring.set_password(
-                    self.platform, 'username', self.line_edit_username.text())
-                keyring.set_password(
-                    self.platform, self.line_edit_username.text(),
-                    self.line_edit_password.text())
-            except keyring.errors.PasswordSetError:
+            if not p2p_cred.save_credentials_in_keyring(
+                self.platform, self.line_edit_username.text(),
+                self.line_edit_password.text()):
                 QMessageBox.warning(
                     self, 'Speichern im Keyring fehlgeschlagen!',
                     'Speichern des Passworts im Keyring war leider nicht '

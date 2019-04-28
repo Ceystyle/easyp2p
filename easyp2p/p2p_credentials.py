@@ -11,6 +11,17 @@ from typing import Optional, Tuple
 from easyp2p.ui.credentials_window import CredentialsWindow
 
 
+def keyring_exists() -> bool:
+    """
+    Check if there is a keyring available.
+
+    Returns:
+        True if a keyring is found, False if not
+
+    """
+    return keyring.get_keyring()
+
+
 def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
     """
     Get credentials for P2P platform from keyring or user.
@@ -70,3 +81,14 @@ def get_credentials_from_user(
         password = credentials_window.line_edit_password.text()
 
     return (username, password)
+
+
+def save_credentials_in_keyring(
+        platform: str, username: str, password: str) -> bool:
+    """Save credentials for platform in keyring."""
+    try:
+        keyring.set_password(platform, 'username', username)
+        keyring.set_password(platform, username, password)
+    except keyring.errors.PasswordSetError:
+        return False
+    return True
