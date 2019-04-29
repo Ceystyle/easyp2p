@@ -5,7 +5,7 @@
 
 from datetime import date
 import sys
-from typing import AbstractSet, Mapping, Tuple
+from typing import AbstractSet, Mapping, Optional, Tuple
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QColor
@@ -21,7 +21,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
     def __init__(
             self, platforms: AbstractSet,
-            credentials: Mapping[str, Tuple[str, str]],
+            credentials: Mapping[str, Optional[Tuple[str, str]]],
             date_range: Tuple[date, date], output_file: str) -> None:
         """
         Constructor of ProgressWindow class.

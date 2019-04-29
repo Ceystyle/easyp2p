@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
 
 
@@ -187,7 +188,7 @@ def create_statement_location(
     return statement_file
 
 
-class one_of_many_expected_conditions_true():  \
+class one_of_many_expected_conditions_true(object):  \
     #pylint: disable=invalid-name, too-few-public-methods
     """
     An expectation for checking if (at least) one of several provided expected
@@ -219,6 +220,6 @@ class one_of_many_expected_conditions_true():  \
             try:
                 if condition(driver):
                     return True
-            except: #pylint: disable=bare-except
+            except NoSuchElementException:
                 pass
         return False

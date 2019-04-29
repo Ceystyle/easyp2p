@@ -100,7 +100,7 @@ def get_password_from_keyring(platform: str, username: str) -> str:
     return keyring.get_password(platform, username)
 
 
-def delete_platform_from_keyring(platform: str) -> str:
+def delete_platform_from_keyring(platform: str) -> bool:
     """
     Delete credentials for platform from keyring.
 

@@ -33,7 +33,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
-        self.credentials = dict()
         self.init_date_combo_boxes()
         self.output_file_changed = False
         self.set_output_file()

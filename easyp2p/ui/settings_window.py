@@ -2,6 +2,7 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """Module implementing SettingsWindow, the settings window of easyp2p."""
+from typing import Set
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox
@@ -26,7 +27,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         self.setupUi(self)
 
         self.platforms = platforms
-        self.saved_platforms = set()
+        self.saved_platforms: Set[str] = set()
         if p2p_cred.keyring_exists():
             for platform in self.platforms:
                 if p2p_cred.get_password_from_keyring(platform, 'username'):

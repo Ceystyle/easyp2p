@@ -38,7 +38,7 @@ class WorkerThread(QThread):
 
     def __init__(
             self, platforms: AbstractSet[str],
-            credentials: Mapping[str, Tuple[str, str]],
+            credentials: Mapping[str, Optional[Tuple[str, str]]],
             date_range: Tuple[date, date], output_file: str) -> None:
         """
         Constructor of WorkerThread.

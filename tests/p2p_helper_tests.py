@@ -13,7 +13,7 @@ import os
 import sys
 from typing import Tuple
 
-import parser_tests
+import tests.parser_tests as parser_tests
 import easyp2p.platforms as p2p_platforms
 import easyp2p.p2p_helper as p2p_helper
 
