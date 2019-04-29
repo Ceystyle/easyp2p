@@ -29,7 +29,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         self.platforms = platforms
         self.saved_platforms: Set[str] = set()
         if p2p_cred.keyring_exists():
-            for platform in self.platforms:
+            for platform in sorted(self.platforms):
                 if p2p_cred.get_password_from_keyring(platform, 'username'):
                     self.list_widget_platforms.addItem(platform)
                     self.saved_platforms.add(platform)
@@ -49,8 +49,8 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         if not_saved_platforms:
             platform, accepted = QInputDialog.getItem(
                 self, 'P2P-Plattform auswählen',
-                'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt werden?',
-                not_saved_platforms, 0, False)
+                'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt '\
+                'werden?', sorted(not_saved_platforms), 0, False)
         else:
             QMessageBox.information(
                 self, 'Keine weiteren Plattformen verfügbar!',
