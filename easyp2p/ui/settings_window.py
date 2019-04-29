@@ -13,11 +13,11 @@ from easyp2p.ui.Ui_settings_window import Ui_SettingsWindow
 class SettingsWindow(QDialog, Ui_SettingsWindow):
 
     """Adjust easyp2p settings and user credentials for the P2P platforms."""
-    
+
     def __init__(self, platforms) -> None:
         """
         Constructor of SettingsWindow.
-        
+
         Args:
             platforms: Set containing the names of all supported P2P platforms
 
@@ -41,7 +41,8 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
     @pyqtSlot()
     def on_push_button_add_clicked(self) -> None:
         """Add credentials for a platform to the keyring."""
-        not_saved_platforms = {platform for platform in self.platforms
+        not_saved_platforms = {
+            platform for platform in self.platforms
             if platform not in self.saved_platforms}
 
         if not_saved_platforms:
@@ -53,7 +54,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             QMessageBox.information(
                 self, 'Keine weiteren Plattformen verfügbar!',
                 ('Es sind bereits Zugangsdaten für alle unterstützten '
-                'Plattformen vorhanden!'))
+                 'Plattformen vorhanden!'))
             return
 
         if platform and accepted:
@@ -79,8 +80,9 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         if msg == QMessageBox.Yes:
             if not p2p_cred.delete_platform_from_keyring(platform):
                 QMessageBox.warning(
-                    self, 'Löschen nicht erfolgreich!', ('Leider konnten die '
-                    '{0}-Zugangsdaten nicht gelöscht werden!'.format(platform)))
+                    self, 'Löschen nicht erfolgreich!',
+                    ('Leider konnten die {0}-Zugangsdaten nicht gelöscht '
+                     'werden!'.format(platform)))
                 return
             self.list_widget_platforms.takeItem(
                 self.list_widget_platforms.row(

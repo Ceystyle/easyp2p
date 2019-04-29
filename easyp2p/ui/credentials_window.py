@@ -36,8 +36,9 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         super().__init__()
         self.setupUi(self)
         self.platform = platform
-        self.label_platform.setText('Bitte Benutzername und Passwort für {0} '
-            'eingeben:'.format(platform))
+        self.label_platform.setText(
+            'Bitte Benutzername und Passwort für {0} eingeben:'.format(
+                platform))
         if not p2p_cred.keyring_exists():
             self.check_box_save_in_keyring.setEnabled(False)
         elif save_in_keyring:
@@ -46,6 +47,9 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
 
     @pyqtSlot()
     def on_button_box_accepted(self):
+        """
+        Check user provided credentials and optionally save them in keyring.
+        """
         if not self.line_edit_username.text() or \
             not self.line_edit_password.text():
             QMessageBox.warning(
@@ -55,8 +59,8 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
 
         if self.check_box_save_in_keyring.isChecked():
             if not p2p_cred.save_credentials_in_keyring(
-                self.platform, self.line_edit_username.text(),
-                self.line_edit_password.text()):
+                    self.platform, self.line_edit_username.text(),
+                    self.line_edit_password.text()):
                 QMessageBox.warning(
                     self, 'Speichern im Keyring fehlgeschlagen!',
                     'Speichern des Passworts im Keyring war leider nicht '

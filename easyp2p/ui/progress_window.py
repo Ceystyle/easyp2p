@@ -20,9 +20,9 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
     """Contains code for handling events for the Progress Window."""
 
     def __init__(
-        self, platforms: AbstractSet,
-        credentials: Mapping[str, Tuple[str, str]],
-        date_range: Tuple[date, date], output_file: str) -> None:
+            self, platforms: AbstractSet,
+            credentials: Mapping[str, Tuple[str, str]],
+            date_range: Tuple[date, date], output_file: str) -> None:
         """
         Constructor of ProgressWindow class.
 

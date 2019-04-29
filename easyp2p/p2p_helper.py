@@ -175,8 +175,8 @@ def create_statement_location(
         dl_dir = os.path.join(Path.home(), '.easyp2p', name.lower())
         statement_file = os.path.join(
             dl_dir, '{0}_statement_{1}-{2}.{3}'.format(
-            name.lower(), date_range[0].strftime('%Y%m%d'),
-            date_range[1].strftime('%Y%m%d'), suffix))
+                name.lower(), date_range[0].strftime('%Y%m%d'),
+                date_range[1].strftime('%Y%m%d'), suffix))
     else:
         dl_dir = os.path.dirname(statement_file)
 

@@ -121,7 +121,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.set_output_file()
 
     @pyqtSlot(str)
-    def on_combo_box_end_year_activated(self, year: str) -> None:
+    def on_combo_box_end_year_activated(self) -> None:
         """Update output file if user changed end year in the combo box."""
         self.set_output_file()
 

@@ -5,8 +5,9 @@
 Module for getting and saving credentials in the system keyring / from the user.
 
 """
-import keyring
 from typing import Optional, Tuple
+
+import keyring
 
 import easyp2p.ui.credentials_window as credentials_window
 
@@ -96,7 +97,7 @@ def get_password_from_keyring(platform: str, username: str) -> str:
         Password or None if no password was found for username
 
     """
-    return keyring.get_password(platform, 'username')
+    return keyring.get_password(platform, username)
 
 
 def delete_platform_from_keyring(platform: str) -> str:
