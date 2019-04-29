@@ -3,11 +3,10 @@
 
 """Module implementing SettingsWindow, the settings window of easyp2p."""
 
-import keyring
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox
 
-import easyp2p.p2p_credentials as p2p_credentials
+import easyp2p.p2p_credentials as p2p_cred
 from easyp2p.ui.Ui_settings_window import Ui_SettingsWindow
 
 
@@ -28,9 +27,9 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
 
         self.platforms = platforms
         self.saved_platforms = set()
-        if keyring.get_keyring():
+        if p2p_cred.keyring_exists():
             for platform in self.platforms:
-                if keyring.get_password(platform, 'username'):
+                if p2p_cred.get_password_from_keyring(platform, 'username'):
                     self.list_widget_platforms.addItem(platform)
                     self.saved_platforms.add(platform)
         else:
@@ -58,7 +57,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             return
 
         if platform and accepted:
-            (username, _) = p2p_credentials.get_credentials_from_user(
+            (username, _) = p2p_cred.get_credentials_from_user(
                 platform, True)
             if username:
                 self.list_widget_platforms.addItem(platform)
@@ -68,7 +67,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
     def on_push_button_change_clicked(self) -> None:
         """Change credentials for selected platform in the keyring."""
         platform = self.list_widget_platforms.currentItem().text()
-        p2p_credentials.get_credentials_from_user(platform, True)
+        p2p_cred.get_credentials_from_user(platform, True)
 
     @pyqtSlot()
     def on_push_button_delete_clicked(self) -> None:
@@ -78,11 +77,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             self, 'Zugangsdaten löschen?',
             'Zugangsdaten für {0} wirklich löschen?'.format(platform))
         if msg == QMessageBox.Yes:
-            try:
-                username = keyring.get_password(platform, 'username')
-                keyring.delete_password(platform, username)
-                keyring.delete_password(platform, 'username')
-            except TypeError:
+            if not p2p_cred.delete_platform_from_keyring(platform):
                 QMessageBox.warning(
                     self, 'Löschen nicht erfolgreich!', ('Leider konnten die '
                     '{0}-Zugangsdaten nicht gelöscht werden!'.format(platform)))

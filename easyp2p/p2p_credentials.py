@@ -84,6 +84,41 @@ def get_credentials_from_user(
     return (username, password)
 
 
+def get_password_from_keyring(platform: str, username: str) -> str:
+    """
+    Get password for platform:username from keyring.
+
+    Args:
+        platform: Name of the P2P platform
+        username: Username for which to get the password
+
+    Returns:
+        Password or None if no password was found for username
+
+    """
+    return keyring.get_password(platform, 'username')
+
+
+def delete_platform_from_keyring(platform: str) -> str:
+    """
+    Delete credentials for platform from keyring.
+
+    Args:
+        platform: Name of the P2P platform
+
+    Returns:
+        True on success, False on failure
+
+    """
+    try:
+        username = keyring.get_password(platform, 'username')
+        keyring.delete_password(platform, username)
+        keyring.delete_password(platform, 'username')
+    except keyring.errors.PasswordDeleteError:
+        return False
+    return True
+
+
 def save_credentials_in_keyring(
         platform: str, username: str, password: str) -> bool:
     """Save credentials for platform in keyring."""
