@@ -22,7 +22,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     """This class defines the main window of easyp2p."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self) -> None:
         """
         Constructor of MainWindow.
 
@@ -30,7 +30,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             parent: Reference to the parent widget
 
         """
-        super(MainWindow, self).__init__(parent)
+        super().__init__()
         self.setupUi(self)
         self.init_date_combo_boxes()
         self.output_file_changed = False
