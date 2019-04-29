@@ -144,8 +144,8 @@ class P2PPlatform:
 
         """
         options = webdriver.ChromeOptions()
-#        options.add_argument("--headless")
-#        options.add_argument("--window-size=1920,1200")
+        options.add_argument("--headless")
+        options.add_argument("--window-size=1920,1200")
         prefs = {"download.default_directory": os.path.dirname(
             self.statement_file_name)}
         options.add_experimental_option("prefs", prefs)
