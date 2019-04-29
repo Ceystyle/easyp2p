@@ -5,12 +5,13 @@
 
 from datetime import date
 import sys
-from typing import AbstractSet, Mapping, Optional, Tuple
+from typing import AbstractSet, Tuple
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
+from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_worker import WorkerThread
 from easyp2p.ui.Ui_progress_window import Ui_ProgressWindow
 
@@ -20,17 +21,14 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
     """Contains code for handling events for the Progress Window."""
 
     def __init__(
-            self, platforms: AbstractSet,
-            credentials: Mapping[str, Optional[Tuple[str, str]]],
-            date_range: Tuple[date, date], output_file: str) -> None:
+            self, platforms: AbstractSet, date_range: Tuple[date, date],
+            output_file: str) -> None:
         """
         Constructor of ProgressWindow class.
 
         Args:
             platforms: Set containing the names of all selected P2P
                 platforms
-            credentials: Dictionary containing tuples (username, password) for
-                each selected P2P platform
             date_range: Date range (start_date, end_date) for which the
                 account statements must be generated
             output_file: Name of the Excel file (including absolute path)
@@ -39,6 +37,11 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         """
         super().__init__()
         self.setupUi(self)
+
+        # Get credentials for the selected platforms
+        credentials = {}
+        for platform in platforms:
+            credentials[platform] = get_credentials(platform)
 
         # Initialize progress bar
         self.progress_bar.setMaximum(len(platforms))

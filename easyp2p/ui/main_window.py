@@ -12,7 +12,6 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (
     QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
-from easyp2p.p2p_credentials import get_credentials
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
@@ -181,15 +180,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Bitte wähle mindestens eine P2P Plattform aus!')
             return
 
-        # Get credentials for the selected platforms
-        credentials = {}
-        for platform in platforms:
-            credentials[platform] = get_credentials(platform)
-
         # Open progress window
         progress_window = ProgressWindow(
-            platforms, credentials, date_range,
-            self.line_edit_output_file.text())
+            platforms, date_range, self.line_edit_output_file.text())
         progress_window.exec_()
 
     @pyqtSlot()
