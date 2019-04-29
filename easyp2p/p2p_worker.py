@@ -4,7 +4,7 @@
 """Module implementing WorkerThread."""
 
 from datetime import date
-from typing import AbstractSet, Callable, Mapping, Optional, Tuple
+from typing import Callable, Mapping, Optional, Tuple
 
 import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
@@ -12,6 +12,7 @@ from PyQt5.QtGui import QColor
 from selenium.common.exceptions import WebDriverException
 
 import easyp2p.p2p_parser as p2p_parser
+from easyp2p.p2p_settings import Settings
 import easyp2p.platforms as p2p_platforms
 
 
@@ -37,28 +38,22 @@ class WorkerThread(QThread):
     RED = QColor(100, 0, 0)
 
     def __init__(
-            self, platforms: AbstractSet[str],
-            credentials: Mapping[str, Optional[Tuple[str, str]]],
-            date_range: Tuple[date, date], output_file: str) -> None:
+            self, settings: Settings,
+            credentials: Mapping[str, Optional[Tuple[str, str]]]) -> None:
         """
         Constructor of WorkerThread.
 
         Args:
-            platforms: Set containing the names of all selected P2P
-                platforms
+            settings: Settings for easyp2p
             credentials: Dictionary containing tuples (username, password) for
                 each selected P2P platform
-            date_range: Date range (start_date, end_date) for which the
-                account statements must be generated
-            output_file: Name of the Excel file (including absolute path)
-                to which the results will be written
 
         """
         QThread.__init__(self)
-        self.platforms = platforms
+        self.platforms = settings.platforms
         self.credentials = credentials
-        self.date_range = date_range
-        self.output_file = output_file
+        self.date_range = settings.date_range
+        self.output_file = settings.output_file
         self.abort = False
         self.df_result = pd.DataFrame()
 

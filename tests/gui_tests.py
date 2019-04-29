@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtTest import QTest
 
 import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_settings import Settings
 from easyp2p.ui.credentials_window import CredentialsWindow
 from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
@@ -176,12 +177,21 @@ class MainWindowTests(unittest.TestCase):
     def test_push_start_button_with_bondora_selected(self) -> None:
         """Test pushing start button after selecting Bondora."""
         self.form.check_box_bondora.setChecked(True)
+        self.set_test_dates('Sep', '2018', 'Feb', '2019')
+        QLineEdit.setText(self.form.line_edit_output_file, 'Test_Bondora.xlsx')
         QTimer.singleShot(
             500, functools.partial(self.is_window_open, ProgressWindow))
         QTest.mouseClick(self.form.push_button_start, Qt.LeftButton)
 
         # Check that the progress window opened
         self.assertTrue(self.window_open)
+
+        # Check that all settings are correct
+        self.assertEqual(self.form.settings.platforms, {'Bondora'})
+        self.assertEqual(
+            self.form.settings.date_range,
+            (date(2018, 9, 1), date(2019, 2, 28)))
+        self.assertEqual(self.form.settings.output_file, 'Test_Bondora.xlsx')
 
     def test_push_tool_button_settings(self) -> None:
         """Test pushing settings button."""
@@ -223,16 +233,28 @@ class ProgressWindowTests(unittest.TestCase):
 
     def setUp(self):
         """Initialize ProgressWindow."""
-        self.form = ProgressWindow(
-            {'test_platform1', 'test_platform2'},
-            {'test_platform': ('username', 'password')},
-            (date(2018, 9, 1), date(2018, 12, 31)),
-            os.path.join(os.getcwd(), 'test.xlsx'))
+        settings = Settings()
+        settings.platforms = {'test_platform1', 'test_platform2'}
+        settings.date_range = (date(2018, 9, 1), date(2018, 12, 31))
+        settings.output_file = os.path.join(os.getcwd(), 'test.xlsx')
+        QTimer.singleShot(200, self.reject_credentials_window)
+        QTimer.singleShot(400, self.reject_credentials_window)
+        self.form = ProgressWindow(settings)
 
     def tearDown(self):
         """Stop the worker thread after test is done."""
+        self.form.worker.abort = True
         self.form.worker.quit()
         self.form.worker.wait()
+
+    def reject_credentials_window(self) -> bool:
+        """Helper method to determine if a window is open."""
+        all_top_level_widgets = QApplication.topLevelWidgets()
+        for widget in all_top_level_widgets:
+            if isinstance(widget, CredentialsWindow):
+                widget.reject()
+                return True
+        return False
 
     def test_defaults(self):
         """Test default behaviour of ProgressWindow."""

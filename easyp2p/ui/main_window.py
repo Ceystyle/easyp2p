@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
 import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
@@ -35,6 +36,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.init_date_combo_boxes()
         self.output_file_changed = False
         self.set_output_file()
+        self.settings = Settings()
 
     def init_date_combo_boxes(self) -> None:
         """Initialize date combo boxes with previous month."""
@@ -180,9 +182,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 'Bitte wähle mindestens eine P2P Plattform aus!')
             return
 
+        self.settings.date_range = self.get_date_range()
+        self.settings.platforms = self.get_platforms()
+        self.settings.output_file = self.line_edit_output_file.text()
+
         # Open progress window
-        progress_window = ProgressWindow(
-            platforms, date_range, self.line_edit_output_file.text())
+        progress_window = ProgressWindow(self.settings)
         progress_window.exec_()
 
     @pyqtSlot()

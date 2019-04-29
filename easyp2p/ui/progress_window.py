@@ -3,15 +3,14 @@
 
 """Module implementing ProgressWindow."""
 
-from datetime import date
 import sys
-from typing import AbstractSet, Tuple
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
 from easyp2p.p2p_credentials import get_credentials
+from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_worker import WorkerThread
 from easyp2p.ui.Ui_progress_window import Ui_ProgressWindow
 
@@ -20,19 +19,12 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
     """Contains code for handling events for the Progress Window."""
 
-    def __init__(
-            self, platforms: AbstractSet, date_range: Tuple[date, date],
-            output_file: str) -> None:
+    def __init__(self, settings: Settings) -> None:
         """
         Constructor of ProgressWindow class.
 
         Args:
-            platforms: Set containing the names of all selected P2P
-                platforms
-            date_range: Date range (start_date, end_date) for which the
-                account statements must be generated
-            output_file: Name of the Excel file (including absolute path)
-                to which the results will be written
+            settings: Settings for easyp2p
 
         """
         super().__init__()
@@ -40,16 +32,15 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
         # Get credentials for the selected platforms
         credentials = {}
-        for platform in platforms:
+        for platform in settings.platforms:
             credentials[platform] = get_credentials(platform)
 
         # Initialize progress bar
-        self.progress_bar.setMaximum(len(platforms))
+        self.progress_bar.setMaximum(len(settings.platforms))
         self.progress_bar.setValue(0)
 
         # Initialize and start worker thread
-        self.worker = WorkerThread(
-            platforms, credentials, date_range, output_file)
+        self.worker = WorkerThread(settings, credentials)
         self.worker.abort_easyp2p.connect(self.abort_easyp2p)
         self.worker.update_progress_bar.connect(
             self.update_progress_bar)
