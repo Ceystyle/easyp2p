@@ -40,15 +40,17 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout.addWidget(self.push_button_delete)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
         self.verticalLayout.addWidget(self.groupBox)
-        self.buttonBox = QtWidgets.QDialogButtonBox(SettingsWindow)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
-        self.verticalLayout.addWidget(self.buttonBox)
+        self.check_box_headless = QtWidgets.QCheckBox(SettingsWindow)
+        self.check_box_headless.setObjectName("check_box_headless")
+        self.verticalLayout.addWidget(self.check_box_headless)
+        self.button_box = QtWidgets.QDialogButtonBox(SettingsWindow)
+        self.button_box.setOrientation(QtCore.Qt.Horizontal)
+        self.button_box.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.button_box.setObjectName("button_box")
+        self.verticalLayout.addWidget(self.button_box)
 
         self.retranslateUi(SettingsWindow)
-        self.buttonBox.accepted.connect(SettingsWindow.accept)
-        self.buttonBox.rejected.connect(SettingsWindow.reject)
+        self.button_box.rejected.connect(SettingsWindow.reject)
         QtCore.QMetaObject.connectSlotsByName(SettingsWindow)
 
     def retranslateUi(self, SettingsWindow):
@@ -58,6 +60,7 @@ class Ui_SettingsWindow(object):
         self.push_button_add.setText(_translate("SettingsWindow", "Hinzufügen"))
         self.push_button_change.setText(_translate("SettingsWindow", "Ändern"))
         self.push_button_delete.setText(_translate("SettingsWindow", "Löschen"))
+        self.check_box_headless.setText(_translate("SettingsWindow", "ChromeDriver-Fenster anzeigen?"))
 
 
 if __name__ == "__main__":

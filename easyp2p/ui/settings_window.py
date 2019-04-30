@@ -2,12 +2,13 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """Module implementing SettingsWindow, the settings window of easyp2p."""
-from typing import Set
+from typing import AbstractSet, Set
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox
 
 import easyp2p.p2p_credentials as p2p_cred
+from easyp2p.p2p_settings import Settings
 from easyp2p.ui.Ui_settings_window import Ui_SettingsWindow
 
 
@@ -15,18 +16,20 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
 
     """Adjust easyp2p settings and user credentials for the P2P platforms."""
 
-    def __init__(self, platforms) -> None:
+    def __init__(self, platforms: AbstractSet[str], settings: Settings) -> None:
         """
         Constructor of SettingsWindow.
 
         Args:
             platforms: Set containing the names of all supported P2P platforms
+            settings: Settings for easyp2p
 
         """
         super().__init__()
         self.setupUi(self)
 
         self.platforms = platforms
+        self.settings = settings
         self.saved_platforms: Set[str] = set()
         if p2p_cred.keyring_exists():
             for platform in sorted(self.platforms):
@@ -38,6 +41,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             self.push_button_add.setEnabled(False)
             self.push_button_change.setEnabled(False)
             self.push_button_delete.setEnabled(False)
+        self.check_box_headless.setChecked(not self.settings.headless)
 
     @pyqtSlot()
     def on_push_button_add_clicked(self) -> None:
@@ -89,3 +93,9 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
                 self.list_widget_platforms.row(
                     self.list_widget_platforms.currentItem()))
             self.saved_platforms.remove(platform)
+
+    @pyqtSlot()
+    def on_button_box_accepted(self):
+        """Update settings if user clicked OK."""
+        self.settings.headless = not self.check_box_headless.isChecked()
+        self.accept()

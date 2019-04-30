@@ -193,5 +193,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_tool_button_settings_clicked(self) -> None:
         """Open the settings window."""
-        settings_window = SettingsWindow(self.get_platforms(False))
+        settings_window = SettingsWindow(
+            self.get_platforms(False), self.settings)
         settings_window.exec_()

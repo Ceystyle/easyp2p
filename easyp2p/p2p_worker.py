@@ -52,6 +52,7 @@ class WorkerThread(QThread):
 
         """
         QThread.__init__(self)
+        self.settings = settings
         self.platforms = settings.platforms
         self.credentials = credentials
         self.date_range = settings.date_range
@@ -150,7 +151,8 @@ class WorkerThread(QThread):
         try:
             download_directory = os.path.join(
                 Path.home(), '.easyp2p', name.lower())
-            with P2PWebDriver(download_directory) as driver:
+            with P2PWebDriver(
+                    download_directory, self.settings) as driver:
                 platform.download_statement(driver, self.credentials[name])
         except WebDriverNotFound as err:
             self.abort_easyp2p.emit(str(err))
