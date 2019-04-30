@@ -53,10 +53,7 @@ class WorkerThread(QThread):
         """
         QThread.__init__(self)
         self.settings = settings
-        self.platforms = settings.platforms
         self.credentials = credentials
-        self.date_range = settings.date_range
-        self.output_file = settings.output_file
         self.abort = False
         self.df_result = pd.DataFrame()
 
@@ -81,7 +78,7 @@ class WorkerThread(QThread):
             self.add_progress_text.emit(error_message, self.RED)
             return None
         else:
-            return platform(self.date_range)
+            return platform(self.settings.date_range)
 
     def ignore_platform(self, name: str, error_msg: str) -> None:
         """
@@ -176,7 +173,7 @@ class WorkerThread(QThread):
         each finished platform the progress bar is increased.
 
         """
-        for name in self.platforms:
+        for name in self.settings.platforms:
 
             if self.abort:
                 return
@@ -199,6 +196,7 @@ class WorkerThread(QThread):
         if self.abort:
             return
 
-        if not p2p_parser.write_results(self.df_result, self.output_file):
+        if not p2p_parser.write_results(
+                self.df_result, self.settings.output_file):
             self.add_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
