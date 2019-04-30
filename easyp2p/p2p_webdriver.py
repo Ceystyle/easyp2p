@@ -15,7 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from easyp2p.p2p_settings import Settings
 
 
-class P2PWebDriver:
+class P2PWebDriver(webdriver.Chrome):
 
     """A class for providing webdriver support to easyp2p."""
 
@@ -56,11 +56,11 @@ class P2PWebDriver:
         # TODO: Find a better solution that works on all systems.
         try:
             if os.path.isfile('/usr/lib/chromium-browser/chromedriver'):
-                self.driver = webdriver.Chrome(
+                super().__init__(
                     executable_path=r'/usr/lib/chromium-browser/chromedriver',
                     options=options)
             else:
-                self.driver = webdriver.Chrome(options=options)
+                super().__init__(options=options)
         except WebDriverException as err:
             raise WebDriverNotFound(
                 'Chromedriver konnte nicht gefunden werden!\n'
@@ -68,18 +68,17 @@ class P2PWebDriver:
 
         if self.settings.headless:
             # This is needed to allow downloads in headless mode
-            self.driver.command_executor._commands["send_command"] = (
+            self.command_executor._commands["send_command"] = (
                 "POST", '/session/$sessionId/chromium/send_command')
             params = {'cmd': 'Page.setDownloadBehavior', 'params': {
                 'behavior': 'allow', 'downloadPath': self.download_directory}}
-            self.driver.execute("send_command", params)
+            self.execute("send_command", params)
 
-        self.driver.wait = self.wait
-        return self.driver
+        return self
 
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         """Close the WebDriver."""
-        self.driver.close()
+        self.close()
 
     def wait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
         """
@@ -95,7 +94,7 @@ class P2PWebDriver:
             WebElement which WebDriverWait waited for.
 
         """
-        return WebDriverWait(self.driver, delay).until(wait_until)
+        return WebDriverWait(self, delay).until(wait_until)
 
 
 class WebDriverNotFound(Exception):
