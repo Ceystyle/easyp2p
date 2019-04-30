@@ -4,16 +4,18 @@
 """Module implementing WorkerThread."""
 
 from datetime import date
+import os
+from pathlib import Path
 from typing import Callable, Mapping, Optional, Tuple
 
 import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
-from selenium.common.exceptions import WebDriverException
 
 import easyp2p.p2p_parser as p2p_parser
 from easyp2p.p2p_settings import Settings
 import easyp2p.platforms as p2p_platforms
+from easyp2p.p2p_webdriver import P2PWebDriver, WebDriverNotFound
 
 
 class WorkerThread(QThread):
@@ -146,8 +148,11 @@ class WorkerThread(QThread):
             'Start der Auswertung von {0}...'.format(name), self.BLACK)
 
         try:
-            platform.download_statement(self.credentials[name])
-        except WebDriverException as err:
+            download_directory = os.path.join(
+                Path.home(), '.easyp2p', name.lower())
+            with P2PWebDriver(download_directory) as driver:
+                platform.download_statement(driver, self.credentials[name])
+        except WebDriverNotFound as err:
             self.abort_easyp2p.emit(str(err))
             self.abort = True
             return False

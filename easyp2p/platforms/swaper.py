@@ -16,14 +16,13 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class Swaper:
 
     """
-    Contains two public methods for downloading/parsing Swaper account
-    statements.
-
+    Contains methods for downloading/parsing Swaper account statements.
     """
 
     def __init__(self, date_range: Tuple[date, date]) -> None:
@@ -31,7 +30,7 @@ class Swaper:
         Constructor of Swaper class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statements must be generated
 
         """
@@ -40,11 +39,13 @@ class Swaper:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'xlsx')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Swaper account statement for given date range.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for Swaper
 
         """
@@ -57,7 +58,7 @@ class Swaper:
             'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.presence_of_element_located((By.ID, 'about')),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
 

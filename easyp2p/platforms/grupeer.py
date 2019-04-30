@@ -15,13 +15,13 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class Grupeer:
 
     """
-    Contains two public methods for downloading/parsing Grupeer account
-    statements.
+    Contains methods for downloading/parsing Grupeer account statements.
 
     """
 
@@ -30,7 +30,7 @@ class Grupeer:
         Constructor of Grupeer class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statements must be generated
 
         """
@@ -39,11 +39,13 @@ class Grupeer:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'xlsx')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Grupeer account statement.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for Grupeer.
 
         """
@@ -55,7 +57,7 @@ class Grupeer:
                              'div/div/ul/li/a/span')}
 
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
             logout_locator=(By.LINK_TEXT, 'Ausloggen'),
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:

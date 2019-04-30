@@ -16,14 +16,13 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class DoFinance:
 
     """
-    Contains two public methods for downloading/parsing DoFinance account
-    statements.
-
+    Contains methods for downloading/parsing DoFinance account statements.
     """
 
     def __init__(self, date_range: Tuple[date, date]) -> None:
@@ -40,11 +39,13 @@ class DoFinance:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'xlsx')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the DoFinance account statement.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for DoFinance
 
         """
@@ -55,7 +56,7 @@ class DoFinance:
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.title_contains('Kreditvergabe Plattform')) as dofinance:
 
             dofinance.log_into_page(

@@ -16,14 +16,14 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import (
+    P2PWebDriver, one_of_many_expected_conditions_true)
 
 
 class Iuvo:
 
     """
-    Contains two public methods for downloading/parsing Iuvo account
-    statements.
-
+    Contains methods for downloading/parsing Iuvo account statements.
     """
 
     def __init__(self, date_range: Tuple[date, date]) -> None:
@@ -31,7 +31,7 @@ class Iuvo:
         Constructor of Iuvo class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statements must be generated
 
         """
@@ -40,11 +40,13 @@ class Iuvo:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'xlsx')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Iuvo account statement for given date range.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for Iuvo
 
         """
@@ -56,7 +58,7 @@ class Iuvo:
                 'div/div/strong[3]')}
 
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.element_to_be_clickable((By.ID, 'einloggen')),
             logout_locator=(By.ID, 'p2p_logout'),
             hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
@@ -67,7 +69,7 @@ class Iuvo:
 
             # Click away cookie policy, if present
             try:
-                iuvo.driver.find_element_by_id(
+                driver.find_element_by_id(
                     'CybotCookiebotDialogBodyButtonAccept').click()
             except NoSuchElementException:
                 pass
@@ -90,8 +92,7 @@ class Iuvo:
             iuvo.generate_statement_direct(
                 (self.date_range[0], self.date_range[1]), (By.ID, 'date_from'),
                 (By.ID, 'date_to'), '%Y-%m-%d',
-                wait_until=p2p_helper.one_of_many_expected_conditions_true(
-                    conditions),
+                wait_until=one_of_many_expected_conditions_true(conditions),
                 submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
 
             try:

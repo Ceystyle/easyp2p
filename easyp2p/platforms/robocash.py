@@ -18,14 +18,13 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class Robocash:
 
     """
-    Contains two public methods for downloading/parsing Robocash account
-    statements.
-
+    Contains methods for downloading/parsing Robocash account statements.
     """
 
     def __init__(self, date_range: Tuple[date, date]) -> None:
@@ -33,7 +32,7 @@ class Robocash:
         Constructor of Robocash class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statements must be generated
 
         """
@@ -42,11 +41,13 @@ class Robocash:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'xls')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Robocash account statement.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for Robocash
 
         Raises:
@@ -62,7 +63,7 @@ class Robocash:
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.title_contains('Willkommen')) as robocash:
 
             robocash.log_into_page(
@@ -73,7 +74,7 @@ class Robocash:
             robocash.open_account_statement_page((By.ID, 'new_statement'))
 
             try:
-                robocash.driver.find_element_by_id('new_statement').click()
+                driver.find_element_by_id('new_statement').click()
             except NoSuchElementException:
                 raise RuntimeError(
                     'Generierung des Robocash-Kontoauszugs konnte nicht '
@@ -90,10 +91,9 @@ class Robocash:
             wait = 0
             while not present:
                 try:
-                    robocash.driver.get(urls['statement'])
-                    robocash.wdwait(
-                        EC.element_to_be_clickable(
-                            (By.ID, 'download_statement')))
+                    driver.get(urls['statement'])
+                    driver.wait(EC.element_to_be_clickable(
+                        (By.ID, 'download_statement')))
                     present = True
                 except TimeoutException:
                     wait += 1

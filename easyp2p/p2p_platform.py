@@ -15,20 +15,18 @@ from datetime import date
 import glob
 import os
 import time
-from typing import cast, Mapping, Optional, Sequence, Tuple
+from typing import Mapping, Optional, Sequence, Tuple
 
-from selenium import webdriver
 from selenium.common.exceptions import (
-    TimeoutException, NoSuchElementException, StaleElementReferenceException,
-    WebDriverException)
+    TimeoutException, NoSuchElementException, StaleElementReferenceException)
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class P2PPlatform:
@@ -42,7 +40,7 @@ class P2PPlatform:
     """
 
     def __init__(
-            self, name: str, urls: Mapping[str, str],
+            self, name: str, driver: P2PWebDriver, urls: Mapping[str, str],
             statement_file_name: str, logout_wait_until: bool,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None) -> None:
@@ -51,6 +49,7 @@ class P2PPlatform:
 
         Args:
             name: Name of the P2P platform
+            driver: Instance of P2PWebDriver class
             urls: Dictionary with URLs for login page
                 (key: 'login'), account statement page (key: 'statement')
                 and optionally logout page (key: 'logout')
@@ -68,16 +67,13 @@ class P2PPlatform:
 
         """
         self.name = name
+        self.driver = driver
         self.urls = urls
         self.statement_file_name = statement_file_name
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
         self.logged_in = False
-
-        # webdriver will be initialized in __enter__ method to make sure it
-        # is always closed again by __exit__
-        self.driver = cast(webdriver.Chrome, None)
 
         # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
@@ -101,7 +97,6 @@ class P2PPlatform:
             Instance of P2PPlatform class
 
         """
-        self.init_webdriver()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
@@ -127,46 +122,8 @@ class P2PPlatform:
                     .format(self.name))
 
             self.logged_in = False
-
-        self.driver.close()
         if exc_type:
             raise exc_type(exc_value)
-
-    def init_webdriver(self) -> None:
-        """
-        Initialize Chromedriver as webdriver.
-
-        Initializes Chromedriver as webdriver, sets the download directory
-        and opens a new maximized browser window.
-
-        Raises:
-            ModuleNotFoundError: If Chromedriver cannot be found
-
-        """
-        options = webdriver.ChromeOptions()
-        options.add_argument("--headless")
-        options.add_argument("--window-size=1920,1200")
-        prefs = {"download.default_directory": os.path.dirname(
-            self.statement_file_name)}
-        options.add_experimental_option("prefs", prefs)
-
-        # TODO: Ubuntu doesn't put chromedriver in PATH so we need to
-        # explicitly specify its location. Find a better solution that works on
-        # all systems.
-        try:
-            if os.path.isfile('/usr/lib/chromium-browser/chromedriver'):
-                driver = webdriver.Chrome(
-                    executable_path=r'/usr/lib/chromium-browser/chromedriver',
-                    options=options)
-            else:
-                driver = webdriver.Chrome(options=options)
-        except WebDriverException as err:
-            raise WebDriverException(
-                'Chromedriver konnte nicht gefunden werden!\n'
-                'easyp2p wird beendet!\n', err)
-
-        driver.maximize_window()
-        self.driver = driver
 
     def log_into_page(
             self, name_field: str, password_field: str,
@@ -210,7 +167,7 @@ class P2PPlatform:
             self.driver.get(self.urls['login'])
 
             if login_locator is not None:
-                login_btn = self.wdwait(
+                login_btn = self.driver.wait(
                     EC.element_to_be_clickable(login_locator))
                 login_btn.click()
 
@@ -226,7 +183,7 @@ class P2PPlatform:
 
         # Enter credentials in name and password field
         try:
-            elem = self.wdwait(
+            elem = self.driver.wait(
                 EC.element_to_be_clickable((By.NAME, name_field)))
             elem.clear()
             elem.send_keys(credentials[0])
@@ -239,9 +196,9 @@ class P2PPlatform:
             # waiting time for now. They promised an web site update for
             # 28/01/2018 which should fix this issue.
             if self.name == 'Twino':
-                self.wdwait(wait_until, delay=10)
+                self.driver.wait(wait_until, delay=10)
             else:
-                self.wdwait(wait_until)
+                self.driver.wait(wait_until)
         except NoSuchElementException:
             raise RuntimeError(
                 'Benutzername/Passwort-Felder konnten nicht auf der '
@@ -251,7 +208,7 @@ class P2PPlatform:
                 '{0}-Login war leider nicht erfolgreich. Passwort korrekt?'
                 .format(self.name))
 
-        self.driver.logged_in = True
+        self.logged_in = True
 
     def open_account_statement_page(
             self, check_locator: Tuple[str, str]) -> None:
@@ -274,7 +231,7 @@ class P2PPlatform:
         try:
             # TODO: catch error if url cannot be loaded
             self.driver.get(self.urls['statement'])
-            self.wdwait(EC.presence_of_element_located(check_locator))
+            self.driver.wait(EC.presence_of_element_located(check_locator))
         except TimeoutException:
             raise RuntimeError(
                 '{0}-Kontoauszugsseite konnte nicht geladen werden!'
@@ -311,10 +268,10 @@ class P2PPlatform:
                 hover = ActionChains(self.driver).move_to_element(elem)
                 hover.perform()
 
-            logout_btn = self.wdwait(
+            logout_btn = self.driver.wait(
                 EC.element_to_be_clickable(logout_locator))
             logout_btn.click()
-            self.wdwait(wait_until)
+            self.driver.wait(wait_until)
         except (NoSuchElementException, TimeoutException):
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
@@ -336,7 +293,7 @@ class P2PPlatform:
         """
         try:
             self.driver.get(self.urls['logout'])
-            self.wdwait(wait_until)
+            self.driver.wait(wait_until)
         except TimeoutException:
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
@@ -396,7 +353,7 @@ class P2PPlatform:
                 date_to.send_keys(date.strftime(date_range[1], date_format))
 
             if submit_btn_locator is not None:
-                submit_btn = self.wdwait(EC.element_to_be_clickable(
+                submit_btn = self.driver.wait(EC.element_to_be_clickable(
                     submit_btn_locator))
                 if self.name == 'Mintos':
                     # Mintos needs some time until the button really works
@@ -410,7 +367,7 @@ class P2PPlatform:
                 time.sleep(1)
 
             if wait_until is not None:
-                self.wdwait(wait_until)
+                self.driver.wait(wait_until)
         except NoSuchElementException:
             raise RuntimeError(
                 'Generierung des {0}-Kontoauszugs konnte nicht gestartet '
@@ -535,7 +492,7 @@ class P2PPlatform:
         # Open the calendar and wait until the buttons for changing the month
         # are visible
         calendar_.click()
-        self.wdwait(EC.visibility_of(previous_month))
+        self.driver.wait(EC.visibility_of(previous_month))
 
         # Switch the calendar to the given target month
         if months < 0:
@@ -694,19 +651,3 @@ class P2PPlatform:
 
         file_name = [file for file in new_file_list if file not in file_list][0]
         return file_name
-
-    def wdwait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
-        """
-        Shorthand for WebDriverWait.
-
-        Args:
-            wait_until: Expected condition for which the webdriver should wait
-
-        Keyword Args:
-            delay: Maximal waiting time in seconds
-
-        Returns:
-            WebElement which WebDriverWait waited for.
-
-        """
-        return WebDriverWait(self.driver, delay).until(wait_until)

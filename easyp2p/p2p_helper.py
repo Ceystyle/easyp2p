@@ -10,10 +10,8 @@ import calendar
 from datetime import date, timedelta
 import os
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
 
 
@@ -186,40 +184,3 @@ def create_statement_location(
         os.makedirs(dl_dir)
 
     return statement_file
-
-
-class one_of_many_expected_conditions_true(object):  \
-    #pylint: disable=invalid-name, too-few-public-methods
-    """
-    An expectation for checking if (at least) one of several provided expected
-    conditions for the Selenium webdriver is true.
-    """
-    def __init__(self, conditions: List[Callable[[webdriver.Chrome], bool]]) \
-            -> None:
-        """
-        Initialize class.
-
-        Args:
-            conditions: List of all conditions which should be checked.
-
-        """
-        self.conditions = conditions
-
-    def __call__(self, driver: webdriver.Chrome) -> bool:
-        """
-        Caller for class.
-
-        Args:
-            driver: Selenium webdriver
-
-        Returns:
-            True if at least one of the conditions is true, False otherwise.
-
-        """
-        for condition in self.conditions:
-            try:
-                if condition(driver):
-                    return True
-            except NoSuchElementException:
-                pass
-        return False

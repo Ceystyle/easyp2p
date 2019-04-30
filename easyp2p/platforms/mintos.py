@@ -17,14 +17,13 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class Mintos:
 
     """
-    Contains two public methods for downloading/parsing Mintos account
-    statements.
-
+    Contains methods for downloading/parsing Mintos account statements.
     """
 
     def __init__(self, date_range: Tuple[date, date]) -> None:
@@ -32,7 +31,7 @@ class Mintos:
         Constructor of Mintos class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statements must be generated
 
         """
@@ -41,11 +40,13 @@ class Mintos:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'xlsx')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Mintos account statement for given date range.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for Mintos
 
         """
@@ -57,7 +58,7 @@ class Mintos:
 
         # TODO: do not rely on title to check successful logout
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.title_contains('Vielen Dank'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
@@ -78,11 +79,11 @@ class Mintos:
             # with start and end balance of 0. If that is the case write an
             # empty DataFrame to the file.
             try:
-                mintos.wdwait(
+                driver.wait(
                     EC.presence_of_element_located((By.ID, 'export-button')))
             except TimeoutException:
                 try:
-                    cashflow_table = mintos.driver.find_element_by_id(
+                    cashflow_table = driver.find_element_by_id(
                         'overview-results')
                     df = pd.read_html(
                         cashflow_table.get_attribute("innerHTML"))[0]

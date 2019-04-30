@@ -18,22 +18,19 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver, one_of_many_expected_conditions_true
 
 
 class Bondora:
 
-    """
-    Contains two public methods for downloading/parsing Bondora account
-    statements.
-
-    """
+    """Contains methods for downloading/parsing Bondora account statements."""
 
     def __init__(self, date_range: Tuple[date, date]) -> None:
         """
         Constructor of Bondora class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statements must be generated
 
         """
@@ -42,11 +39,13 @@ class Bondora:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'xlsx')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Bondora account statement.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for Bondora
 
         """
@@ -64,7 +63,7 @@ class Bondora:
                 'div/a'}
 
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
 
             bondora.log_into_page(
@@ -89,7 +88,7 @@ class Bondora:
                 self.date_range[1].strftime('%m')))
 
             # Start the account statement generation
-            bondora.driver.find_element_by_xpath(xpaths['search_btn']).click()
+            driver.find_element_by_xpath(xpaths['search_btn']).click()
 
             # Wait until statement generation is finished
             no_payments_msg = 'Keine Zahlungen gefunden'
@@ -103,8 +102,7 @@ class Bondora:
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['no_payments']), no_payments_msg)]
             try:
-                bondora.wdwait(
-                    p2p_helper.one_of_many_expected_conditions_true(conditions))
+                driver.wait(one_of_many_expected_conditions_true(conditions))
             except TimeoutException as err:
                 raise TimeoutException(err)
 

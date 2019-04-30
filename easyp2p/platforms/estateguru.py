@@ -15,14 +15,13 @@ from selenium.webdriver.common.by import By
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class Estateguru:
 
     """
-    Contains two public methods for downloading/parsing Estateguru account
-    statements.
-
+    Contains methods for downloading/parsing Estateguru account statements.
     """
 
     def __init__(self, date_range: Tuple[date, date]) -> None:
@@ -30,7 +29,7 @@ class Estateguru:
         Constructor of Estateguru class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
+            date_range: Date range (start_date, end_date) for which the account
                 statements must be generated
 
         """
@@ -39,11 +38,13 @@ class Estateguru:
         self.statement_file_name = p2p_helper.create_statement_location(
             self.name, self.date_range, 'csv')
 
-    def download_statement(self, credentials: Tuple[str, str]) -> None:
+    def download_statement(
+            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
         """
         Generate and download Estateguru account statement for given date range.
 
         Args:
+            driver: Instance of P2PWebDriver class
             credentials: (username, password) for Estateguru
 
         """
@@ -58,7 +59,7 @@ class Estateguru:
                 'div[1]/div[2]/button')}
 
         with P2PPlatform(
-            self.name, urls, self.statement_file_name,
+            self.name, driver, urls, self.statement_file_name,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
             as estateguru:
 
@@ -77,7 +78,7 @@ class Estateguru:
             # variable anyway to be consistent with the other platform classes.
             estateguru.driver.find_element_by_xpath(
                 xpaths['select_btn']).click()
-            estateguru.wdwait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+            driver.wait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
             estateguru.download_statement((By.LINK_TEXT, 'CSV'))
 
     def parse_statement(self, statement_file_name: str = None) \
