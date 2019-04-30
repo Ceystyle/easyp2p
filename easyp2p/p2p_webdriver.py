@@ -68,11 +68,9 @@ class P2PWebDriver(webdriver.Chrome):
 
         if self.settings.headless:
             # This is needed to allow downloads in headless mode
-            self.command_executor._commands["send_command"] = (
-                "POST", '/session/$sessionId/chromium/send_command')
-            params = {'cmd': 'Page.setDownloadBehavior', 'params': {
-                'behavior': 'allow', 'downloadPath': self.download_directory}}
-            self.execute("send_command", params)
+            params = {
+                'behavior': 'allow', 'downloadPath': self.download_directory}
+            self.execute_cdp_cmd('Page.setDownloadBehavior', params)
 
         return self
 
