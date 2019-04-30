@@ -5,13 +5,16 @@
 
 from datetime import date
 import os
+from pathlib import Path
 from typing import Tuple
 import unittest
+
 import keyring
 
 from tests.parser_tests import are_files_equal, RESULT_PREFIX
 import easyp2p.platforms as p2p_platforms
-
+from easyp2p.p2p_settings import Settings
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 class PlatformTests(unittest.TestCase):
 
@@ -62,7 +65,11 @@ class PlatformTests(unittest.TestCase):
         platform_class = getattr(
             getattr(p2p_platforms, platform.lower()), platform)
         platform_instance = platform_class(date_range)
-        platform_instance.download_statement(credentials)
+        download_directory = os.path.join(
+            Path.home(), '.easyp2p', platform.lower())
+        settings = Settings()
+        with P2PWebDriver(download_directory, settings) as driver:
+            platform_instance.download_statement(driver, credentials)
         self.assertTrue(are_files_equal(
             platform_instance.statement_file_name, RESULT_PREFIX + result_file,
             drop_header=drop_header))
@@ -93,7 +100,10 @@ class PlatformTests(unittest.TestCase):
         """Test download_estateguru_statement."""
         credentials = self.get_credentials_from_keyring('Estateguru')
         estateguru = p2p_platforms.estateguru.Estateguru(self.DATE_RANGE)
-        estateguru.download_statement(credentials)
+        download_directory = os.path.join(Path.home(), '.easyp2p', 'estateguru')
+        settings = Settings()
+        with P2PWebDriver(download_directory, settings) as driver:
+            estateguru.download_statement(driver, credentials)
         # The Estateguru statement contains all cashflows ever generated for
         # this account. Therefore it changes regularly and we cannot compare
         # it to a fixed reference file. This test just makes sure that the
