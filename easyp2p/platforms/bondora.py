@@ -18,7 +18,8 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import P2PWebDriver, one_of_many_expected_conditions_true
+from easyp2p.p2p_webdriver import (P2PWebDriver,
+    one_of_many_expected_conditions_true)
 
 
 class Bondora:
@@ -63,7 +64,7 @@ class Bondora:
                 'div/a'}
 
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
 
             bondora.log_into_page(
@@ -106,7 +107,8 @@ class Bondora:
             except TimeoutException as err:
                 raise TimeoutException(err)
 
-            bondora.download_statement((By.XPATH, xpaths['download_btn']))
+            bondora.download_statement(
+                self.statement_file_name, (By.XPATH, xpaths['download_btn']))
 
 
     def parse_statement(self, statement_file_name: str = None) \

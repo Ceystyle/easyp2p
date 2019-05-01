@@ -57,7 +57,7 @@ class Grupeer:
                              'div/div/ul/li/a/span')}
 
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
             logout_locator=(By.LINK_TEXT, 'Ausloggen'),
             hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
@@ -76,7 +76,8 @@ class Grupeer:
                     + str(self.date_range[0].strftime('%d.%m.%Y'))),
                 submit_btn_locator=(By.NAME, 'submit'))
 
-            grupeer.download_statement((By.NAME, 'excel'))
+            grupeer.download_statement(
+                self.statement_file_name, (By.NAME, 'excel'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

@@ -58,7 +58,7 @@ class Swaper:
             'logout_btn': '//*[@id="logout"]/span[1]/span'}
 
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.presence_of_element_located((By.ID, 'about')),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
 
@@ -84,7 +84,8 @@ class Swaper:
                 self.date_range, default_dates, arrows, days_table,
                 calendar_locator)
 
-            swaper.download_statement((By.XPATH, xpaths['download_btn']))
+            swaper.download_statement(
+                self.statement_file_name, (By.XPATH, xpaths['download_btn']))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

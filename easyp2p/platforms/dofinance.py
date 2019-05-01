@@ -56,7 +56,7 @@ class DoFinance:
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.title_contains('Kreditvergabe Plattform')) as dofinance:
 
             dofinance.log_into_page(
@@ -70,7 +70,8 @@ class DoFinance:
                 '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
 
-            dofinance.download_statement((By.NAME, 'xls'))
+            dofinance.download_statement(
+                self.statement_file_name, (By.NAME, 'xls'))
 
 
     def parse_statement(self, statement_file_name: str = None) \

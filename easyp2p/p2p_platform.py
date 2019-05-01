@@ -41,7 +41,7 @@ class P2PPlatform:
 
     def __init__(
             self, name: str, driver: P2PWebDriver, urls: Mapping[str, str],
-            statement_file_name: str, logout_wait_until: bool,
+            logout_wait_until: bool,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None) -> None:
         """
@@ -69,7 +69,6 @@ class P2PPlatform:
         self.name = name
         self.driver = driver
         self.urls = urls
-        self.statement_file_name = statement_file_name
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
@@ -524,7 +523,8 @@ class P2PPlatform:
                     elem.click()
 
     def download_statement(
-            self, download_locator: Tuple[str, str], actions=None) -> None:
+            self, statement_file_name: str, download_locator: Tuple[str, str],
+            actions=None) -> None:
         """
         Download account statement file by clicking the provided button.
 
@@ -533,9 +533,11 @@ class P2PPlatform:
         button is clickable, which can be provided by the optional actions
         variable. The method also checks if the download was successful.
         If true, the _rename_statement method is called to rename the
-        downloaded file to self.statement_file_name.
+        downloaded file to statement_file_name.
 
         Args:
+            statement_file_name: File name including path where the downloaded
+                statement must be saved
             download_locator: Locator of the download button
 
         Keyword Args:
@@ -551,7 +553,7 @@ class P2PPlatform:
 
         """
         # Get a list of all files in the download directory
-        dl_dir = os.path.dirname(self.statement_file_name)
+        dl_dir = os.path.dirname(statement_file_name)
         file_list = glob.glob(os.path.join(dl_dir, '*'))
 
         # Find and click the download button
@@ -572,7 +574,7 @@ class P2PPlatform:
         file_name = self._wait_for_download_end(file_list, dl_dir)
 
         # Rename downloaded file
-        self._rename_statement(file_name, self.statement_file_name)
+        self._rename_statement(file_name, statement_file_name)
 
     def _rename_statement(
             self, source_file_name: str, target_file_name: str) -> None:

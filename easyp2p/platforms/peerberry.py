@@ -65,7 +65,7 @@ class PeerBerry:
                               'div[1]/div/div[2]/div/div[2]/div/span')}
 
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.title_contains('Einloggen'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
 
@@ -112,7 +112,8 @@ class PeerBerry:
                 raise RuntimeError('Generierung des {0}-Kontoauszugs hat '
                                    'zu lange gedauert.'.format(self.name))
 
-            peerberry.download_statement((By.XPATH, xpaths['download_btn']),
+            peerberry.download_statement(
+                self.statement_file_name, (By.XPATH, xpaths['download_btn']),
                 actions='move_to_element')
 
     def parse_statement(self, statement_file_name: str = None) \

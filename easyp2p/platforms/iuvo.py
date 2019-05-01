@@ -58,7 +58,7 @@ class Iuvo:
                 'div/div/strong[3]')}
 
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.element_to_be_clickable((By.ID, 'einloggen')),
             logout_locator=(By.ID, 'p2p_logout'),
             hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
@@ -108,6 +108,7 @@ class Iuvo:
                 df.to_excel(self.statement_file_name)
             else:
                 iuvo.download_statement(
+                    self.statement_file_name,
                     (By.CLASS_NAME, 'p2p-download-full-list'))
 
     def parse_statement(self, statement_file_name: str = None) \

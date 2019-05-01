@@ -63,7 +63,7 @@ class Twino:
                           'individual-investments"]')}
 
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as twino:
 
@@ -80,7 +80,9 @@ class Twino:
                 wait_until=EC.element_to_be_clickable(
                     (By.CSS_SELECTOR, '.accStatement__pdf')))
 
-            twino.download_statement((By.CSS_SELECTOR, '.accStatement__pdf'))
+            twino.download_statement(
+                self.statement_file_name,
+                (By.CSS_SELECTOR, '.accStatement__pdf'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

@@ -63,7 +63,7 @@ class Robocash:
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.title_contains('Willkommen')) as robocash:
 
             robocash.log_into_page(
@@ -102,7 +102,8 @@ class Robocash:
                             'Generierung des {0}-Kontoauszugs hat zu lange '
                             'gedauert!'.format(self.name))
 
-            robocash.download_statement((By.ID, 'download_statement'))
+            robocash.download_statement(
+                self.statement_file_name, (By.ID, 'download_statement'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

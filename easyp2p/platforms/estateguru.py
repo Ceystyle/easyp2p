@@ -59,7 +59,7 @@ class Estateguru:
                 'div[1]/div[2]/button')}
 
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
             as estateguru:
 
@@ -79,7 +79,8 @@ class Estateguru:
             estateguru.driver.find_element_by_xpath(
                 xpaths['select_btn']).click()
             driver.wait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
-            estateguru.download_statement((By.LINK_TEXT, 'CSV'))
+            estateguru.download_statement(
+                self.statement_file_name, (By.LINK_TEXT, 'CSV'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:

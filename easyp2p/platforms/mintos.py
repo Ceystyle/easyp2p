@@ -58,7 +58,7 @@ class Mintos:
 
         # TODO: do not rely on title to check successful logout
         with P2PPlatform(
-            self.name, driver, urls, self.statement_file_name,
+            self.name, driver, urls,
             EC.title_contains('Vielen Dank'),
             logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
@@ -105,7 +105,8 @@ class Mintos:
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
                         'generiert werden')
             else:
-                mintos.download_statement((By.ID, 'export-button'))
+                mintos.download_statement(
+                    self.statement_file_name, (By.ID, 'export-button'))
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
