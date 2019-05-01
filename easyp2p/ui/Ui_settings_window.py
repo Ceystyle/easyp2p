@@ -60,7 +60,7 @@ class Ui_SettingsWindow(object):
         self.push_button_add.setText(_translate("SettingsWindow", "Hinzufügen"))
         self.push_button_change.setText(_translate("SettingsWindow", "Ändern"))
         self.push_button_delete.setText(_translate("SettingsWindow", "Löschen"))
-        self.check_box_headless.setText(_translate("SettingsWindow", "ChromeDriver-Fenster anzeigen?"))
+        self.check_box_headless.setText(_translate("SettingsWindow", "ChromeDriver-Fenster unsichtbar"))
 
 
 if __name__ == "__main__":

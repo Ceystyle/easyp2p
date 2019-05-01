@@ -41,7 +41,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
             self.push_button_add.setEnabled(False)
             self.push_button_change.setEnabled(False)
             self.push_button_delete.setEnabled(False)
-        self.check_box_headless.setChecked(not self.settings.headless)
+        self.check_box_headless.setChecked(self.settings.headless)
 
     @pyqtSlot()
     def on_push_button_add_clicked(self) -> None:
@@ -97,5 +97,5 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
     @pyqtSlot()
     def on_button_box_accepted(self):
         """Update settings if user clicked OK."""
-        self.settings.headless = not self.check_box_headless.isChecked()
+        self.settings.headless = self.check_box_headless.isChecked()
         self.accept()

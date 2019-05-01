@@ -63,7 +63,7 @@
    <item>
     <widget class="QCheckBox" name="check_box_headless">
      <property name="text">
-      <string>ChromeDriver-Fenster anzeigen?</string>
+      <string>ChromeDriver-Fenster unsichtbar</string>
      </property>
     </widget>
    </item>
