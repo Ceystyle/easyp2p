@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018-19 Niko Sandschneider
+# Copyright 2019 Niko Sandschneider
 
-"""Module containing all GUI tests for easyp2p."""
+"""Module containing all tests for the main window of easyp2p."""
 
 from datetime import date
 import functools
@@ -12,29 +12,18 @@ import unittest
 
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
-    QApplication, QCheckBox, QDialogButtonBox, QLineEdit, QMessageBox)
+    QApplication, QCheckBox, QLineEdit, QMessageBox)
 from PyQt5.QtTest import QTest
 
 import easyp2p.p2p_helper as p2p_helper
-from easyp2p.p2p_settings import Settings
+#from easyp2p.p2p_settings import Settings
 from easyp2p.ui.credentials_window import CredentialsWindow
 from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 
-PLATFORMS = {
-    'Bondora': 'csv',
-    'DoFinance': 'xlsx',
-    'Estateguru': 'csv',
-    'Grupeer': 'xlsx',
-    'Iuvo': 'xlsx',
-    'Mintos': 'xlsx',
-    'PeerBerry': 'csv',
-    'Robocash': 'xls',
-    'Swaper': 'xlsx',
-    'Twino': 'xlsx'}
-
 app = QApplication(sys.argv)
+# TODO: add tests to check if Settings are correct
 
 
 class MainWindowTests(unittest.TestCase):
@@ -43,6 +32,7 @@ class MainWindowTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create the GUI."""
+        
         self.form = MainWindow()
         self.message_box_open = False
         self.progress_window_open = False
@@ -201,118 +191,6 @@ class MainWindowTests(unittest.TestCase):
 
         # Check that the progress window opened
         self.assertTrue(self.window_open)
-
-    def is_message_box_open(self) -> bool:
-        """Helper method to determine if a QMessageBox is open."""
-        all_top_level_widgets = QApplication.topLevelWidgets()
-        for widget in all_top_level_widgets:
-            if isinstance(widget, QMessageBox):
-                QTest.keyClick(widget, Qt.Key_Enter)
-                self.message_box_open = True
-                return True
-        self.message_box_open = False
-        return False
-
-    def is_window_open(
-            self, window: Union[
-                CredentialsWindow, ProgressWindow, SettingsWindow]) -> bool:
-        """Helper method to determine if a window is open."""
-        all_top_level_widgets = QApplication.topLevelWidgets()
-        for widget in all_top_level_widgets:
-            if isinstance(widget, window):
-                widget.reject()
-                self.window_open = True
-                return True
-        self.window_open = False
-        return False
-
-
-class ProgressWindowTests(unittest.TestCase):
-
-    """Test the progress window of easyp2p."""
-
-    def setUp(self):
-        """Initialize ProgressWindow."""
-        settings = Settings()
-        settings.platforms = {'test_platform1', 'test_platform2'}
-        settings.date_range = (date(2018, 9, 1), date(2018, 12, 31))
-        settings.output_file = os.path.join(os.getcwd(), 'test.xlsx')
-        QTimer.singleShot(200, self.reject_credentials_window)
-        QTimer.singleShot(400, self.reject_credentials_window)
-        self.form = ProgressWindow(settings)
-
-    def tearDown(self):
-        """Stop the worker thread after test is done."""
-        self.form.worker.abort = True
-        self.form.worker.quit()
-        self.form.worker.wait()
-
-    def reject_credentials_window(self) -> bool:
-        """Helper method to determine if a window is open."""
-        all_top_level_widgets = QApplication.topLevelWidgets()
-        for widget in all_top_level_widgets:
-            if isinstance(widget, CredentialsWindow):
-                widget.reject()
-                return True
-        return False
-
-    def test_defaults(self):
-        """Test default behaviour of ProgressWindow."""
-        self.assertEqual(self.form.progress_bar.value(), 0)
-        self.assertEqual(self.form.progress_text.isReadOnly(), True)
-        self.assertEqual(self.form.progress_text.toPlainText(), '')
-        self.assertEqual(self.form.push_button_ok.isEnabled(), False)
-        self.assertEqual(self.form.push_button_abort.isEnabled(), True)
-
-    def test_progress_text(self):
-        """Test appending a line to progress_text."""
-        self.form.worker.add_progress_text.emit(
-            'Test message', self.form.worker.BLACK)
-        self.assertEqual(self.form.progress_text.toPlainText(), 'Test message')
-
-    def test_progress_bar(self):
-        """Test updating progress_bar to maximum value."""
-        self.form.worker.update_progress_bar.emit()
-        self.assertEqual(self.form.progress_bar.value(), 1)
-        self.form.worker.update_progress_bar.emit()
-        self.assertEqual(self.form.progress_bar.value(), 2)
-        # Two is the maximum value so the ok button must be enabled
-        self.assertEqual(self.form.push_button_ok.isEnabled(), True)
-        # Further increasing the progress_bar should not work
-        self.form.worker.update_progress_bar.emit()
-        self.assertEqual(self.form.progress_bar.value(), 2)
-
-
-class CredentialsWindowTests(unittest.TestCase):
-
-    """Test the credentials window of easyp2p."""
-
-    def setUp(self):
-        """Initialize CredentialsWindow."""
-        self.form = CredentialsWindow('test_platform')
-        self.message_box_open = False
-        self.window_open = False
-
-    def test_defaults(self):
-        """Test default behaviour of CredentialsWindow."""
-        self.assertFalse(self.form.line_edit_username.text())
-        self.assertFalse(self.form.line_edit_password.text())
-        self.assertFalse(self.form.check_box_save_in_keyring.isChecked())
-
-    def test_save_in_keyring_parameter(self):
-        """Test behaviour of CredentialsWindow if save_in_keyring==True."""
-        self.form = CredentialsWindow('test_platform', True)
-        self.assertTrue(self.form.check_box_save_in_keyring.isChecked())
-        self.assertFalse(self.form.check_box_save_in_keyring.isEnabled())
-
-    def test_no_input(self):
-        """Test clicking OK without entering credentials."""
-        QTimer.singleShot(500, self.is_message_box_open)
-        QTimer.singleShot(
-            500, functools.partial(self.is_window_open, CredentialsWindow))
-        # Check that message box opened and CredentialsWindow is still open
-        self.form.button_box.button(QDialogButtonBox.Ok).click()
-        self.assertTrue(self.message_box_open)
 
     def is_message_box_open(self) -> bool:
         """Helper method to determine if a QMessageBox is open."""

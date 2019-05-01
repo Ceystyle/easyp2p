@@ -6,7 +6,9 @@
 
 import unittest
 
-import tests.gui_tests
+import tests.test_credentials_window
+import tests.test_main_window
+import tests.test_progress_window
 import tests.parser_tests
 import tests.platform_tests
 
@@ -15,7 +17,9 @@ loader = unittest.TestLoader()
 suite = unittest.TestSuite()
 
 # add tests to the test suite
-suite.addTests(loader.loadTestsFromModule(tests.gui_tests))
+suite.addTests(loader.loadTestsFromModule(tests.test_credentials_window))
+suite.addTests(loader.loadTestsFromModule(tests.test_main_window))
+suite.addTests(loader.loadTestsFromModule(tests.test_progress_window))
 suite.addTests(loader.loadTestsFromModule(tests.parser_tests))
 suite.addTests(loader.loadTestsFromModule(tests.platform_tests))
 
