@@ -148,9 +148,22 @@ class WorkerThread(QThread):
         try:
             download_directory = os.path.join(
                 Path.home(), '.easyp2p', name.lower())
-            with P2PWebDriver(
-                    download_directory, self.settings) as driver:
-                platform.download_statement(driver, self.credentials[name])
+            if name == 'Iuvo' and self.settings.headless:
+                # Iuvo is currently not supported in headless Chromedriver mode
+                # because it opens a new window for downloading the statement.
+                # Chromedriver does not allow that due to security reasons.
+                self.add_progress_text.emit(
+                    'Iuvo wird nicht mit unsichtbarem Chromedriver '\
+                    'unterstützt!', self.RED)
+                self.add_progress_text.emit(
+                    'Mache Chromedriver sichtbar!', self.RED)
+                with P2PWebDriver(
+                        download_directory, False) as driver:
+                    platform.download_statement(driver, self.credentials[name])
+            else:
+                with P2PWebDriver(
+                        download_directory, self.settings.headless) as driver:
+                    platform.download_statement(driver, self.credentials[name])
         except WebDriverNotFound as err:
             self.abort_easyp2p.emit(str(err))
             self.abort = True

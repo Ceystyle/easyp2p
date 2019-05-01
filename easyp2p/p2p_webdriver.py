@@ -12,25 +12,23 @@ from selenium.common.exceptions import (
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 
-from easyp2p.p2p_settings import Settings
-
 
 class P2PWebDriver(webdriver.Chrome):
 
     """A class for providing webdriver support to easyp2p."""
 
-    def __init__(self, download_directory: str, settings: Settings) -> None:
+    def __init__(self, download_directory: str, headless: bool) -> None:
         """
         Initialize the P2PWebDriver class.
 
         Args:
             download_directory: Will be set as download directory for the
                 Chromedriver
-            settings: Settings for easyp2p
+            headless: If True run Chromedriver in headless mode
 
         """
         self.download_directory = download_directory
-        self.settings = settings
+        self.headless = headless
         self.driver = cast(webdriver.Chrome, None)
 
     def __enter__(self) -> 'P2PWebDriver':
@@ -48,7 +46,7 @@ class P2PWebDriver(webdriver.Chrome):
         prefs = {"download.default_directory": self.download_directory}
         options.add_experimental_option("prefs", prefs)
         options.add_argument("start-maximized")
-        if self.settings.headless:
+        if self.headless:
             options.add_argument("--headless")
             options.add_argument("--window-size=1920,1200")
         # Ubuntu doesn't put chromedriver in PATH so we need to
@@ -66,7 +64,7 @@ class P2PWebDriver(webdriver.Chrome):
                 'Chromedriver konnte nicht gefunden werden!\n'
                 'easyp2p wird beendet!\n', err)
 
-        if self.settings.headless:
+        if self.headless:
             # This is needed to allow downloads in headless mode
             params = {
                 'behavior': 'allow', 'downloadPath': self.download_directory}
