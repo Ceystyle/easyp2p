@@ -26,24 +26,39 @@ class CredentialsWindowTests(unittest.TestCase):
 
     def setUp(self):
         """Initialize CredentialsWindow."""
-        self.form = CredentialsWindow('test_platform')
         self.message_box_open = False
         self.window_open = False
 
-    def test_defaults(self):
-        """Test default behaviour of CredentialsWindow."""
+    def test_defaults_with_keyring(self):
+        """Test default behaviour if keyring_exists==True."""
+        self.form = CredentialsWindow('TestPlatform', True)
         self.assertFalse(self.form.line_edit_username.text())
         self.assertFalse(self.form.line_edit_password.text())
         self.assertFalse(self.form.check_box_save_in_keyring.isChecked())
 
-    def test_save_in_keyring_parameter(self):
-        """Test behaviour of CredentialsWindow if save_in_keyring==True."""
-        self.form = CredentialsWindow('test_platform', True)
+    def test_defaults_without_keyring(self):
+        """Test default behaviour if keyring_exists==False."""
+        self.form = CredentialsWindow('TestPlatform', False)
+        self.assertFalse(self.form.line_edit_username.text())
+        self.assertFalse(self.form.line_edit_password.text())
+        self.assertFalse(self.form.check_box_save_in_keyring.isChecked())
+        self.assertFalse(self.form.check_box_save_in_keyring.isEnabled())
+
+    def test_save_in_keyring_with_keyring(self):
+        """Test if a keyring is available and save_in_keyring==True."""
+        self.form = CredentialsWindow('TestPlatform', True, True)
         self.assertTrue(self.form.check_box_save_in_keyring.isChecked())
+        self.assertFalse(self.form.check_box_save_in_keyring.isEnabled())
+
+    def test_save_in_keyring_without_keyring(self):
+        """Test if a keyring is not available and save_in_keyring==True."""
+        self.form = CredentialsWindow('TestPlatform', False, True)
+        self.assertFalse(self.form.check_box_save_in_keyring.isChecked())
         self.assertFalse(self.form.check_box_save_in_keyring.isEnabled())
 
     def test_no_input(self):
         """Test clicking OK without entering credentials."""
+        self.form = CredentialsWindow('TestPlatform', True)
         QTimer.singleShot(500, self.is_message_box_open)
         QTimer.singleShot(
             500, functools.partial(self.is_window_open, CredentialsWindow))
