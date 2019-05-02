@@ -110,9 +110,15 @@ def delete_platform_from_keyring(platform: str) -> bool:
     Returns:
         True on success, False on failure
 
+    Raises:
+        RuntimeError: If 'username' for platform cannot be found in the keyring
+
     """
     try:
         username = keyring.get_password(platform, 'username')
+        if not username:
+            raise RuntimeError(
+                '{0} wurde nicht im Keyring gefunden!'.format(platform))
         keyring.delete_password(platform, username)
         keyring.delete_password(platform, 'username')
     except keyring.errors.PasswordDeleteError:
