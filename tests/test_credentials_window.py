@@ -9,7 +9,7 @@ import unittest
 
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
-    QApplication, QDialogButtonBox,  QMessageBox)
+    QApplication, QDialogButtonBox, QLineEdit, QMessageBox)
 from PyQt5.QtTest import QTest
 
 from easyp2p.ui.credentials_window import CredentialsWindow
@@ -61,6 +61,23 @@ class CredentialsWindowTests(unittest.TestCase):
         self.form.button_box.button(QDialogButtonBox.Cancel).click()
         self.assertFalse(self.form.isVisible())
 
+    def test_input_credentials(self):
+        """Test entering credentials."""
+        self.form = CredentialsWindow('TestPlatform', True)
+        QLineEdit.setText(self.form.line_edit_username, 'TestUser')
+        QLineEdit.setText(self.form.line_edit_password, 'TestPass')
+        self.form.button_box.button(QDialogButtonBox.Ok).click()
+        self.assertEqual(self.form.username, 'TestUser')
+        self.assertEqual(self.form.password, 'TestPass')
+
+    def test_input_credentials_cancel(self):
+        """Test entering credentials and then clicking Cancel."""
+        self.form = CredentialsWindow('TestPlatform', True)
+        QLineEdit.setText(self.form.line_edit_username, 'TestUser')
+        QLineEdit.setText(self.form.line_edit_password, 'TestPass')
+        self.form.button_box.button(QDialogButtonBox.Cancel).click()
+        self.assertIsNone(self.form.username)
+        self.assertIsNone(self.form.password)
 
 def accept_qmessagebox(testclass: unittest.TestCase) -> None:
     """
