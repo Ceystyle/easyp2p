@@ -133,9 +133,16 @@ def save_platform_in_keyring(
     Returns:
         True on success, False on failure
 
+    Raises:
+        RuntimeError: If username == 'username'
+
     """
-    # TODO: handle case if username=='username' (this is only a hypothetical
-    # problem since P2P platforms use email addresses as usernames)
+    # We use 'username' to save the username of the platform, thus it cannot be
+    # used as a "normal" username. This is only a hypothetical problem since
+    # P2P platforms use email addresses as usernames
+    if username == 'username':
+        raise RuntimeError('Benutzername "username" ist nicht erlaubt!')
+
     try:
         keyring.set_password(platform, 'username', username)
         keyring.set_password(platform, username, password)
