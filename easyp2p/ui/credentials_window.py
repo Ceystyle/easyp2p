@@ -31,14 +31,18 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         super().__init__()
         self.setupUi(self)
         self.platform = platform
+        self.username: str = None
+        self.password: str = None
         self.label_platform.setText(
             'Bitte Benutzername und Passwort für {0} eingeben:'.format(
                 platform))
         if not keyring_exists:
             self.check_box_save_in_keyring.setEnabled(False)
+            self.save_in_keyring = False
         elif save_in_keyring:
             self.check_box_save_in_keyring.setChecked(True)
             self.check_box_save_in_keyring.setEnabled(False)
+            self.save_in_keyring = True
 
     @pyqtSlot()
     def on_button_box_accepted(self):
@@ -52,6 +56,9 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
                 'Benutzername und Passwort ausfüllen!')
             return
 
+        self.username = self.line_edit_username.text()
+        self.password = self.line_edit_password.text()
+        self.save_in_keyring = self.check_box_save_in_keyring.isChecked()
         self.accept()
 
     def warn_user(self, header, msg):

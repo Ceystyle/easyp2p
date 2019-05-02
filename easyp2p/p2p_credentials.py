@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 
 import keyring
 
-import easyp2p.ui.credentials_window as credentials_window
+from easyp2p.ui.credentials_window import CredentialsWindow
 
 
 def keyring_exists() -> bool:
@@ -66,29 +66,27 @@ def get_credentials_from_user(
     Args:
         platform: Name of the P2P platform
 
+    Keyword Args:
+        save_in_keyring: If True the save_in_keyring checkbox will be
+            checked and disabled
+
     Returns:
-        Tuple (username, password) on success, (None, None) otherwise
+        Tuple (username, password)
 
     """
-    username, password = None, None
-    while not username or not password:
-        cred_window = credentials_window.CredentialsWindow(
-            platform, keyring.get_keyring(), save_in_keyring)
+    cred_window = CredentialsWindow(
+        platform, keyring.get_keyring(), save_in_keyring)
+    cred_window.exec_()
 
-        if not cred_window.exec_():
-            # User clicked the Cancel button
-            return (None, None)
+    if cred_window.save_in_keyring:
+        if not save_platform_in_keyring(
+                platform, cred_window.username, cred_window.password):
+            cred_window.warn_user(
+                'Speichern im Keyring fehlgeschlagen!',
+                'Speichern des Passworts im Keyring war leider nicht '\
+                'erfolgreich!')
 
-        username = cred_window.line_edit_username.text()
-        password = cred_window.line_edit_password.text()
-        if cred_window.check_box_save_in_keyring.isChecked():
-            if not save_platform_in_keyring(platform, username, password):
-                cred_window.warn_user(
-                    'Speichern im Keyring fehlgeschlagen!',
-                    'Speichern des Passworts im Keyring war leider nicht '\
-                    'erfolgreich!')
-
-    return (username, password)
+    return (cred_window.username, cred_window.password)
 
 
 def get_password_from_keyring(platform: str, username: str) -> Optional[str]:
