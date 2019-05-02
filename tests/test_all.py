@@ -6,6 +6,7 @@
 
 import unittest
 
+import tests.test_credentials
 import tests.test_credentials_window
 import tests.test_main_window
 import tests.test_progress_window
@@ -17,6 +18,7 @@ loader = unittest.TestLoader()
 suite = unittest.TestSuite()
 
 # add tests to the test suite
+suite.addTests(loader.loadTestsFromModule(tests.test_credentials))
 suite.addTests(loader.loadTestsFromModule(tests.test_credentials_window))
 suite.addTests(loader.loadTestsFromModule(tests.test_main_window))
 suite.addTests(loader.loadTestsFromModule(tests.test_progress_window))
