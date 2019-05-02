@@ -58,7 +58,7 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
             return
 
         if self.check_box_save_in_keyring.isChecked():
-            if not p2p_cred.save_credentials_in_keyring(
+            if not p2p_cred.save_platform_in_keyring(
                     self.platform, self.line_edit_username.text(),
                     self.line_edit_password.text()):
                 QMessageBox.warning(

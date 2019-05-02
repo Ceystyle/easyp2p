@@ -120,9 +120,22 @@ def delete_platform_from_keyring(platform: str) -> bool:
     return True
 
 
-def save_credentials_in_keyring(
+def save_platform_in_keyring(
         platform: str, username: str, password: str) -> bool:
-    """Save credentials for platform in keyring."""
+    """
+    Save credentials for platform in keyring.
+
+    Args:
+        platform: Name of the P2P platform
+        username: Username for platform
+        password: Password for platform
+
+    Returns:
+        True on success, False on failure
+
+    """
+    # TODO: handle case if username=='username' (this is only a hypothetical
+    # problem since P2P platforms use email addresses as usernames)
     try:
         keyring.set_password(platform, 'username', username)
         keyring.set_password(platform, username, password)
