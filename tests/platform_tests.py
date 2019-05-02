@@ -62,8 +62,7 @@ class PlatformTests(unittest.TestCase):
 
         """
         credentials = self.get_credentials_from_keyring(platform)
-        platform_class = getattr(
-            getattr(p2p_platforms, platform.lower()), platform)
+        platform_class = getattr(p2p_platforms, platform)
         platform_instance = platform_class(date_range)
         download_directory = os.path.join(
             Path.home(), '.easyp2p', platform.lower())
@@ -99,7 +98,7 @@ class PlatformTests(unittest.TestCase):
     def test_download_estateguru_statement(self):
         """Test download_estateguru_statement."""
         credentials = self.get_credentials_from_keyring('Estateguru')
-        estateguru = p2p_platforms.estateguru.Estateguru(self.DATE_RANGE)
+        estateguru = p2p_platforms.Estateguru(self.DATE_RANGE)
         download_directory = os.path.join(Path.home(), '.easyp2p', 'estateguru')
         settings = Settings()
         with P2PWebDriver(download_directory, settings) as driver:

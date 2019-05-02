@@ -70,7 +70,7 @@ class WorkerThread(QThread):
 
         """
         try:
-            platform = getattr(getattr(p2p_platforms, name.lower()), name)
+            platform = getattr(p2p_platforms, name)
         except AttributeError:
             error_message = (
                 'Klasse {0} konnte nicht gefunden werden. Ist {1}.py '

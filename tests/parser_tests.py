@@ -63,8 +63,7 @@ class ParserTests(unittest.TestCase):
                 types
 
         """
-        platform_class = getattr(
-            getattr(p2p_platforms, platform.lower()), platform)
+        platform_class = getattr(p2p_platforms, platform)
         platform_instance = platform_class(date_range)
         (df, unknown_cf_types) = platform_instance.parse_statement(
             input_file)
