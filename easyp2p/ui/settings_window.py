@@ -32,7 +32,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         self.settings = settings
         self.saved_platforms: Set[str] = set()
         if p2p_cred.keyring_exists():
-            for platform in sorted(self.platforms):
+            for platform in self.platforms:
                 if p2p_cred.get_password_from_keyring(platform, 'username'):
                     self.list_widget_platforms.addItem(platform)
                     self.saved_platforms.add(platform)

@@ -57,6 +57,7 @@ class Ui_SettingsWindow(object):
         _translate = QtCore.QCoreApplication.translate
         SettingsWindow.setWindowTitle(_translate("SettingsWindow", "Einstellungen"))
         self.groupBox.setTitle(_translate("SettingsWindow", "Im Keyring gespeicherte Zugangsdaten"))
+        self.list_widget_platforms.setSortingEnabled(True)
         self.push_button_add.setText(_translate("SettingsWindow", "Hinzufügen"))
         self.push_button_change.setText(_translate("SettingsWindow", "Ändern"))
         self.push_button_delete.setText(_translate("SettingsWindow", "Löschen"))
