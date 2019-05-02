@@ -60,6 +60,9 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         """
         self.worker.abort = True
         self.reject()
+        if self.worker.isRunning():
+            self.worker.quit()
+            self.worker.wait()
 
     def update_progress_bar(self) -> None:
         """
