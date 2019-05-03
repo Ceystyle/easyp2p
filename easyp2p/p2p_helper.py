@@ -94,9 +94,10 @@ def get_list_of_months(date_range: Tuple[date, date]) \
     current_date = date_range[0]
     while current_date < date_range[1]:
         start_of_month = date(current_date.year, current_date.month, 1)
-        _, days_in_month = calendar.monthrange(
-            start_of_month.year, start_of_month.month)
-        end_of_month = start_of_month + timedelta(days=days_in_month - 1)
+        days_in_month = calendar.monthrange(
+            current_date.year, current_date.month)[1]
+        end_of_month = date(
+            current_date.year, current_date.month, days_in_month)
         months.append((start_of_month, end_of_month))
         current_date += timedelta(days=days_in_month)
 
