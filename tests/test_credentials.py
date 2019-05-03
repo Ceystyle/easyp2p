@@ -6,6 +6,7 @@
 import functools
 import sys
 import unittest
+import warnings
 
 import keyring
 from PyQt5.QtCore import QTimer
@@ -21,6 +22,12 @@ APP = QApplication(sys.argv)
 
 
 class CredentialsTests(unittest.TestCase):
+
+    """Test p2p_credentials."""
+
+    def setUp(self):
+        """Ignore unnecessary ResourceWarnings for all tests."""
+        warnings.simplefilter("ignore", ResourceWarning)
 
     @unittest.skipIf(not keyring.get_keyring(), "No keyring available!")
     def test_keyring_exists_with_keyring(self):
