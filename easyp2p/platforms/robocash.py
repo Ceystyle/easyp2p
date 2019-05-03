@@ -63,8 +63,8 @@ class Robocash:
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.title_contains('Willkommen')) as robocash:
+                self.name, driver, urls,
+                EC.title_contains('Willkommen')) as robocash:
 
             robocash.log_into_page(
                 'email', 'password', credentials,

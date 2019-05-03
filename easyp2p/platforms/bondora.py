@@ -18,8 +18,8 @@ from selenium.common.exceptions import TimeoutException
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_webdriver import (P2PWebDriver,
-    one_of_many_expected_conditions_true)
+from easyp2p.p2p_webdriver import (
+    P2PWebDriver, one_of_many_expected_conditions_true)
 
 
 class Bondora:
@@ -56,16 +56,16 @@ class Bondora:
             'statement': 'https://www.bondora.com/de/cashflow'}
         xpaths = {
             'no_payments': '/html/body/div[1]/div/div/div/div[3]/div',
-            'search_btn': ('//*[@id="page-content-wrapper"]/div/div/div[1]/'
-                'form/div[3]/button'),
-            'start_date': ('/html/body/div[1]/div/div/div/div[3]/div/table/'
-                'tbody/tr[2]/td[1]/a'),
-            'download_btn': '/html/body/div[1]/div/div/div/div[1]/form/div[4]/'
-                'div/a'}
+            'search_btn': '//*[@id="page-content-wrapper"]/div/div/div[1]/'\
+                'form/div[3]/button',
+            'start_date': '/html/body/div[1]/div/div/div/div[3]/div/table/'\
+                'tbody/tr[2]/td[1]/a',
+            'download_btn': '/html/body/div[1]/div/div/div/div[1]/form/'\
+                'div[4]/div/a'}
 
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
+                self.name, driver, urls,
+                EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
 
             bondora.log_into_page(
                 'Email', 'Password', credentials,

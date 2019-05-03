@@ -54,14 +54,14 @@ class Iuvo:
             'login': 'https://www.iuvo-group.com/de/login/',
             'statement': 'https://www.iuvo-group.com/de/account-statement/'}
         xpaths = {
-            'statement_check': ('/html/body/div[5]/main/div/div/div/div[6]/div/'
-                'div/div/strong[3]')}
+            'statement_check': '/html/body/div[5]/main/div/div/div/div[6]/div'\
+                '/div/div/strong[3]'}
 
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.element_to_be_clickable((By.ID, 'einloggen')),
-            logout_locator=(By.ID, 'p2p_logout'),
-            hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
+                self.name, driver, urls,
+                EC.element_to_be_clickable((By.ID, 'einloggen')),
+                logout_locator=(By.ID, 'p2p_logout'),
+                hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
             iuvo.log_into_page(
                 'login', 'password', credentials,

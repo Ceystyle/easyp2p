@@ -58,9 +58,9 @@ class Mintos:
 
         # TODO: do not rely on title to check successful logout
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.title_contains('Vielen Dank'),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
+                self.name, driver, urls,
+                EC.title_contains('Vielen Dank'),
+                logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
             mintos.log_into_page(
                 '_username', '_password', credentials,

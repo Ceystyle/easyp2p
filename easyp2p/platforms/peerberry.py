@@ -55,19 +55,20 @@ class PeerBerry:
             'statement': 'https://peerberry.com/de/statement'}
         xpaths = {
             'cookie_policy': '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]',
-            'download_btn': ('//*[@id="app"]/div/div/div/div[2]/div/div[2]/'
-                             'div[3]/div[2]/div'),
-            'logout_btn': ('//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/'
-                           'div[2]/div'),
-            'start_balance': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
-                              'div[2]/div/div/div[1]'),
-            'statement_btn': ('/html/body/div[1]/div/div/div/div[2]/div/div[2]/'
-                              'div[1]/div/div[2]/div/div[2]/div/span')}
+            'download_btn': '//*[@id="app"]/div/div/div/div[2]/div/div[2]/'\
+                'div[3]/div[2]/div',
+            'logout_btn': '//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/'\
+                'div[2]/div',
+            'start_balance': '/html/body/div[1]/div/div/div/div[2]/div/div[2]/'\
+                'div[2]/div/div/div[1]',
+            'statement_btn': '/html/body/div[1]/div/div/div/div[2]/div/div[2]/'\
+                'div[1]/div/div[2]/div/div[2]/div/span'}
 
+        # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.title_contains('Einloggen'),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
+                self.name, driver, urls,
+                EC.title_contains('Einloggen'),
+                logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
 
             peerberry.log_into_page(
                 'email', 'password', credentials,

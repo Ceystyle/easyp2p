@@ -53,15 +53,15 @@ class Estateguru:
             'logout': 'https://estateguru.co/portal/logout/index',
             'statement': 'https://estateguru.co/portal/portfolio/account'}
         xpaths = {
-            'account_statement_check': ('/html/body/section/div/div/div/div[2]/'
-                'section[1]/div/div/div[2]/div/form/div[2]/ul/li[5]/a'),
-            'select_btn': ('/html/body/section/div/div/div/div[2]/section[2]/'
-                'div[1]/div[2]/button')}
+            'account_statement_check': '/html/body/section/div/div/div/div[2]/'\
+                'section[1]/div/div/div[2]/div/form/div[2]/ul/li[5]/a',
+            'select_btn': '/html/body/section/div/div/div/div[2]/section[2]/'\
+                'div[1]/div[2]/button'}
 
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
-            as estateguru:
+                self.name, driver, urls,
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
+                as estateguru:
 
             estateguru.log_into_page(
                 'username', 'password', credentials,
@@ -109,7 +109,7 @@ class Estateguru:
         parser.df = parser.df[:-1]
 
         # Only consider valid cashflows
-        parser.df = parser.df[parser.df['Cashflow-Status']=='Genehmigt']
+        parser.df = parser.df[parser.df['Cashflow-Status'] == 'Genehmigt']
 
         # Define mapping between Estateguru and easyp2p cashflow types and
         # column names

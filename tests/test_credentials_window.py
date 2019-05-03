@@ -14,16 +14,19 @@ from PyQt5.QtTest import QTest
 
 from easyp2p.ui.credentials_window import CredentialsWindow
 
-app = QApplication(sys.argv)
+APP = QApplication(sys.argv)
 
 
 class CredentialsWindowTests(unittest.TestCase):
 
     """Test the credentials window of easyp2p."""
 
+    def setUp(self):
+        """Initialize dialog for most of the tests."""
+        self.form = CredentialsWindow('TestPlatform', True)
+
     def test_defaults_with_keyring(self):
         """Test default behaviour if keyring_exists==True."""
-        self.form = CredentialsWindow('TestPlatform', True)
         self.assertFalse(self.form.line_edit_username.text())
         self.assertFalse(self.form.line_edit_password.text())
         self.assertFalse(self.form.check_box_save_in_keyring.isChecked())
@@ -50,7 +53,6 @@ class CredentialsWindowTests(unittest.TestCase):
 
     def test_no_input(self):
         """Test clicking OK without entering credentials."""
-        self.form = CredentialsWindow('TestPlatform', True)
         self.form.setVisible(True)
         self.assertTrue(self.form.isVisible())
         # Make sure a QMessageBox appears if no credentials are provided
@@ -63,7 +65,6 @@ class CredentialsWindowTests(unittest.TestCase):
 
     def test_input_credentials(self):
         """Test entering credentials."""
-        self.form = CredentialsWindow('TestPlatform', True)
         QLineEdit.setText(self.form.line_edit_username, 'TestUser')
         QLineEdit.setText(self.form.line_edit_password, 'TestPass')
         self.form.button_box.button(QDialogButtonBox.Ok).click()
@@ -72,7 +73,6 @@ class CredentialsWindowTests(unittest.TestCase):
 
     def test_input_credentials_cancel(self):
         """Test entering credentials and then clicking Cancel."""
-        self.form = CredentialsWindow('TestPlatform', True)
         QLineEdit.setText(self.form.line_edit_username, 'TestUser')
         QLineEdit.setText(self.form.line_edit_password, 'TestPass')
         self.form.button_box.button(QDialogButtonBox.Cancel).click()

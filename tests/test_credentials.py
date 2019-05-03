@@ -17,7 +17,7 @@ from easyp2p.p2p_credentials import (
     save_platform_in_keyring)
 from easyp2p.ui.credentials_window import CredentialsWindow
 
-app = QApplication(sys.argv)
+APP = QApplication(sys.argv)
 
 
 class CredentialsTests(unittest.TestCase):
@@ -49,7 +49,7 @@ class CredentialsTests(unittest.TestCase):
         save_platform_in_keyring('TestPlatform', 'TestUser', 'TestPass')
         self.assertTrue(delete_platform_from_keyring('TestPlatform'))
         self.assertIsNone(keyring.get_password('TestPlatform', 'username'))
-        self.assertIsNone(keyring.get_password('TestPlatform', 'TestUser'))        
+        self.assertIsNone(keyring.get_password('TestPlatform', 'TestUser'))
 
     @unittest.skipIf(not keyring.get_keyring(), "No keyring available!")
     def test_delete_platform_from_keyring_if_not_exists(self):
@@ -60,6 +60,7 @@ class CredentialsTests(unittest.TestCase):
             RuntimeError, delete_platform_from_keyring, 'TestPlatform')
 
     def test_get_credentials_from_user_no_save_in_keyring(self):
+        """Test getting credentials from the user without saving in keyring."""
         QTimer.singleShot(100, functools.partial(
             fill_credentials_window, 'TestUser', 'TestPass', False))
         (username, password) = get_credentials_from_user('TestPlatform', True)
@@ -68,6 +69,7 @@ class CredentialsTests(unittest.TestCase):
 
     @unittest.skipIf(not keyring.get_keyring(), "No keyring available!")
     def test_get_credentials_from_user_save_in_keyring(self):
+        """Test getting credentials from the user with save in keyring."""
         QTimer.singleShot(100, functools.partial(
             fill_credentials_window, 'TestUser', 'TestPass', True))
         (username, password) = get_credentials_from_user('TestPlatform', True)

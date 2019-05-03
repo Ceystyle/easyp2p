@@ -53,14 +53,14 @@ class Grupeer:
             'login': 'https://www.grupeer.com/de/login',
             'statement': 'https://www.grupeer.com/de/account-statement'}
         xpaths = {
-            'logout_hover': ('/html/body/div[4]/header/div/div/div[2]/div[1]/'
-                             'div/div/ul/li/a/span')}
+            'logout_hover': '/html/body/div[4]/header/div/div/div[2]/div[1]/'\
+                'div/div/ul/li/a/span'}
 
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
-            logout_locator=(By.LINK_TEXT, 'Ausloggen'),
-            hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
+                self.name, driver, urls,
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
+                logout_locator=(By.LINK_TEXT, 'Ausloggen'),
+                hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
             grupeer.log_into_page(
                 'email', 'password', credentials,

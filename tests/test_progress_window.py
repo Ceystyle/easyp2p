@@ -16,7 +16,7 @@ from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
 from tests.test_credentials import fill_credentials_window
 
-app = QApplication(sys.argv)
+APP = QApplication(sys.argv)
 
 
 class ProgressWindowTests(unittest.TestCase):

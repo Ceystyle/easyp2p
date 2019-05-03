@@ -22,7 +22,7 @@ from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 
-app = QApplication(sys.argv)
+APP = QApplication(sys.argv)
 # TODO: add tests to check if Settings are correct
 
 
@@ -32,7 +32,7 @@ class MainWindowTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create the GUI."""
-        
+
         self.form = MainWindow()
         self.message_box_open = False
         self.progress_window_open = False

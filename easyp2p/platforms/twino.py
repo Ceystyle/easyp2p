@@ -51,21 +51,21 @@ class Twino:
         """
         urls = {
             'login': 'https://www.twino.eu/de/',
-            'statement': ('https://www.twino.eu/de/profile/investor/'
-                          'my-investments/account-transactions')}
+            'statement': 'https://www.twino.eu/de/profile/investor/'\
+                'my-investments/account-transactions'}
         xpaths = {
             'end_date': '//*[@date-picker="filterData.processingDateTo"]',
-            'login_btn': ('/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/'
-                          'div/div[1]/button'),
+            'login_btn': '/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/'\
+                'div/div[1]/button',
             'logout_btn': '//a[@href="/logout"]',
             'start_date': '//*[@date-picker="filterData.processingDateFrom"]',
-            'statement': ('//a[@href="/de/profile/investor/my-investments/'
-                          'individual-investments"]')}
+            'statement': '//a[@href="/de/profile/investor/my-investments/'\
+                'individual-investments"]'}
 
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
-            logout_locator=(By.XPATH, xpaths['logout_btn'])) as twino:
+                self.name, driver, urls,
+                EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
+                logout_locator=(By.XPATH, xpaths['logout_btn'])) as twino:
 
             twino.log_into_page(
                 'email', 'login-password', credentials,

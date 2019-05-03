@@ -56,8 +56,8 @@ class DoFinance:
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
-            self.name, driver, urls,
-            EC.title_contains('Kreditvergabe Plattform')) as dofinance:
+                self.name, driver, urls,
+                EC.title_contains('Kreditvergabe Plattform')) as dofinance:
 
             dofinance.log_into_page(
                 'email', 'password', credentials,
