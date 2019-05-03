@@ -12,16 +12,15 @@ from typing import Union
 import unittest
 
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import (
-    QApplication, QCheckBox, QLineEdit, QMessageBox)
+from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
 from PyQt5.QtTest import QTest
 
-import easyp2p.p2p_helper as p2p_helper
 #from easyp2p.p2p_settings import Settings
 from easyp2p.ui.credentials_window import CredentialsWindow
 from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
+from tests.test_credentials_window import accept_qmessagebox
 
 APP = QApplication(sys.argv)
 # TODO: add tests to check if Settings are correct
@@ -34,7 +33,6 @@ class MainWindowTests(unittest.TestCase):
     def setUp(self) -> None:
         """Create the GUI."""
         self.form = MainWindow()
-        self.message_box_open = False
         self.progress_window_open = False
         self.window_open = False
 
@@ -92,14 +90,12 @@ class MainWindowTests(unittest.TestCase):
 
     def test_no_platform_selected(self) -> None:
         """Test clicking start without any selected platform."""
-        # Push the start button without selecting any platform first
-        QTimer.singleShot(500, self.is_message_box_open)
+        QTimer.singleShot(100, functools.partial(accept_qmessagebox, self))
         QTimer.singleShot(
             500, functools.partial(self.is_window_open, ProgressWindow))
         self.form.push_button_start.click()
 
-        # Check that warning message pops up and ProgressWindow did not open
-        self.assertTrue(self.message_box_open)
+        # Check that ProgressWindow did not open
         self.assertFalse(self.window_open)
 
     def test_output_file_on_date_change(self) -> None:
@@ -130,15 +126,12 @@ class MainWindowTests(unittest.TestCase):
     def test_end_date_before_start_date(self) -> None:
         """Test clicking start with end date set before start date."""
         self.form.set_date_range('Feb', '2017', 'Sep', '2016')
-
-        # Push the start button
-        QTimer.singleShot(500, self.is_message_box_open)
+        QTimer.singleShot(100, functools.partial(accept_qmessagebox, self))
         QTimer.singleShot(
             500, functools.partial(self.is_window_open, ProgressWindow))
         self.form.push_button_start.click()
 
-        # Check that warning message pops up and ProgressWindow did not open
-        self.assertTrue(self.message_box_open)
+        # Check that ProgressWindow did not open
         self.assertFalse(self.window_open)
 
     def test_push_start_button_with_bondora_selected(self) -> None:
@@ -168,17 +161,6 @@ class MainWindowTests(unittest.TestCase):
 
         # Check that the progress window opened
         self.assertTrue(self.window_open)
-
-    def is_message_box_open(self) -> bool:
-        """Helper method to determine if a QMessageBox is open."""
-        all_top_level_widgets = QApplication.topLevelWidgets()
-        for widget in all_top_level_widgets:
-            if isinstance(widget, QMessageBox):
-                QTest.keyClick(widget, Qt.Key_Enter)
-                self.message_box_open = True
-                return True
-        self.message_box_open = False
-        return False
 
     def is_window_open(
             self, window: Union[
