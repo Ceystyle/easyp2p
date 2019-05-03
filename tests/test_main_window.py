@@ -8,7 +8,6 @@ from datetime import date
 import functools
 import os
 import sys
-from typing import Union
 import unittest
 
 from PyQt5.QtCore import QTimer, Qt
@@ -16,11 +15,10 @@ from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
 from PyQt5.QtTest import QTest
 
 #from easyp2p.p2p_settings import Settings
-from easyp2p.ui.credentials_window import CredentialsWindow
 from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
-from tests.test_credentials_window import accept_qmessagebox
+import tests.utils as utils
 
 APP = QApplication(sys.argv)
 # TODO: add tests to check if Settings are correct
@@ -33,8 +31,7 @@ class MainWindowTests(unittest.TestCase):
     def setUp(self) -> None:
         """Create the GUI."""
         self.form = MainWindow()
-        self.progress_window_open = False
-        self.window_open = False
+        self.test_results = []
 
     def test_defaults(self) -> None:
         """Test GUI in default state."""
@@ -90,13 +87,18 @@ class MainWindowTests(unittest.TestCase):
 
     def test_no_platform_selected(self) -> None:
         """Test clicking start without any selected platform."""
-        QTimer.singleShot(100, functools.partial(accept_qmessagebox, self))
+        QTimer.singleShot(100, functools.partial(
+            utils.accept_qmessagebox, self))
         QTimer.singleShot(
-            500, functools.partial(self.is_window_open, ProgressWindow))
+            500, functools.partial(utils.window_visible, self, ProgressWindow))
+        QTimer.singleShot(
+            700, functools.partial(
+                utils.cancel_window, self, ProgressWindow, 'push_button_abort'))
         self.form.push_button_start.click()
 
-        # Check that ProgressWindow did not open
-        self.assertFalse(self.window_open)
+        # Check that QMessageBox was opened and ProgressWindow was not
+        expected_results = [utils.QMSG_BOX_OPEN]
+        self.assertEqual(self.test_results, expected_results)
 
     def test_output_file_on_date_change(self) -> None:
         """Test output file name after a date change."""
@@ -126,25 +128,37 @@ class MainWindowTests(unittest.TestCase):
     def test_end_date_before_start_date(self) -> None:
         """Test clicking start with end date set before start date."""
         self.form.set_date_range('Feb', '2017', 'Sep', '2016')
-        QTimer.singleShot(100, functools.partial(accept_qmessagebox, self))
+        QTimer.singleShot(100, functools.partial(
+            utils.accept_qmessagebox, self))
         QTimer.singleShot(
-            500, functools.partial(self.is_window_open, ProgressWindow))
+            500, functools.partial(utils.window_visible, self, ProgressWindow))
+        QTimer.singleShot(
+            700, functools.partial(
+                utils.cancel_window, self, ProgressWindow, 'push_button_abort'))
         self.form.push_button_start.click()
 
-        # Check that ProgressWindow did not open
-        self.assertFalse(self.window_open)
+        # Check that QMessageBox was opened and ProgressWindow was not
+        expected_results = [utils.QMSG_BOX_OPEN]
+        self.assertEqual(self.test_results, expected_results)
 
+    @unittest.skip('This test needs more work to ensure that Bondora is not '
+        'evaluated. We just want to test the GUI.')
     def test_push_start_button_with_bondora_selected(self) -> None:
         """Test pushing start button after selecting Bondora."""
-        self.form.check_box_bondora.setChecked(True)
+        self.form.check_box_dofinance.setChecked(True)
         self.form.set_date_range('Sep', '2018', 'Feb', '2019')
         QLineEdit.setText(self.form.line_edit_output_file, 'Test_Bondora.xlsx')
         QTimer.singleShot(
-            500, functools.partial(self.is_window_open, ProgressWindow))
+            100, functools.partial(utils.window_visible, self, ProgressWindow))
+        QTimer.singleShot(
+            200, functools.partial(
+                utils.cancel_window, self, ProgressWindow, 'push_button_abort'))
         QTest.mouseClick(self.form.push_button_start, Qt.LeftButton)
 
-        # Check that the progress window opened
-        self.assertTrue(self.window_open)
+        # Check that ProgressWindow opened
+        expected_results = [
+            utils.PROG_WINDOW_VISIBLE, utils.PROG_WINDOW_CANCELLED]
+        self.assertEqual(self.test_results, expected_results)
 
         # Check that all settings are correct
         self.assertEqual(self.form.settings.platforms, {'Bondora'})
@@ -156,24 +170,16 @@ class MainWindowTests(unittest.TestCase):
     def test_push_tool_button_settings(self) -> None:
         """Test pushing settings button."""
         QTimer.singleShot(
-            500, functools.partial(self.is_window_open, SettingsWindow))
+            500, functools.partial(utils.window_visible, self, SettingsWindow))
+        QTimer.singleShot(
+            700, functools.partial(
+                utils.cancel_window, self, SettingsWindow))
         QTest.mouseClick(self.form.tool_button_settings, Qt.LeftButton)
 
-        # Check that the progress window opened
-        self.assertTrue(self.window_open)
-
-    def is_window_open(
-            self, window: Union[
-                CredentialsWindow, ProgressWindow, SettingsWindow]) -> bool:
-        """Helper method to determine if a window is open."""
-        all_top_level_widgets = QApplication.topLevelWidgets()
-        for widget in all_top_level_widgets:
-            if isinstance(widget, window):
-                widget.reject()
-                self.window_open = True
-                return True
-        self.window_open = False
-        return False
+        # Check that SettingsWindow opened
+        expected_results = [
+            utils.SETTINGS_VISIBLE, utils.SETTINGS_CANCELLED]
+        self.assertEqual(self.test_results, expected_results)
 
 
 if __name__ == "__main__":
