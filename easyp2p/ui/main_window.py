@@ -33,13 +33,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         super().__init__()
         self.setupUi(self)
-        self.init_date_combo_boxes()
-        self.output_file_changed = False
-        self.set_output_file()
-        self.settings = Settings()
-
-    def init_date_combo_boxes(self) -> None:
-        """Initialize date combo boxes with previous month."""
+        # Initialize date combo boxes with previous month
         if date.today().month > 1:
             start_month = p2p_helper.nbr_to_short_month(
                 str(date.today().month - 1))
@@ -47,15 +41,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             start_month = 'Dez'
             start_year = str(date.today().year - 1)
+        self.set_date_range(start_month, start_year, start_month, start_year)
+        self.output_file_changed = False
+        self.set_output_file()
+        self.settings = Settings()
 
+    def set_date_range(
+            self, start_month: str, start_year: str,
+            end_month: str, end_year: str) -> None:
+        """
+        Set start and end dates in the combo boxes.
+
+        Args:
+            start_month: Start month
+            start_year: Start year
+            end_month: End month
+            end_year: End year
+
+        """
         self.combo_box_start_month.setCurrentIndex(
             self.combo_box_start_month.findText(start_month))
         self.combo_box_start_year.setCurrentIndex(
             self.combo_box_start_year.findText(start_year))
         self.combo_box_end_month.setCurrentIndex(
-            self.combo_box_end_month.findText(start_month))
+            self.combo_box_end_month.findText(end_month))
         self.combo_box_end_year.setCurrentIndex(
-            self.combo_box_end_year.findText(start_year))
+            self.combo_box_end_year.findText(end_year))
 
     def get_date_range(self) -> Tuple[date, date]:
         """
