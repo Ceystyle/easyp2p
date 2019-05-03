@@ -7,12 +7,11 @@ import functools
 import sys
 import unittest
 
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import (
-    QApplication, QDialogButtonBox, QLineEdit, QMessageBox)
-from PyQt5.QtTest import QTest
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QLineEdit
 
 from easyp2p.ui.credentials_window import CredentialsWindow
+import tests.utils as utils
 
 APP = QApplication(sys.argv)
 
@@ -24,6 +23,7 @@ class CredentialsWindowTests(unittest.TestCase):
     def setUp(self):
         """Initialize dialog for most of the tests."""
         self.form = CredentialsWindow('TestPlatform', True)
+        self.test_results = []
 
     def test_defaults_with_keyring(self):
         """Test default behaviour if keyring_exists==True."""
@@ -53,14 +53,18 @@ class CredentialsWindowTests(unittest.TestCase):
 
     def test_no_input(self):
         """Test clicking OK without entering credentials."""
-        self.form.setVisible(True)
-        self.assertTrue(self.form.isVisible())
-        # Make sure a QMessageBox appears if no credentials are provided
-        QTimer.singleShot(100, functools.partial(accept_qmessagebox, self))
-        self.form.button_box.button(QDialogButtonBox.Ok).click()
-        # Credentials window must still be visible
-        self.assertTrue(self.form.isVisible())
-        self.form.button_box.button(QDialogButtonBox.Cancel).click()
+        QTimer.singleShot(
+            0, self.form.button_box.button(QDialogButtonBox.Ok).click)
+        QTimer.singleShot(
+            400, functools.partial(utils.accept_qmessagebox, self))
+        QTimer.singleShot(
+            500, functools.partial(
+                utils.window_visible, self, CredentialsWindow))
+        QTimer.singleShot(
+            600, self.form.button_box.button(QDialogButtonBox.Cancel).click)
+        self.form.exec_()
+        expected_results = [utils.QMSG_BOX_OPEN, utils.CRED_WINDOW_VISIBLE]
+        self.assertEqual(self.test_results, expected_results)
         self.assertFalse(self.form.isVisible())
 
     def test_input_credentials(self):
@@ -78,21 +82,6 @@ class CredentialsWindowTests(unittest.TestCase):
         self.form.button_box.button(QDialogButtonBox.Cancel).click()
         self.assertIsNone(self.form.username)
         self.assertIsNone(self.form.password)
-
-def accept_qmessagebox(testclass: unittest.TestCase) -> None:
-    """
-    Check if a QMessageBox is open. If yes accept it. If no fail the test.
-
-    Args:
-        testclass: Instance of unittest.TestCase
-
-    """
-    all_top_level_widgets = QApplication.topLevelWidgets()
-    for widget in all_top_level_widgets:
-        if isinstance(widget, QMessageBox):
-            QTest.keyClick(widget, Qt.Key_Enter)
-            return
-    testclass.fail('QMessageBox did not open!')
 
 
 if __name__ == "__main__":
