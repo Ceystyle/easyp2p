@@ -79,17 +79,15 @@ class DoFinance:
         """
         Parser for DoFinance.
 
-        Keyword Args:
+        Args:
             statement_file_name: File name including path of the account
-                statement which should be parsed.
+                statement which should be parsed. If None, the file at
+                self.statement_file_name will be parsed. Default is None.
 
         Returns:
             Tuple with two elements. The first element is the data frame
             containing the parsed results. The second element is a set
             containing all unknown cash flow types.
-
-        Raises:
-            RuntimeError: If the statement file cannot be found.
 
         """
         if statement_file_name is not None:
