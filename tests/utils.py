@@ -7,13 +7,15 @@ from typing import Union
 import unittest
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QInputDialog, QMessageBox
 from PyQt5.QtTest import QTest
 
 from easyp2p.ui.credentials_window import CredentialsWindow
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 
+QINPUT_DIALOG_OPEN = 'QInputDialog is open!'
+QINPUT_DIALOG_NOT_OPEN = 'QInputDialog is not open!'
 QMSG_BOX_OPEN = 'QMessageBox is open!'
 QMSG_BOX_NOT_OPEN = 'QMessageBox is not open!'
 CRED_WINDOW_VISIBLE = '{0} is visible!'.format(CredentialsWindow)
@@ -29,6 +31,22 @@ SETTINGS_NOT_CANCELLED = '{0} was not cancelled!'.format(SettingsWindow)
 
 Windows = Union[CredentialsWindow, ProgressWindow, SettingsWindow]
 
+
+def accept_qinputdialog(testclass: unittest.TestCase):
+    """
+    Check if a QInputDialog is open. If yes accept it. If no fail the test.
+
+    Args:
+        testclass: Instance of unittest.TestCase
+
+    """
+    all_top_level_widgets = QApplication.topLevelWidgets()
+    for widget in all_top_level_widgets:
+        if isinstance(widget, QInputDialog):
+            widget.accept()
+            testclass.test_results.append(QINPUT_DIALOG_NOT_OPEN)
+            return
+    testclass.test_results.append(QINPUT_DIALOG_NOT_OPEN)
 
 def accept_qmessagebox(testclass: unittest.TestCase) -> None:
     """

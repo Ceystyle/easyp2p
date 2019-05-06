@@ -22,6 +22,7 @@ suite.addTests(loader.loadTestsFromModule(tests.test_credentials))
 suite.addTests(loader.loadTestsFromModule(tests.test_credentials_window))
 suite.addTests(loader.loadTestsFromModule(tests.test_main_window))
 suite.addTests(loader.loadTestsFromModule(tests.test_progress_window))
+suite.addTests(loader.loadTestsFromModule(tests.test_settings_window))
 suite.addTests(loader.loadTestsFromModule(tests.parser_tests))
 suite.addTests(loader.loadTestsFromModule(tests.platform_tests))
 
