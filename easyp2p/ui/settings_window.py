@@ -53,7 +53,7 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         if not_saved_platforms:
             platform, accepted = QInputDialog.getItem(
                 self, 'P2P-Plattform auswählen',
-                'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt '\
+                'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt '
                 'werden?', sorted(not_saved_platforms), 0, False)
         else:
             QMessageBox.information(

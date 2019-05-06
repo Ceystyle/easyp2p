@@ -153,7 +153,7 @@ class WorkerThread(QThread):
                 # because it opens a new window for downloading the statement.
                 # Chromedriver does not allow that due to security reasons.
                 self.add_progress_text.emit(
-                    'Iuvo wird nicht mit unsichtbarem Chromedriver '\
+                    'Iuvo wird nicht mit unsichtbarem Chromedriver '
                     'unterstützt!', self.RED)
                 self.add_progress_text.emit(
                     'Mache Chromedriver sichtbar!', self.RED)

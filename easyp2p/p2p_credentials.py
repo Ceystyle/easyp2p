@@ -81,7 +81,7 @@ def get_credentials_from_user(
                 platform, cred_window.username, cred_window.password):
             cred_window.warn_user(
                 'Speichern im Keyring fehlgeschlagen!',
-                'Speichern des Passworts im Keyring war leider nicht '\
+                'Speichern des Passworts im Keyring war leider nicht '
                 'erfolgreich!')
 
     return (cred_window.username, cred_window.password)
