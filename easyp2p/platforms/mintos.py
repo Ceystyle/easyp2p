@@ -21,7 +21,6 @@ from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class Mintos:
-
     """
     Contains methods for downloading/parsing Mintos account statements.
     """
@@ -73,10 +72,8 @@ class Mintos:
                 submit_btn_locator=(By.ID, 'filter-button'))
 
             # If there were no cashflows in date_range, the download button will
-            # not appear. In that case test if there really were no cashflows by
-            # checking that there are only two lines in the account statement
-            # with start and end balance of 0. If that is the case write an
-            # empty DataFrame to the file.
+            # not appear. In that case test if there really were no cashflows.
+            # If that is the case write an empty DataFrame to the file.
             try:
                 driver.wait(
                     EC.presence_of_element_located((By.ID, 'export-button')))
@@ -91,14 +88,9 @@ class Mintos:
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
                         'generiert werden')
 
-                if len(df) == 2:
-                    if df.iloc[0][0] == 'Anfangssaldo ' \
-                            + self.date_range[0].strftime('%d.%m.%Y') \
-                        and df.iloc[0][1] == 0 \
-                        and df.iloc[1][0] == 'Endsaldo ' \
-                            + self.date_range[1].strftime('%d.%m.%Y'):
-                        df = pd.DataFrame()
-                        df.to_excel(self.statement_file_name)
+                if self._no_cashflows(df):
+                    df = pd.DataFrame()
+                    df.to_excel(self.statement_file_name)
                 else:
                     raise RuntimeError(
                         'Der Mintos-Kontoauszug konnte nicht erfolgreich '
@@ -106,6 +98,37 @@ class Mintos:
             else:
                 mintos.download_statement(
                     self.statement_file_name, (By.ID, 'export-button'))
+
+    def _no_cashflows(self, df: pd.DataFrame) -> bool:
+        """
+        Helper method to determine if there were any cashflows in date_range.
+
+        If there were no cashflows the Mintos cashflow table contains just two
+        lines with start and end balance equal to zero.
+
+        Args:
+            df: DataFrame containing the Mintos cashflow table.
+
+        Returns:
+            True if there were no cashflows, False otherwise.
+
+        """
+        if len(df) != 2:
+            return False
+
+        if df.iloc[0][0] != (
+                'Anfangssaldo ' + self.date_range[0].strftime('%d.%m.%Y')):
+            return False
+
+        # Start balance value
+        if df.iloc[0][1] != 0:
+            return False
+
+        if df.iloc[1][0] != (
+                'Endsaldo ' + self.date_range[1].strftime('%d.%m.%Y')):
+            return False
+
+        return True
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
