@@ -15,7 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location, nbr_to_short_month
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import (
@@ -32,12 +32,12 @@ class Bondora:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Bondora'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xlsx')
 
     def download_statement(
@@ -46,22 +46,26 @@ class Bondora:
         Generate and download the Bondora account statement.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Bondora
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for Bondora.
 
         """
         urls = {
             'login': 'https://www.bondora.com/de/login',
             'logout': 'https://www.bondora.com/de/authorize/logout',
-            'statement': 'https://www.bondora.com/de/cashflow'}
+            'statement': 'https://www.bondora.com/de/cashflow',
+        }
         xpaths = {
             'no_payments': '/html/body/div[1]/div/div/div/div[3]/div',
-            'search_btn': '//*[@id="page-content-wrapper"]/div/div/div[1]/'\
-                'form/div[3]/button',
-            'start_date': '/html/body/div[1]/div/div/div/div[3]/div/table/'\
-                'tbody/tr[2]/td[1]/a',
-            'download_btn': '/html/body/div[1]/div/div/div/div[1]/form/'\
-                'div[4]/div/a'}
+            'search_btn': (
+                '//*[@id="page-content-wrapper"]/div/div/div[1]/form/div[3]'
+                '/button'),
+            'start_date': (
+                '/html/body/div[1]/div/div/div/div[3]/div/table/tbody/tr[2]'
+                '/td[1]/a'),
+            'download_btn': (
+                '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'),
+        }
 
         with P2PPlatform(
                 self.name, driver, urls,
@@ -74,19 +78,16 @@ class Bondora:
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
+            start_month = nbr_to_short_month(self.date_range[0].strftime('%m'))
+            end_month = nbr_to_short_month(self.date_range[1].strftime('%m'))
             select = Select(bondora.driver.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(self.date_range[0].year))
-
             select = Select(bondora.driver.find_element_by_id('StartMonth'))
-            select.select_by_visible_text(p2p_helper.nbr_to_short_month(
-                self.date_range[0].strftime('%m')))
-
+            select.select_by_visible_text(start_month)
             select = Select(bondora.driver.find_element_by_id('EndYear'))
             select.select_by_visible_text(str(self.date_range[1].year))
-
             select = Select(bondora.driver.find_element_by_id('EndMonth'))
-            select.select_by_visible_text(p2p_helper.nbr_to_short_month(
-                self.date_range[1].strftime('%m')))
+            select.select_by_visible_text(end_month)
 
             # Start the account statement generation
             driver.find_element_by_xpath(xpaths['search_btn']).click()
@@ -97,9 +98,7 @@ class Bondora:
             conditions = [
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['start_date']), '{0} {1}'.format(
-                        p2p_helper.nbr_to_short_month(
-                            self.date_range[0].strftime('%m')),
-                        self.date_range[0].year)),
+                        start_month, self.date_range[0].year)),
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['no_payments']), no_payments_msg)]
             try:
@@ -109,7 +108,6 @@ class Bondora:
 
             bondora.download_statement(
                 self.statement_file_name, (By.XPATH, xpaths['download_btn']))
-
 
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
