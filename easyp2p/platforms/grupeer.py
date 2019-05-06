@@ -124,4 +124,4 @@ class Grupeer:
             '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount',
             'Balance')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

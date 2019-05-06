@@ -132,4 +132,4 @@ class Estateguru:
             '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
             'Estateguru_Cashflow-Typ', 'Betrag', 'Verfügbar für Investitionen')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

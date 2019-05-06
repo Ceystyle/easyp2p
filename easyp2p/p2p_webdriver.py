@@ -95,7 +95,7 @@ class WebDriverNotFound(Exception):
     """Custom exception which will be raised if Chromedriver cannot be found."""
 
 
-class one_of_many_expected_conditions_true():
+class one_of_many_expected_conditions_true:
     """
     An expectation for checking if (at least) one of several provided expected
     conditions for the Selenium webdriver is true.

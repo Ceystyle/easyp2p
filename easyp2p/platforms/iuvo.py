@@ -21,7 +21,6 @@ from easyp2p.p2p_webdriver import (
 
 
 class Iuvo:
-
     """
     Contains methods for downloading/parsing Iuvo account statements.
     """
@@ -138,13 +137,13 @@ class Iuvo:
         # Create a DataFrame with zero entries if there were no cashflows
         if parser.df.empty:
             parser.add_zero_cashflows()
-            return (parser.df, '')
+            return parser.df, ''
 
         # Format the header of the table
         parser.df = parser.df[2:]  # First two rows contain a generic header
-        new_header = parser.df.iloc[0] # Get the new first row as header
-        parser.df = parser.df[1:] # Remove the first row
-        parser.df.columns = new_header # Set the new header
+        new_header = parser.df.iloc[0]  # Get the new first row as header
+        parser.df = parser.df[1:]  # Remove the first row
+        parser.df.columns = new_header  # Set the new header
 
         # The last three rows only contain a summary
         parser.df = parser.df[:-3]
@@ -165,4 +164,4 @@ class Iuvo:
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Transaction Type', 'Turnover', 'Balance')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

@@ -54,7 +54,7 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
         if not username or not password:
             return None
 
-    return (username, password)
+    return username, password
 
 
 def get_credentials_from_user(
@@ -84,7 +84,7 @@ def get_credentials_from_user(
                 'Speichern des Passworts im Keyring war leider nicht '
                 'erfolgreich!')
 
-    return (cred_window.username, cred_window.password)
+    return cred_window.username, cred_window.password
 
 
 def get_password_from_keyring(platform: str, username: str) -> Optional[str]:

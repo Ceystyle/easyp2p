@@ -3,7 +3,7 @@
 
 """Module containing all configurable settings for easyp2p."""
 
-class Settings():
+class Settings:
 
     """A class to store all settings of easyp2p."""
 

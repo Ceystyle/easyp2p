@@ -42,7 +42,7 @@ class PlatformTests(unittest.TestCase):
                 self.skipTest(
                     'No credentials for {0} in the keyring.'.format(platform))
 
-        return (username, password)
+        return username, password
 
     def run_download_statement_test(
             self, platform: str, date_range: Tuple[date, date],

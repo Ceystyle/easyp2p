@@ -257,7 +257,7 @@ class ParserTests(unittest.TestCase):
         self.run_parser_test(
             'Robocash', INPUT_PREFIX + test_name + '.xls',
             RESULT_PREFIX + test_name + '.csv',
-            unknown_cf_types_exp=('TestCF1, TestCF2'))
+            unknown_cf_types_exp='TestCF1, TestCF2')
 
     def test_swaper_parser(self):
         """Test parsing Swaper default statement."""
@@ -283,7 +283,7 @@ class ParserTests(unittest.TestCase):
         self.run_parser_test(
             'Twino', INPUT_PREFIX + test_name + '.xlsx',
             RESULT_PREFIX + test_name + '.csv',
-            unknown_cf_types_exp=('TestCF1 PRINCIPAL, TestCF2 INTEREST'))
+            unknown_cf_types_exp='TestCF1 PRINCIPAL, TestCF2 INTEREST')
 
     def test_twino_parser_wrong_column_names(self):
         """

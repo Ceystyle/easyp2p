@@ -127,4 +127,4 @@ class Swaper:
             '%d.%m.%Y', rename_columns, cashflow_types,
             'Transaction type', 'Amount')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

@@ -145,4 +145,4 @@ class Robocash:
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Operation', 'Betrag', 'Der Saldo des Portfolios')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

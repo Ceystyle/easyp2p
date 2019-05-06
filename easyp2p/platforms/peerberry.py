@@ -112,7 +112,7 @@ class PeerBerry:
                 driver.find_element_by_xpath(xpaths['statement_btn']).click()
                 driver.wait(
                     EC.text_to_be_present_in_element(
-                        ((By.XPATH, xpaths['start_balance'])),
+                        (By.XPATH, xpaths['start_balance']),
                         'Eröffnungssaldo '+str(
                             self.date_range[0]).format('%Y-%m-%d')))
             except NoSuchElementException:
@@ -158,4 +158,4 @@ class PeerBerry:
         unknown_cf_types = parser.start_parser(
             '%Y-%m-%d', rename_columns, cashflow_types, 'Type', 'Amount')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

@@ -10,7 +10,6 @@ from easyp2p.ui.Ui_credentials_window import Ui_CredentialsWindow
 
 
 class CredentialsWindow(QDialog, Ui_CredentialsWindow):
-
     """Class for getting P2P platform login credentials from the user."""
 
     def __init__(
@@ -20,12 +19,12 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         Constructor of CredentialsWindow.
 
         Args:
-            platform: Name of the P2P platform
-            keyring_exists: True if a keyring is available, False if not
+            platform: Name of the P2P platform.
+            keyring_exists: True if a keyring is available, False if not.
 
         Keyword Args:
             save_in_keyring: If True the save_in_keyring checkbox will be
-                checked and disabled
+                checked and disabled.
 
         """
         super().__init__()
@@ -50,10 +49,10 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         Check user provided credentials and optionally save them in keyring.
         """
         if not self.line_edit_username.text() or \
-            not self.line_edit_password.text():
+                not self.line_edit_password.text():
             QMessageBox.warning(
-                self, 'Felder nicht ausgefüllt', 'Bitte Felder für '
-                'Benutzername und Passwort ausfüllen!')
+                self, 'Felder nicht ausgefüllt',
+                'Bitte Felder für Benutzername und Passwort ausfüllen!')
             return
 
         self.username = self.line_edit_username.text()

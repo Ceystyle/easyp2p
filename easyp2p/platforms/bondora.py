@@ -148,4 +148,4 @@ class Bondora:
         unknown_cf_types = parser.start_parser(
             '%d.%m.%Y', rename_columns=rename_columns)
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

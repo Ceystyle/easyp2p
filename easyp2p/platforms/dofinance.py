@@ -118,4 +118,4 @@ class DoFinance:
             '%d.%m.%Y', rename_columns, cashflow_types, 'Art der Transaktion',
             'Betrag, €')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

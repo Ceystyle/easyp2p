@@ -181,4 +181,4 @@ class Mintos:
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Mintos_Cashflow-Typ', 'Turnover', 'Balance')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types

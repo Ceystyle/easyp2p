@@ -144,4 +144,4 @@ class Twino:
             '%d.%m.%Y %H:%M', rename_columns, cashflow_types,
             'Twino_Cashflow-Typ', 'Amount, EUR')
 
-        return (parser.df, unknown_cf_types)
+        return parser.df, unknown_cf_types
