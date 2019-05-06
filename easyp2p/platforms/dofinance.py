@@ -13,7 +13,7 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -30,13 +30,13 @@ class DoFinance:
         Constructor of DoFinance class.
 
         Args:
-            date_range: date range (start_date, end_date) for which the account
-                statements must be generated
+            date_range: Date range (start_date, end_date) for which the account
+                statements must be generated.
 
         """
         self.name = 'DoFinance'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xlsx')
 
     def download_statement(
@@ -45,19 +45,20 @@ class DoFinance:
         Generate and download the DoFinance account statement.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for DoFinance
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for DoFinance.
 
         """
         urls = {
             'login': 'https://www.dofinance.eu/de/users/login',
             'logout': 'https://www.dofinance.eu/de/users/logout',
-            'statement': 'https://www.dofinance.eu/de/users/statement'}
+            'statement': 'https://www.dofinance.eu/de/users/statement',
+        }
 
-        # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.title_contains('Kreditvergabe Plattform')) as dofinance:
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
+                as dofinance:
 
             dofinance.log_into_page(
                 'email', 'password', credentials,
@@ -73,7 +74,6 @@ class DoFinance:
             dofinance.download_statement(
                 self.statement_file_name, (By.NAME, 'xls'))
 
-
     def parse_statement(self, statement_file_name: str = None) \
             -> Tuple[pd.DataFrame, str]:
         """
@@ -81,15 +81,15 @@ class DoFinance:
 
         Keyword Args:
             statement_file_name: File name including path of the account
-                statement which should be parsed
+                statement which should be parsed.
 
         Returns:
-            Tuple with two elements. The first
-            element is the data frame containing the parsed results. The second
-            element is a set containing all unknown cash flow types.
+            Tuple with two elements. The first element is the data frame
+            containing the parsed results. The second element is a set
+            containing all unknown cash flow types.
 
         Raises:
-            RuntimeError: if the statement file cannot be found
+            RuntimeError: If the statement file cannot be found.
 
         """
         if statement_file_name is not None:
