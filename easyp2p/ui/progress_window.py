@@ -65,13 +65,8 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             self.worker.wait()
 
     def update_progress_bar(self) -> None:
-        """
-        Update the progress bar in ProgressWindow to new value.
+        """Update the progress bar in ProgressWindow to new value."""
 
-        Args:
-            value: Value of the progress bar, between 0 and 100
-
-        """
         self.progress_bar.setValue(self.progress_bar.value() + 1)
         if self.progress_bar.value() == self.progress_bar.maximum():
             self.push_button_ok.setEnabled(True)

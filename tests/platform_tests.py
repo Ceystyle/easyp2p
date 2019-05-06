@@ -55,10 +55,9 @@ class PlatformTests(unittest.TestCase):
             date_range: Date range for account statement generation
             result_file: Name of the file with the expected results without
                 prefix
-
-        Keyword Args:
-            drop_header: True if the header of the account statement should be
-                ignored during comparison with expected result file
+            drop_header: If True ignore the header of the account statement
+                during the comparison with expected result file. Default is
+                 False
 
         """
         credentials = self.get_credentials_from_keyring(platform)

@@ -149,12 +149,10 @@ class P2PPlatform:
             credentials: Tuple (username, password) containing login
                 credentials
             wait_until: Expected condition in case of successful login
-
-        Keyword Args:
             login_locator: Locator of web element which has to be clicked in
-                order to open login form.
+                order to open login form. Default is None.
             fill_delay: Delay in seconds between filling in password and user
-                name fields
+                name fields. Default is 0.
 
         Raises:
             RuntimeError: - If login or password fields cannot be found
@@ -251,10 +249,9 @@ class P2PPlatform:
         Args:
             logout_locator: Locator of logout button
             wait_until: Expected condition in case of successful logout
-
-        Keyword Args:
             hover_locator: Locator of web element over which the mouse
-                needs to hover in order to make the logout button visible
+                needs to hover in order to make the logout button visible.
+                Default is None.
 
         Raises:
             RuntimeWarning: - If loading of page takes too long
@@ -316,21 +313,18 @@ class P2PPlatform:
                 statement must be generated
             start_locator: Locator of web element where the start date needs
                 to be entered
-            end_element: Locator of web element where the end date needs to be
+            end_locator: Locator of web element where the end date needs to be
                 entered.
             date_format: Date format which the platform uses
-
-        Keyword Args:
             wait_until: Expected condition in case of successful account
-                statement generation
+                statement generation. Default is None.
             submit_btn_locator: Locator of button which needs to clicked to
                 start account statement generation. Not all P2P platforms
-                require this.
+                require this. Default is None.
 
         Raises:
-            RuntimeError: - If a web element cannot be found
-                          - If the generation of the account statement
-                            takes too long
+            RuntimeError: If a web element cannot be found or if the generation
+                of the account statement takes too long
 
         """
         try:
@@ -539,10 +533,9 @@ class P2PPlatform:
             statement_file_name: File name including path where the downloaded
                 statement must be saved
             download_locator: Locator of the download button
-
-        Keyword Args:
             actions: 'move to element' or None: some P2P sites require that the
-                mouse hovers over the download button to make it clickable
+                mouse hovers over the download button to make it clickable.
+                Default is None.
 
         Raises:
             RuntimeError: - If the download button cannot be found

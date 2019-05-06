@@ -82,9 +82,7 @@ class P2PWebDriver(webdriver.Chrome):
 
         Args:
             wait_until: Expected condition for which the webdriver should wait
-
-        Keyword Args:
-            delay: Maximal waiting time in seconds
+            delay: Maximal waiting time in seconds. Default is 5.0.
 
         Returns:
             WebElement which WebDriverWait waited for.

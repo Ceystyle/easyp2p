@@ -73,9 +73,8 @@ def cancel_window(
     Args:
         testclass: Instance of unittest.TestCase
         window: Type of window which should be cancelled
-
-    Keyword Args:
-        cancel_button: Attribute name of the cancel button
+        cancel_button: Attribute name of the cancel button.
+            Default is None.
 
     """
     all_top_level_widgets = QApplication.topLevelWidgets()

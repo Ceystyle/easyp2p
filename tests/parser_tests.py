@@ -55,10 +55,8 @@ class ParserTests(unittest.TestCase):
             platform: Name of the P2P platform
             input_file: Input file name including path for the parser
             exp_result_file: File name including path with expected results
-
-        Keyword Args:
-            date_range: Date range for which the account statement was
-                generated
+            date_range: Date range tuple (start_date, end_date) for which the
+                account statement was generated
             unknown_cf_types_exp: Expected results for the unknown cashflow
                 types
 
@@ -371,12 +369,10 @@ def are_files_equal(
     Function to determine if two files are equal.
 
     Args:
-        file1 (str): Name including path of first file
-        file2 (str): Name including path of second file
-
-    Keyword Args:
+        file1: Name including path of first file
+        file2: Name including path of second file
         drop_header: If True the header of the files will be ignored in the
-            comparison
+            comparison. Default is False.
 
     Returns:
         bool: True if the files are equal, False if not or if at least one

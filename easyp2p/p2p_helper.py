@@ -2,7 +2,7 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """
-p2p_helper contains some helper functions/classes for easyp2p.
+p2p_helper contains some helper functions for easyp2p.
 
 """
 
@@ -161,10 +161,8 @@ def create_statement_location(
         date_range: Date range (start_date, end_date) for which the account
             statement must be generated
         suffix: Suffix of the statement file
-
-    Keyword Args:
-        statement_file: if not None this will override the default file
-            name
+        statement_file: If not None this will override the default file
+            name. Default is None.
 
     Returns:
         File name including path where the platform account statement

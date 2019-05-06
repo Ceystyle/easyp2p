@@ -65,10 +65,8 @@ def get_credentials_from_user(
 
     Args:
         platform: Name of the P2P platform
-
-    Keyword Args:
         save_in_keyring: If True the save_in_keyring checkbox will be
-            checked and disabled
+            checked and disabled. Default is False.
 
     Returns:
         Tuple (username, password)

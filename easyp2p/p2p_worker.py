@@ -101,7 +101,7 @@ class WorkerThread(QThread):
 
         Args:
             name: Name of the P2P platform
-            platform_instance: Instance of P2PPlatform class
+            platform: Instance of P2PPlatform class
 
         Returns:
             True on success, False on failure
