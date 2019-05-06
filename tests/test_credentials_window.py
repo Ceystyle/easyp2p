@@ -83,6 +83,16 @@ class CredentialsWindowTests(unittest.TestCase):
         self.assertIsNone(self.form.username)
         self.assertIsNone(self.form.password)
 
+    def test_input_credentials_cancel_with_save_in_keyring(self):
+        """
+        Test cancel without entering credentials and save_in_keyring checked.
+        """
+        self.form.check_box_save_in_keyring.setChecked(True)
+        self.form.button_box.button(QDialogButtonBox.Cancel).click()
+        self.assertIsNone(self.form.username)
+        self.assertIsNone(self.form.password)
+        self.assertFalse(self.form.save_in_keyring)
+
 
 if __name__ == "__main__":
     unittest.main()
