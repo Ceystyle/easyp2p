@@ -12,7 +12,7 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -30,12 +30,12 @@ class Estateguru:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Estateguru'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'csv')
 
     def download_statement(
@@ -44,19 +44,23 @@ class Estateguru:
         Generate and download Estateguru account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Estateguru
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for Estateguru.
 
         """
         urls = {
             'login': 'https://estateguru.co/de/?switch=de',
             'logout': 'https://estateguru.co/portal/logout/index',
-            'statement': 'https://estateguru.co/portal/portfolio/account'}
+            'statement': 'https://estateguru.co/portal/portfolio/account',
+        }
         xpaths = {
-            'account_statement_check': '/html/body/section/div/div/div/div[2]/'\
-                'section[1]/div/div/div[2]/div/form/div[2]/ul/li[5]/a',
-            'select_btn': '/html/body/section/div/div/div/div[2]/section[2]/'\
-                'div[1]/div[2]/button'}
+            'account_statement_check': (
+                '/html/body/section/div/div/div/div[2]/section[1]/div/div'
+                '/div[2]/div/form/div[2]/ul/li[5]/a'),
+            'select_btn': (
+                '/html/body/section/div/div/div/div[2]/section[2]/div[1]'
+                '/div[2]/button'),
+        }
 
         with P2PPlatform(
                 self.name, driver, urls,

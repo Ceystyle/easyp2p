@@ -13,7 +13,7 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -31,12 +31,12 @@ class Twino:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Twino'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xlsx')
 
     def download_statement(
@@ -45,22 +45,27 @@ class Twino:
         Generate and download the Twino account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Twino
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for Twino.
 
         """
         urls = {
             'login': 'https://www.twino.eu/de/',
-            'statement': 'https://www.twino.eu/de/profile/investor/'\
-                'my-investments/account-transactions'}
+            'statement': (
+                'https://www.twino.eu/de/profile/investor/my-investments'
+                '/account-transactions'),
+        }
         xpaths = {
             'end_date': '//*[@date-picker="filterData.processingDateTo"]',
-            'login_btn': '/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/'\
-                'div/div[1]/button',
+            'login_btn': (
+                '/html/body/div[1]/div[2]/div[1]/header[1]/div/nav/div/div[1]'
+                '/button'),
             'logout_btn': '//a[@href="/logout"]',
             'start_date': '//*[@date-picker="filterData.processingDateFrom"]',
-            'statement': '//a[@href="/de/profile/investor/my-investments/'\
-                'individual-investments"]'}
+            'statement': (
+                '//a[@href="/de/profile/investor/my-investments/'
+                'individual-investments"]'),
+        }
 
         with P2PPlatform(
                 self.name, driver, urls,

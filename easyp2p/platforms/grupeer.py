@@ -12,7 +12,7 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -31,12 +31,12 @@ class Grupeer:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Grupeer'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xlsx')
 
     def download_statement(
@@ -45,16 +45,19 @@ class Grupeer:
         Generate and download the Grupeer account statement.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Grupeer.
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for Grupeer.
 
         """
         urls = {
             'login': 'https://www.grupeer.com/de/login',
-            'statement': 'https://www.grupeer.com/de/account-statement'}
+            'statement': 'https://www.grupeer.com/de/account-statement',
+        }
         xpaths = {
-            'logout_hover': '/html/body/div[4]/header/div/div/div[2]/div[1]/'\
-                'div/div/ul/li/a/span'}
+            'logout_hover': (
+                '/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li'
+                '/a/span'),
+        }
 
         with P2PPlatform(
                 self.name, driver, urls,

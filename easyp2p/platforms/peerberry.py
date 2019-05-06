@@ -14,7 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -32,12 +32,12 @@ class PeerBerry:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'PeerBerry'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'csv')
 
     def download_statement(
@@ -46,8 +46,8 @@ class PeerBerry:
         Generate and download the PeerBerry account statement.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials (tuple[str, str]): (username, password) for PeerBerry
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for PeerBerry.
 
         """
         urls = {
@@ -56,14 +56,18 @@ class PeerBerry:
         }
         xpaths = {
             'cookie_policy': '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]',
-            'download_btn': '//*[@id="app"]/div/div/div/div[2]/div/div[2]/'\
-                'div[3]/div[2]/div',
-            'logout_btn': '//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/'\
-                'div[2]/div',
-            'start_balance': '/html/body/div[1]/div/div/div/div[2]/div/div[2]/'\
-                'div[2]/div/div/div[1]',
-            'statement_btn': '/html/body/div[1]/div/div/div/div[2]/div/div[2]/'\
-                'div[1]/div/div[2]/div/div[2]/div/span'}
+            'download_btn': (
+                '//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]'
+                '/div'),
+            'logout_btn': (
+                '//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div'),
+            'start_balance': (
+                '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/div'
+                '/div/div[1]'),
+            'statement_btn': (
+                '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div'
+                '/div[2]/div/div[2]/div/span'),
+        }
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
@@ -85,14 +89,18 @@ class PeerBerry:
 
             # Create account statement for given date range
             default_dates = (date.today(), date.today())
-            arrows = {'arrow_tag': 'th',
-                      'left_arrow_class': 'rdtPrev',
-                      'right_arrow_class': 'rdtNext'}
+            arrows = {
+                'arrow_tag': 'th',
+                'left_arrow_class': 'rdtPrev',
+                'right_arrow_class': 'rdtNext',
+            }
             calendar_locator = ((By.NAME, 'startDate'), (By.NAME, 'endDate'))
-            days_table = {'class_name': 'rdtDays',
-                          'current_day_id': 'rdtDay',
-                          'id_from_calendar': False,
-                          'table_id': 'class'}
+            days_table = {
+                'class_name': 'rdtDays',
+                'current_day_id': 'rdtDay',
+                'id_from_calendar': False,
+                'table_id': 'class'
+            }
 
             peerberry.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,

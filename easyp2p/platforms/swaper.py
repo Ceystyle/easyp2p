@@ -13,7 +13,7 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -31,12 +31,12 @@ class Swaper:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Swaper'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xlsx')
 
     def download_statement(
@@ -45,17 +45,20 @@ class Swaper:
         Generate and download the Swaper account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Swaper
+            driver: Instance of P2PWebDriver class.
+            credentials: (username, password) for Swaper.
 
         """
         urls = {
             'login': 'https://www.swaper.com/#/dashboard',
-            'statement': 'https://www.swaper.com/#/overview/account-statement'}
+            'statement': 'https://www.swaper.com/#/overview/account-statement',
+        }
         xpaths = {
-            'download_btn': '//*[@id="account-statement"]/div[3]/div[4]/div/'\
-                'div[1]/a/div[1]/div/span[2]',
-            'logout_btn': '//*[@id="logout"]/span[1]/span'}
+            'download_btn': (
+                '//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a'
+                '/div[1]/div/span[2]'),
+            'logout_btn': '//*[@id="logout"]/span[1]/span'
+        }
 
         with P2PPlatform(
                 self.name, driver, urls,

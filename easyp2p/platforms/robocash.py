@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -33,12 +33,12 @@ class Robocash:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Robocash'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xls')
 
     def download_statement(
@@ -47,8 +47,8 @@ class Robocash:
         Generate and download the Robocash account statement.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Robocash
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for Robocash.
 
         Raises:
             RuntimeError: - If the statement button cannot be found
@@ -58,8 +58,11 @@ class Robocash:
         urls = {
             'login': 'https://robo.cash/de',
             'logout': 'https://robo.cash/de/logout',
-            'statement': 'https://robo.cash/de/cabinet/statement'}
-        xpaths = {'login_field': '/html/body/header/div/div[2]/a'}
+            'statement': 'https://robo.cash/de/cabinet/statement',
+        }
+        xpaths = {
+            'login_field': '/html/body/header/div/div[2]/a',
+        }
 
         # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(

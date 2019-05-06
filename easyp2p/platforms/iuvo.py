@@ -32,12 +32,12 @@ class Iuvo:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Iuvo'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xlsx')
 
     def download_statement(
@@ -46,16 +46,19 @@ class Iuvo:
         Generate and download the Iuvo account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Iuvo
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for Iuvo.
 
         """
         urls = {
             'login': 'https://www.iuvo-group.com/de/login/',
-            'statement': 'https://www.iuvo-group.com/de/account-statement/'}
+            'statement': 'https://www.iuvo-group.com/de/account-statement/',
+        }
         xpaths = {
-            'statement_check': '/html/body/div[5]/main/div/div/div/div[6]/div'\
-                '/div/div/strong[3]'}
+            'statement_check': (
+                '/html/body/div[5]/main/div/div/div/div[6]/div/div/div'
+                '/strong[3]'),
+        }
 
         with P2PPlatform(
                 self.name, driver, urls,
