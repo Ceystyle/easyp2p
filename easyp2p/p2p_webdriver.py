@@ -72,10 +72,6 @@ class P2PWebDriver(webdriver.Chrome):
 
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_trace) -> None:
-        """Close the WebDriver."""
-        self.close()
-
     def wait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
