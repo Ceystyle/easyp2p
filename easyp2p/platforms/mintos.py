@@ -14,7 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -32,12 +32,12 @@ class Mintos:
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
-                statements must be generated
+                statements must be generated.
 
         """
         self.name = 'Mintos'
         self.date_range = date_range
-        self.statement_file_name = p2p_helper.create_statement_location(
+        self.statement_file_name = create_statement_location(
             self.name, self.date_range, 'xlsx')
 
     def download_statement(
@@ -46,8 +46,8 @@ class Mintos:
         Generate and download the Mintos account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class
-            credentials: (username, password) for Mintos
+            driver: Instance of P2PWebDriver class.
+            credentials: Tuple (username, password) for Mintos.
 
         """
         urls = {
@@ -56,10 +56,9 @@ class Mintos:
         xpaths = {
             'logout_btn': "//a[contains(@href,'logout')]"}
 
-        # TODO: do not rely on title to check successful logout
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.title_contains('Vielen Dank'),
+                EC.element_to_be_clickable((By.ID, 'header-login-button')),
                 logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
 
             mintos.log_into_page(
