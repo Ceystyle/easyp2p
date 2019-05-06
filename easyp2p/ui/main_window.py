@@ -24,13 +24,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     """This class defines the main window of easyp2p."""
 
     def __init__(self) -> None:
-        """
-        Constructor of MainWindow.
-
-        Keyword Args:
-            parent: Reference to the parent widget
-
-        """
+        """Constructor of MainWindow."""
         super().__init__()
         self.setupUi(self)
         # Initialize date combo boxes with previous month
