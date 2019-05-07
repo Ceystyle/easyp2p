@@ -10,8 +10,8 @@ import tests.test_credentials
 import tests.test_credentials_window
 import tests.test_main_window
 import tests.test_progress_window
-import tests.parser_tests
-import tests.platform_tests
+import tests.test_parser
+import tests.test_platforms
 
 # initialize the test suite
 loader = unittest.TestLoader()
@@ -23,8 +23,8 @@ suite.addTests(loader.loadTestsFromModule(tests.test_credentials_window))
 suite.addTests(loader.loadTestsFromModule(tests.test_main_window))
 suite.addTests(loader.loadTestsFromModule(tests.test_progress_window))
 suite.addTests(loader.loadTestsFromModule(tests.test_settings_window))
-suite.addTests(loader.loadTestsFromModule(tests.parser_tests))
-suite.addTests(loader.loadTestsFromModule(tests.platform_tests))
+suite.addTests(loader.loadTestsFromModule(tests.test_parser))
+suite.addTests(loader.loadTestsFromModule(tests.test_platforms))
 
 # initialize a runner, pass it the suite and run it
 runner = unittest.TextTestRunner(verbosity=3)

@@ -11,7 +11,7 @@ import unittest
 
 import keyring
 
-from tests.parser_tests import are_files_equal, RESULT_PREFIX
+from tests.test_parser import are_files_equal, RESULT_PREFIX
 import easyp2p.platforms as p2p_platforms
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_webdriver import P2PWebDriver
