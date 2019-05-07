@@ -3,6 +3,8 @@
 
 """Module implementing CredentialsWindow."""
 
+from typing import Optional
+
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
@@ -30,8 +32,8 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         super().__init__()
         self.setupUi(self)
         self.platform = platform
-        self.username: str = None
-        self.password: str = None
+        self.username: Optional[str] = None
+        self.password: Optional[str] = None
         self.save_in_keyring = False
         self.label_platform.setText(
             'Bitte Benutzername und Passwort für {0} eingeben:'.format(
