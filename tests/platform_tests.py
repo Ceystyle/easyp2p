@@ -66,7 +66,7 @@ class PlatformTests(unittest.TestCase):
         download_directory = os.path.join(
             Path.home(), '.easyp2p', platform.lower())
         settings = Settings()
-        with P2PWebDriver(download_directory, settings) as driver:
+        with P2PWebDriver(download_directory, settings.headless) as driver:
             platform_instance.download_statement(driver, credentials)
         self.assertTrue(are_files_equal(
             platform_instance.statement_file_name, RESULT_PREFIX + result_file,
@@ -100,7 +100,7 @@ class PlatformTests(unittest.TestCase):
         estateguru = p2p_platforms.Estateguru(self.DATE_RANGE)
         download_directory = os.path.join(Path.home(), '.easyp2p', 'estateguru')
         settings = Settings()
-        with P2PWebDriver(download_directory, settings) as driver:
+        with P2PWebDriver(download_directory, settings.headless) as driver:
             estateguru.download_statement(driver, credentials)
         # The Estateguru statement contains all cashflows ever generated for
         # this account. Therefore it changes regularly and we cannot compare
