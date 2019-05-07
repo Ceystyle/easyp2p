@@ -25,7 +25,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 
-import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 
@@ -426,9 +425,9 @@ class P2PPlatform:
                     .format(self.name))
 
             # How many clicks on the arrow buttons are necessary?
-            start_calendar_clicks = p2p_helper.get_calendar_clicks(
+            start_calendar_clicks = _get_calendar_clicks(
                 date_range[0], default_dates[0])
-            end_calendar_clicks = p2p_helper.get_calendar_clicks(
+            end_calendar_clicks = _get_calendar_clicks(
                 date_range[1], default_dates[1])
 
             # Identify the arrows for both start and end calendar
@@ -458,7 +457,7 @@ class P2PPlatform:
                 'Generierung des {0}-Kontoauszugs hat zu lange gedauert.'
                 .format(self.name))
 
-    def set_date_in_calendar(
+    def _set_date_in_calendar(
             self, calendar_: WebElement, day: int, months: int,
             previous_month: WebElement, next_month: WebElement,
             days_table: Mapping[str, object]) -> None:
@@ -644,3 +643,30 @@ class P2PPlatform:
 
         file_name = [file for file in new_file_list if file not in file_list][0]
         return file_name
+
+
+def _get_calendar_clicks(target_date: date, start_date: date) -> int:
+    """
+    Get number of clicks necessary to get from start to target month.
+
+    This function will determine how many months in the past/future the
+    target date is compared to a given start date. Positive numbers mean
+    months into the future, negative numbers months into the past.
+
+    Args:
+        target_date: Target date.
+        start_date: Start date.
+
+    Returns:
+        Number of calendar clicks to get from start to target date.
+
+    """
+    if target_date.year != start_date.year:
+        clicks = 12 * (target_date.year - start_date.year)
+    else:
+        clicks = 0
+
+    if target_date.month != start_date.month:
+        clicks += target_date.month - start_date.month
+
+    return clicks

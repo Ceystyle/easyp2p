@@ -15,35 +15,6 @@ from typing import List, Optional, Tuple
 import pandas as pd
 
 
-def get_calendar_clicks(
-        target_date: date, start_date: date) -> int:
-    """
-    Get number of calendar clicks necessary to get from start to target month.
-
-    This function will determine how many months in the
-    past/future the target date is compared to a given
-    start date. Positive numbers mean months into the
-    future, negative numbers months into the past.
-
-    Args:
-        target_date: Target date.
-        start_date: Start date.
-
-    Returns:
-        Number of months between start and target date.
-
-    """
-    if target_date.year != start_date.year:
-        clicks = 12 * (target_date.year - start_date.year)
-    else:
-        clicks = 0
-
-    if target_date.month != start_date.month:
-        clicks += target_date.month - start_date.month
-
-    return clicks
-
-
 def get_df_from_file(input_file: str) -> pd.DataFrame:
     """
     Read a pandas.DataFrame from input_file.
