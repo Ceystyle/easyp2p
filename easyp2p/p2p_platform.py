@@ -439,12 +439,12 @@ class P2PPlatform:
                     arrows['arrow_tag'], arrows['right_arrow_class']))
 
             # Set start_date
-            self.set_date_in_calendar(
+            self._set_date_in_calendar(
                 start_calendar, date_range[0].day, start_calendar_clicks,
                 left_arrows[0], right_arrows[0], days_table)
 
             # Set end_date
-            self.set_date_in_calendar(
+            self._set_date_in_calendar(
                 end_calendar, date_range[1].day, end_calendar_clicks,
                 left_arrows[1], right_arrows[1], days_table)
 
