@@ -57,13 +57,15 @@ class WorkerThread(QThread):
         self.abort = False
         self.df_result = pd.DataFrame()
 
-    def get_platform_instance(self, name: str) \
+    def get_platform_instance(self, name: str, statement_without_suffix: str) \
             -> Optional[Callable[[Tuple[date, date]], None]]:
         """
         Helper method to get an instance of the platform class.
 
         Args:
             name: Name of the P2P platform/module
+            statement_without_suffix: File name including path but without
+                suffix where the account statement should be saved.
 
         Returns:
             Platform class or None if the class cannot be found
@@ -124,13 +126,15 @@ class WorkerThread(QThread):
 
     def download_statements(
             self, name: str,
-            platform: Callable[[Tuple[date, date]], None]) -> bool:
+            platform: Callable[[Tuple[date, date]], None],
+            download_directory: str) -> bool:
         """
-        Helper method for calling the download_statement functions.
+        Helper method for calling the download_statement methods.
 
         Args:
-            name: Name of the P2P platform
-            platform: Instance of P2PPlatform class
+            name: Name of the P2P platform.
+            platform: Instance of P2PPlatform class.
+            download_directory: Download directory for this platform.
 
         Returns:
             True if download finished without errors, False otherwise
@@ -146,8 +150,6 @@ class WorkerThread(QThread):
             'Start der Auswertung von {0}...'.format(name), self.BLACK)
 
         try:
-            download_directory = os.path.join(
-                Path.home(), '.easyp2p', name.lower())
             if name == 'Iuvo' and self.settings.headless:
                 # Iuvo is currently not supported in headless Chromedriver mode
                 # because it opens a new window for downloading the statement.
@@ -157,8 +159,7 @@ class WorkerThread(QThread):
                     'unterstützt!', self.RED)
                 self.add_progress_text.emit(
                     'Mache Chromedriver sichtbar!', self.RED)
-                with P2PWebDriver(
-                        download_directory, False) as driver:
+                with P2PWebDriver(download_directory, False) as driver:
                     platform.download_statement(driver, self.credentials[name])
             else:
                 with P2PWebDriver(
@@ -177,6 +178,42 @@ class WorkerThread(QThread):
 
         return True
 
+    def set_download_directory(self, name: str) -> Tuple[str, str]:
+        """
+        Set directory for statement download and make sure it is empty.
+
+        The statement file will be saved at .easyp2p/platform_name relative
+        to the user's home directory. The download directory for the WebDriver
+        will be set to the directory 'active' relative to this location.
+
+        Args:
+            name: Name of the P2P platform
+
+        Returns:
+            Tuple containing target name of the statement file (including path
+            but without suffix) and the download directory
+
+        """
+        # Set target location of account statement file
+        statement_without_suffix = os.path.join(
+            Path.home(), '.easyp2p', name.lower(),
+            '{0}_statement_{1}-{2}'.format(
+                name.lower(), self.settings.date_range[0].strftime('%Y%m%d'),
+                self.settings.date_range[1].strftime('%Y%m%d')))
+
+        # Create download directory and make sure it contains no files
+        download_directory = os.path.join(
+            os.path.dirname(statement_without_suffix), 'active')
+        if not os.path.isdir(download_directory):
+            os.makedirs(download_directory)
+        else:
+            filelist = os.listdir(path=download_directory)
+            if filelist:
+                for f in filelist:
+                    os.remove(os.path.join(download_directory, f))
+
+        return statement_without_suffix, download_directory
+
     def run(self) -> None:
         """
         Get and output results from all selected P2P platforms.
@@ -191,12 +228,15 @@ class WorkerThread(QThread):
             if self.abort:
                 return
 
-            platform = self.get_platform_instance(name)
+            statement_without_suffix, download_directory \
+                = self.set_download_directory(name)
+            platform = self.get_platform_instance(
+                name, statement_without_suffix)
             if platform is None:
                 self.update_progress_bar.emit()
                 continue
 
-            if self.download_statements(name, platform):
+            if self.download_statements(name, platform, download_directory):
                 if self.abort:
                     return
 
