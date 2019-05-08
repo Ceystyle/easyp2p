@@ -566,24 +566,29 @@ def _download_finished(
         statement: File name including path where the downloaded file should
             be saved.
         download_directory: Download directory.
-        max_wait_time: Maximum time in seconds to wait for download to start.
+        max_wait_time: Maximum time in seconds to wait for download to
+            start/finish.
 
     Returns:
         True if download finished successfully, False if not.
 
     Raises:
-        RuntimeError: - If the downloaded file cannot be found and there
-                        is no active download after max_waiting_time
-                      - If more than one active download of
-                        default_file_name is found
+        RuntimeError: If there is more than one file in the download directory.
 
     """
     done = False
     waiting_time = 0
+    download_time = 0
+
     while not done:
         ongoing_downloads = glob.glob(
             os.path.join(download_directory, '*.crdownload'))
-        if not ongoing_downloads:
+        if ongoing_downloads:
+            if download_time > max_wait_time:
+                return False
+            time.sleep(1)
+            download_time += 1
+        else:
             filelist = glob.glob(os.path.join(download_directory, '*'))
             if len(filelist) == 1:
                 os.rename(filelist[0], statement)
@@ -593,8 +598,8 @@ def _download_finished(
                 # This should never happen since we check in p2p_worker that
                 # the download directory is empty
                 raise RuntimeError(
-                    'Downloadverzeichnis {} ist nicht leer!'
-                        .format(download_directory))
+                    'Downloadverzeichnis {} ist nicht leer!'.format(
+                        download_directory))
 
             if waiting_time > max_wait_time:
                 # If the download didn't start after more than max_wait_time
