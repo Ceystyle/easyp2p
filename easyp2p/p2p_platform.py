@@ -557,7 +557,7 @@ class P2PPlatform:
                 .format(self.name))
 
         # Wait until download has finished
-        file_name = self._wait_for_download_end(file_list, dl_dir)
+        file_name = _wait_for_download_end(self.name, file_list, dl_dir)
 
         # Rename downloaded file
         self._rename_statement(file_name, statement_file_name)
@@ -586,57 +586,57 @@ class P2PPlatform:
         except FileNotFoundError:
             raise RuntimeError(error_msg)
 
-    def _wait_for_download_end(
-            self, file_list: Sequence[str], dl_dir: str,
-            max_waiting_time: float = 4.0) -> str:
-        """
-        Wait until download has finished and return name of downloaded file.
 
-        Args:
-            file_list: List of all files in the download directory before the
-                download started
-            dl_dir: Download directory
+def _wait_for_download_end(
+        name: str, file_list: Sequence[str], dl_dir: str,
+        max_waiting_time: float = 4.0) -> str:
+    """
+    Wait until download has finished and return name of downloaded file.
 
-        Keyword Args:
-            max_waiting_time: Maximum time to wait for download to start
+    Args:
+        name: Name of the P2P platform.
+        file_list: List of all files in the download directory before the
+            download started.
+        dl_dir: Download directory.
+        max_waiting_time: Maximum time to wait for download to start.
 
-        Returns:
-            Name including path of the downloaded file
+    Returns:
+        Name including path of the downloaded file.
 
-        Raises:
-            RuntimeError: - If the downloaded file cannot be found and there
-                            is no active download after max_waiting_time
-                          - If more than one active download of
-                            default_file_name is found
+    Raises:
+        RuntimeError: - If the downloaded file cannot be found and there
+                        is no active download after max_waiting_time
+                      - If more than one active download of
+                        default_file_name is found
 
-        """
-        _download_finished = False
-        _waiting_time = 0
-        while not _download_finished:
-            # TODO: make sure that there were no leftover downloads from
-            # a failed run in the past
-            ongoing_downloads = glob.glob(os.path.join(dl_dir, '*.crdownload'))
-            if not ongoing_downloads:
-                new_file_list = glob.glob(os.path.join(dl_dir, '*'))
-                if len(new_file_list) - len(file_list) == 1:
-                    _download_finished = True
-                elif new_file_list == file_list:
-                    if _waiting_time > max_waiting_time:
-                        # If the download didn't start after more than
-                        # max_waiting_time something has gone wrong.
-                        raise RuntimeError(
-                            'Download des {0}-Kontoauszugs wurde abgebrochen!'
-                            .format(self.name))
-                    time.sleep(1)
-                    _waiting_time += 1
-                else:
-                    # This should never happen
+    """
+    _download_finished = False
+    _waiting_time = 0
+    while not _download_finished:
+        # TODO: make sure that there were no leftover downloads from
+        # a failed run in the past
+        ongoing_downloads = glob.glob(os.path.join(dl_dir, '*.crdownload'))
+        if not ongoing_downloads:
+            new_file_list = glob.glob(os.path.join(dl_dir, '*'))
+            if len(new_file_list) - len(file_list) == 1:
+                _download_finished = True
+            elif new_file_list == file_list:
+                if _waiting_time > max_waiting_time:
+                    # If the download didn't start after more than
+                    # max_waiting_time something has gone wrong.
                     raise RuntimeError(
-                        'Mehr als ein aktiver Download des {0}-Kontoauszugs '
-                        'gefunden!'.format(self.name))
+                        'Download des {0}-Kontoauszugs wurde abgebrochen!'
+                        .format(name))
+                time.sleep(1)
+                _waiting_time += 1
+            else:
+                # This should never happen
+                raise RuntimeError(
+                    'Mehr als ein aktiver Download des {0}-Kontoauszugs '
+                    'gefunden!'.format(name))
 
-        file_name = [file for file in new_file_list if file not in file_list][0]
-        return file_name
+    file_name = [file for file in new_file_list if file not in file_list][0]
+    return file_name
 
 
 def _get_calendar_clicks(target_date: date, start_date: date) -> int:
