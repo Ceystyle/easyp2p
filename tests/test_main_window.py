@@ -186,5 +186,5 @@ class MainWindowTests(unittest.TestCase):
 
 if __name__ == "__main__":
     runner = unittest.TextTestRunner(verbosity=3)
-    suite = unittest.TestLoader().loadTestsFromTestCase(ParserTests)
+    suite = unittest.TestLoader().loadTestsFromTestCase(MainWindowTests)
     result = runner.run(suite)
