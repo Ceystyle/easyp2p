@@ -7,6 +7,7 @@ import calendar
 from datetime import date
 import functools
 import os
+from pathlib import Path
 import sys
 import unittest
 
@@ -42,10 +43,11 @@ class MainWindowTests(unittest.TestCase):
 
         # Check if output file name is set correctly
         date_range = self.form.get_date_range()
-        self.assertTrue(self.form.line_edit_output_file.text() == os.path.join(
-            os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
-                date_range[0].strftime('%d%m%Y'),
-                date_range[1].strftime('%d%m%Y'))))
+        self.assertEqual(
+            self.form.line_edit_output_file.text(), os.path.join(
+                Path.home(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
+                    date_range[0].strftime('%d%m%Y'),
+                    date_range[1].strftime('%d%m%Y'))))
 
         # Check if combo boxes are set correctly
         date_range = self.form.get_date_range()
@@ -111,7 +113,7 @@ class MainWindowTests(unittest.TestCase):
         new_output_file = self.form.line_edit_output_file.text()
         self.assertNotEqual(new_output_file, old_output_file)
         self.assertEqual(new_output_file, os.path.join(
-            os.getcwd(), 'P2P_Ergebnisse_01022017-30092017.xlsx'))
+            Path.home(), 'P2P_Ergebnisse_01022017-30092017.xlsx'))
 
     def test_output_file_on_date_change_after_user_change(self) -> None:
         """Test output file after date change if user already changed file."""
@@ -183,4 +185,6 @@ class MainWindowTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    runner = unittest.TextTestRunner(verbosity=3)
+    suite = unittest.TestLoader().loadTestsFromTestCase(ParserTests)
+    result = runner.run(suite)

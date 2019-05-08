@@ -6,6 +6,7 @@
 import calendar
 from datetime import date
 import os
+from pathlib import Path
 from typing import Set, Tuple
 
 from PyQt5.QtCore import pyqtSlot
@@ -105,7 +106,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         date_range = self.get_date_range()
         if not self.output_file_changed:
             output_file = os.path.join(
-                os.getcwd(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
+                Path.home(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
                     date_range[0].strftime('%d%m%Y'),
                     date_range[1].strftime('%d%m%Y')))
             QLineEdit.setText(self.line_edit_output_file, output_file)
