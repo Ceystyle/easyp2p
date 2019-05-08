@@ -26,7 +26,7 @@ PLATFORMS = {
     'Swaper': 'xlsx',
     'Twino': 'xlsx'}
 INPUT_PREFIX = os.path.join('tests', 'input', 'input_test_')
-RESULT_PREFIX = os.path.join('tests', 'results', 'result_test_')
+RESULT_PREFIX = os.path.join('tests', 'expected_results', 'result_test_')
 
 
 class ParserTests(unittest.TestCase):
@@ -412,4 +412,6 @@ def drop_df_header(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    unittest.main()
+    runner = unittest.TextTestRunner(verbosity=3)
+    suite = unittest.TestLoader().loadTestsFromTestCase(ParserTests)
+    result = runner.run(suite)
