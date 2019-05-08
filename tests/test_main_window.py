@@ -10,19 +10,19 @@ import os
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import MagicMock
 
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
 from PyQt5.QtTest import QTest
 
-#from easyp2p.p2p_settings import Settings
+from easyp2p.platforms import Bondora
 from easyp2p.ui.main_window import MainWindow
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 import tests.utils as utils
 
 APP = QApplication(sys.argv)
-# TODO: add tests to check if Settings are correct
 
 
 class MainWindowTests(unittest.TestCase):
@@ -143,11 +143,12 @@ class MainWindowTests(unittest.TestCase):
         expected_results = [utils.QMSG_BOX_OPEN]
         self.assertEqual(self.test_results, expected_results)
 
-    @unittest.skip('This test needs more work to ensure that Bondora is not '
-        'evaluated. We just want to test the GUI.')
     def test_push_start_button_with_bondora_selected(self) -> None:
         """Test pushing start button after selecting Bondora."""
-        self.form.check_box_dofinance.setChecked(True)
+        # Create mock methods to avoid real calls to the Bondora website
+        Bondora.download_statement = MagicMock()
+        Bondora.parse_statement = MagicMock()
+        self.form.check_box_bondora.setChecked(True)
         self.form.set_date_range('Sep', '2018', 'Feb', '2019')
         QLineEdit.setText(self.form.line_edit_output_file, 'Test_Bondora.xlsx')
         QTimer.singleShot(
@@ -168,6 +169,10 @@ class MainWindowTests(unittest.TestCase):
             self.form.settings.date_range,
             (date(2018, 9, 1), date(2019, 2, 28)))
         self.assertEqual(self.form.settings.output_file, 'Test_Bondora.xlsx')
+
+        # Assert that Bondora was called
+        Bondora.download_statement.assert_called_once_with(
+            unittest.mock.ANY, unittest.mock.ANY)
 
     def test_push_tool_button_settings(self) -> None:
         """Test pushing settings button."""
