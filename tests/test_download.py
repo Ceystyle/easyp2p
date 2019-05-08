@@ -16,7 +16,8 @@ import easyp2p.platforms as p2p_platforms
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_webdriver import P2PWebDriver
 
-class PlatformTests(unittest.TestCase):
+
+class DownloadTests(unittest.TestCase):
 
     """Test downloading account statements from all supported platforms."""
 
