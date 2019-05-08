@@ -10,7 +10,6 @@ from selenium import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException, WebDriverException)
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 
@@ -73,7 +72,7 @@ class P2PWebDriver(webdriver.Chrome):
 
         return self
 
-    def wait(self, wait_until: EC, delay: float = 5.0) -> WebElement:
+    def wait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
 

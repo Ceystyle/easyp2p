@@ -40,7 +40,7 @@ class P2PPlatform:
 
     def __init__(
             self, name: str, driver: P2PWebDriver, urls: Mapping[str, str],
-            logout_wait_until: EC,
+            logout_wait_until: bool,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None) -> None:
         """
@@ -125,7 +125,7 @@ class P2PPlatform:
 
     def log_into_page(
             self, name_field: str, password_field: str,
-            credentials: Tuple[str, str], wait_until: EC,
+            credentials: Tuple[str, str], wait_until: bool,
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.) -> None:
         """
@@ -296,7 +296,7 @@ class P2PPlatform:
     def generate_statement_direct(
             self, date_range: Tuple[date, date],
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
-            date_format: str, wait_until: Optional[EC] = None,
+            date_format: str, wait_until: bool = None,
             submit_btn_locator: Tuple[str, str] = None) -> None:
         """
         Generate account statement when date fields can be edited directly.
