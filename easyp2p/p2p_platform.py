@@ -560,31 +560,33 @@ class P2PPlatform:
         file_name = _wait_for_download_end(self.name, file_list, dl_dir)
 
         # Rename downloaded file
-        self._rename_statement(file_name, statement_file_name)
+        _rename_statement(self.name, file_name, statement_file_name)
 
-    def _rename_statement(
-            self, source_file_name: str, target_file_name: str) -> None:
-        """
-        Rename downloaded statement from source_file_name to target_file_name.
 
-        Args:
-            source_file_name: file name including path of the file which should
-                be renamed
-            target_file_name: file name including path which the file should be
-                renamed to
+def _rename_statement(
+        name: str, source_file_name: str, target_file_name: str) -> None:
+    """
+    Rename downloaded statement from source_file_name to target_file_name.
 
-        Raises:
-            RuntimeError: If source file cannot be found
+    Args:
+        name: Name of the P2P platform.
+        source_file_name: File name including path of the file which should
+            be renamed.
+        target_file_name: File name including path the file should be
+            renamed to.
 
-        """
-        error_msg = (
-            '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
-            'werden.'.format(self.name))
+    Raises:
+        RuntimeError: If source file cannot be found
 
-        try:
-            os.rename(source_file_name, target_file_name)
-        except FileNotFoundError:
-            raise RuntimeError(error_msg)
+    """
+    error_msg = (
+        '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
+        'werden.'.format(name))
+
+    try:
+        os.rename(source_file_name, target_file_name)
+    except FileNotFoundError:
+        raise RuntimeError(error_msg)
 
 
 def _wait_for_download_end(
