@@ -7,13 +7,12 @@ Download and parse Twino statement.
 """
 
 from datetime import date
-from typing import Tuple
+from typing import Optional, Tuple
 
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -25,19 +24,22 @@ class Twino:
     Contains methods for downloading/parsing Twino account statements.
     """
 
-    def __init__(self, date_range: Tuple[date, date]) -> None:
+    def __init__(
+            self, date_range: Tuple[date, date],
+            statement_without_suffix: str) -> None:
         """
         Constructor of Twino class.
 
         Args:
             date_range: Date range (start_date, end_date) for which the account
                 statements must be generated.
+            statement_without_suffix: File name including path but without
+                suffix where the account statement should be saved.
 
         """
         self.name = 'Twino'
         self.date_range = date_range
-        self.statement_file_name = create_statement_location(
-            self.name, self.date_range, 'xlsx')
+        self.statement = statement_without_suffix + '.xlsx'
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -86,18 +88,17 @@ class Twino:
                     (By.CSS_SELECTOR, '.accStatement__pdf')))
 
             twino.download_statement(
-                self.statement_file_name,
-                (By.CSS_SELECTOR, '.accStatement__pdf'))
+                self.statement, (By.CSS_SELECTOR, '.accStatement__pdf'))
 
-    def parse_statement(self, statement_file_name: str = None) \
+    def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, str]:
         """
         Parser for Twino.
 
         Args:
-            statement_file_name: File name including path of the account
+            statement: File name including path of the account
                 statement which should be parsed. If None, the file at
-                self.statement_file_name will be parsed. Default is None.
+                self.statement will be parsed. Default is None.
 
         Returns:
             Tuple with two elements. The first element is the data frame
@@ -105,10 +106,10 @@ class Twino:
             containing all unknown cash flow types.
 
         """
-        if statement_file_name is not None:
-            self.statement_file_name = statement_file_name
+        if statement:
+            self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement_file_name)
+        parser = P2PParser(self.name, self.date_range, self.statement)
 
         # Format the header of the table
         parser.df = parser.df[1:]  # First row only contains a generic header

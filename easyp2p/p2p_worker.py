@@ -80,7 +80,7 @@ class WorkerThread(QThread):
             self.add_progress_text.emit(error_message, self.RED)
             return None
         else:
-            return platform(self.settings.date_range)
+            return platform(self.settings.date_range, statement_without_suffix)
 
     def ignore_platform(self, name: str, error_msg: str) -> None:
         """

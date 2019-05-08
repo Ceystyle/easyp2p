@@ -24,6 +24,29 @@ class DownloadTests(unittest.TestCase):
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
 
+    def setUp(self) -> None:
+        """Create download directory and set statement file location."""
+        # Create download directory and make sure it is empty
+        self.download_directory = os.path.join(
+            os.getcwd(), 'tests', 'test_results', 'download_tests', 'active')
+        if not os.path.isdir(self.download_directory):
+            os.makedirs(self.download_directory)
+        else:
+            filelist = os.listdir(path=self.download_directory)
+            if filelist:
+                for f in filelist:
+                    os.remove(os.path.join(self.download_directory, f))
+        self.statement_without_suffix = os.path.join(
+            os.getcwd(), 'tests', 'test_results', 'download_tests',
+            'download_test')
+
+    def tearDown(self) -> None:
+        """Delete contents of download directory."""
+        filelist = os.listdir(path=self.download_directory)
+        if filelist:
+            for f in filelist:
+                os.remove(os.path.join(self.download_directory, f))
+
     def get_credentials_from_keyring(self, platform: str) -> Tuple[str, str]:
         """
         Helper method to get credentials from the keyring.
@@ -63,14 +86,15 @@ class DownloadTests(unittest.TestCase):
         """
         credentials = self.get_credentials_from_keyring(platform)
         platform_class = getattr(p2p_platforms, platform)
-        platform_instance = platform_class(date_range)
-        download_directory = os.path.join(
-            Path.home(), '.easyp2p', platform.lower())
-        settings = Settings()
-        with P2PWebDriver(download_directory, settings.headless) as driver:
+        platform_instance = platform_class(
+            date_range, self.statement_without_suffix)
+
+        # For now we just test in non-headless mode
+        headless = False
+        with P2PWebDriver(self.download_directory, headless) as driver:
             platform_instance.download_statement(driver, credentials)
         self.assertTrue(are_files_equal(
-            platform_instance.statement_file_name, RESULT_PREFIX + result_file,
+            platform_instance.statement, RESULT_PREFIX + result_file,
             drop_header=drop_header))
 
     def test_download_bondora_statement(self) -> None:
@@ -108,7 +132,7 @@ class DownloadTests(unittest.TestCase):
         # it to a fixed reference file. This test just makes sure that the
         # statement was downloaded.
         # TODO: check for content errors
-        self.assertTrue(os.path.isfile(estateguru.statement_file_name))
+        self.assertTrue(os.path.isfile(estateguru.statement_))
 
     def test_download_grupeer_statement(self):
         """Test download_grupeer_statement."""

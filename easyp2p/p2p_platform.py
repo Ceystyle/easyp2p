@@ -510,7 +510,7 @@ class P2PPlatform:
                     elem.click()
 
     def download_statement(
-            self, statement_file_name: str, download_locator: Tuple[str, str],
+            self, statement: str, download_locator: Tuple[str, str],
             actions=None) -> None:
         """
         Download account statement file by clicking the provided button.
@@ -520,12 +520,12 @@ class P2PPlatform:
         button is clickable, which can be provided by the optional actions
         variable. The method also checks if the download was successful.
         If true, the _rename_statement method is called to rename the
-        downloaded file to statement_file_name.
+        downloaded file to statement.
 
         Args:
-            statement_file_name: File name including path where the downloaded
-                statement must be saved
-            download_locator: Locator of the download button
+            statement: File name including path where the downloaded
+                statement should be saved.
+            download_locator: Locator of the download button.
             actions: 'move to element' or None: some P2P sites require that the
                 mouse hovers over the download button to make it clickable.
                 Default is None.
@@ -538,11 +538,6 @@ class P2PPlatform:
                             default_file_name is found
 
         """
-        # Get a list of all files in the download directory
-        dl_dir = os.path.dirname(statement_file_name)
-        file_list = glob.glob(os.path.join(dl_dir, '*'))
-
-        # Find and click the download button
         try:
             download_button = self.driver.find_element(*download_locator)
 
@@ -551,59 +546,30 @@ class P2PPlatform:
                 action.move_to_element(download_button).perform()
 
             download_button.click()
+
+            if not _download_finished(
+                    statement, self.driver.download_directory):
+                raise NoSuchElementException
         except NoSuchElementException:
             raise RuntimeError(
                 'Download des {0}-Kontoauszugs konnte nicht gestartet werden.'
                 .format(self.name))
 
-        # Wait until download has finished
-        file_name = _wait_for_download_end(self.name, file_list, dl_dir)
 
-        # Rename downloaded file
-        _rename_statement(self.name, file_name, statement_file_name)
-
-
-def _rename_statement(
-        name: str, source_file_name: str, target_file_name: str) -> None:
+def _download_finished(
+        statement: str, download_directory: str,
+        max_wait_time: float = 4.0) -> bool:
     """
-    Rename downloaded statement from source_file_name to target_file_name.
+    Wait until statement download is done and rename the file to statement.
 
     Args:
-        name: Name of the P2P platform.
-        source_file_name: File name including path of the file which should
-            be renamed.
-        target_file_name: File name including path the file should be
-            renamed to.
-
-    Raises:
-        RuntimeError: If source file cannot be found
-
-    """
-    error_msg = (
-        '{0}-Kontoauszug konnte nicht im Downloadverzeichnis gefunden '
-        'werden.'.format(name))
-
-    try:
-        os.rename(source_file_name, target_file_name)
-    except FileNotFoundError:
-        raise RuntimeError(error_msg)
-
-
-def _wait_for_download_end(
-        name: str, file_list: Sequence[str], dl_dir: str,
-        max_waiting_time: float = 4.0) -> str:
-    """
-    Wait until download has finished and return name of downloaded file.
-
-    Args:
-        name: Name of the P2P platform.
-        file_list: List of all files in the download directory before the
-            download started.
-        dl_dir: Download directory.
-        max_waiting_time: Maximum time to wait for download to start.
+        statement: File name including path where the downloaded file should
+            be saved.
+        download_directory: Download directory.
+        max_wait_time: Maximum time in seconds to wait for download to start.
 
     Returns:
-        Name including path of the downloaded file.
+        True if download finished successfully, False if not.
 
     Raises:
         RuntimeError: - If the downloaded file cannot be found and there
@@ -612,33 +578,33 @@ def _wait_for_download_end(
                         default_file_name is found
 
     """
-    _download_finished = False
-    _waiting_time = 0
-    while not _download_finished:
-        # TODO: make sure that there were no leftover downloads from
-        # a failed run in the past
-        ongoing_downloads = glob.glob(os.path.join(dl_dir, '*.crdownload'))
+    done = False
+    waiting_time = 0
+    while not done:
+        ongoing_downloads = glob.glob(
+            os.path.join(download_directory, '*.crdownload'))
         if not ongoing_downloads:
-            new_file_list = glob.glob(os.path.join(dl_dir, '*'))
-            if len(new_file_list) - len(file_list) == 1:
-                _download_finished = True
-            elif new_file_list == file_list:
-                if _waiting_time > max_waiting_time:
-                    # If the download didn't start after more than
-                    # max_waiting_time something has gone wrong.
-                    raise RuntimeError(
-                        'Download des {0}-Kontoauszugs wurde abgebrochen!'
-                        .format(name))
-                time.sleep(1)
-                _waiting_time += 1
-            else:
-                # This should never happen
-                raise RuntimeError(
-                    'Mehr als ein aktiver Download des {0}-Kontoauszugs '
-                    'gefunden!'.format(name))
+            filelist = glob.glob(os.path.join(download_directory, '*'))
+            if len(filelist) == 1:
+                os.rename(filelist[0], statement)
+                return True
 
-    file_name = [file for file in new_file_list if file not in file_list][0]
-    return file_name
+            if len(filelist) > 1:
+                # This should never happen since we check in p2p_worker that
+                # the download directory is empty
+                raise RuntimeError(
+                    'Downloadverzeichnis {} ist nicht leer!'
+                        .format(download_directory))
+
+            if waiting_time > max_wait_time:
+                # If the download didn't start after more than max_wait_time
+                # something has gone wrong.
+                return False
+
+            time.sleep(1)
+            waiting_time += 1
+
+    return False
 
 
 def _get_calendar_clicks(target_date: date, start_date: date) -> int:
