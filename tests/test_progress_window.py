@@ -3,18 +3,15 @@
 
 """Module containing all tests for the progress window of easyp2p."""
 
-from datetime import date
-import functools
 import os
 import sys
-import unittest
+import unittest.mock
+from datetime import date
 
-from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
-from tests.test_credentials import fill_credentials_window
 
 APP = QApplication(sys.argv)
 
@@ -23,23 +20,23 @@ class ProgressWindowTests(unittest.TestCase):
 
     """Test the progress window of easyp2p."""
 
-    def setUp(self):
+    @unittest.mock.patch('easyp2p.ui.progress_window.get_credentials')
+    @unittest.mock.patch('easyp2p.ui.progress_window.WorkerThread.start')
+    def setUp(self, mock_worker, mock_credentials):
         """Initialize ProgressWindow."""
-        settings = Settings()
-        settings.platforms = {'test_platform1', 'test_platform2'}
-        settings.date_range = (date(2018, 9, 1), date(2018, 12, 31))
-        settings.output_file = os.path.join(os.getcwd(), 'test.xlsx')
-        QTimer.singleShot(100, functools.partial(
-            fill_credentials_window, 'TestUser', 'TestPass', False))
-        QTimer.singleShot(200, functools.partial(
-            fill_credentials_window, 'TestUser', 'TestPass', False))
-        self.form = ProgressWindow(settings)
-
-    def tearDown(self):
-        """Stop the worker thread after test is done."""
-        self.form.worker.abort = True
-        self.form.worker.quit()
-        self.form.worker.wait()
+        self.settings = Settings()
+        self.settings.platforms = {'test_platform1', 'test_platform2'}
+        self.settings.date_range = (date(2018, 9, 1), date(2018, 12, 31))
+        self.settings.output_file = os.path.join(os.getcwd(), 'test.xlsx')
+        mock_credentials.return_value = 'TestUser', 'TestPass'
+        credentials = {
+            'test_platform1': ('TestUser', 'TestPass'),
+            'test_platform2': ('TestUser', 'TestPass')}
+        self.form = ProgressWindow(self.settings)
+        self.assertEqual(self.form.worker.credentials, credentials)
+        self.assertEqual(
+            self.settings.platforms, {'test_platform1', 'test_platform2'})
+        mock_worker.assert_called_once_with()
 
     def test_defaults(self):
         """Test default behaviour of ProgressWindow."""
@@ -67,6 +64,30 @@ class ProgressWindowTests(unittest.TestCase):
         self.form.worker.update_progress_bar.emit()
         self.assertEqual(self.form.progress_bar.value(), 2)
 
+    @unittest.mock.patch('easyp2p.ui.progress_window.sys')
+    @unittest.mock.patch('easyp2p.ui.progress_window.QMessageBox.critical')
+    def test_abort_easyp2p(self, mock_msg_box, mock_sys):
+        """Test emitting the abort_easyp2p signal."""
+        self.form.worker.abort_easyp2p.emit('Test abort_easyp2p!')
+        # 2097152 is QMessageBox.Close
+        mock_msg_box.assert_called_once_with(
+            self.form, 'Kritischer Fehler', 'Test abort_easyp2p!', 2097152)
+        mock_sys.exit.assert_called_once_with()
+
+    def test_push_button_abort(self):
+        """Test that the worker thread is aborted if user clicks cancel."""
+        self.form.push_button_abort.click()
+        self.assertTrue(self.form.worker.abort)
+        self.assertTrue(self.form.rejected)
+
+    def test_push_button_ok(self):
+        """Test that the Ok button closes the window."""
+        self.form.progress_bar.maximum()
+        self.form.push_button_ok.click()
+        self.assertTrue(self.form.accepted)
+
 
 if __name__ == "__main__":
-    unittest.main()
+    runner = unittest.TextTestRunner(verbosity=3)
+    suite = unittest.TestLoader().loadTestsFromTestCase(ProgressWindowTests)
+    result = runner.run(suite)
