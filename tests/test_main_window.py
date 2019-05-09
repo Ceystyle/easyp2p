@@ -4,23 +4,15 @@
 """Module containing all tests for the main window of easyp2p."""
 
 import calendar
-from datetime import date
-import functools
 import os
-from pathlib import Path
 import sys
-import unittest
-from unittest.mock import MagicMock
+import unittest.mock
+from datetime import date
+from pathlib import Path
 
-from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
-from PyQt5.QtTest import QTest
 
-from easyp2p.platforms import Bondora
 from easyp2p.ui.main_window import MainWindow
-from easyp2p.ui.progress_window import ProgressWindow
-from easyp2p.ui.settings_window import SettingsWindow
-import tests.utils as utils
 
 APP = QApplication(sys.argv)
 
@@ -29,10 +21,14 @@ class MainWindowTests(unittest.TestCase):
 
     """Test the main window of easyp2p."""
 
+    ALL_PLATFORMS = {
+        'Bondora', 'DoFinance', 'Estateguru', 'Grupeer', 'Iuvo', 'Mintos',
+        'PeerBerry', 'Robocash', 'Swaper', 'Twino'
+    }
+
     def setUp(self) -> None:
         """Create the GUI."""
         self.form = MainWindow()
-        self.test_results = []
 
     def test_defaults(self) -> None:
         """Test GUI in default state."""
@@ -53,8 +49,9 @@ class MainWindowTests(unittest.TestCase):
         date_range = self.form.get_date_range()
         today = date.today()
         if today.month > 1:
-            self.assertEqual(date_range, (date(today.year, today.month - 1, 1),
-                date(today.year, today.month - 1,
+            self.assertEqual(
+                date_range, (date(today.year, today.month - 1, 1), date(
+                    today.year, today.month - 1,
                     calendar.monthrange(today.year, today.month - 1)[1])))
         else:
             self.assertEqual(date_range, (date(today.year - 1, 12, 1), date(
@@ -75,6 +72,44 @@ class MainWindowTests(unittest.TestCase):
         for check_box in self.form.group_box_platforms.findChildren(QCheckBox):
             self.assertTrue(check_box.isChecked())
 
+    def test_get_platforms_no_platform_checked_true(self) -> None:
+        """Test get_platforms if no platform is selected and checked==True."""
+        platforms = self.form.get_platforms(True)
+        self.assertEqual(platforms, set())
+
+    def test_get_platforms_all_platforms_checked_true(self) -> None:
+        """
+        Test get_platforms if all platforms are selected and checked==True.
+        """
+        self.form.check_box_select_all.setChecked(True)
+        platforms = self.form.get_platforms(True)
+        self.assertEqual(platforms, self.ALL_PLATFORMS)
+
+    def test_get_platforms_three_platforms_selected_checked_true(self) -> None:
+        """
+        Test get_platforms if three platforms are selected and checked==True.
+        """
+        self.form.check_box_bondora.setChecked(True)
+        self.form.check_box_mintos.setChecked(True)
+        self.form.check_box_twino.setChecked(True)
+        platforms = self.form.get_platforms(True)
+        self.assertEqual(platforms, {'Bondora', 'Mintos', 'Twino'})
+
+    def test_get_platforms_three_platforms_selected_checked_false(self) -> None:
+        """
+        Test get_platforms if three platforms are selected and checked==False.
+        """
+        self.form.check_box_bondora.setChecked(True)
+        self.form.check_box_mintos.setChecked(True)
+        self.form.check_box_twino.setChecked(True)
+        platforms = self.form.get_platforms(False)
+        self.assertEqual(platforms, self.ALL_PLATFORMS)
+
+    def test_get_platforms_checked_false(self) -> None:
+        """Test get_platforms if checked==False."""
+        platforms = self.form.get_platforms(False)
+        self.assertEqual(platforms, self.ALL_PLATFORMS)
+
     def test_select_all_platforms_twice(self) -> None:
         """Test the Select All Platforms checkbox."""
         # Toggle the 'Select all platforms' checkbox
@@ -86,21 +121,6 @@ class MainWindowTests(unittest.TestCase):
         # Test that all platform check boxes are unchecked again
         for check_box in self.form.group_box_platforms.findChildren(QCheckBox):
             self.assertFalse(check_box.isChecked())
-
-    def test_no_platform_selected(self) -> None:
-        """Test clicking start without any selected platform."""
-        QTimer.singleShot(100, functools.partial(
-            utils.accept_qmessagebox, self))
-        QTimer.singleShot(
-            500, functools.partial(utils.window_visible, self, ProgressWindow))
-        QTimer.singleShot(
-            700, functools.partial(
-                utils.cancel_window, self, ProgressWindow, 'push_button_abort'))
-        self.form.push_button_start.click()
-
-        # Check that QMessageBox was opened and ProgressWindow was not
-        expected_results = [utils.QMSG_BOX_OPEN]
-        self.assertEqual(self.test_results, expected_results)
 
     def test_output_file_on_date_change(self) -> None:
         """Test output file name after a date change."""
@@ -127,66 +147,87 @@ class MainWindowTests(unittest.TestCase):
         # Check that the output file name was not changed
         self.assertEqual(self.form.line_edit_output_file.text(), 'Test.xlsx')
 
-    def test_end_date_before_start_date(self) -> None:
-        """Test clicking start with end date set before start date."""
-        self.form.set_date_range('Feb', '2017', 'Sep', '2016')
-        QTimer.singleShot(100, functools.partial(
-            utils.accept_qmessagebox, self))
-        QTimer.singleShot(
-            500, functools.partial(utils.window_visible, self, ProgressWindow))
-        QTimer.singleShot(
-            700, functools.partial(
-                utils.cancel_window, self, ProgressWindow, 'push_button_abort'))
+    @unittest.mock.patch('easyp2p.ui.main_window.ProgressWindow')
+    @unittest.mock.patch('easyp2p.ui.main_window.QMessageBox.warning')
+    def test_no_platform_selected(self, mock_warning, mock_dialog) -> None:
+        """Test clicking start without any selected platform."""
         self.form.push_button_start.click()
 
         # Check that QMessageBox was opened and ProgressWindow was not
-        expected_results = [utils.QMSG_BOX_OPEN]
-        self.assertEqual(self.test_results, expected_results)
+        mock_warning.assert_called_once_with(
+            self.form,
+            'Keine P2P Plattform ausgewählt!',
+            'Bitte wähle mindestens eine P2P Plattform aus!')
+        self.assertFalse(mock_dialog.called)
 
-    def test_push_start_button_with_bondora_selected(self) -> None:
+    @unittest.mock.patch('easyp2p.ui.main_window.ProgressWindow')
+    @unittest.mock.patch('easyp2p.ui.main_window.QMessageBox.warning')
+    def test_end_date_before_start_date(
+            self, mock_warning, mock_dialog) -> None:
+        """Test clicking start with end date set before start date."""
+        self.form.set_date_range('Feb', '2017', 'Sep', '2016')
+        self.form.push_button_start.click()
+
+        # Check that QMessageBox was opened and ProgressWindow was not
+        mock_warning.assert_called_once_with(
+            self.form,
+            'Startdatum liegt nach Enddatum!',
+            'Das Startdatum darf nicht nach dem Enddatum liegen!')
+        self.assertFalse(mock_dialog.called, 'ProgressWindow was opened!')
+
+    @unittest.mock.patch('easyp2p.ui.main_window.ProgressWindow')
+    def test_push_start_button_with_bondora_selected(self, mock_dialog) -> None:
         """Test pushing start button after selecting Bondora."""
-        # Create mock methods to avoid real calls to the Bondora website
-        Bondora.download_statement = MagicMock()
-        Bondora.parse_statement = MagicMock()
         self.form.check_box_bondora.setChecked(True)
         self.form.set_date_range('Sep', '2018', 'Feb', '2019')
-        QLineEdit.setText(self.form.line_edit_output_file, 'Test_Bondora.xlsx')
-        QTimer.singleShot(
-            100, functools.partial(utils.window_visible, self, ProgressWindow))
-        QTimer.singleShot(
-            200, functools.partial(
-                utils.cancel_window, self, ProgressWindow, 'push_button_abort'))
-        QTest.mouseClick(self.form.push_button_start, Qt.LeftButton)
+        QLineEdit.setText(self.form.line_edit_output_file, 'Test.xlsx')
+        self.form.push_button_start.click()
 
         # Check that ProgressWindow opened
-        expected_results = [
-            utils.PROG_WINDOW_VISIBLE, utils.PROG_WINDOW_CANCELLED]
-        self.assertEqual(self.test_results, expected_results)
+        mock_dialog.assert_called_once_with(self.form.settings)
 
         # Check that all settings are correct
         self.assertEqual(self.form.settings.platforms, {'Bondora'})
         self.assertEqual(
             self.form.settings.date_range,
             (date(2018, 9, 1), date(2019, 2, 28)))
-        self.assertEqual(self.form.settings.output_file, 'Test_Bondora.xlsx')
+        self.assertEqual(self.form.settings.output_file, 'Test.xlsx')
 
-        # Assert that Bondora was called
-        Bondora.download_statement.assert_called_once_with(
-            unittest.mock.ANY, unittest.mock.ANY)
+    @unittest.mock.patch('easyp2p.ui.main_window.ProgressWindow')
+    def test_push_start_button_with_increasing_number_of_platforms_selected(
+            self, mock_dialog) -> None:
+        """
+        Test push start button with increasing number of selected platforms.
+        """
+        self.form.set_date_range('Sep', '2018', 'Feb', '2019')
+        QLineEdit.setText(self.form.line_edit_output_file, 'Test.xlsx')
 
-    def test_push_tool_button_settings(self) -> None:
+        selected_platforms = set()
+        for platform in self.ALL_PLATFORMS:
+            check_box = getattr(self.form, 'check_box_' + platform.lower())
+            check_box.setChecked(True)
+            selected_platforms.add(platform)
+            self.form.push_button_start.click()
+
+            # Check that ProgressWindow opened
+            mock_dialog.assert_called_once_with(self.form.settings)
+            mock_dialog.reset_mock()
+
+            # Check that all settings are correct
+            self.assertEqual(self.form.settings.platforms, selected_platforms)
+            self.assertEqual(
+                self.form.settings.date_range,
+                (date(2018, 9, 1), date(2019, 2, 28)))
+            self.assertEqual(self.form.settings.output_file, 'Test.xlsx')
+
+    @unittest.mock.patch('easyp2p.ui.main_window.SettingsWindow')
+    def test_push_tool_button_settings(self, mock_dialog) -> None:
         """Test pushing settings button."""
-        QTimer.singleShot(
-            500, functools.partial(utils.window_visible, self, SettingsWindow))
-        QTimer.singleShot(
-            700, functools.partial(
-                utils.cancel_window, self, SettingsWindow))
-        QTest.mouseClick(self.form.tool_button_settings, Qt.LeftButton)
+        self.form.tool_button_settings.click()
 
         # Check that SettingsWindow opened
-        expected_results = [
-            utils.SETTINGS_VISIBLE, utils.SETTINGS_CANCELLED]
-        self.assertEqual(self.test_results, expected_results)
+        mock_dialog.assert_called_once_with(
+            self.form.get_platforms(False), self.form.settings)
 
 
 if __name__ == "__main__":
