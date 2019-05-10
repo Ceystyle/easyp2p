@@ -3,54 +3,30 @@
 
 """Module containing all tests for the settings window of easyp2p."""
 
-import functools
 import sys
-import unittest
+import unittest.mock
 
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox
-from PyQt5.QtTest import QTest
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QMessageBox
 
-import easyp2p.p2p_credentials as p2p_cred
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.settings_window import SettingsWindow
-import tests.utils as utils
-from tests.test_credentials import fill_credentials_window
 
 app = QApplication(sys.argv)
 
-
+@unittest.mock.patch('easyp2p.ui.settings_window.p2p_cred')
 class SettingsWindowTests(unittest.TestCase):
     """Test the settings window of easyp2p."""
 
-    def setUp(self) -> None:
-        """Initialize SettingsWindow."""
+    @unittest.mock.patch('easyp2p.ui.settings_window.p2p_cred')
+    def setUp(self, mock_cred) -> None:
+        """Initialize common parameters."""
         self.settings = Settings()
-        self.platforms = {'TestPlatform1', 'TestPlatform2', 'TestPlatform3'}
+        self.platforms = ['TestPlatform1', 'TestPlatform2', 'TestPlatform3']
+
+    def test_no_keyring(self, mock_cred):
+        """Test when keyring is not available."""
+        mock_cred.keyring_exists.return_value = False
         self.form = SettingsWindow(self.platforms, self.settings)
-        self.test_results = []
-
-    def tearDown(self) -> None:
-        """Remove all test platforms from keyring."""
-        for platform in self.platforms:
-            try:
-                p2p_cred.delete_platform_from_keyring(platform)
-            except RuntimeError:
-                pass
-
-    @unittest.skipIf(not p2p_cred.keyring_exists(), "No keyring available!")
-    def test_defaults_with_keyring(self):
-        """Test default behaviour if keyring is available."""
-        self.assertTrue(self.form.check_box_headless.isChecked())
-        self.assertEqual(0, self.form.list_widget_platforms.count())
-        self.assertEqual(set(), self.form.saved_platforms)
-        self.assertTrue(self.form.push_button_add.isEnabled())
-        self.assertTrue(self.form.push_button_change.isEnabled())
-        self.assertTrue(self.form.push_button_delete.isEnabled())
-
-    @unittest.skipIf(p2p_cred.keyring_exists(), "Keyring is available!")
-    def test_defaults_without_keyring(self):
-        """Test default behaviour if keyring is not available."""
         self.assertTrue(self.form.check_box_headless.isChecked())
         self.assertEqual(1, self.form.list_widget_platforms.count())
         self.assertEqual(
@@ -60,59 +36,197 @@ class SettingsWindowTests(unittest.TestCase):
         self.assertFalse(self.form.push_button_change.isEnabled())
         self.assertFalse(self.form.push_button_delete.isEnabled())
 
-    def test_push_button_add(self):
+    def test_keyring_no_platforms(self, mock_cred):
+        """Test when no platforms are saved in keyring."""
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.assertTrue(self.form.check_box_headless.isChecked())
+        self.assertEqual(0, self.form.list_widget_platforms.count())
+        self.assertEqual(set(), self.form.saved_platforms)
+        self.assertTrue(self.form.push_button_add.isEnabled())
+        self.assertTrue(self.form.push_button_change.isEnabled())
+        self.assertTrue(self.form.push_button_delete.isEnabled())
+
+    def test_keyring_one_platform(self, mock_cred):
+        """Test when one platform is saved in keyring."""
+        mock_cred.get_password_from_keyring.side_effect = [
+            None, 'TestUser', None]
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.assertTrue(self.form.check_box_headless.isChecked())
+        self.assertEqual(1, self.form.list_widget_platforms.count())
+        self.assertEqual({'TestPlatform2'}, self.form.saved_platforms)
+        self.assertTrue(self.form.push_button_add.isEnabled())
+        self.assertTrue(self.form.push_button_change.isEnabled())
+        self.assertTrue(self.form.push_button_delete.isEnabled())
+
+    def test_keyring_all_platforms(self, mock_cred):
+        """Test when all platforms are saved in keyring."""
+        mock_cred.get_password_from_keyring.side_effect \
+            = ['TestUser'] * len(self.platforms)
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.assertTrue(self.form.check_box_headless.isChecked())
+        self.assertEqual(
+            len(self.platforms), self.form.list_widget_platforms.count())
+        self.assertEqual(set(self.platforms), self.form.saved_platforms)
+        self.assertTrue(self.form.push_button_add.isEnabled())
+        self.assertTrue(self.form.push_button_change.isEnabled())
+        self.assertTrue(self.form.push_button_delete.isEnabled())
+
+    @unittest.mock.patch('easyp2p.ui.settings_window.QInputDialog.getItem')
+    def test_push_button_add(self, mock_input, mock_cred):
         """Test adding a platform to the keyring."""
-        QTimer.singleShot(200, functools.partial(
-            utils.accept_qinputdialog, self))
-        QTimer.singleShot(
-            500, functools.partial(
-                fill_credentials_window, 'foo', 'bar', True))
-        QTest.mouseClick(self.form.push_button_add, Qt.LeftButton)
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        mock_cred.get_credentials_from_user.return_value = (
+            'TestUser', 'TestPass')
+        mock_input.return_value = 'TestPlatform1', True
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.form.push_button_add.click()
         self.assertEqual(1, self.form.list_widget_platforms.count())
         self.assertEqual(
             'TestPlatform1',
             self.form.list_widget_platforms.item(0).text())
+        self.assertEqual(self.form.saved_platforms, {'TestPlatform1'})
 
-    def test_push_button_delete(self):
-        """Test deleting a platform from the keyring."""
-        # First add the platform and mark it
-        self.test_push_button_add()
+    @unittest.mock.patch('easyp2p.ui.settings_window.QInputDialog.getItem')
+    def test_push_button_add_user_cancels_dialog(self, mock_input, mock_cred):
+        """Test adding a platform to the keyring and user cancels dialog."""
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        mock_input.return_value = '', False
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.form.push_button_add.click()
+        self.assertEqual(0, self.form.list_widget_platforms.count())
+        self.assertEqual(self.form.saved_platforms, set())
+
+    @unittest.mock.patch('easyp2p.ui.settings_window.QInputDialog.getItem')
+    def test_push_button_add_no_credentials(self, mock_input, mock_cred):
+        """
+        Test adding a platform to the keyring when user enters no credentials.
+        """
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        mock_cred.get_credentials_from_user.return_value = (None, None)
+        mock_input.return_value = 'TestPlatform1', True
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.form.push_button_add.click()
+        self.assertEqual(0, self.form.list_widget_platforms.count())
+        self.assertEqual(self.form.saved_platforms, set())
+
+    @unittest.mock.patch('easyp2p.ui.settings_window.QMessageBox.information')
+    def test_push_button_all_platforms_exist(self, mock_info, mock_cred):
+        """
+        Test adding platform to the keyring if all platforms are already saved.
+        """
+        mock_cred.get_password_from_keyring.side_effect \
+            = ['TestUser'] * len(self.platforms)
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.form.push_button_add.click()
+        mock_info.assert_called_once_with(
+            self.form, 'Keine weiteren Plattformen verfügbar!',
+            ('Es sind bereits Zugangsdaten für alle unterstützten '
+             'Plattformen vorhanden!'))
+        self.assertEqual(
+            len(self.platforms), self.form.list_widget_platforms.count())
+        self.assertEqual(self.form.saved_platforms, set(self.platforms))
+
+    def test_push_button_change(self, mock_cred):
+        """Test change button."""
+        # Add all platforms and mark the first one
+        mock_cred.get_password_from_keyring.side_effect \
+            = ['TestUser'] * len(self.platforms)
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
         self.form.list_widget_platforms.setCurrentRow(0)
+        self.form.push_button_change.click()
+        mock_cred.get_credentials_from_user.assert_called_once_with(
+            'TestPlatform1', True)
 
-        QTimer.singleShot(100, functools.partial(
-            utils.accept_qmessagebox, self))
-        QTest.mouseClick(self.form.push_button_delete, Qt.LeftButton)
+    @unittest.mock.patch('easyp2p.ui.settings_window.QMessageBox.question')
+    def test_push_button_delete_one_platform(self, mock_question, mock_cred):
+        """Test delete button if one platform is saved."""
+        # First add one platform and mark it
+        mock_cred.get_password_from_keyring.side_effect = [
+            None, 'TestUser', None]
+        mock_cred.keyring_exists.return_value = True
+        mock_question.return_value = QMessageBox.Yes
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.form.list_widget_platforms.setCurrentRow(0)
+        self.form.push_button_delete.click()
+        mock_question.assert_called_once_with(
+            self.form, 'Zugangsdaten löschen?',
+            'Zugangsdaten für TestPlatform2 wirklich löschen?')
+        mock_cred.delete_platform_from_keyring.assert_called_once_with(
+            'TestPlatform2')
         self.assertEqual(set(), self.form.saved_platforms)
         self.assertEqual(0, self.form.list_widget_platforms.count())
 
-    def test_accept_with_headless_true(self):
+    @unittest.mock.patch('easyp2p.ui.settings_window.QMessageBox.question')
+    def test_push_button_delete_all_platforms(self, mock_question, mock_cred):
+        """Test delete button if all platforms are saved."""
+        # First add one platform and mark it
+        mock_cred.get_password_from_keyring.side_effect \
+            = ['TestUser'] * len(self.platforms)
+        mock_cred.keyring_exists.return_value = True
+        mock_question.return_value = QMessageBox.Yes
+        self.form = SettingsWindow(self.platforms, self.settings)
+        self.form.list_widget_platforms.setCurrentRow(1)
+        self.form.push_button_delete.click()
+        mock_question.assert_called_once_with(
+            self.form, 'Zugangsdaten löschen?',
+            'Zugangsdaten für TestPlatform2 wirklich löschen?')
+        mock_cred.delete_platform_from_keyring.assert_called_once_with(
+            'TestPlatform2')
+        self.assertEqual(
+            {'TestPlatform1', 'TestPlatform3'}, self.form.saved_platforms)
+        self.assertEqual(2, self.form.list_widget_platforms.count())
+
+    def test_accept_with_headless_true(self, mock_cred):
         """Keep default value True for headless and click OK."""
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
         self.assertTrue(self.form.check_box_headless.isChecked())
         self.form.button_box.button(QDialogButtonBox.Ok).click()
         self.assertTrue(self.form.settings.headless)
 
-    def test_accept_with_headless_false(self):
+    def test_accept_with_headless_false(self, mock_cred):
         """Change headless to False and click OK. Must still be False."""
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
         self.form.check_box_headless.setChecked(False)
         self.form.button_box.button(QDialogButtonBox.Ok).click()
         self.assertFalse(self.form.settings.headless)
 
-    def test_cancel_with_headless_true(self):
+    def test_cancel_with_headless_true(self, mock_cred):
         """
         Keep headless default value and click Cancel. headless must be True.
         """
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
         self.assertTrue(self.form.check_box_headless.isChecked())
         self.form.button_box.button(QDialogButtonBox.Cancel).click()
         self.assertTrue(self.form.settings.headless)
 
-    def test_cancel_with_headless_false(self):
+    def test_cancel_with_headless_false(self, mock_cred):
         """
         Set headless to False and click Cancel. Headless must be back to True.
         """
+        mock_cred.get_password_from_keyring.return_value = None
+        mock_cred.keyring_exists.return_value = True
+        self.form = SettingsWindow(self.platforms, self.settings)
         self.form.check_box_headless.setChecked(False)
         self.form.button_box.button(QDialogButtonBox.Cancel).click()
         self.assertTrue(self.form.settings.headless)
 
 
 if __name__ == "__main__":
-    unittest.main()
+    runner = unittest.TextTestRunner(verbosity=3)
+    suite = unittest.TestLoader().loadTestsFromTestCase(SettingsWindowTests)
+    result = runner.run(suite)
