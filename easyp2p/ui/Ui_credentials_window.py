@@ -50,7 +50,6 @@ class Ui_CredentialsWindow(object):
         self.verticalLayout.addLayout(self.verticalLayout_3)
 
         self.retranslateUi(CredentialsWindow)
-        self.button_box.rejected.connect(CredentialsWindow.reject)
         QtCore.QMetaObject.connectSlotsByName(CredentialsWindow)
 
     def retranslateUi(self, CredentialsWindow):

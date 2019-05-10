@@ -127,6 +127,14 @@ class CredentialsWindowTests(unittest.TestCase):
         self.assertIsNone(self.form.password)
         self.assertFalse(self.form.save_in_keyring)
 
+    def test_cancel_save_in_keyring_true(self):
+        """Test clicking Cancel when save_in_keyring==True."""
+        self.form = CredentialsWindow('TestPlatform', True, True)
+        self.form.button_box.button(QDialogButtonBox.Cancel).click()
+        self.assertIsNone(self.form.username)
+        self.assertIsNone(self.form.password)
+        self.assertFalse(self.form.save_in_keyring)
+
     @unittest.mock.patch('easyp2p.ui.credentials_window.QMessageBox.warning')
     def test_warn_user(self, mock_warning):
         self.form.warn_user('TestWarning', 'This is a test warning!')

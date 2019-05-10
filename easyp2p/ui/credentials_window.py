@@ -62,6 +62,14 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         self.save_in_keyring = self.check_box_save_in_keyring.isChecked()
         self.accept()
 
+    @pyqtSlot()
+    def on_button_box_rejected(self):
+        """
+        Make sure save_in_keyring is False if user clicks Cancel.
+        """
+        self.save_in_keyring = False
+        self.reject()
+
     def warn_user(self, header, msg):
         """Display a warning message to the user."""
         QMessageBox.warning(self, header, msg)
