@@ -50,6 +50,13 @@ class CredentialsTests(unittest.TestCase):
         self.assertEqual(
             mock_keyring.set_password.call_args_list, expected_calls)
 
+    def test_save_platform_in_keyring_username_equals_username(
+            self, mock_keyring):
+        """Test save_platform_in_keyring when username=='username'."""
+        self.assertRaises(RuntimeError, save_platform_in_keyring,
+            'TestPlatform', 'username', 'TestPass')
+        self.assertFalse(mock_keyring.set_password.called)
+
     def test_delete_platform_from_keyring_if_exists(self, mock_keyring):
         """Test delete_platform_from_keyring if platform exists in keyring."""
         mock_keyring.get_password.return_value = 'TestUser'
