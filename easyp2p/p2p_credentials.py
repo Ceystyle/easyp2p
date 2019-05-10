@@ -8,6 +8,7 @@ Module for getting and saving credentials in the system keyring / from the user.
 from typing import Optional, Tuple
 
 import keyring
+from keyring.errors import PasswordDeleteError
 
 from easyp2p.ui.credentials_window import CredentialsWindow
 
@@ -123,7 +124,7 @@ def delete_platform_from_keyring(platform: str) -> bool:
                 '{0} wurde nicht im Keyring gefunden!'.format(platform))
         keyring.delete_password(platform, username)
         keyring.delete_password(platform, 'username')
-    except keyring.errors.PasswordDeleteError:
+    except PasswordDeleteError:
         return False
     return True
 
