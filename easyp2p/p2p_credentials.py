@@ -28,8 +28,9 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
     """
     Get credentials for P2P platform from keyring or user.
 
-    If a keyring exists, try to get credentials from it. If not or if they
-    cannot be found, ask user for credentials.
+    If a keyring exists, try to get credentials for platform from it. If no
+    keyring is available or the credentials were not found, ask the user to
+    enter credentials (via get_credentials_from_user).
 
     Args:
         platform: Name of the P2P platform
@@ -38,19 +39,13 @@ def get_credentials(platform: str) -> Optional[Tuple[str, str]]:
         Tuple (username, password) on success, None otherwise
 
     """
-    _ask_for_credentials = False
+    username, password = None, None
 
     if keyring.get_keyring():
-        try:
-            username = keyring.get_password(platform, 'username')
-            password = keyring.get_password(platform, username)
-        except TypeError:
-            # Either username or password were not found in the keyring
-            _ask_for_credentials = True
-    else:
-        _ask_for_credentials = True
+        username = keyring.get_password(platform, 'username')
+        password = keyring.get_password(platform, username)
 
-    if _ask_for_credentials:
+    if not username or not password:
         (username, password) = get_credentials_from_user(platform)
         if not username or not password:
             return None
