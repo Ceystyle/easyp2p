@@ -13,6 +13,7 @@ import os
 import sys
 from typing import Tuple
 
+from easyp2p.p2p_parser import get_df_from_file
 import tests.test_parser as parser_tests
 import easyp2p.platforms as p2p_platforms
 import easyp2p.p2p_helper as p2p_helper
@@ -32,7 +33,7 @@ def _generate_parser_results(
 
     """
     if os.path.isfile(output_file):
-        df_old = p2p_helper.get_df_from_file(output_file)
+        df_old = get_df_from_file(output_file)
     platform_class = getattr(
         getattr(p2p_platforms, platform.lower()), platform)
     platform_instance = platform_class(date_range)

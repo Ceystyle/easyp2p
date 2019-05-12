@@ -6,43 +6,6 @@ p2p_helper contains some helper functions for easyp2p.
 
 """
 
-from pathlib import Path
-
-import pandas as pd
-
-
-def get_df_from_file(input_file: str) -> pd.DataFrame:
-    """
-    Read a pandas.DataFrame from input_file.
-
-    Args:
-        input_file: file name including path
-
-    Returns:
-        pandas.DataFrame: DataFrame which was read from the file
-
-    Raises:
-        RuntimeError: If input_file does not exist, cannot be read or if the \
-            file format is neither csv or xlsx
-
-    """
-
-    file_format = Path(input_file).suffix
-
-    try:
-        if file_format == '.csv':
-            df = pd.read_csv(input_file)
-        elif file_format in ('.xlsx', '.xls'):
-            df = pd.read_excel(input_file)
-        else:
-            raise RuntimeError(
-                'Unbekanntes Dateiformat beim Import: ', input_file)
-    except FileNotFoundError:
-        raise RuntimeError(
-            '{0} konnte nicht gefunden werden!'.format(input_file))
-
-    return df
-
 
 def short_month_to_nbr(short_name: str) -> str:
     """

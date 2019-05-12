@@ -10,7 +10,7 @@ import unittest
 
 import pandas as pd
 
-import easyp2p.p2p_helper as p2p_helper
+from easyp2p.p2p_parser import get_df_from_file
 import easyp2p.p2p_parser as p2p_parser
 import easyp2p.platforms as p2p_platforms
 
@@ -351,9 +351,8 @@ class ParserTests(unittest.TestCase):
         df_result = pd.DataFrame()
 
         for platform in PLATFORMS:
-            df = p2p_helper.get_df_from_file(
-                RESULT_PREFIX + '{0}_parser.csv'.format(
-                    platform.lower()))
+            df = get_df_from_file(RESULT_PREFIX + '{0}_parser.csv'.format(
+                platform.lower()))
             df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
             df_result = df_result.append(df, sort=True)
 
@@ -380,8 +379,8 @@ def are_files_equal(
 
     """
     try:
-        df1 = p2p_helper.get_df_from_file(file1)
-        df2 = p2p_helper.get_df_from_file(file2)
+        df1 = get_df_from_file(file1)
+        df2 = get_df_from_file(file2)
     except RuntimeError:
         return False
 
