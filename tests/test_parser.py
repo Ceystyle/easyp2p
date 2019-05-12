@@ -40,7 +40,7 @@ class ParserTests(unittest.TestCase):
         self.date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
 
     def run_parser_test(
-            self, platform: str, input_file: str,
+            self, platform: str, input_file_without_suffix: str,
             exp_result_file: str,
             date_range: Tuple[date, date] =
                 (date(2018, 9, 1), date(2018, 12, 31)),
@@ -53,7 +53,8 @@ class ParserTests(unittest.TestCase):
 
         Args:
             platform: Name of the P2P platform
-            input_file: Input file name including path for the parser
+            input_file_without_suffix: Input file name for the parser including
+                path but without suffix
             exp_result_file: File name including path with expected results
             date_range: Date range tuple (start_date, end_date) for which the
                 account statement was generated
@@ -62,9 +63,9 @@ class ParserTests(unittest.TestCase):
 
         """
         platform_class = getattr(p2p_platforms, platform)
-        platform_instance = platform_class(date_range)
-        (df, unknown_cf_types) = platform_instance.parse_statement(
-            input_file)
+        platform_instance = platform_class(
+            date_range, input_file_without_suffix)
+        (df, unknown_cf_types) = platform_instance.parse_statement()
         df_exp = pd.read_csv(
             exp_result_file, index_col=[0, 1, 2])
 
@@ -109,8 +110,7 @@ class ParserTests(unittest.TestCase):
             date_range = self.date_range
 
         self.run_parser_test(
-            platform,
-            INPUT_PREFIX + test_name + '.' + PLATFORMS[platform],
+            platform, INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv', date_range=date_range)
 
     def no_cfs_parser_test(
@@ -122,8 +122,7 @@ class ParserTests(unittest.TestCase):
             date_range = self.date_range_no_cfs
 
         self.run_parser_test(
-            platform,
-            INPUT_PREFIX + test_name + '.' + PLATFORMS[platform],
+            platform, INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv', date_range=date_range)
 
     def test_bondora_parser(self):
@@ -150,7 +149,7 @@ class ParserTests(unittest.TestCase):
         test_name = 'dofinance_parser_unknown_cf'
         dofinance_date_range = (date(2018, 5, 1), date(2018, 9, 30))
         self.run_parser_test(
-            'DoFinance', INPUT_PREFIX + test_name + '.xlsx',
+            'DoFinance', INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv', dofinance_date_range,
             unknown_cf_types_exp=
             'Anlage\nRate: 6% Typ: automatisch, TestCF1, TestCF2')
@@ -158,10 +157,10 @@ class ParserTests(unittest.TestCase):
     def test_dofinance_parser_wrong_column_names(self):
         """Test DoFinance parser if there are unknown column names."""
         dofinance = p2p_platforms.dofinance.DoFinance(
-            (date(2018, 5, 1), date(2018, 9, 30)))
+            (date(2018, 5, 1), date(2018, 9, 30)),
+            INPUT_PREFIX + 'dofinance_parser_wrong_column_names')
         self.assertRaises(
-            RuntimeError, dofinance.parse_statement,
-            INPUT_PREFIX + 'dofinance_parser_wrong_column_names.xlsx')
+            RuntimeError, dofinance.parse_statement)
 
     def test_estateguru_parser(self):
         """Test parsing Estateguru default statement."""
@@ -173,9 +172,10 @@ class ParserTests(unittest.TestCase):
 
     def test_estateguru_parser_unknown_cf(self):
         """Test Estateguru parser if unknown cashflow types are present."""
-        test_name = 'estateguru_parser_unknown_cf.csv'
+        test_name = 'estateguru_parser_unknown_cf'
         self.run_parser_test(
-            'Estateguru', INPUT_PREFIX + test_name, RESULT_PREFIX + test_name,
+            'Estateguru', INPUT_PREFIX + test_name,
+            RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp=
             'Investition(AutoInvestieren), TestCF1, TestCF2')
 
@@ -193,7 +193,7 @@ class ParserTests(unittest.TestCase):
         """
         test_name = 'grupeer_parser_unknown_cf'
         self.run_parser_test(
-            'Grupeer', INPUT_PREFIX + test_name + '.xlsx',
+            'Grupeer', INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='TestCF1, TestCF2')
 
@@ -211,7 +211,7 @@ class ParserTests(unittest.TestCase):
         """
         test_name = 'iuvo_parser_unknown_cf'
         self.run_parser_test(
-            'Iuvo', INPUT_PREFIX + test_name + '.xlsx',
+            'Iuvo', INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='TestCF1, TestCF2')
 
@@ -229,7 +229,7 @@ class ParserTests(unittest.TestCase):
         """
         test_name = 'mintos_parser_unknown_cf'
         self.run_parser_test(
-            'Mintos', INPUT_PREFIX + test_name + '.xlsx',
+            'Mintos', INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='Interestincome, TestCF1, TestCF2')
 
@@ -255,7 +255,7 @@ class ParserTests(unittest.TestCase):
         """
         test_name = 'robocash_parser_unknown_cf'
         self.run_parser_test(
-            'Robocash', INPUT_PREFIX + test_name + '.xls',
+            'Robocash', INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='TestCF1, TestCF2')
 
@@ -281,7 +281,7 @@ class ParserTests(unittest.TestCase):
         """
         test_name = 'twino_parser_unknown_cf'
         self.run_parser_test(
-            'Twino', INPUT_PREFIX + test_name + '.xlsx',
+            'Twino', INPUT_PREFIX + test_name,
             RESULT_PREFIX + test_name + '.csv',
             unknown_cf_types_exp='TestCF1 PRINCIPAL, TestCF2 INTEREST')
 
@@ -290,10 +290,10 @@ class ParserTests(unittest.TestCase):
         Test Twino parser if unknown column names are present in the statement.
         """
         twino = p2p_platforms.twino.Twino(
-            (date(2018, 9, 1), date(2018, 12, 31)))
+            (date(2018, 9, 1), date(2018, 12, 31)),
+            INPUT_PREFIX + 'twino_parser_wrong_column_names')
         self.assertRaises(
-            RuntimeError, twino.parse_statement,
-            INPUT_PREFIX + 'twino_parser_wrong_column_names.xlsx')
+            RuntimeError, twino.parse_statement)
 
     def run_write_results(
             self, df_result: pd.DataFrame, result_file: str,
