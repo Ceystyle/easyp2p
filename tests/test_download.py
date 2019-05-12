@@ -17,6 +17,9 @@ from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 
+@unittest.skipIf(
+    input('Run download tests (y/N)?: ').lower() != 'y',
+    'Download tests skipped!')
 class DownloadTests(unittest.TestCase):
 
     """Test downloading account statements from all supported platforms."""
@@ -214,4 +217,6 @@ class DownloadTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    runner = unittest.TextTestRunner(verbosity=3)
+    suite = unittest.TestLoader().loadTestsFromTestCase(DownloadTests)
+    result = runner.run(suite)
