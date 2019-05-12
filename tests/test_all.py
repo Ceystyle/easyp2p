@@ -11,7 +11,7 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
 
     # add tests to the test suite
-    suite.addTests(loader.discover('tests', 'test_*'))
+    suite.addTests(loader.discover('tests', 'test_*.py'))
 
     # initialize a runner, pass it the suite and run it
     runner = unittest.TextTestRunner(verbosity=3)
