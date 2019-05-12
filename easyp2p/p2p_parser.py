@@ -10,7 +10,8 @@ single output format. The combined output is aggregated and written to an Excel
 file.
 
 """
-from datetime import date
+import calendar
+from datetime import date, timedelta
 from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
@@ -139,7 +140,7 @@ class P2PParser:
 
         """
         # Get a list of all months in date_range
-        list_of_months = p2p_helper.get_list_of_months(self.date_range)
+        list_of_months = _get_list_of_months(self.date_range)
 
         # If there were no cashflows all months are missing
         if self.df.empty:
@@ -197,7 +198,7 @@ class P2PParser:
             # daily cashflow which needs to be subtracted again
             self.df[self.START_BALANCE_NAME] = \
                 (orig_df.groupby(self.DATE).first()[balance_column]
-                - orig_df.groupby(self.DATE).first()[value_column])\
+                    - orig_df.groupby(self.DATE).first()[value_column])\
                 .reset_index()[0]
             self.df[self.END_BALANCE_NAME] = \
                 orig_df.groupby(self.DATE).last()[balance_column]\
@@ -217,7 +218,8 @@ class P2PParser:
         try:
             self.df[self.DATE] = pd.to_datetime(
                 self.df[self.DATE], format=date_format)
-            self.df = self.df[(self.df[self.DATE] >= start_date) \
+            self.df = self.df[
+                (self.df[self.DATE] >= start_date)
                 & (self.df[self.DATE] <= end_date)]
             # Convert date column from datetime to date:
             self.df[self.DATE] = self.df[self.DATE].dt.date
@@ -272,7 +274,7 @@ class P2PParser:
 
         """
         if not date_list:
-            list_of_months = p2p_helper.get_list_of_months(self.date_range)
+            list_of_months = _get_list_of_months(self.date_range)
             date_list = [month[0] for month in list_of_months]
 
         df = pd.DataFrame()
@@ -363,6 +365,33 @@ class P2PParser:
         return unknown_cf_types
 
 
+def _get_list_of_months(date_range: Tuple[date, date]) \
+        -> List[Tuple[date, date]]:
+    """
+    Get list of months between (and including) start and end date.
+
+    Args:
+        date_range: Tuple (start_date, end_date)
+
+    Returns:
+        List of tuples (start_of_month, end_of_month) for all months between \
+        start and end date.
+
+    """
+    months = []
+    current_date = date_range[0]
+    while current_date < date_range[1]:
+        start_of_month = date(current_date.year, current_date.month, 1)
+        days_in_month = calendar.monthrange(
+            current_date.year, current_date.month)[1]
+        end_of_month = date(
+            current_date.year, current_date.month, days_in_month)
+        months.append((start_of_month, end_of_month))
+        current_date += timedelta(days=days_in_month)
+
+    return months
+
+
 def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     """
     Sum up the results contained in data frames and write them to Excel file.
@@ -399,7 +428,8 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         df_result[P2PParser.DATE], format='%d.%m.%Y').dt.to_period('M')
 
     # Calculate results per month and platform, keeping the NaNs
-    value_columns = [column for column in P2PParser.TARGET_COLUMNS \
+    value_columns = [
+        column for column in P2PParser.TARGET_COLUMNS
         if column in df_result.columns]
     df_monthly = pd.pivot_table(
         df_result, values=value_columns,

@@ -6,11 +6,7 @@ p2p_helper contains some helper functions for easyp2p.
 
 """
 
-import calendar
-from datetime import date, timedelta
-import os
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 import pandas as pd
 
@@ -46,33 +42,6 @@ def get_df_from_file(input_file: str) -> pd.DataFrame:
             '{0} konnte nicht gefunden werden!'.format(input_file))
 
     return df
-
-
-def get_list_of_months(date_range: Tuple[date, date]) \
-        -> List[Tuple[date, date]]:
-    """
-    Get list of months between (and including) start and end date.
-
-    Args:
-        date_range: Tuple (start_date, end_date)
-
-    Returns:
-        List of tuples (start_of_month, end_of_month) for all months between \
-        start and end date.
-
-    """
-    months = []
-    current_date = date_range[0]
-    while current_date < date_range[1]:
-        start_of_month = date(current_date.year, current_date.month, 1)
-        days_in_month = calendar.monthrange(
-            current_date.year, current_date.month)[1]
-        end_of_month = date(
-            current_date.year, current_date.month, days_in_month)
-        months.append((start_of_month, end_of_month))
-        current_date += timedelta(days=days_in_month)
-
-    return months
 
 
 def short_month_to_nbr(short_name: str) -> str:
