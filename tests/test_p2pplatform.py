@@ -56,9 +56,11 @@ class DownloadFinishedTests(unittest.TestCase):
             os.remove(self.statement)
 
     def tearDown(self) -> None:
-        """Delete download directory."""
+        """Delete download directory and statement file."""
         try:
             shutil.rmtree(self.download_directory)
+            if os.path.isfile(self.statement):
+                os.remove(self.statement)
         except OSError as err:
             print('Error: {} - {}.'.format(err.filename, err.strerror))
 
