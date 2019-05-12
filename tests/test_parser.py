@@ -356,9 +356,13 @@ class ParserTests(unittest.TestCase):
             df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
             df_result = df_result.append(df, sort=True)
 
+        result_file = os.path.join('tests', 'test_write_results_all.xlsx')
         self.run_write_results(
-            df_result, 'test_write_results_all.xlsx',
-            RESULT_PREFIX + 'write_results_all.xlsx')
+            df_result, result_file, RESULT_PREFIX + 'write_results_all.xlsx')
+
+        # Clean up after test
+        if os.path.isfile(result_file):
+            os.remove(result_file)
 
 
 def are_files_equal(
