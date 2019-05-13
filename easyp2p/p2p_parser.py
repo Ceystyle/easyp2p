@@ -245,8 +245,7 @@ class P2PParser:
                 statement which contains the cash flow type
 
         Returns:
-            Sorted comma separated string consisting of all unknown cash flow
-            types
+            Sorted set of strings with all unknown cash flow types.
 
         """
         if cashflow_types:
@@ -316,8 +315,7 @@ class P2PParser:
                 balances
 
         Returns:
-            Sorted comma separated string consisting of all unknown cash flow
-            types
+            Sorted set of strings with all unknown cash flow types.
 
         Raises:
             RuntimeError: If date or cashflow columns cannot be found in
