@@ -127,7 +127,7 @@ class DownloadTests(unittest.TestCase):
         credentials = self.get_credentials_from_keyring('Estateguru')
         estateguru = p2p_platforms.Estateguru(self.DATE_RANGE)
         download_directory = os.path.join(Path.home(), '.easyp2p', 'estateguru')
-        settings = Settings()
+        settings = Settings(self.DATE_RANGE, 'test.xlsx')
         with P2PWebDriver(download_directory, settings.headless) as driver:
             estateguru.download_statement(driver, credentials)
         # The Estateguru statement contains all cashflows ever generated for

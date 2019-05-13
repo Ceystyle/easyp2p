@@ -39,7 +39,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.set_date_range(start_month, start_year, start_month, start_year)
         self.output_file_changed = False
         self.set_output_file()
-        self.settings = Settings()
+        self.settings = Settings(
+            self.get_date_range(), self.line_edit_output_file.text())
 
     def set_date_range(
             self, start_month: str, start_year: str,

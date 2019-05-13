@@ -3,6 +3,8 @@
 
 """Module containing all tests for the settings window of easyp2p."""
 
+from datetime import date
+import os
 import sys
 import unittest.mock
 
@@ -20,7 +22,9 @@ class SettingsWindowTests(unittest.TestCase):
     @unittest.mock.patch('easyp2p.ui.settings_window.p2p_cred')
     def setUp(self, mock_cred) -> None:
         """Initialize common parameters."""
-        self.settings = Settings()
+        self.settings = Settings(
+            (date(2018, 9, 1), date(2018, 12, 31)),
+            os.path.join(os.getcwd(), 'test.xlsx'))
         self.platforms = ['TestPlatform1', 'TestPlatform2', 'TestPlatform3']
 
     def test_no_keyring(self, mock_cred):

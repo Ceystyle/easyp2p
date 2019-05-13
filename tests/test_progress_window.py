@@ -24,10 +24,10 @@ class ProgressWindowTests(unittest.TestCase):
     @unittest.mock.patch('easyp2p.ui.progress_window.WorkerThread.start')
     def setUp(self, mock_worker, mock_credentials):
         """Initialize ProgressWindow."""
-        self.settings = Settings()
+        self.settings = Settings(
+            (date(2018, 9, 1), date(2018, 12, 31)),
+            os.path.join(os.getcwd(), 'test.xlsx'))
         self.settings.platforms = {'test_platform1', 'test_platform2'}
-        self.settings.date_range = (date(2018, 9, 1), date(2018, 12, 31))
-        self.settings.output_file = os.path.join(os.getcwd(), 'test.xlsx')
         mock_credentials.return_value = 'TestUser', 'TestPass'
         credentials = {
             'test_platform1': ('TestUser', 'TestPass'),
