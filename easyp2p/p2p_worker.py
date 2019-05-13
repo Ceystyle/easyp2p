@@ -58,46 +58,33 @@ class WorkerThread(QThread):
         self.df_result = pd.DataFrame()
 
     def get_platform_instance(self, name: str, statement_without_suffix: str) \
-            -> Optional[Callable[[Tuple[date, date]], None]]:
+            -> Callable[[Tuple[date, date]], None]:
         """
         Helper method to get an instance of the platform class.
 
         Args:
-            name: Name of the P2P platform/module
+            name: Name of the P2P platform/module.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
 
         Returns:
-            Platform class or None if the class cannot be found
+            Platform class instance.
+
+        Raises:
+            PlatformFailedError: If the platform class cannot be found.
 
         """
         try:
             platform = getattr(p2p_platforms, name)
         except AttributeError:
-            error_message = (
-                'Klasse {0} konnte nicht gefunden werden. Ist {1}.py '
-                'vorhanden?'.format(name, name.lower()))
-            self.add_progress_text.emit(error_message, self.RED)
-            return None
+            raise PlatformFailedError(
+                name.lower(), '.py konnte nicht gefunden werden!')
         else:
             return platform(self.settings.date_range, statement_without_suffix)
 
-    def ignore_platform(self, name: str, error_msg: str) -> None:
-        """
-        Helper method for printing ignore and error message to GUI.
-
-        Args:
-            name: Name of the P2P platform
-            error_msg: Error message to print
-
-        """
-        self.add_progress_text.emit(error_msg, self.RED)
-        self.add_progress_text.emit(
-            '{0} wird ignoriert!'.format(name), self.RED)
-
     def parse_statements(
             self, name: str,
-            platform: Callable[[Tuple[date, date]], None]) -> bool:
+            platform: Callable[[Tuple[date, date]], None]) -> None:
         """
         Helper method for calling the parser and appending the dataframe list.
 
@@ -105,16 +92,15 @@ class WorkerThread(QThread):
             name: Name of the P2P platform
             platform: Instance of P2PPlatform class
 
-        Returns:
-            True on success, False on failure
+        Raises:
+            PlatformFailedError: If parse_statement method fails.
 
         """
         try:
             (df, unknown_cf_types) = platform.parse_statement()
             self.df_result = self.df_result.append(df, sort=True)
         except RuntimeError as err:
-            self.ignore_platform(name, str(err))
-            return False
+            raise PlatformFailedError(str(err))
 
         if unknown_cf_types:
             warning_msg = (
@@ -122,12 +108,10 @@ class WorkerThread(QThread):
                 'ignoriert: {1}'.format(name, unknown_cf_types))
             self.add_progress_text.emit(warning_msg, self.RED)
 
-        return True
-
     def download_statements(
             self, name: str,
             platform: Callable[[Tuple[date, date]], None],
-            download_directory: str) -> bool:
+            download_directory: str) -> None:
         """
         Helper method for calling the download_statement methods.
 
@@ -136,15 +120,14 @@ class WorkerThread(QThread):
             platform: Instance of P2PPlatform class.
             download_directory: Download directory for this platform.
 
-        Returns:
-            True if download finished without errors, False otherwise
+        Raises:
+            PlatformFailedError: If no credentials for platform are available
+                or if the download_statement method fails.
 
         """
         if self.credentials[name] is None:
-            self.add_progress_text.emit(
-                'Keine Zugangsdaten für {0} vorhanden!'.format(name),
-                self.RED)
-            return False
+            raise PlatformFailedError(
+                'Keine Zugangsdaten für {0} vorhanden!'.format(name))
 
         self.add_progress_text.emit(
             'Start der Auswertung von {0}...'.format(name), self.BLACK)
@@ -168,15 +151,12 @@ class WorkerThread(QThread):
         except WebDriverNotFound as err:
             self.abort_easyp2p.emit(str(err))
             self.abort = True
-            return False
+            return
         except RuntimeError as err:
-            self.ignore_platform(name, str(err))
-            return False
+            raise PlatformFailedError(str(err))
         except RuntimeWarning as warning:
             self.add_progress_text.emit(str(warning), self.RED)
             # Continue anyway
-
-        return True
 
     def set_download_directory(self, name: str) -> Tuple[str, str]:
         """
@@ -230,21 +210,26 @@ class WorkerThread(QThread):
 
             statement_without_suffix, download_directory \
                 = self.set_download_directory(name)
-            platform = self.get_platform_instance(
-                name, statement_without_suffix)
-            if platform is None:
-                self.update_progress_bar.emit()
-                continue
 
-            if self.download_statements(name, platform, download_directory):
+            try:
+                platform = self.get_platform_instance(
+                    name, statement_without_suffix)
+
+                self.download_statements(name, platform, download_directory)
+
                 if self.abort:
                     return
 
-                if self.parse_statements(name, platform):
-                    self.add_progress_text.emit(
-                        '{0} erfolgreich ausgewertet!'.format(name), self.BLACK)
-
-            self.update_progress_bar.emit()
+                self.parse_statements(name, platform)
+                self.add_progress_text.emit(
+                    '{0} erfolgreich ausgewertet!'.format(name), self.BLACK)
+                self.update_progress_bar.emit()
+            except PlatformFailedError as err:
+                self.add_progress_text.emit(str(err), self.RED)
+                self.add_progress_text.emit(
+                    '{0} wird ignoriert!'.format(name), self.RED)
+                self.update_progress_bar.emit()
+                continue
 
         if self.abort:
             return
@@ -253,3 +238,10 @@ class WorkerThread(QThread):
                 self.df_result, self.settings.output_file):
             self.add_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
+
+
+class PlatformFailedError(BaseException):
+
+    """Will be raised if evaluation of a P2P platform fails."""
+
+    pass
