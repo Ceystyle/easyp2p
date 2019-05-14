@@ -28,27 +28,15 @@ class P2PWebDriver(webdriver.Chrome):
 
         """
         self.download_directory = download_directory
-        self.headless = headless
         self.driver = cast(webdriver.Chrome, None)
-
-    def __enter__(self) -> 'P2PWebDriver':
-        """
-        Initialize ChromeDriver as webdriver.
-
-        Initializes Chromedriver as webdriver, sets the download directory
-        and opens a new maximized browser window.
-
-        Raises:
-            ModuleNotFoundError: If Chromedriver cannot be found
-
-        """
         options = webdriver.ChromeOptions()
         prefs = {"download.default_directory": self.download_directory}
         options.add_experimental_option("prefs", prefs)
         options.add_argument("start-maximized")
-        if self.headless:
+        if headless:
             options.add_argument("--headless")
             options.add_argument("--window-size=1920,1200")
+
         # Ubuntu doesn't put chromedriver in PATH so we need to
         # explicitly specify its location.
         # TODO: Find a better solution that works on all systems.
@@ -64,13 +52,11 @@ class P2PWebDriver(webdriver.Chrome):
                 'Chromedriver konnte nicht gefunden werden!\n'
                 'easyp2p wird beendet!\n', err)
 
-        if self.headless:
+        if headless:
             # This is needed to allow downloads in headless mode
             params = {
                 'behavior': 'allow', 'downloadPath': self.download_directory}
             self.execute_cdp_cmd('Page.setDownloadBehavior', params)
-
-        return self
 
     def wait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
         """
