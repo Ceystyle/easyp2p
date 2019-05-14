@@ -12,11 +12,10 @@ import unittest
 import keyring
 
 from easyp2p.p2p_parser import get_df_from_file
-from tests.test_parser import RESULT_PREFIX
 import easyp2p.platforms as p2p_platforms
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_webdriver import P2PWebDriver
-
+from tests import RESULT_PREFIX
 
 @unittest.skipIf(
     input('Run download tests (y/N)?: ').lower() != 'y',

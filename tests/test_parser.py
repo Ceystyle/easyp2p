@@ -13,20 +13,7 @@ import pandas as pd
 from easyp2p.p2p_parser import get_df_from_file
 import easyp2p.p2p_parser as p2p_parser
 import easyp2p.platforms as p2p_platforms
-
-PLATFORMS = {
-    'Bondora': 'xlsx',
-    'DoFinance': 'xlsx',
-    'Estateguru': 'csv',
-    'Grupeer': 'xlsx',
-    'Iuvo': 'xlsx',
-    'Mintos': 'xlsx',
-    'PeerBerry': 'csv',
-    'Robocash': 'xls',
-    'Swaper': 'xlsx',
-    'Twino': 'xlsx'}
-INPUT_PREFIX = os.path.join('tests', 'input', 'input_test_')
-RESULT_PREFIX = os.path.join('tests', 'expected_results', 'result_test_')
+from tests import INPUT_PREFIX, RESULT_PREFIX, PLATFORMS
 
 
 class ParserTests(unittest.TestCase):
@@ -366,25 +353,6 @@ class ParserTests(unittest.TestCase):
         result_file = os.path.join('tests', 'test_write_results_all.xlsx')
         self.run_write_results(
             df_result, result_file, RESULT_PREFIX + 'write_results_all.xlsx')
-
-        # Clean up after test
-        if os.path.isfile(result_file):
-            os.remove(result_file)
-
-    def test_write_results_missing_month(self):
-        """Test write_results for all supported platforms."""
-        df_result = pd.DataFrame()
-
-        for platform in {'Bondora'}:
-            df = get_df_from_file(
-                RESULT_PREFIX + '{0}_parser_missing_month.csv'.format(
-                    platform.lower()))
-            df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
-            df_result = df_result.append(df, sort=True)
-
-        result_file = os.path.join('tests', 'test_write_results_all_missing_month.xlsx')
-        self.run_write_results(
-            df_result, result_file, RESULT_PREFIX + 'write_results_all_missing_month.xlsx')
 
         # Clean up after test
         if os.path.isfile(result_file):

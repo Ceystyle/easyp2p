@@ -13,31 +13,27 @@ import pandas as pd
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_worker import WorkerThread, PlatformFailedError
 from easyp2p.p2p_webdriver import WebDriverNotFound
+from tests import PLATFORMS
 
 
 class WorkerTests(unittest.TestCase):
 
     """Contains all p2p_worker tests."""
 
-    ALL_PLATFORMS = {
-        'Bondora', 'DoFinance', 'Estateguru', 'Grupeer', 'Iuvo', 'Mintos',
-        'PeerBerry', 'Robocash', 'Swaper', 'Twino'
-    }
-
     def setUp(self) -> None:
         """Initialize the WorkerThread."""
         self.settings = Settings(
             (date(2018, 9, 1), date(2018, 12, 31)),
             os.path.join(os.getcwd(), 'test.xlsx'))
-        self.settings.platforms = self.ALL_PLATFORMS
+        self.settings.platforms = set(PLATFORMS)
         self.credentials = dict()
-        for platform in self.ALL_PLATFORMS:
+        for platform in PLATFORMS:
             self.credentials[platform] = ('TestUser', 'TestPass')
         self.worker = WorkerThread(self.settings, self.credentials)
 
     def test_get_platform_instance(self):
         """Test get_platform_instance for all supported platforms."""
-        for platform in self.ALL_PLATFORMS:
+        for platform in PLATFORMS:
             platform_instance = self.worker.get_platform_instance(
                 platform, 'test_statement')
             self.assertEqual(type(platform_instance).__name__, platform)
@@ -232,7 +228,7 @@ class WorkerTests(unittest.TestCase):
 
         expected_download_args = []
         expected_parse_args = []
-        for platform in self.ALL_PLATFORMS:
+        for platform in PLATFORMS:
             # TODO: replace ANY by real platform instance
             expected_download_args.append(unittest.mock.call(
                 platform, unittest.mock.ANY, 'test_dldir'))

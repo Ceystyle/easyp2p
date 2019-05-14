@@ -13,6 +13,7 @@ from pathlib import Path
 from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
 
 from easyp2p.ui.main_window import MainWindow
+from tests import PLATFORMS
 
 APP = QApplication(sys.argv)
 
@@ -20,11 +21,6 @@ APP = QApplication(sys.argv)
 class MainWindowTests(unittest.TestCase):
 
     """Test the main window of easyp2p."""
-
-    ALL_PLATFORMS = {
-        'Bondora', 'DoFinance', 'Estateguru', 'Grupeer', 'Iuvo', 'Mintos',
-        'PeerBerry', 'Robocash', 'Swaper', 'Twino'
-    }
 
     def setUp(self) -> None:
         """Create the GUI."""
@@ -83,7 +79,7 @@ class MainWindowTests(unittest.TestCase):
         """
         self.form.check_box_select_all.setChecked(True)
         platforms = self.form.get_platforms(True)
-        self.assertEqual(platforms, self.ALL_PLATFORMS)
+        self.assertEqual(platforms, set(PLATFORMS))
 
     def test_get_platforms_three_platforms_selected_checked_true(self) -> None:
         """
@@ -103,12 +99,12 @@ class MainWindowTests(unittest.TestCase):
         self.form.check_box_mintos.setChecked(True)
         self.form.check_box_twino.setChecked(True)
         platforms = self.form.get_platforms(False)
-        self.assertEqual(platforms, self.ALL_PLATFORMS)
+        self.assertEqual(platforms, set(PLATFORMS))
 
     def test_get_platforms_checked_false(self) -> None:
         """Test get_platforms if checked==False."""
         platforms = self.form.get_platforms(False)
-        self.assertEqual(platforms, self.ALL_PLATFORMS)
+        self.assertEqual(platforms, set(PLATFORMS))
 
     def test_select_all_platforms_twice(self) -> None:
         """Test the Select All Platforms checkbox."""
@@ -203,7 +199,7 @@ class MainWindowTests(unittest.TestCase):
         QLineEdit.setText(self.form.line_edit_output_file, 'Test.xlsx')
 
         selected_platforms = set()
-        for platform in self.ALL_PLATFORMS:
+        for platform in PLATFORMS:
             check_box = getattr(self.form, 'check_box_' + platform.lower())
             check_box.setChecked(True)
             selected_platforms.add(platform)
