@@ -73,7 +73,7 @@ class DownloadTests(unittest.TestCase):
 
     def run_download_statement_test(
             self, platform: str, date_range: Tuple[date, date],
-            result_file: str, drop_header: bool = False) -> None:
+            result_file: str, header: int = 0) -> None:
         """
         Helper method for running the download tests.
 
@@ -82,11 +82,13 @@ class DownloadTests(unittest.TestCase):
             date_range: Date range for account statement generation
             result_file: Name of the file with the expected results without
                 prefix
-            drop_header: If True ignore the header of the account statement
-                during the comparison with expected result file. Default is
-                 False
+            header: Row number to use as column names and start of data.
 
         """
+        if not os.path.isfile(RESULT_PREFIX + result_file):
+            self.skipTest(
+                'Expected results file {} not found!'.format(
+                    RESULT_PREFIX + result_file))
         credentials = self.get_credentials_from_keyring(platform)
         platform_class = getattr(p2p_platforms, platform)
         platform_instance = platform_class(
@@ -98,7 +100,7 @@ class DownloadTests(unittest.TestCase):
             platform_instance.download_statement(driver, credentials)
         self.assertTrue(are_files_equal(
             platform_instance.statement, RESULT_PREFIX + result_file,
-            drop_header=drop_header))
+            header=header))
 
     def test_download_bondora_statement(self) -> None:
         """Test download_bondora_statement."""
@@ -207,13 +209,13 @@ class DownloadTests(unittest.TestCase):
         """Test download_twino_statement."""
         self.run_download_statement_test(
             'Twino', self.DATE_RANGE,
-            'download_twino_statement.xlsx', drop_header=True)
+            'download_twino_statement.xlsx', header=2)
 
     def test_download_twino_statement_no_cfs(self):
         """Test Twino download when there are no cashflows."""
         self.run_download_statement_test(
             'Twino', self.DATE_RANGE_NO_CFS,
-            'download_twino_statement_no_cfs.xlsx', drop_header=True)
+            'download_twino_statement_no_cfs.xlsx', header=2)
 
 
 if __name__ == '__main__':

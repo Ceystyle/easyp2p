@@ -212,6 +212,9 @@ class P2PParser:
         Args:
             date_format: Date format which the platform uses
 
+        Raises:
+            RuntimeError: If date column cannot be found in dataframe.
+
         """
         start_date = pd.Timestamp(self.date_range[0])
         end_date = pd.Timestamp(self.date_range[1]).replace(
@@ -545,19 +548,20 @@ def _write_worksheet(
                 money_format)
 
 
-def get_df_from_file(input_file: str) -> pd.DataFrame:
+def get_df_from_file(input_file: str, header: int = 0) -> pd.DataFrame:
     """
     Read a pandas.DataFrame from input_file.
 
     Args:
-        input_file: file name including path
+        input_file: File name including path.
+        header: Row number to use as column names and start of data.
 
     Returns:
-        pandas.DataFrame: DataFrame which was read from the file
+        pandas.DataFrame: DataFrame which was read from the file.
 
     Raises:
         RuntimeError: If input_file does not exist, cannot be read or if the \
-            file format is neither csv or xlsx
+            file format is neither csv or xlsx.
 
     """
 
@@ -565,9 +569,9 @@ def get_df_from_file(input_file: str) -> pd.DataFrame:
 
     try:
         if file_format == '.csv':
-            df = pd.read_csv(input_file)
+            df = pd.read_csv(input_file, header=header)
         elif file_format in ('.xlsx', '.xls'):
-            df = pd.read_excel(input_file)
+            df = pd.read_excel(input_file, header=header)
         else:
             raise RuntimeError(
                 'Unbekanntes Dateiformat beim Import: ', input_file)

@@ -367,15 +367,14 @@ class ParserTests(unittest.TestCase):
 
 def are_files_equal(
         file1: str, file2: str,
-        drop_header: bool = False) -> bool:
+        header: int = 0) -> bool:
     """
     Function to determine if two files are equal.
 
     Args:
         file1: Name including path of first file
         file2: Name including path of second file
-        drop_header: If True the header of the files will be ignored in the
-            comparison. Default is False.
+        header: Row number to use as column names and start of data.
 
     Returns:
         bool: True if the files are equal, False if not or if at least one
@@ -383,35 +382,13 @@ def are_files_equal(
 
     """
     try:
-        df1 = get_df_from_file(file1)
-        df2 = get_df_from_file(file2)
-    except RuntimeError:
+        df1 = get_df_from_file(file1, header=header)
+        df2 = get_df_from_file(file2, header=header)
+    except RuntimeError as err:
+        print('File not found: ', err)
         return False
 
-    if drop_header:
-        df1 = drop_df_header(df1)
-        df2 = drop_df_header(df2)
-
     return df1.equals(df2)
-
-
-def drop_df_header(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Helper function to drop the header of a pandas DataFrame.
-
-    Args:
-        df: DataFrame including header
-
-    Returns:
-        DataFrame with the header row removed.
-
-    """
-    df = df[1:]   # The first row only contains a generic header
-    new_header = df.iloc[0]  # Get the new first row as header
-    df = df[1:]  # Remove the first row
-    df.columns = new_header  # Set the new header
-
-    return df
 
 
 if __name__ == "__main__":
