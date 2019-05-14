@@ -11,7 +11,8 @@ import unittest
 
 import keyring
 
-from tests.test_parser import are_files_equal, RESULT_PREFIX
+from easyp2p.p2p_parser import get_df_from_file
+from tests.test_parser import RESULT_PREFIX
 import easyp2p.platforms as p2p_platforms
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -216,6 +217,32 @@ class DownloadTests(unittest.TestCase):
         self.run_download_statement_test(
             'Twino', self.DATE_RANGE_NO_CFS,
             'download_twino_statement_no_cfs.xlsx', header=2)
+
+
+def are_files_equal(
+        file1: str, file2: str,
+        header: int = 0) -> bool:
+    """
+    Function to determine if two files are equal.
+
+    Args:
+        file1: Name including path of first file
+        file2: Name including path of second file
+        header: Row number to use as column names and start of data.
+
+    Returns:
+        bool: True if the files are equal, False if not or if at least one
+        of the files does not exist
+
+    """
+    try:
+        df1 = get_df_from_file(file1, header=header)
+        df2 = get_df_from_file(file2, header=header)
+    except RuntimeError as err:
+        print('File not found: ', err)
+        return False
+
+    return df1.equals(df2)
 
 
 if __name__ == '__main__':

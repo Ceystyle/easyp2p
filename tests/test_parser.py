@@ -129,6 +129,13 @@ class ParserTests(unittest.TestCase):
         """Test parsing Bondora default statement."""
         self.default_parser_test('Bondora')
 
+    def test_bondora_parser_missing_month(self):
+        """Test parsing Bondora default statement."""
+        test_name = 'bondora_parser_missing_month'
+        self.run_parser_test(
+            'Bondora', INPUT_PREFIX + test_name,
+            RESULT_PREFIX + test_name + '.csv', date_range=self.date_range)
+
     def test_bondora_parser_no_cfs(self):
         """Test Bondora parser if there were no cashflows in date_range."""
         self.no_cfs_parser_test('Bondora')
@@ -364,31 +371,24 @@ class ParserTests(unittest.TestCase):
         if os.path.isfile(result_file):
             os.remove(result_file)
 
+    def test_write_results_missing_month(self):
+        """Test write_results for all supported platforms."""
+        df_result = pd.DataFrame()
 
-def are_files_equal(
-        file1: str, file2: str,
-        header: int = 0) -> bool:
-    """
-    Function to determine if two files are equal.
+        for platform in {'Bondora'}:
+            df = get_df_from_file(
+                RESULT_PREFIX + '{0}_parser_missing_month.csv'.format(
+                    platform.lower()))
+            df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
+            df_result = df_result.append(df, sort=True)
 
-    Args:
-        file1: Name including path of first file
-        file2: Name including path of second file
-        header: Row number to use as column names and start of data.
+        result_file = os.path.join('tests', 'test_write_results_all_missing_month.xlsx')
+        self.run_write_results(
+            df_result, result_file, RESULT_PREFIX + 'write_results_all_missing_month.xlsx')
 
-    Returns:
-        bool: True if the files are equal, False if not or if at least one
-        of the files does not exist
-
-    """
-    try:
-        df1 = get_df_from_file(file1, header=header)
-        df2 = get_df_from_file(file2, header=header)
-    except RuntimeError as err:
-        print('File not found: ', err)
-        return False
-
-    return df1.equals(df2)
+        # Clean up after test
+        if os.path.isfile(result_file):
+            os.remove(result_file)
 
 
 if __name__ == "__main__":
