@@ -156,76 +156,13 @@ class WorkerTests(unittest.TestCase):
             "Bondora: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: "
             "{'TestCF1', 'TestCF2'}", self.worker.RED)
 
-    @unittest.mock.patch('easyp2p.p2p_worker.os.makedirs')
-    @unittest.mock.patch('easyp2p.p2p_worker.os.path.isdir')
-    def test_set_download_directory_not_exists(
-            self, mock_isdir, mock_makedirs):
-        """Test set_download_directory if download directory does not exist."""
-        mock_isdir.return_value = False
-        statement_without_suffix, download_directory = \
-            self.worker.set_download_directory('TestPlatform')
-        self.assertEqual(statement_without_suffix, os.path.join(
-            Path.home(), '.easyp2p', 'testplatform',
-            'testplatform_statement_20180901-20181231'))
-        self.assertEqual(download_directory, os.path.join(
-            Path.home(), '.easyp2p', 'testplatform', 'active'))
-        mock_makedirs.assert_called_once_with(download_directory)
-
-    @unittest.mock.patch('easyp2p.p2p_worker.os.remove')
-    @unittest.mock.patch('easyp2p.p2p_worker.os.listdir')
-    @unittest.mock.patch('easyp2p.p2p_worker.os.path.isdir')
-    def test_set_download_directory_exists_empty(
-            self, mock_isdir, mock_listdir, mock_remove):
-        """
-        Test set_download_directory if download directory exists and is empty.
-        """
-        mock_isdir.return_value = True
-        mock_listdir.return_value = []
-        statement_without_suffix, download_directory = \
-            self.worker.set_download_directory('TestPlatform')
-        self.assertEqual(statement_without_suffix, os.path.join(
-            Path.home(), '.easyp2p', 'testplatform',
-            'testplatform_statement_20180901-20181231'))
-        self.assertEqual(download_directory, os.path.join(
-            Path.home(), '.easyp2p', 'testplatform', 'active'))
-        mock_listdir.assert_called_once_with(path=download_directory)
-        self.assertFalse(mock_remove.called)
-
-    @unittest.mock.patch('easyp2p.p2p_worker.os.remove')
-    @unittest.mock.patch('easyp2p.p2p_worker.os.listdir')
-    @unittest.mock.patch('easyp2p.p2p_worker.os.path.isdir')
-    def test_set_download_directory_exists_not_empty(
-            self, mock_isdir, mock_listdir, mock_remove):
-        """
-        Test set_download_directory if non-empty download directory exists.
-        """
-        mock_isdir.return_value = True
-        mock_listdir.return_value = ['file1', 'file2']
-        statement_without_suffix, download_directory = \
-            self.worker.set_download_directory('TestPlatform')
-        self.assertEqual(statement_without_suffix, os.path.join(
-            Path.home(), '.easyp2p', 'testplatform',
-            'testplatform_statement_20180901-20181231'))
-        self.assertEqual(download_directory, os.path.join(
-            Path.home(), '.easyp2p', 'testplatform', 'active'))
-        mock_listdir.assert_called_once_with(path=download_directory)
-        self.assertEqual(
-            mock_remove.call_args_list, [
-                unittest.mock.call(os.path.join(download_directory, 'file1')),
-                unittest.mock.call(os.path.join(download_directory, 'file2'))])
-
     @unittest.mock.patch('easyp2p.p2p_worker.p2p_parser.write_results')
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.download_statements')
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.parse_statements')
-    @unittest.mock.patch(
-        'easyp2p.p2p_worker.WorkerThread.set_download_directory')
     def test_run(
-            self, mock_set_dldir, mock_parse, mock_download,
-            mock_write_results):
+            self, mock_parse, mock_download, mock_write_results):
         """Test running all platforms."""
-        mock_set_dldir.return_value = 'test_statement', 'test_dldir'
         self.worker.run()
-
         expected_download_args = []
         expected_parse_args = []
         for platform in PLATFORMS:
@@ -242,13 +179,9 @@ class WorkerTests(unittest.TestCase):
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.add_progress_text')
     @unittest.mock.patch('easyp2p.p2p_worker.p2p_parser.write_results')
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.download_statements')
-    @unittest.mock.patch(
-        'easyp2p.p2p_worker.WorkerThread.set_download_directory')
     def test_run_no_results(
-            self, mock_set_dldir, mock_download,
-            mock_write_results, mock_text):
+            self, mock_download, mock_write_results, mock_text):
         """Test writing results when there were none."""
-        mock_set_dldir.return_value = 'test_statement', 'test_dldir'
         mock_download.side_effect = PlatformFailedError
         mock_write_results.return_value = False
         self.worker.run()
