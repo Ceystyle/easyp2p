@@ -14,8 +14,9 @@ Selenium webdriver. easyp2p uses Chromedriver as webdriver.
 from datetime import date
 import glob
 import os
+import shutil
 import time
-from typing import Mapping, Optional, Sequence, Tuple
+from typing import Mapping, Optional, Tuple
 
 from selenium.common.exceptions import (
     TimeoutException, NoSuchElementException, StaleElementReferenceException)
@@ -591,12 +592,12 @@ def _download_finished(
         else:
             filelist = glob.glob(os.path.join(download_directory, '*'))
             if len(filelist) == 1:
-                os.rename(filelist[0], statement)
+                shutil.move(filelist[0], statement)
                 return True
 
             if len(filelist) > 1:
-                # This should never happen since we check in p2p_worker that
-                # the download directory is empty
+                # This should never happen since the download directory is a
+                # newly created temporary directory
                 raise RuntimeError(
                     'Downloadverzeichnis {} ist nicht leer!'.format(
                         download_directory))

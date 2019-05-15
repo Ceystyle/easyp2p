@@ -6,6 +6,7 @@
 from datetime import date
 import os
 from pathlib import Path
+import tempfile
 from typing import Callable, Mapping, Optional, Tuple
 
 import pandas as pd
@@ -110,15 +111,13 @@ class WorkerThread(QThread):
 
     def download_statements(
             self, name: str,
-            platform: Callable[[Tuple[date, date]], None],
-            download_directory: str) -> None:
+            platform: Callable[[Tuple[date, date]], None]) -> None:
         """
         Helper method for calling the download_statement methods.
 
         Args:
             name: Name of the P2P platform.
             platform: Instance of P2PPlatform class.
-            download_directory: Download directory for this platform.
 
         Raises:
             PlatformFailedError: If no credentials for platform are available
@@ -142,12 +141,17 @@ class WorkerThread(QThread):
                     'unterstützt!', self.RED)
                 self.add_progress_text.emit(
                     'Mache Chromedriver sichtbar!', self.RED)
-                with P2PWebDriver(download_directory, False) as driver:
-                    platform.download_statement(driver, self.credentials[name])
+                with tempfile.TemporaryDirectory() as download_directory:
+                    with P2PWebDriver(download_directory, False) as driver:
+                        platform.download_statement(
+                            driver, self.credentials[name])
             else:
-                with P2PWebDriver(
-                        download_directory, self.settings.headless) as driver:
-                    platform.download_statement(driver, self.credentials[name])
+                with tempfile.TemporaryDirectory() as download_directory:
+                    with P2PWebDriver(
+                            download_directory,
+                            self.settings.headless) as driver:
+                        platform.download_statement(
+                            driver, self.credentials[name])
         except WebDriverNotFound as err:
             self.abort_easyp2p.emit(str(err))
             self.abort = True
@@ -157,42 +161,6 @@ class WorkerThread(QThread):
         except RuntimeWarning as warning:
             self.add_progress_text.emit(str(warning), self.RED)
             # Continue anyway
-
-    def set_download_directory(self, name: str) -> Tuple[str, str]:
-        """
-        Set directory for statement download and make sure it is empty.
-
-        The statement file will be saved at .easyp2p/platform_name relative
-        to the user's home directory. The download directory for the WebDriver
-        will be set to the directory 'active' relative to this location.
-
-        Args:
-            name: Name of the P2P platform
-
-        Returns:
-            Tuple containing target name of the statement file (including path
-            but without suffix) and the download directory
-
-        """
-        # Set target location of account statement file
-        statement_without_suffix = os.path.join(
-            Path.home(), '.easyp2p', name.lower(),
-            '{0}_statement_{1}-{2}'.format(
-                name.lower(), self.settings.date_range[0].strftime('%Y%m%d'),
-                self.settings.date_range[1].strftime('%Y%m%d')))
-
-        # Create download directory and make sure it contains no files
-        download_directory = os.path.join(
-            os.path.dirname(statement_without_suffix), 'active')
-        if not os.path.isdir(download_directory):
-            os.makedirs(download_directory)
-        else:
-            filelist = os.listdir(path=download_directory)
-            if filelist:
-                for f in filelist:
-                    os.remove(os.path.join(download_directory, f))
-
-        return statement_without_suffix, download_directory
 
     def run(self) -> None:
         """
@@ -208,14 +176,19 @@ class WorkerThread(QThread):
             if self.abort:
                 return
 
-            statement_without_suffix, download_directory \
-                = self.set_download_directory(name)
+            # Set target location of account statement file
+            statement_without_suffix = os.path.join(
+                Path.home(), '.easyp2p', name.lower(),
+                '{0}_statement_{1}-{2}'.format(
+                    name.lower(),
+                    self.settings.date_range[0].strftime('%Y%m%d'),
+                    self.settings.date_range[1].strftime('%Y%m%d')))
 
             try:
                 platform = self.get_platform_instance(
                     name, statement_without_suffix)
 
-                self.download_statements(name, platform, download_directory)
+                self.download_statements(name, platform)
 
                 if self.abort:
                     return
