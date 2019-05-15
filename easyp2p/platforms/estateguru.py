@@ -59,9 +59,15 @@ class Estateguru:
             'account_statement_check': (
                 '/html/body/section/div/div/div/div[2]/section[1]/div/div'
                 '/div[2]/div/form/div[2]/ul/li[5]/a'),
+            'filter_btn': (
+                '/html/body/section/div/div/div/div[2]/section[2]/div[1]'
+                '/div[1]/button/span'),
             'select_btn': (
                 '/html/body/section/div/div/div/div[2]/section[2]/div[1]'
                 '/div[2]/button'),
+            'submit_btn': (
+                '/html/body/section/div/div/div/div[2]/section[2]/div[1]'
+                '/div[3]/form/div[6]/div/div[3]/button'),
         }
 
         with P2PPlatform(
@@ -75,13 +81,19 @@ class Estateguru:
                 login_locator=(By.LINK_TEXT, 'Einloggen'))
 
             estateguru.open_account_statement_page(
-                (By.XPATH, xpaths['account_statement_check']))
+                (By.XPATH, xpaths['filter_btn']))
 
-            # Estateguru does not provide functionality for filtering payment
-            # dates. Therefore we download the statement which includes all
-            # cashflows ever generated for this account. That also means that
-            # date_range is not used for self. We keep it as input
-            # variable anyway to be consistent with the other platform classes.
+            # Open the filter dialog and generate the statement
+            estateguru.driver.find_element_by_xpath(
+                xpaths['filter_btn']).click()
+            estateguru.generate_statement_direct(
+                self.date_range, (By.ID, 'dateApproveFilter'),
+                (By.ID, 'dateApproveFilterTo'), '%d.%m.%Y',
+                wait_until=EC.element_to_be_clickable(
+                    (By.XPATH, xpaths['select_btn'])),
+                submit_btn_locator=(By.XPATH, xpaths['submit_btn']))
+
+            # Open the download dialog and download the statement
             estateguru.driver.find_element_by_xpath(
                 xpaths['select_btn']).click()
             driver.wait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))

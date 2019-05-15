@@ -325,13 +325,16 @@ class P2PPlatform:
             date_from = self.driver.find_element(*start_locator)
             date_from.send_keys(Keys.CONTROL + 'a')
             date_from.send_keys(date.strftime(date_range[0], date_format))
-
             try:
                 date_to = self.driver.find_element(*end_locator)
                 date_to.click()
                 date_to.send_keys(Keys.CONTROL + 'a')
                 date_to.send_keys(date.strftime(date_range[1], date_format))
-                date_to.send_keys(Keys.RETURN)
+
+                if submit_btn_locator is None:
+                    # If no submit button is provided statement generation can
+                    # be started with a simple Enter key click
+                    date_to.send_keys(Keys.RETURN)
             except StaleElementReferenceException:
                 # Some P2P sites refresh the page after a change
                 # which leads to this exception
