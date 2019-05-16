@@ -1,237 +1,281 @@
 # -*- coding: utf-8 -*-
 # Copyright 2019 Niko Sandschneider
 
-"""Module containing all account statement download tests for easyp2p."""
+"""Module with statement download tests for all supported P2P platforms."""
 
 from datetime import date
 import os
-from pathlib import Path
+import tempfile
 from typing import Tuple
 import unittest
 
-import keyring
-
+from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import get_df_from_file
-import easyp2p.platforms as p2p_platforms
-from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_webdriver import P2PWebDriver
-from tests import RESULT_PREFIX
+import easyp2p.platforms as p2p_platforms
+from tests import RESULT_PREFIX, TEST_PREFIX, PLATFORMS
+
 
 @unittest.skipIf(
-    input('Run download tests (y/N)?: ').lower() != 'y',
+    input('Run download tests (y/n)?: ').lower() != 'y',
     'Download tests skipped!')
-class DownloadTests(unittest.TestCase):
+class BaseDownloadTests(unittest.TestCase):
 
-    """Test downloading account statements from all supported platforms."""
+    """
+    Class providing functionality for running the statement download tests.
+    """
+
+    def setUp(self) -> None:
+        """Dummy setUp, needs to be overridden by child classes."""
+        self.name = None
+        self.Platform = None
+
+    def run_download_test(
+            self, result_file: str, date_range: Tuple[date, date],
+            header: int = 0) -> None:
+        """
+        Download platform account statement and compare it to result_file.
+
+        Args:
+            result_file: File with expected results without prefix or suffix.
+            date_range: Date range for which to generate the account statement.
+            header: Row number to use as column names and start of data for
+                comparing downloaded statement to expected result.
+
+        """
+        if self.name is None or self.Platform is None:
+            self.skipTest('No name or platform class provided!')
+
+        expected_results = \
+            RESULT_PREFIX + result_file + '.' + PLATFORMS[self.name]
+        statement_without_suffix = TEST_PREFIX + result_file
+
+        if not os.path.isfile(expected_results):
+            self.skipTest(
+                'Expected results file {} not found!'.format(
+                    expected_results))
+
+        credentials = get_credentials(self.name, ask_user=False)
+        if credentials is (None, None):
+            self.skipTest(
+                'No credentials for {} in the keyring.'.format(self.name))
+
+        platform = self.Platform(date_range, statement_without_suffix)
+
+        # For now we just test in non-headless mode
+        with tempfile.TemporaryDirectory() as download_directory:
+            with P2PWebDriver(download_directory, False) as driver:
+                platform.download_statement(driver, credentials)
+
+        self.assertTrue(
+            are_files_equal(
+                platform.statement, expected_results, header=header))
+
+
+class BondoraDownloadTests(BaseDownloadTests):
+
+    """Class containing the statement download tests for Bondora."""
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
 
     def setUp(self) -> None:
-        """Create download directory and set statement file location."""
-        # Create download directory and make sure it is empty
-        self.download_directory = os.path.join(
-            os.getcwd(), 'tests', 'test_results', 'download_tests', 'active')
-        if not os.path.isdir(self.download_directory):
-            os.makedirs(self.download_directory)
-        else:
-            filelist = os.listdir(path=self.download_directory)
-            if filelist:
-                for f in filelist:
-                    os.remove(os.path.join(self.download_directory, f))
-        self.statement_without_suffix = os.path.join(
-            os.getcwd(), 'tests', 'test_results', 'download_tests',
-            'download_test')
+        self.name = 'Bondora'
+        self.Platform = p2p_platforms.Bondora
 
-    def tearDown(self) -> None:
-        """Delete contents of download directory."""
-        filelist = os.listdir(path=self.download_directory)
-        if filelist:
-            for f in filelist:
-                os.remove(os.path.join(self.download_directory, f))
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_bondora_statement', self.DATE_RANGE)
 
-    def get_credentials_from_keyring(self, platform: str) -> Tuple[str, str]:
-        """
-        Helper method to get credentials from the keyring.
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_bondora_statement_no_cfs', self.DATE_RANGE_NO_CFS)
 
-        Args:
-            platform: Name of the P2P platform
 
-        Returns:
-            Tuple (username, password) for the P2P platform
+class DoFinanceDownloadTests(BaseDownloadTests):
 
-        """
-        if keyring.get_keyring():
-            try:
-                username = keyring.get_password(platform, 'username')
-                password = keyring.get_password(platform, username)
-            except TypeError:
-                self.skipTest(
-                    'No credentials for {0} in the keyring.'.format(platform))
+    """Class containing the statement download tests for DoFinance."""
 
-        return username, password
+    DATE_RANGE = (date(2018, 5, 1), date(2018, 8, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
 
-    def run_download_statement_test(
-            self, platform: str, date_range: Tuple[date, date],
-            result_file: str, header: int = 0) -> None:
-        """
-        Helper method for running the download tests.
+    def setUp(self) -> None:
+        self.name = 'DoFinance'
+        self.Platform = p2p_platforms.DoFinance
 
-        Args:
-            platform: Name of the P2P platform
-            date_range: Date range for account statement generation
-            result_file: Name of the file with the expected results without
-                prefix
-            header: Row number to use as column names and start of data.
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_dofinance_statement', self.DATE_RANGE)
 
-        """
-        if not os.path.isfile(RESULT_PREFIX + result_file):
-            self.skipTest(
-                'Expected results file {} not found!'.format(
-                    RESULT_PREFIX + result_file))
-        credentials = self.get_credentials_from_keyring(platform)
-        platform_class = getattr(p2p_platforms, platform)
-        platform_instance = platform_class(
-            date_range, self.statement_without_suffix)
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_dofinance_statement_no_cfs', self.DATE_RANGE_NO_CFS)
 
-        # For now we just test in non-headless mode
-        headless = False
-        with P2PWebDriver(self.download_directory, headless) as driver:
-            platform_instance.download_statement(driver, credentials)
-        self.assertTrue(are_files_equal(
-            platform_instance.statement, RESULT_PREFIX + result_file,
-            header=header))
 
-    def test_download_bondora_statement(self) -> None:
-        """Test download_bondora_statement."""
-        self.run_download_statement_test(
-            'Bondora', self.DATE_RANGE, 'download_bondora_statement.xlsx')
+class EstateguruDownloadTests(BaseDownloadTests):
 
-    def test_download_bondora_statement_no_cfs(self) -> None:
-        """Test Bondora download when there are no cashflows."""
-        self.run_download_statement_test(
-            'Bondora', self.DATE_RANGE_NO_CFS,
-            'download_bondora_statement_no_cfs.xlsx')
+    """Class containing the statement download tests for Estateguru."""
 
-    def test_download_dofinance_statement(self):
-        """Test download_dofinance_statement function."""
-        self.run_download_statement_test(
-            'DoFinance', self.DATE_RANGE, 'download_dofinance_statement.xlsx')
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
 
-    def test_download_dofinance_statement_no_cfs(self):
-        """Test DoFinance download when there are no cashflows."""
-        self.run_download_statement_test(
-            'DoFinance', self.DATE_RANGE_NO_CFS,
-            'download_dofinance_statement_no_cfs.xlsx')
+    def setUp(self) -> None:
+        self.name = 'Estateguru'
+        self.Platform = p2p_platforms.Estateguru
 
-    def test_download_estateguru_statement(self):
-        """Test download_estateguru_statement."""
-        credentials = self.get_credentials_from_keyring('Estateguru')
-        estateguru = p2p_platforms.Estateguru(self.DATE_RANGE)
-        download_directory = os.path.join(Path.home(), '.easyp2p', 'estateguru')
-        settings = Settings(self.DATE_RANGE, 'test.xlsx')
-        with P2PWebDriver(download_directory, settings.headless) as driver:
-            estateguru.download_statement(driver, credentials)
-        # The Estateguru statement contains all cashflows ever generated for
-        # this account. Therefore it changes regularly and we cannot compare
-        # it to a fixed reference file. This test just makes sure that the
-        # statement was downloaded.
-        # TODO: check for content errors
-        self.assertTrue(os.path.isfile(estateguru.statement_))
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_estateguru_statement', self.DATE_RANGE)
 
-    def test_download_grupeer_statement(self):
-        """Test download_grupeer_statement."""
-        self.run_download_statement_test(
-            'Grupeer', self.DATE_RANGE, 'download_grupeer_statement.xlsx')
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_estateguru_statement_no_cfs', self.DATE_RANGE_NO_CFS)
 
-    def test_download_grupeer_statement_no_cfs(self):
-        """Test Grupeer download when there are no cashflows in date_range."""
-        self.run_download_statement_test(
-            'Grupeer', self.DATE_RANGE_NO_CFS,
-            'download_grupeer_statement_no_cfs.xlsx')
 
-    def test_download_iuvo_statement(self):
-        """Test download_iuvo_statement."""
-        self.run_download_statement_test(
-            'Iuvo', self.DATE_RANGE, 'download_iuvo_statement.xlsx')
+class GrupeerDownloadTests(BaseDownloadTests):
 
-    def test_download_iuvo_statement_no_cfs(self):
-        """Test Iuvo download when there are no cashflows in date_range."""
-        self.run_download_statement_test(
-            'Iuvo', self.DATE_RANGE_NO_CFS,
-            'download_iuvo_statement_no_cfs.xlsx')
+    """Class containing the statement download tests for Grupeer."""
 
-    def test_download_mintos_statement(self):
-        """Test download_mintos_statement."""
-        self.run_download_statement_test(
-            'Mintos', self.DATE_RANGE, 'download_mintos_statement.xlsx')
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
 
-    def test_download_mintos_statement_no_cfs(self):
-        """Test Mintos download when there are no cashflows."""
-        self.run_download_statement_test(
-            'Mintos', self.DATE_RANGE_NO_CFS,
-            'download_mintos_statement_no_cfs.xlsx')
+    def setUp(self) -> None:
+        self.name = 'Grupeer'
+        self.Platform = p2p_platforms.Grupeer
 
-    def test_download_peerberry_statement(self):
-        """Test download_peerberry_statement."""
-        self.run_download_statement_test(
-            'PeerBerry', self.DATE_RANGE, 'download_peerberry_statement.csv')
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_grupeer_statement', self.DATE_RANGE)
 
-    def test_download_peerberry_statement_no_cfs(self):
-        """Test Peerberry download when there are no cashflows."""
-        self.run_download_statement_test(
-            'PeerBerry', self.DATE_RANGE_NO_CFS,
-            'download_peerberry_statement_no_cfs.csv')
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_grupeer_statement_no_cfs', self.DATE_RANGE_NO_CFS)
 
-    def test_download_robocash_statement(self):
-        """Test download_robocash_statement function."""
-        self.run_download_statement_test(
-            'Robocash', self.DATE_RANGE, 'download_robocash_statement.xls')
 
-    def test_download_robocash_statement_no_cfs(self):
-        """Test Robocash download when there are no cashflows in date_range."""
-        self.run_download_statement_test(
-            'Robocash', self.DATE_RANGE_NO_CFS,
-            'download_robocash_statement_no_cfs.xls')
+class IuvoDownloadTests(BaseDownloadTests):
 
-    def test_download_swaper_statement(self):
-        """Test download_swaper_statement function."""
-        self.run_download_statement_test(
-            'Swaper', self.DATE_RANGE, 'download_swaper_statement.xlsx')
+    """Class containing the statement download tests for Iuvo."""
 
-    def test_download_swaper_statement_no_cfs(self) -> None:
-        """Test Swaper download when there are no cashflows."""
-        self.run_download_statement_test(
-            'Swaper', self.DATE_RANGE_NO_CFS,
-            'download_swaper_statement_no_cfs.xlsx')
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
 
-    def test_download_twino_statement(self):
-        """Test download_twino_statement."""
-        self.run_download_statement_test(
-            'Twino', self.DATE_RANGE,
-            'download_twino_statement.xlsx', header=2)
+    def setUp(self) -> None:
+        self.name = 'Iuvo'
+        self.Platform = p2p_platforms.Iuvo
 
-    def test_download_twino_statement_no_cfs(self):
-        """Test Twino download when there are no cashflows."""
-        self.run_download_statement_test(
-            'Twino', self.DATE_RANGE_NO_CFS,
-            'download_twino_statement_no_cfs.xlsx', header=2)
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_iuvo_statement', self.DATE_RANGE)
+
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_iuvo_statement_no_cfs', self.DATE_RANGE_NO_CFS)
+
+
+class MintosDownloadTests(BaseDownloadTests):
+
+    """Class containing the statement download tests for Mintos."""
+
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+
+    def setUp(self) -> None:
+        self.name = 'Mintos'
+        self.Platform = p2p_platforms.Mintos
+
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_mintos_statement', self.DATE_RANGE)
+
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_mintos_statement_no_cfs', self.DATE_RANGE_NO_CFS)
+
+
+class PeerBerryDownloadTests(BaseDownloadTests):
+
+    """Class containing the statement download tests for PeerBerry."""
+
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+
+    def setUp(self) -> None:
+        self.name = 'PeerBerry'
+        self.Platform = p2p_platforms.PeerBerry
+
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_peerberry_statement', self.DATE_RANGE)
+
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_peerberry_statement_no_cfs', self.DATE_RANGE_NO_CFS)
+
+
+class RobocashDownloadTests(BaseDownloadTests):
+
+    """Class containing the statement download tests for Robocash."""
+
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+
+    def setUp(self) -> None:
+        self.name = 'Robocash'
+        self.Platform = p2p_platforms.Robocash
+
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_robocash_statement', self.DATE_RANGE)
+
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_robocash_statement_no_cfs', self.DATE_RANGE_NO_CFS)
+
+
+class SwaperDownloadTests(BaseDownloadTests):
+
+    """Class containing the statement download tests for PeerBerry."""
+
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+
+    def setUp(self) -> None:
+        self.name = 'Swaper'
+        self.Platform = p2p_platforms.Swaper
+
+    def test_download_statement(self) -> None:
+        self.run_download_test('download_swaper_statement', self.DATE_RANGE)
+
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_swaper_statement_no_cfs', self.DATE_RANGE_NO_CFS)
+
+
+class TwinoDownloadTests(BaseDownloadTests):
+
+    """Class containing the statement download tests for PeerBerry."""
+
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+
+    def setUp(self) -> None:
+        self.name = 'Twino'
+        self.Platform = p2p_platforms.Twino
+
+    def test_download_statement(self) -> None:
+        self.run_download_test(
+            'download_twino_statement', self.DATE_RANGE, header=2)
+
+    def test_download_statement_no_cfs(self) -> None:
+        self.run_download_test(
+            'download_twino_statement_no_cfs', self.DATE_RANGE_NO_CFS, header=2)
 
 
 def are_files_equal(
-        file1: str, file2: str,
-        header: int = 0) -> bool:
+        file1: str, file2: str, header: int = 0) -> bool:
     """
-    Function to determine if two files are equal.
+    Function to determine if two files containing pd.DataFrames are equal.
 
     Args:
-        file1: Name including path of first file
-        file2: Name including path of second file
+        file1: Name including path of first file.
+        file2: Name including path of second file.
         header: Row number to use as column names and start of data.
 
     Returns:
         bool: True if the files are equal, False if not or if at least one
-        of the files does not exist
+        of the files does not exist.
 
     """
     try:
@@ -245,6 +289,4 @@ def are_files_equal(
 
 
 if __name__ == '__main__':
-    runner = unittest.TextTestRunner(verbosity=3)
-    suite = unittest.TestLoader().loadTestsFromTestCase(DownloadTests)
-    result = runner.run(suite)
+    unittest.main()
