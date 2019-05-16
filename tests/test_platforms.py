@@ -267,7 +267,7 @@ class SwaperTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Swaper'
         self.Platform = p2p_platforms.Swaper
-        self.unknown_cf_types = ''
+        self.unknown_cf_types = 'TestCF1, TestCF2'
 
 
 class TwinoTests(BasePlatformTests):
