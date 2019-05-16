@@ -109,8 +109,11 @@ class BasePlatformTests(unittest.TestCase):
             else:
                 self.assertTrue(df.equals(df_exp))
         except AssertionError as err:
-            print('df:', df, df.dtypes)
-            print('df_exp:', df_exp, df_exp.dtypes)
+            print('\n')
+            print('df:', df.loc[(df != df_exp).any(1), (df != df_exp).any(0)])
+            print(
+                'df_exp:',
+                df_exp.loc[(df != df_exp).any(1), (df != df_exp).any(0)])
             raise AssertionError(err)
 
         self.assertEqual(unknown_cf_types, exp_unknown_cf_types)
