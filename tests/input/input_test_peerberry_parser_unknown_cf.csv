@@ -1,0 +1,1585 @@
+Id,Date,phrases.Loan Id,Type,Amount,Currency Id
+1234567,2018-12-30,123456,Investment,-12.53,EUR
+1234568,2018-12-30,123457,Investment,-20,EUR
+1234569,2018-12-30,123458,Amount of principal payment received,12.28,EUR
+1234570,2018-12-30,123459,Amount of interest payment received,0.09,EUR
+1234571,2018-12-30,123460,Amount of principal payment received,20,EUR
+1234572,2018-12-30,123461,Amount of interest payment received,0.16,EUR
+1234573,2018-12-28,123462,Investment,-16.03,EUR
+1234574,2018-12-28,123463,Amount of interest payment received,0.1,EUR
+1234575,2018-12-28,123464,Amount of principal payment received,11.27,EUR
+1234576,2018-12-28,123465,Investment,-20,EUR
+1234577,2018-12-28,123466,Investment,-20,EUR
+1234578,2018-12-27,123467,Amount of interest payment received,0.18,EUR
+1234579,2018-12-27,123468,Amount of principal payment received,20,EUR
+1234580,2018-12-27,123469,Amount of interest payment received,0.14,EUR
+1234581,2018-12-27,123470,Amount of principal payment received,20,EUR
+1234582,2018-12-26,123471,Investment,-20,EUR
+1234583,2018-12-26,123472,Amount of principal payment received,20,EUR
+1234584,2018-12-26,123473,Amount of interest payment received,0.08,EUR
+1234585,2018-12-26,123474,Investment,-20,EUR
+1234586,2018-12-26,123475,Amount of principal payment received,20,EUR
+1234587,2018-12-26,123476,Amount of interest payment received,0.16,EUR
+1234588,2018-12-25,123477,Investment,-20,EUR
+1234589,2018-12-25,123478,Investment,-20,EUR
+1234590,2018-12-25,123479,Amount of principal payment received,20,EUR
+1234591,2018-12-25,123480,Amount of interest payment received,0.15,EUR
+1234592,2018-12-25,123481,Amount of principal payment received,20,EUR
+1234593,2018-12-25,123482,Amount of interest payment received,0.15,EUR
+1234594,2018-12-25,123483,Investment,-20,EUR
+1234595,2018-12-25,123484,Amount of principal payment received,20,EUR
+1234596,2018-12-25,123485,Amount of interest payment received,0.17,EUR
+1234597,2018-12-24,123486,Investment,-20,EUR
+1234598,2018-12-24,123487,Amount of principal payment received,20,EUR
+1234599,2018-12-24,123488,Amount of interest payment received,0.12,EUR
+1234600,2018-12-24,123489,Investment,-20,EUR
+1234601,2018-12-24,123490,Investment,-20,EUR
+1234602,2018-12-24,123491,Amount of principal payment received,20,EUR
+1234603,2018-12-24,123492,Amount of interest payment received,0.42,EUR
+1234604,2018-12-24,123493,Amount of principal payment received,20,EUR
+1234605,2018-12-24,123494,Amount of interest payment received,0.15,EUR
+1234606,2018-12-24,123495,Investment,-20,EUR
+1234607,2018-12-23,123496,Amount of principal payment received,20,EUR
+1234608,2018-12-23,123497,Amount of interest payment received,0.15,EUR
+1234609,2018-12-23,123498,TestCF1,-20,EUR
+1234610,2018-12-23,123499,Investment,-20,EUR
+1234611,2018-12-23,123500,Investment,-20,EUR
+1234612,2018-12-23,123501,Investment,-20,EUR
+1234613,2018-12-23,123502,Investment,-20,EUR
+1234614,2018-12-23,123503,Investment,-20,EUR
+1234615,2018-12-23,123504,Investment,-20,EUR
+1234616,2018-12-23,123505,Amount of interest payment received,0.17,EUR
+1234617,2018-12-23,123506,Amount of principal payment received,20,EUR
+1234618,2018-12-23,123507,Amount of interest payment received,0.19,EUR
+1234619,2018-12-23,123508,Amount of principal payment received,20,EUR
+1234620,2018-12-23,123509,Amount of interest payment received,0.19,EUR
+1234621,2018-12-23,123510,Amount of principal payment received,20,EUR
+1234622,2018-12-23,123511,Amount of interest payment received,0.2,EUR
+1234623,2018-12-23,123512,Amount of principal payment received,20,EUR
+1234624,2018-12-23,123513,Amount of interest payment received,0.2,EUR
+1234625,2018-12-23,123514,Amount of principal payment received,19.16,EUR
+1234626,2018-12-23,123515,Amount of interest payment received,0.16,EUR
+1234627,2018-12-23,123516,Amount of principal payment received,15.45,EUR
+1234628,2018-12-23,123517,Amount of interest payment received,0.21,EUR
+1234629,2018-12-23,123518,Amount of principal payment received,20,EUR
+1234630,2018-12-22,123519,Investment,-20,EUR
+1234631,2018-12-22,123520,Investment,-14.9,EUR
+1234632,2018-12-22,123521,Amount of interest payment received,0.24,EUR
+1234633,2018-12-22,123522,Amount of principal payment received,20,EUR
+1234634,2018-12-22,123523,Amount of principal payment received,20,EUR
+1234635,2018-12-22,123524,Amount of interest payment received,0.12,EUR
+1234636,2018-12-22,123525,Investment,-20,EUR
+1234637,2018-12-22,123526,Investment,-20,EUR
+1234638,2018-12-22,123527,Investment,-20,EUR
+1234639,2018-12-22,123528,Amount of interest payment received,0.15,EUR
+1234640,2018-12-22,123529,Amount of principal payment received,20,EUR
+1234641,2018-12-22,123530,Amount of interest payment received,0.13,EUR
+1234642,2018-12-22,123531,Amount of principal payment received,20,EUR
+1234643,2018-12-22,123532,Amount of principal payment received,20,EUR
+1234644,2018-12-22,123533,Amount of interest payment received,0.12,EUR
+1234645,2018-12-21,123534,Investment,-20,EUR
+1234646,2018-12-21,123535,Investment,-20,EUR
+1234647,2018-12-21,123536,Investment,-20,EUR
+1234648,2018-12-21,123537,Investment,-20,EUR
+1234649,2018-12-21,123538,Investment,-20,EUR
+1234650,2018-12-21,123539,Investment,-20,EUR
+1234651,2018-12-21,123540,Amount of principal payment received,20,EUR
+1234652,2018-12-21,123541,Amount of interest payment received,0.17,EUR
+1234653,2018-12-21,123542,Amount of principal payment received,20,EUR
+1234654,2018-12-21,123543,Amount of interest payment received,0.17,EUR
+1234655,2018-12-21,123544,Amount of principal payment received,20,EUR
+1234656,2018-12-21,123545,Amount of interest payment received,0.17,EUR
+1234657,2018-12-21,123546,Amount of principal payment received,20,EUR
+1234658,2018-12-21,123547,Amount of interest payment received,0.17,EUR
+1234659,2018-12-21,123548,Amount of principal payment received,20,EUR
+1234660,2018-12-21,123549,Amount of interest payment received,0.17,EUR
+1234661,2018-12-21,123550,Amount of principal payment received,20,EUR
+1234662,2018-12-21,123551,Amount of interest payment received,0.15,EUR
+1234663,2018-12-21,123552,Investment,-16.14,EUR
+1234664,2018-12-21,123553,Investment,-20,EUR
+1234665,2018-12-21,123554,Investment,-20,EUR
+1234666,2018-12-20,123555,Amount of interest payment received,0.11,EUR
+1234667,2018-12-20,123556,Amount of principal payment received,15.62,EUR
+1234668,2018-12-20,123557,Amount of interest payment received,0.09,EUR
+1234669,2018-12-20,123558,Amount of principal payment received,14.37,EUR
+1234670,2018-12-20,123559,Investment,-20,EUR
+1234671,2018-12-20,123560,Investment,-20,EUR
+1234672,2018-12-20,123561,Amount of principal payment received,20,EUR
+1234673,2018-12-20,123562,Amount of interest payment received,0.13,EUR
+1234674,2018-12-20,123563,Amount of interest payment received,0.07,EUR
+1234675,2018-12-20,123564,Amount of principal payment received,20,EUR
+1234676,2018-12-20,123565,Amount of interest payment received,0.04,EUR
+1234677,2018-12-20,123566,Amount of principal payment received,20,EUR
+1234678,2018-12-19,123567,TestCF2,-20,EUR
+1234679,2018-12-19,123568,Amount of principal payment received,19.88,EUR
+1234680,2018-12-19,123569,Amount of interest payment received,0.42,EUR
+1234681,2018-12-18,123570,Investment,-20,EUR
+1234682,2018-12-18,123571,Amount of interest payment received,0.12,EUR
+1234683,2018-12-18,123572,Amount of principal payment received,20,EUR
+1234684,2018-12-18,123573,Investment,-20,EUR
+1234685,2018-12-18,123574,Amount of principal payment received,20,EUR
+1234686,2018-12-18,123575,Amount of interest payment received,0.16,EUR
+1234687,2018-12-16,123576,Investment,-20,EUR
+1234688,2018-12-16,123577,Amount of principal payment received,20,EUR
+1234689,2018-12-16,123578,Amount of interest payment received,0.11,EUR
+1234690,2018-12-15,123579,Investment,-20,EUR
+1234691,2018-12-15,123580,Investment,-20,EUR
+1234692,2018-12-15,123581,Investment,-20,EUR
+1234693,2018-12-15,123582,Investment,-20,EUR
+1234694,2018-12-15,123583,Investment,-20,EUR
+1234695,2018-12-15,123584,Investment,-20,EUR
+1234696,2018-12-15,123585,Investment,-20,EUR
+1234697,2018-12-15,123586,Investment,-20,EUR
+1234698,2018-12-15,123587,Investment,-20,EUR
+1234699,2018-12-15,123588,Investment,-20,EUR
+1234700,2018-12-15,123589,Amount of interest payment received,0.3,EUR
+1234701,2018-12-15,123590,Amount of principal payment received,20,EUR
+1234702,2018-12-15,123591,Amount of interest payment received,0.25,EUR
+1234703,2018-12-15,123592,Amount of principal payment received,20,EUR
+1234704,2018-12-15,123593,Amount of interest payment received,0.25,EUR
+1234705,2018-12-15,123594,Amount of principal payment received,20,EUR
+1234706,2018-12-15,123595,Amount of interest payment received,0.14,EUR
+1234707,2018-12-15,123596,Amount of principal payment received,11.25,EUR
+1234708,2018-12-15,123597,Amount of interest payment received,0.24,EUR
+1234709,2018-12-15,123598,Amount of principal payment received,20,EUR
+1234710,2018-12-15,123599,Amount of interest payment received,0.24,EUR
+1234711,2018-12-15,123600,Amount of principal payment received,20,EUR
+1234712,2018-12-15,123601,Amount of interest payment received,0.23,EUR
+1234713,2018-12-15,123602,Amount of principal payment received,20,EUR
+1234714,2018-12-15,123603,Amount of interest payment received,0.23,EUR
+1234715,2018-12-15,123604,Amount of principal payment received,20,EUR
+1234716,2018-12-15,123605,Amount of interest payment received,0.17,EUR
+1234717,2018-12-15,123606,Amount of principal payment received,16.56,EUR
+1234718,2018-12-15,123607,Amount of interest payment received,0.19,EUR
+1234719,2018-12-15,123608,Amount of principal payment received,20,EUR
+1234720,2018-12-15,123609,Amount of principal payment received,10.85,EUR
+1234721,2018-12-15,123610,Amount of interest payment received,0.02,EUR
+1234722,2018-12-15,123611,Investment,-20,EUR
+1234723,2018-12-15,123612,Investment,-16.26,EUR
+1234724,2018-12-15,123613,Amount of principal payment received,20,EUR
+1234725,2018-12-15,123614,Amount of interest payment received,0.14,EUR
+1234726,2018-12-15,123615,Amount of principal payment received,20,EUR
+1234727,2018-12-15,123616,Amount of interest payment received,0.18,EUR
+1234728,2018-12-15,123617,Investment,-20,EUR
+1234729,2018-12-14,123618,Amount of interest payment received,0.04,EUR
+1234730,2018-12-14,123619,Amount of principal payment received,20,EUR
+1234731,2018-12-13,123620,Investment,-12.21,EUR
+1234732,2018-12-13,123621,Amount of principal payment received,12.18,EUR
+1234733,2018-12-13,123622,Amount of interest payment received,0.03,EUR
+1234734,2018-12-13,123623,Investment,-11.91,EUR
+1234735,2018-12-13,123624,Investment,-20,EUR
+1234736,2018-12-13,123625,Amount of principal payment received,11.56,EUR
+1234737,2018-12-13,123626,Amount of interest payment received,0.13,EUR
+1234738,2018-12-13,123627,Amount of principal payment received,20,EUR
+1234739,2018-12-13,123628,Amount of interest payment received,0.22,EUR
+1234740,2018-12-13,123629,Investment,-19.29,EUR
+1234741,2018-12-13,123630,Amount of interest payment received,0.26,EUR
+1234742,2018-12-13,123631,Amount of principal payment received,16.02,EUR
+1234743,2018-12-13,123632,Investment,-18.51,EUR
+1234744,2018-12-13,123633,Investment,-20,EUR
+1234745,2018-12-13,123634,Investment,-20,EUR
+1234746,2018-12-13,123635,Investment,-20,EUR
+1234747,2018-12-13,123636,Amount of interest payment received,0.23,EUR
+1234748,2018-12-13,123637,Amount of principal payment received,20,EUR
+1234749,2018-12-13,123638,Amount of interest payment received,0.23,EUR
+1234750,2018-12-13,123639,Amount of principal payment received,20,EUR
+1234751,2018-12-13,123640,Amount of interest payment received,0.2,EUR
+1234752,2018-12-13,123641,Amount of principal payment received,20,EUR
+1234753,2018-12-13,123642,Amount of interest payment received,0.2,EUR
+1234754,2018-12-13,123643,Amount of principal payment received,20,EUR
+1234755,2018-12-12,123644,Investment,-16.27,EUR
+1234756,2018-12-12,123645,Investment,-20,EUR
+1234757,2018-12-12,123646,Amount of interest payment received,0.14,EUR
+1234758,2018-12-12,123647,Amount of principal payment received,16.63,EUR
+1234759,2018-12-12,123648,Amount of interest payment received,0.16,EUR
+1234760,2018-12-12,123649,Amount of principal payment received,20,EUR
+1234761,2018-12-12,123650,Investment,-11.3,EUR
+1234762,2018-12-12,123651,Investment,-20,EUR
+1234763,2018-12-12,123652,Amount of principal payment received,10.07,EUR
+1234764,2018-12-12,123653,Amount of interest payment received,0.26,EUR
+1234765,2018-12-12,123654,Amount of principal payment received,20,EUR
+1234766,2018-12-12,123655,Amount of interest payment received,0.55,EUR
+1234767,2018-12-11,123656,Investment,-20,EUR
+1234768,2018-12-11,123657,Amount of principal payment received,20,EUR
+1234769,2018-12-11,123658,Amount of interest payment received,0.04,EUR
+1234770,2018-12-11,123659,Investment,-20,EUR
+1234771,2018-12-11,123660,Investment,-20,EUR
+1234772,2018-12-11,123661,Amount of interest payment received,0.22,EUR
+1234773,2018-12-11,123662,Amount of principal payment received,20,EUR
+1234774,2018-12-11,123663,Amount of interest payment received,0.16,EUR
+1234775,2018-12-11,123664,Amount of principal payment received,20,EUR
+1234776,2018-12-10,123665,Investment,-10.85,EUR
+1234777,2018-12-10,123666,Amount of principal payment received,10.69,EUR
+1234778,2018-12-10,123667,Amount of interest payment received,0.12,EUR
+1234779,2018-12-10,123668,Investment,-20,EUR
+1234780,2018-12-10,123669,Amount of interest payment received,0.04,EUR
+1234781,2018-12-10,123670,Amount of principal payment received,20,EUR
+1234782,2018-12-09,123671,Investment,-16.09,EUR
+1234783,2018-12-09,123672,Investment,-20,EUR
+1234784,2018-12-09,123673,Amount of interest payment received,0.1,EUR
+1234785,2018-12-09,123674,Amount of principal payment received,20,EUR
+1234786,2018-12-09,123675,Amount of principal payment received,11.21,EUR
+1234787,2018-12-09,123676,Amount of interest payment received,0.12,EUR
+1234788,2018-12-08,123677,Investment,-20,EUR
+1234789,2018-12-08,123678,Investment,-20,EUR
+1234790,2018-12-08,123679,Investment,-20,EUR
+1234791,2018-12-08,123680,Investment,-20,EUR
+1234792,2018-12-08,123681,Investment,-20,EUR
+1234793,2018-12-08,123682,Investment,-20,EUR
+1234794,2018-12-08,123683,Investment,-20,EUR
+1234795,2018-12-08,123684,Amount of interest payment received,0.26,EUR
+1234796,2018-12-08,123685,Amount of principal payment received,20,EUR
+1234797,2018-12-08,123686,Amount of interest payment received,0.26,EUR
+1234798,2018-12-08,123687,Amount of principal payment received,20,EUR
+1234799,2018-12-08,123688,Amount of principal payment received,20,EUR
+1234800,2018-12-08,123689,Amount of interest payment received,0.16,EUR
+1234801,2018-12-08,123690,Amount of interest payment received,0.24,EUR
+1234802,2018-12-08,123691,Amount of principal payment received,20,EUR
+1234803,2018-12-08,123692,Amount of interest payment received,0.11,EUR
+1234804,2018-12-08,123693,Amount of principal payment received,10.27,EUR
+1234805,2018-12-08,123694,Amount of interest payment received,0.17,EUR
+1234806,2018-12-08,123695,Amount of principal payment received,17.16,EUR
+1234807,2018-12-08,123696,Amount of interest payment received,0.16,EUR
+1234808,2018-12-08,123697,Amount of principal payment received,20,EUR
+1234809,2018-12-08,123698,Amount of interest payment received,0.08,EUR
+1234810,2018-12-08,123699,Amount of principal payment received,10.48,EUR
+1234811,2018-12-07,123700,Investment,-15.77,EUR
+1234812,2018-12-07,123701,Investment,-20,EUR
+1234813,2018-12-07,123702,Investment,-20,EUR
+1234814,2018-12-07,123703,Investment,-20,EUR
+1234815,2018-12-07,123704,Investment,-20,EUR
+1234816,2018-12-07,123705,Investment,-20,EUR
+1234817,2018-12-07,123706,Investment,-20,EUR
+1234818,2018-12-07,123707,Amount of interest payment received,0.07,EUR
+1234819,2018-12-07,123708,Amount of principal payment received,20,EUR
+1234820,2018-12-07,123709,Amount of interest payment received,0.21,EUR
+1234821,2018-12-07,123710,Amount of principal payment received,20,EUR
+1234822,2018-12-07,123711,Amount of interest payment received,0.21,EUR
+1234823,2018-12-07,123712,Amount of principal payment received,20,EUR
+1234824,2018-12-07,123713,Amount of interest payment received,0.2,EUR
+1234825,2018-12-07,123714,Amount of principal payment received,20,EUR
+1234826,2018-12-07,123715,Amount of interest payment received,0.19,EUR
+1234827,2018-12-07,123716,Amount of principal payment received,20,EUR
+1234828,2018-12-07,123717,Amount of interest payment received,0.17,EUR
+1234829,2018-12-07,123718,Amount of principal payment received,18.55,EUR
+1234830,2018-12-07,123719,Amount of interest payment received,0.15,EUR
+1234831,2018-12-07,123720,Amount of principal payment received,20,EUR
+1234832,2018-12-07,123721,Investment,-20,EUR
+1234833,2018-12-07,123722,Investment,-20,EUR
+1234834,2018-12-07,123723,Amount of interest payment received,0.04,EUR
+1234835,2018-12-07,123724,Amount of principal payment received,20,EUR
+1234836,2018-12-07,123725,Amount of interest payment received,0.04,EUR
+1234837,2018-12-07,123726,Amount of principal payment received,20,EUR
+1234838,2018-12-01,123727,Amount of interest payment received,0.09,EUR
+1234839,2018-12-01,123728,Amount of interest payment received,0.09,EUR
+1234840,2018-12-01,123729,Amount of interest payment received,0.06,EUR
+1234841,2018-12-01,123730,Amount of interest payment received,0.07,EUR
+1234842,2018-12-01,123731,Amount of interest payment received,0.04,EUR
+1234843,2018-12-01,123732,Amount of interest payment received,0.06,EUR
+1234844,2018-12-01,123733,Amount of interest payment received,0.05,EUR
+1234845,2018-12-01,123734,Amount of interest payment received,0.13,EUR
+1234846,2018-12-01,123735,Amount of interest payment received,0.1,EUR
+1234847,2018-12-01,123736,Amount of interest payment received,0.13,EUR
+1234848,2018-12-01,123737,Amount of interest payment received,0.13,EUR
+1234849,2018-12-01,123738,Amount of interest payment received,0.12,EUR
+1234850,2018-12-01,123739,Amount of interest payment received,0.11,EUR
+1234851,2018-12-01,123740,Amount of interest payment received,0.07,EUR
+1234852,2018-12-06,123741,Investment,-12.18,EUR
+1234853,2018-12-06,123742,Investment,-20,EUR
+1234854,2018-12-06,123743,Amount of interest payment received,0.15,EUR
+1234855,2018-12-06,123744,Amount of principal payment received,20,EUR
+1234856,2018-12-06,123745,Amount of interest payment received,0.09,EUR
+1234857,2018-12-06,123746,Amount of principal payment received,11.94,EUR
+1234858,2018-12-05,123747,Investment,-12.28,EUR
+1234859,2018-12-05,123748,Amount of principal payment received,10.08,EUR
+1234860,2018-12-05,123749,Amount of interest payment received,0.26,EUR
+1234861,2018-12-01,123750,Amount of interest payment received,0.1,EUR
+1234862,2018-12-04,123751,Investment,-20,EUR
+1234863,2018-12-04,123752,Investment,-20,EUR
+1234864,2018-12-04,123753,Investment,-20,EUR
+1234865,2018-12-04,123754,Amount of principal payment received,20,EUR
+1234866,2018-12-04,123755,Amount of interest payment received,0.16,EUR
+1234867,2018-12-04,123756,Amount of principal payment received,20,EUR
+1234868,2018-12-04,123757,Amount of interest payment received,0.23,EUR
+1234869,2018-12-04,123758,Amount of interest payment received,0.09,EUR
+1234870,2018-12-04,123759,Amount of principal payment received,20,EUR
+1234871,2018-12-04,123760,Investment,-20,EUR
+1234872,2018-12-04,123761,Investment,-20,EUR
+1234873,2018-12-04,123762,Amount of principal payment received,20,EUR
+1234874,2018-12-04,123763,Amount of interest payment received,0.24,EUR
+1234875,2018-12-04,123764,Amount of principal payment received,20,EUR
+1234876,2018-12-04,123765,Amount of interest payment received,0.24,EUR
+1234877,2018-12-03,123766,Investment,-20,EUR
+1234878,2018-12-03,123767,Amount of principal payment received,20,EUR
+1234879,2018-12-03,123768,Amount of interest payment received,0.22,EUR
+1234880,2018-12-02,123769,Investment,-20,EUR
+1234881,2018-12-02,123770,Amount of principal payment received,20,EUR
+1234882,2018-12-02,123771,Amount of interest payment received,0.13,EUR
+1234883,2018-12-01,123772,Investment,-20,EUR
+1234884,2018-12-01,123773,Investment,-20,EUR
+1234885,2018-12-01,123774,Amount of principal payment received,20,EUR
+1234886,2018-12-01,123775,Amount of interest payment received,0.13,EUR
+1234887,2018-12-01,123776,Amount of principal payment received,20,EUR
+1234888,2018-12-01,123777,Amount of interest payment received,0.13,EUR
+1234889,2018-12-01,123778,Investment,-20,EUR
+1234890,2018-12-01,123779,Amount of principal payment received,20,EUR
+1234891,2018-12-01,123780,Amount of interest payment received,0.15,EUR
+1234892,2018-12-01,123781,Investment,-20,EUR
+1234893,2018-12-01,123782,Amount of principal payment received,20,EUR
+1234894,2018-12-01,123783,Amount of interest payment received,0.12,EUR
+1234895,2018-11-30,123784,Investment,-11.27,EUR
+1234896,2018-11-30,123785,Amount of principal payment received,11.22,EUR
+1234897,2018-11-30,123786,Amount of interest payment received,0.05,EUR
+1234898,2018-11-30,123787,Investment,-14.37,EUR
+1234899,2018-11-30,123788,Amount of principal payment received,14.27,EUR
+1234900,2018-11-30,123789,Amount of interest payment received,0.1,EUR
+1234901,2018-11-30,123790,Investment,-12.3,EUR
+1234902,2018-11-30,123791,Investment,-20,EUR
+1234903,2018-11-30,123792,Investment,-20,EUR
+1234904,2018-11-30,123793,Amount of principal payment received,20,EUR
+1234905,2018-11-30,123794,Amount of interest payment received,0.12,EUR
+1234906,2018-11-30,123795,Amount of principal payment received,11.99,EUR
+1234907,2018-11-30,123796,Amount of interest payment received,0.07,EUR
+1234908,2018-11-30,123797,Amount of principal payment received,20,EUR
+1234909,2018-11-30,123798,Amount of interest payment received,0.12,EUR
+1234910,2018-11-30,123799,Investment,-10.81,EUR
+1234911,2018-11-30,123800,Investment,-20,EUR
+1234912,2018-11-30,123801,Amount of interest payment received,0.17,EUR
+1234913,2018-11-30,123802,Amount of principal payment received,20,EUR
+1234914,2018-11-30,123803,Amount of interest payment received,0.09,EUR
+1234915,2018-11-30,123804,Amount of principal payment received,10.55,EUR
+1234916,2018-11-29,123805,Investment,-20,EUR
+1234917,2018-11-29,123806,Investment,-20,EUR
+1234918,2018-11-29,123807,Investment,-20,EUR
+1234919,2018-11-29,123808,Investment,-20,EUR
+1234920,2018-11-29,123809,Investment,-20,EUR
+1234921,2018-11-29,123810,Amount of interest payment received,0.02,EUR
+1234922,2018-11-29,123811,Amount of principal payment received,11.84,EUR
+1234923,2018-11-29,123812,Amount of interest payment received,0.02,EUR
+1234924,2018-11-29,123813,Amount of principal payment received,20,EUR
+1234925,2018-11-29,123814,Amount of interest payment received,0.16,EUR
+1234926,2018-11-29,123815,Amount of principal payment received,16.27,EUR
+1234927,2018-11-29,123816,Amount of interest payment received,0.09,EUR
+1234928,2018-11-29,123817,Amount of principal payment received,10.72,EUR
+1234929,2018-11-29,123818,Amount of principal payment received,20,EUR
+1234930,2018-11-29,123819,Amount of interest payment received,0.08,EUR
+1234931,2018-11-29,123820,Amount of interest payment received,0.01,EUR
+1234932,2018-11-29,123821,Amount of principal payment received,20,EUR
+1234933,2018-11-28,123822,Investment,-20,EUR
+1234934,2018-11-28,123823,Investment,-20,EUR
+1234935,2018-11-28,123824,Investment,-20,EUR
+1234936,2018-11-28,123825,Amount of interest payment received,0.23,EUR
+1234937,2018-11-28,123826,Amount of principal payment received,20,EUR
+1234938,2018-11-28,123827,Amount of interest payment received,0.14,EUR
+1234939,2018-11-28,123828,Amount of principal payment received,20,EUR
+1234940,2018-11-28,123829,Amount of interest payment received,0.14,EUR
+1234941,2018-11-28,123830,Amount of principal payment received,20,EUR
+1234942,2018-11-28,123831,Investment,-20,EUR
+1234943,2018-11-28,123832,Amount of interest payment received,0.28,EUR
+1234944,2018-11-28,123833,Amount of principal payment received,20,EUR
+1234945,2018-11-28,123834,Investment,-15.62,EUR
+1234946,2018-11-28,123835,Investment,-20,EUR
+1234947,2018-11-28,123836,Amount of principal payment received,13.19,EUR
+1234948,2018-11-28,123837,Amount of interest payment received,0.2,EUR
+1234949,2018-11-28,123838,Amount of principal payment received,20,EUR
+1234950,2018-11-28,123839,Amount of interest payment received,0.41,EUR
+1234951,2018-11-27,123840,Investment,-20,EUR
+1234952,2018-11-27,123841,Investment,-20,EUR
+1234953,2018-11-27,123842,Investment,-20,EUR
+1234954,2018-11-27,123843,Amount of interest payment received,0.17,EUR
+1234955,2018-11-27,123844,Amount of principal payment received,20,EUR
+1234956,2018-11-27,123845,Amount of interest payment received,0.13,EUR
+1234957,2018-11-27,123846,Amount of principal payment received,20,EUR
+1234958,2018-11-27,123847,Amount of principal payment received,20,EUR
+1234959,2018-11-27,123848,Amount of interest payment received,0.15,EUR
+1234960,2018-11-26,123849,Investment,-20,EUR
+1234961,2018-11-26,123850,Amount of principal payment received,20,EUR
+1234962,2018-11-26,123851,Amount of interest payment received,0.16,EUR
+1234963,2018-11-26,123852,Investment,-20,EUR
+1234964,2018-11-26,123853,Amount of principal payment received,20,EUR
+1234965,2018-11-26,123854,Amount of interest payment received,0.09,EUR
+1234966,2018-11-25,123855,Investment,-20,EUR
+1234967,2018-11-25,123856,Amount of principal payment received,20,EUR
+1234968,2018-11-25,123857,Amount of interest payment received,0.14,EUR
+1234969,2018-11-25,123858,Investment,-20,EUR
+1234970,2018-11-25,123859,Amount of principal payment received,20,EUR
+1234971,2018-11-25,123860,Amount of interest payment received,0.43,EUR
+1234972,2018-11-24,123861,Investment,-20,EUR
+1234973,2018-11-24,123862,Amount of principal payment received,20,EUR
+1234974,2018-11-24,123863,Amount of interest payment received,0.13,EUR
+1234975,2018-11-24,123864,Investment,-20,EUR
+1234976,2018-11-24,123865,Amount of principal payment received,20,EUR
+1234977,2018-11-24,123866,Amount of interest payment received,0.42,EUR
+1234978,2018-11-23,123867,Investment,-11.84,EUR
+1234979,2018-11-23,123868,Investment,-20,EUR
+1234980,2018-11-23,123869,Amount of interest payment received,0.04,EUR
+1234981,2018-11-23,123870,Amount of principal payment received,11.25,EUR
+1234982,2018-11-23,123871,Amount of interest payment received,0.03,EUR
+1234983,2018-11-23,123872,Amount of principal payment received,20,EUR
+1234984,2018-11-23,123873,Investment,-20,EUR
+1234985,2018-11-23,123874,Investment,-20,EUR
+1234986,2018-11-23,123875,Investment,-20,EUR
+1234987,2018-11-23,123876,Amount of interest payment received,0.13,EUR
+1234988,2018-11-23,123877,Amount of principal payment received,20,EUR
+1234989,2018-11-23,123878,Amount of interest payment received,0.11,EUR
+1234990,2018-11-23,123879,Amount of principal payment received,20,EUR
+1234991,2018-11-23,123880,Amount of interest payment received,0.07,EUR
+1234992,2018-11-23,123881,Amount of principal payment received,20,EUR
+1234993,2018-11-22,123882,Investment,-20,EUR
+1234994,2018-11-22,123883,Amount of interest payment received,0.21,EUR
+1234995,2018-11-22,123884,Amount of principal payment received,20,EUR
+1234996,2018-11-22,123885,Investment,-14.31,EUR
+1234997,2018-11-22,123886,Amount of interest payment received,0.11,EUR
+1234998,2018-11-22,123887,Amount of principal payment received,11.91,EUR
+1234999,2018-11-22,123888,Investment,-20,EUR
+1235000,2018-11-22,123889,Investment,-20,EUR
+1235001,2018-11-22,123890,Investment,-20,EUR
+1235002,2018-11-22,123891,Amount of principal payment received,20,EUR
+1235003,2018-11-22,123892,Amount of interest payment received,0.14,EUR
+1235004,2018-11-22,123893,Amount of principal payment received,11.47,EUR
+1235005,2018-11-22,123894,Amount of interest payment received,0.08,EUR
+1235006,2018-11-22,123895,Amount of interest payment received,0.03,EUR
+1235007,2018-11-22,123896,Amount of principal payment received,10.34,EUR
+1235008,2018-11-22,123897,Amount of interest payment received,0.11,EUR
+1235009,2018-11-22,123898,Amount of principal payment received,20,EUR
+1235010,2018-11-22,123899,Investment,-20,EUR
+1235011,2018-11-22,123900,Amount of principal payment received,20,EUR
+1235012,2018-11-22,123901,Amount of interest payment received,0.12,EUR
+1235013,2018-11-22,123902,Investment,-10.91,EUR
+1235014,2018-11-22,123903,Investment,-20,EUR
+1235015,2018-11-22,123904,Amount of principal payment received,10.39,EUR
+1235016,2018-11-22,123905,Amount of interest payment received,0.02,EUR
+1235017,2018-11-22,123906,Amount of principal payment received,20,EUR
+1235018,2018-11-22,123907,Amount of interest payment received,0.03,EUR
+1235019,2018-11-22,123908,Investment,-20,EUR
+1235020,2018-11-22,123909,Amount of principal payment received,20,EUR
+1235021,2018-11-22,123910,Amount of interest payment received,0.13,EUR
+1235022,2018-11-21,123911,Investment,-20,EUR
+1235023,2018-11-21,123912,Amount of principal payment received,20,EUR
+1235024,2018-11-21,123913,Amount of interest payment received,0.05,EUR
+1235025,2018-11-19,123914,Investment,-20,EUR
+1235026,2018-11-19,123915,Amount of interest payment received,0.14,EUR
+1235027,2018-11-19,123916,Amount of principal payment received,20,EUR
+1235028,2018-11-19,123917,Investment,-20,EUR
+1235029,2018-11-19,123918,Amount of principal payment received,20,EUR
+1235030,2018-11-19,123919,Amount of interest payment received,0.15,EUR
+1235031,2018-11-19,123920,Investment,-16.98,EUR
+1235032,2018-11-19,123921,Amount of principal payment received,16.72,EUR
+1235033,2018-11-19,123922,Amount of interest payment received,0.11,EUR
+1235034,2018-11-19,123923,Investment,-20,EUR
+1235035,2018-11-19,123924,Amount of principal payment received,20,EUR
+1235036,2018-11-19,123925,Amount of interest payment received,0.15,EUR
+1235037,2018-11-19,123926,Investment,-15.45,EUR
+1235038,2018-11-19,123927,Amount of principal payment received,15.22,EUR
+1235039,2018-11-19,123928,Amount of interest payment received,0.11,EUR
+1235040,2018-11-18,123929,Investment,-20,EUR
+1235041,2018-11-18,123930,Amount of principal payment received,20,EUR
+1235042,2018-11-18,123931,Amount of interest payment received,0.12,EUR
+1235043,2018-11-18,123932,Investment,-19.16,EUR
+1235044,2018-11-18,123933,Amount of principal payment received,18.99,EUR
+1235045,2018-11-18,123934,Amount of interest payment received,0.17,EUR
+1235046,2018-11-17,123935,Investment,-20,EUR
+1235047,2018-11-17,123936,Investment,-20,EUR
+1235048,2018-11-17,123937,Investment,-20,EUR
+1235049,2018-11-17,123938,Amount of interest payment received,0.38,EUR
+1235050,2018-11-17,123939,Amount of principal payment received,20,EUR
+1235051,2018-11-17,123940,Amount of interest payment received,0.19,EUR
+1235052,2018-11-17,123941,Amount of principal payment received,20,EUR
+1235053,2018-11-17,123942,Amount of interest payment received,0.14,EUR
+1235054,2018-11-17,123943,Amount of principal payment received,19.29,EUR
+1235055,2018-11-17,123944,Investment,-10.39,EUR
+1235056,2018-11-17,123945,Investment,-20,EUR
+1235057,2018-11-17,123946,Amount of interest payment received,0.06,EUR
+1235058,2018-11-17,123947,Amount of principal payment received,10.24,EUR
+1235059,2018-11-17,123948,Amount of interest payment received,0.09,EUR
+1235060,2018-11-17,123949,Amount of principal payment received,20,EUR
+1235061,2018-11-16,123950,Investment,-11.22,EUR
+1235062,2018-11-16,123951,Amount of interest payment received,0.16,EUR
+1235063,2018-11-16,123952,Amount of principal payment received,10.63,EUR
+1235064,2018-11-16,123953,Investment,-20,EUR
+1235065,2018-11-16,123954,Investment,-20,EUR
+1235066,2018-11-16,123955,Amount of principal payment received,20,EUR
+1235067,2018-11-16,123956,Amount of interest payment received,0.12,EUR
+1235068,2018-11-16,123957,Amount of principal payment received,20,EUR
+1235069,2018-11-16,123958,Amount of interest payment received,0.17,EUR
+1235070,2018-11-16,123959,Investment,-20,EUR
+1235071,2018-11-16,123960,Amount of principal payment received,20,EUR
+1235072,2018-11-16,123961,Amount of interest payment received,0.14,EUR
+1235073,2018-11-15,123962,Investment,-16.63,EUR
+1235074,2018-11-15,123963,Amount of interest payment received,0.12,EUR
+1235075,2018-11-15,123964,Amount of principal payment received,16.28,EUR
+1235076,2018-11-15,123965,Investment,-20,EUR
+1235077,2018-11-15,123966,Amount of principal payment received,20,EUR
+1235078,2018-11-15,123967,Amount of interest payment received,0.11,EUR
+1235079,2018-11-14,123968,Investment,-20,EUR
+1235080,2018-11-14,123969,Amount of interest payment received,0.12,EUR
+1235081,2018-11-14,123970,Amount of principal payment received,20,EUR
+1235082,2018-11-13,123971,Investment,-11.57,EUR
+1235083,2018-11-13,123972,Amount of principal payment received,11.23,EUR
+1235084,2018-11-13,123973,Amount of interest payment received,0.12,EUR
+1235085,2018-11-13,123974,Investment,-20,EUR
+1235086,2018-11-13,123975,Amount of interest payment received,0.22,EUR
+1235087,2018-11-13,123976,Amount of principal payment received,20,EUR
+1235088,2018-11-13,123977,Investment,-10.34,EUR
+1235089,2018-11-13,123978,Investment,-20,EUR
+1235090,2018-11-13,123979,Amount of principal payment received,20,EUR
+1235091,2018-11-13,123980,Amount of interest payment received,0.47,EUR
+1235092,2018-11-13,123981,Investment,-20,EUR
+1235093,2018-11-13,123982,Amount of principal payment received,20,EUR
+1235094,2018-11-13,123983,Amount of interest payment received,0.43,EUR
+1235095,2018-11-12,123984,Investment,-20,EUR
+1235096,2018-11-12,123985,Amount of interest payment received,0.09,EUR
+1235097,2018-11-12,123986,Amount of principal payment received,10.2,EUR
+1235098,2018-11-12,123987,Amount of interest payment received,0.16,EUR
+1235099,2018-11-12,123988,Amount of principal payment received,18.72,EUR
+1235100,2018-11-12,123989,Investment,-20,EUR
+1235101,2018-11-12,123990,Amount of interest payment received,0.12,EUR
+1235102,2018-11-12,123991,Amount of principal payment received,20,EUR
+1235103,2018-11-11,123992,Investment,-20,EUR
+1235104,2018-11-11,123993,Amount of principal payment received,20,EUR
+1235105,2018-11-11,123994,Amount of interest payment received,0.15,EUR
+1235106,2018-11-11,123995,Investment,-11.94,EUR
+1235107,2018-11-11,123996,Investment,-20,EUR
+1235108,2018-11-11,123997,Amount of principal payment received,20,EUR
+1235109,2018-11-11,123998,Amount of interest payment received,0.13,EUR
+1235110,2018-11-11,123999,Amount of principal payment received,10.76,EUR
+1235111,2018-11-11,124000,Amount of interest payment received,0.07,EUR
+1235112,2018-11-11,124001,Investment,-20,EUR
+1235113,2018-11-11,124002,Investment,-20,EUR
+1235114,2018-11-11,124003,Investment,-20,EUR
+1235115,2018-11-11,124004,Amount of principal payment received,20,EUR
+1235116,2018-11-11,124005,Amount of interest payment received,0.2,EUR
+1235117,2018-11-11,124006,Amount of principal payment received,20,EUR
+1235118,2018-11-11,124007,Amount of interest payment received,0.18,EUR
+1235119,2018-11-11,124008,Amount of principal payment received,20,EUR
+1235120,2018-11-11,124009,Amount of interest payment received,0.18,EUR
+1235121,2018-11-11,124010,Investment,-20,EUR
+1235122,2018-11-11,124011,Amount of principal payment received,20,EUR
+1235123,2018-11-11,124012,Amount of interest payment received,0.18,EUR
+1235124,2018-11-10,124013,Investment,-20,EUR
+1235125,2018-11-10,124014,Amount of principal payment received,20,EUR
+1235126,2018-11-10,124015,Amount of interest payment received,0.12,EUR
+1235127,2018-11-10,124016,Investment,-20,EUR
+1235128,2018-11-10,124017,Amount of principal payment received,20,EUR
+1235129,2018-11-10,124018,Amount of interest payment received,0.12,EUR
+1235130,2018-11-10,124019,Investment,-11.25,EUR
+1235131,2018-11-10,124020,Investment,-20,EUR
+1235132,2018-11-10,124021,Investment,-20,EUR
+1235133,2018-11-10,124022,Investment,-20,EUR
+1235134,2018-11-10,124023,Amount of principal payment received,20,EUR
+1235135,2018-11-10,124024,Amount of interest payment received,0.21,EUR
+1235136,2018-11-10,124025,Amount of principal payment received,10.51,EUR
+1235137,2018-11-10,124026,Amount of interest payment received,0.07,EUR
+1235138,2018-11-10,124027,Amount of principal payment received,20,EUR
+1235139,2018-11-10,124028,Amount of interest payment received,0.12,EUR
+1235140,2018-11-10,124029,Amount of principal payment received,20,EUR
+1235141,2018-11-10,124030,Amount of interest payment received,0.14,EUR
+1235142,2018-11-10,124031,Investment,-20,EUR
+1235143,2018-11-10,124032,Amount of principal payment received,20,EUR
+1235144,2018-11-10,124033,Amount of interest payment received,0.2,EUR
+1235145,2018-11-10,124034,Investment,-11.99,EUR
+1235146,2018-11-10,124035,Investment,-20,EUR
+1235147,2018-11-10,124036,Amount of principal payment received,11.35,EUR
+1235148,2018-11-10,124037,Amount of interest payment received,0.1,EUR
+1235149,2018-11-10,124038,Amount of principal payment received,20,EUR
+1235150,2018-11-10,124039,Amount of interest payment received,0.17,EUR
+1235151,2018-11-10,124040,Investment,-20,EUR
+1235152,2018-11-10,124041,Amount of principal payment received,20,EUR
+1235153,2018-11-10,124042,Amount of interest payment received,0.37,EUR
+1235154,2018-11-10,124043,Investment,-11.1,EUR
+1235155,2018-11-10,124044,Investment,-20,EUR
+1235156,2018-11-10,124045,Investment,-20,EUR
+1235157,2018-11-10,124046,Amount of principal payment received,20,EUR
+1235158,2018-11-10,124047,Amount of interest payment received,0.41,EUR
+1235159,2018-11-10,124048,Amount of principal payment received,20,EUR
+1235160,2018-11-10,124049,Amount of interest payment received,0.41,EUR
+1235161,2018-11-10,124050,Amount of principal payment received,10,EUR
+1235162,2018-11-10,124051,Amount of interest payment received,0.28,EUR
+1235163,2018-11-10,124052,Investment,-10.48,EUR
+1235164,2018-11-10,124053,Amount of principal payment received,10.38,EUR
+1235165,2018-11-10,124054,Amount of interest payment received,0.1,EUR
+1235166,2018-11-09,124055,Investment,-16.56,EUR
+1235167,2018-11-09,124056,Investment,-20,EUR
+1235168,2018-11-09,124057,Amount of interest payment received,0.23,EUR
+1235169,2018-11-09,124058,Amount of principal payment received,20,EUR
+1235170,2018-11-09,124059,Amount of interest payment received,0.16,EUR
+1235171,2018-11-09,124060,Amount of principal payment received,15.75,EUR
+1235172,2018-11-09,124061,Investment,-20,EUR
+1235173,2018-11-09,124062,Amount of interest payment received,0.18,EUR
+1235174,2018-11-09,124063,Amount of principal payment received,20,EUR
+1235175,2018-11-09,124064,Investment,-20,EUR
+1235176,2018-11-09,124065,Investment,-20,EUR
+1235177,2018-11-09,124066,Amount of interest payment received,0.13,EUR
+1235178,2018-11-09,124067,Amount of principal payment received,20,EUR
+1235179,2018-11-09,124068,Amount of interest payment received,0.11,EUR
+1235180,2018-11-09,124069,Amount of principal payment received,20,EUR
+1235181,2018-11-09,124070,Investment,-11.12,EUR
+1235182,2018-11-09,124071,Amount of interest payment received,0.02,EUR
+1235183,2018-11-09,124072,Amount of principal payment received,11.1,EUR
+1235184,2018-11-07,124073,Investment,-14.27,EUR
+1235185,2018-11-07,124074,Amount of principal payment received,11.71,EUR
+1235186,2018-11-07,124075,Amount of interest payment received,0.08,EUR
+1235187,2018-11-06,124076,Investment,-20,EUR
+1235188,2018-11-06,124077,Investment,-20,EUR
+1235189,2018-11-06,124078,Investment,-20,EUR
+1235190,2018-11-06,124079,Amount of principal payment received,20,EUR
+1235191,2018-11-06,124080,Amount of interest payment received,0.49,EUR
+1235192,2018-11-06,124081,Amount of principal payment received,20,EUR
+1235193,2018-11-06,124082,Amount of interest payment received,0.49,EUR
+1235194,2018-11-06,124083,Amount of principal payment received,20,EUR
+1235195,2018-11-06,124084,Amount of interest payment received,0.49,EUR
+1235196,2018-11-05,124085,Investment,-20,EUR
+1235197,2018-11-05,124086,Investment,-20,EUR
+1235198,2018-11-05,124087,Amount of principal payment received,20,EUR
+1235199,2018-11-05,124088,Amount of interest payment received,0.18,EUR
+1235200,2018-11-05,124089,Amount of principal payment received,20,EUR
+1235201,2018-11-05,124090,Amount of interest payment received,0.22,EUR
+1235202,2018-11-05,124091,Investment,-20,EUR
+1235203,2018-11-05,124092,Amount of principal payment received,20,EUR
+1235204,2018-11-05,124093,Amount of interest payment received,0.18,EUR
+1235205,2018-11-05,124094,Investment,-20,EUR
+1235206,2018-11-05,124095,Amount of principal payment received,20,EUR
+1235207,2018-11-05,124096,Amount of interest payment received,0.21,EUR
+1235208,2018-11-05,124097,Investment,-20,EUR
+1235209,2018-11-05,124098,Amount of principal payment received,20,EUR
+1235210,2018-11-05,124099,Amount of interest payment received,0.22,EUR
+1235211,2018-11-04,124100,Investment,-18.55,EUR
+1235212,2018-11-04,124101,Amount of interest payment received,0.08,EUR
+1235213,2018-11-04,124102,Amount of principal payment received,10.32,EUR
+1235214,2018-11-04,124103,Investment,-20,EUR
+1235215,2018-11-04,124104,Amount of principal payment received,20,EUR
+1235216,2018-11-04,124105,Amount of interest payment received,0.48,EUR
+1235217,2018-11-01,124106,Amount of interest payment received,0.02,EUR
+1235218,2018-11-03,124107,Investment,-12.51,EUR
+1235219,2018-11-03,124108,Amount of principal payment received,20,EUR
+1235220,2018-11-03,124109,Amount of interest payment received,0.16,EUR
+1235221,2018-11-03,124110,Investment,-11.1,EUR
+1235222,2018-11-03,124111,Amount of interest payment received,0.11,EUR
+1235223,2018-11-03,124112,Amount of principal payment received,10.46,EUR
+1235224,2018-11-03,124113,Investment,-20,EUR
+1235225,2018-11-03,124114,Investment,-20,EUR
+1235226,2018-11-03,124115,Investment,-20,EUR
+1235227,2018-11-03,124116,Amount of interest payment received,0.19,EUR
+1235228,2018-11-03,124117,Amount of principal payment received,20,EUR
+1235229,2018-11-03,124118,Amount of interest payment received,0.17,EUR
+1235230,2018-11-03,124119,Amount of principal payment received,20,EUR
+1235231,2018-11-03,124120,Amount of interest payment received,0.17,EUR
+1235232,2018-11-03,124121,Amount of principal payment received,20,EUR
+1235233,2018-11-03,124122,Investment,-11.56,EUR
+1235234,2018-11-03,124123,Amount of interest payment received,0.08,EUR
+1235235,2018-11-03,124124,Amount of principal payment received,11.48,EUR
+1235236,2018-11-03,124125,Investment,-17.16,EUR
+1235237,2018-11-03,124126,Investment,-20,EUR
+1235238,2018-11-03,124127,Amount of interest payment received,0.13,EUR
+1235239,2018-11-03,124128,Amount of principal payment received,20,EUR
+1235240,2018-11-03,124129,Amount of interest payment received,0.08,EUR
+1235241,2018-11-03,124130,Amount of principal payment received,11.91,EUR
+1235242,2018-11-03,124131,Investment,-20,EUR
+1235243,2018-11-03,124132,Amount of interest payment received,0.11,EUR
+1235244,2018-11-03,124133,Amount of principal payment received,20,EUR
+1235245,2018-11-03,124134,Investment,-20,EUR
+1235246,2018-11-03,124135,Amount of principal payment received,11.84,EUR
+1235247,2018-11-03,124136,Amount of interest payment received,0.04,EUR
+1235248,2018-11-03,124137,Amount of principal payment received,10.58,EUR
+1235249,2018-11-03,124138,Amount of interest payment received,0.06,EUR
+1235250,2018-11-03,124139,Investment,-20,EUR
+1235251,2018-11-02,124140,Amount of principal payment received,20,EUR
+1235252,2018-11-02,124141,Amount of interest payment received,0.16,EUR
+1235253,2018-11-02,124142,Investment,-20,EUR
+1235254,2018-11-02,124143,Amount of principal payment received,20,EUR
+1235255,2018-11-02,124144,Amount of interest payment received,0.2,EUR
+1235256,2018-11-01,124145,Investment,-20,EUR
+1235257,2018-11-01,124146,Amount of principal payment received,20,EUR
+1235258,2018-11-01,124147,Amount of interest payment received,0.13,EUR
+1235259,2018-11-01,124148,Investment,-20,EUR
+1235260,2018-10-31,124149,Amount of principal payment received,20,EUR
+1235261,2018-10-31,124150,Amount of interest payment received,0.15,EUR
+1235262,2018-10-31,124151,Investment,-20,EUR
+1235263,2018-10-31,124152,Investment,-20,EUR
+1235264,2018-10-31,124153,Amount of interest payment received,0.15,EUR
+1235265,2018-10-31,124154,Amount of principal payment received,10.06,EUR
+1235266,2018-10-31,124155,Amount of interest payment received,0.32,EUR
+1235267,2018-10-31,124156,Amount of principal payment received,20,EUR
+1235268,2018-10-31,124157,Amount of principal payment received,10.99,EUR
+1235269,2018-10-31,124158,Amount of interest payment received,0.09,EUR
+1235270,2018-10-31,124159,Investment,-20,EUR
+1235271,2018-10-31,124160,Amount of interest payment received,0.16,EUR
+1235272,2018-10-31,124161,Amount of principal payment received,20,EUR
+1235273,2018-10-31,124162,Investment,-11.25,EUR
+1235274,2018-10-31,124163,Investment,-20,EUR
+1235275,2018-10-31,124164,Amount of interest payment received,0.13,EUR
+1235276,2018-10-31,124165,Amount of principal payment received,17.76,EUR
+1235277,2018-10-31,124166,Amount of interest payment received,0.09,EUR
+1235278,2018-10-31,124167,Amount of principal payment received,13.13,EUR
+1235279,2018-10-31,124168,Investment,-20,EUR
+1235280,2018-10-31,124169,Amount of interest payment received,0.14,EUR
+1235281,2018-10-31,124170,Amount of principal payment received,20,EUR
+1235282,2018-10-31,124171,Investment,-10.72,EUR
+1235283,2018-10-31,124172,Investment,-20,EUR
+1235284,2018-10-31,124173,Amount of principal payment received,10,EUR
+1235285,2018-10-31,124174,Amount of interest payment received,0.24,EUR
+1235286,2018-10-31,124175,Amount of principal payment received,10,EUR
+1235287,2018-10-31,124176,Amount of interest payment received,0.24,EUR
+1235288,2018-10-31,124177,Amount of principal payment received,10,EUR
+1235289,2018-10-31,124178,Amount of interest payment received,0.24,EUR
+1235290,2018-10-31,124179,Investment,-10.27,EUR
+1235291,2018-10-31,124180,Amount of principal payment received,10,EUR
+1235292,2018-10-31,124181,Amount of interest payment received,0.27,EUR
+1235293,2018-10-30,124182,Investment,-10.69,EUR
+1235294,2018-10-30,124183,Investment,-20,EUR
+1235295,2018-10-30,124184,Amount of interest payment received,0.1,EUR
+1235296,2018-10-30,124185,Amount of principal payment received,20,EUR
+1235297,2018-10-30,124186,Amount of interest payment received,0.05,EUR
+1235298,2018-10-30,124187,Amount of principal payment received,10.54,EUR
+1235299,2018-10-30,124188,Investment,-10.55,EUR
+1235300,2018-10-30,124189,Amount of interest payment received,0.05,EUR
+1235301,2018-10-30,124190,Amount of principal payment received,10.27,EUR
+1235302,2018-10-30,124191,Investment,-20,EUR
+1235303,2018-10-30,124192,Amount of interest payment received,0.08,EUR
+1235304,2018-10-30,124193,Amount of principal payment received,20,EUR
+1235305,2018-10-30,124194,Investment,-20,EUR
+1235306,2018-10-30,124195,Amount of interest payment received,0.08,EUR
+1235307,2018-10-30,124196,Amount of principal payment received,20,EUR
+1235308,2018-10-30,124197,Investment,-20,EUR
+1235309,2018-10-30,124198,Amount of interest payment received,0.07,EUR
+1235310,2018-10-30,124199,Amount of principal payment received,20,EUR
+1235311,2018-10-30,124200,Investment,-11.21,EUR
+1235312,2018-10-30,124201,Amount of interest payment received,0.04,EUR
+1235313,2018-10-30,124202,Amount of principal payment received,10.75,EUR
+1235314,2018-10-30,124203,Investment,-20,EUR
+1235315,2018-10-30,124204,Investment,-20,EUR
+1235316,2018-10-30,124205,Investment,-20,EUR
+1235317,2018-10-30,124206,Amount of interest payment received,0.02,EUR
+1235318,2018-10-30,124207,Amount of principal payment received,20,EUR
+1235319,2018-10-30,124208,Amount of interest payment received,0.06,EUR
+1235320,2018-10-30,124209,Amount of principal payment received,20,EUR
+1235321,2018-10-30,124210,Amount of interest payment received,0.18,EUR
+1235322,2018-10-30,124211,Amount of principal payment received,20,EUR
+1235323,2018-10-30,124212,Investment,-20,EUR
+1235324,2018-10-30,124213,Amount of interest payment received,0.16,EUR
+1235325,2018-10-30,124214,Amount of principal payment received,20,EUR
+1235326,2018-10-29,124215,Investment,-11.47,EUR
+1235327,2018-10-29,124216,Investment,-20,EUR
+1235328,2018-10-29,124217,Investment,-20,EUR
+1235329,2018-10-29,124218,Investment,-20,EUR
+1235330,2018-10-29,124219,Amount of principal payment received,20,EUR
+1235331,2018-10-29,124220,Amount of interest payment received,0.14,EUR
+1235332,2018-10-29,124221,Amount of principal payment received,10,EUR
+1235333,2018-10-29,124222,Amount of interest payment received,0.24,EUR
+1235334,2018-10-29,124223,Amount of principal payment received,10,EUR
+1235335,2018-10-29,124224,Amount of interest payment received,0.24,EUR
+1235336,2018-10-29,124225,Amount of principal payment received,10,EUR
+1235337,2018-10-29,124226,Amount of interest payment received,0.24,EUR
+1235338,2018-10-29,124227,Amount of principal payment received,10,EUR
+1235339,2018-10-29,124228,Amount of interest payment received,0.24,EUR
+1235340,2018-10-29,124229,Amount of principal payment received,10,EUR
+1235341,2018-10-29,124230,Amount of interest payment received,0.24,EUR
+1235342,2018-10-27,124231,Investment,-20,EUR
+1235343,2018-10-27,124232,Amount of principal payment received,20,EUR
+1235344,2018-10-27,124233,Amount of interest payment received,0.13,EUR
+1235345,2018-10-26,124234,Investment,-10.24,EUR
+1235346,2018-10-26,124235,Amount of principal payment received,10,EUR
+1235347,2018-10-26,124236,Amount of interest payment received,0.24,EUR
+1235348,2018-10-25,124237,Investment,-15.22,EUR
+1235349,2018-10-25,124238,Amount of principal payment received,10.17,EUR
+1235350,2018-10-25,124239,Amount of interest payment received,0.11,EUR
+1235351,2018-10-25,124240,Investment,-20,EUR
+1235352,2018-10-25,124241,Investment,-16.72,EUR
+1235353,2018-10-25,124242,Investment,-20,EUR
+1235354,2018-10-25,124243,Investment,-20,EUR
+1235355,2018-10-25,124244,Amount of principal payment received,20,EUR
+1235356,2018-10-25,124245,Amount of interest payment received,0.06,EUR
+1235357,2018-10-25,124246,Amount of principal payment received,20,EUR
+1235358,2018-10-25,124247,Amount of interest payment received,0.06,EUR
+1235359,2018-10-25,124248,Amount of principal payment received,20,EUR
+1235360,2018-10-25,124249,Amount of interest payment received,0.09,EUR
+1235361,2018-10-25,124250,Amount of interest payment received,0.1,EUR
+1235362,2018-10-25,124251,Amount of principal payment received,11.13,EUR
+1235363,2018-10-25,124252,Amount of principal payment received,10.16,EUR
+1235364,2018-10-25,124253,Amount of interest payment received,0.06,EUR
+1235365,2018-10-24,124254,Investment,-11.91,EUR
+1235366,2018-10-24,124255,Amount of principal payment received,11.05,EUR
+1235367,2018-10-24,124256,Amount of interest payment received,0.02,EUR
+1235368,2018-10-24,124257,Investment,-20,EUR
+1235369,2018-10-24,124258,Investment,-20,EUR
+1235370,2018-10-24,124259,Investment,-20,EUR
+1235371,2018-10-24,124260,Amount of interest payment received,0.3,EUR
+1235372,2018-10-24,124261,Amount of principal payment received,20,EUR
+1235373,2018-10-24,124262,Amount of interest payment received,0.3,EUR
+1235374,2018-10-24,124263,Amount of principal payment received,20,EUR
+1235375,2018-10-24,124264,Amount of interest payment received,0.24,EUR
+1235376,2018-10-24,124265,Amount of principal payment received,20,EUR
+1235377,2018-10-24,124266,Investment,-10.45,EUR
+1235378,2018-10-24,124267,Amount of interest payment received,0.11,EUR
+1235379,2018-10-24,124268,Amount of principal payment received,10.34,EUR
+1235380,2018-10-23,124269,Investment,-16.27,EUR
+1235381,2018-10-23,124270,Amount of principal payment received,10.25,EUR
+1235382,2018-10-23,124271,Amount of interest payment received,0.11,EUR
+1235383,2018-10-23,124272,Investment,-20,EUR
+1235384,2018-10-23,124273,Amount of principal payment received,10,EUR
+1235385,2018-10-23,124274,Amount of interest payment received,0.28,EUR
+1235386,2018-10-23,124275,Amount of interest payment received,0.22,EUR
+1235387,2018-10-23,124276,Amount of principal payment received,15.17,EUR
+1235388,2018-10-23,124277,Investment,-20,EUR
+1235389,2018-10-23,124278,Amount of interest payment received,0.13,EUR
+1235390,2018-10-23,124279,Amount of principal payment received,20,EUR
+1235391,2018-10-23,124280,Investment,-20,EUR
+1235392,2018-10-23,124281,Amount of interest payment received,0.11,EUR
+1235393,2018-10-23,124282,Amount of principal payment received,20,EUR
+1235394,2018-10-22,124283,Investment,-11.84,EUR
+1235395,2018-10-22,124284,Amount of interest payment received,0.13,EUR
+1235396,2018-10-22,124285,Amount of principal payment received,10.08,EUR
+1235397,2018-10-22,124286,Investment,-20,EUR
+1235398,2018-10-22,124287,Amount of interest payment received,0.23,EUR
+1235399,2018-10-22,124288,Amount of principal payment received,20,EUR
+1235400,2018-10-22,124289,Investment,-20,EUR
+1235401,2018-10-22,124290,Amount of interest payment received,0.19,EUR
+1235402,2018-10-22,124291,Amount of principal payment received,20,EUR
+1235403,2018-10-21,124292,Investment,-20,EUR
+1235404,2018-10-21,124293,Amount of principal payment received,20,EUR
+1235405,2018-10-21,124294,Amount of interest payment received,0.12,EUR
+1235406,2018-10-21,124295,Investment,-20,EUR
+1235407,2018-10-21,124296,Amount of principal payment received,20,EUR
+1235408,2018-10-21,124297,Amount of interest payment received,0.11,EUR
+1235409,2018-10-21,124298,Investment,-19.29,EUR
+1235410,2018-10-21,124299,Amount of principal payment received,20,EUR
+1235411,2018-10-21,124300,Amount of interest payment received,0.19,EUR
+1235412,2018-10-21,124301,Investment,-20,EUR
+1235413,2018-10-21,124302,Amount of principal payment received,20,EUR
+1235414,2018-10-21,124303,Amount of interest payment received,0.08,EUR
+1235415,2018-10-20,124304,Investment,-16.02,EUR
+1235416,2018-10-20,124305,Investment,-16.28,EUR
+1235417,2018-10-20,124306,Amount of principal payment received,10,EUR
+1235418,2018-10-20,124307,Amount of interest payment received,0.25,EUR
+1235419,2018-10-20,124308,Amount of principal payment received,10,EUR
+1235420,2018-10-20,124309,Amount of interest payment received,0.25,EUR
+1235421,2018-10-20,124310,Amount of interest payment received,0.02,EUR
+1235422,2018-10-20,124311,Amount of principal payment received,10.94,EUR
+1235423,2018-10-20,124312,Investment,-20,EUR
+1235424,2018-10-20,124313,Investment,-20,EUR
+1235425,2018-10-20,124314,Amount of interest payment received,0.11,EUR
+1235426,2018-10-20,124315,Amount of principal payment received,20,EUR
+1235427,2018-10-20,124316,Amount of interest payment received,0.1,EUR
+1235428,2018-10-20,124317,Amount of principal payment received,20,EUR
+1235429,2018-10-20,124318,Investment,-20,EUR
+1235430,2018-10-20,124319,Investment,-20,EUR
+1235431,2018-10-20,124320,Amount of interest payment received,0.04,EUR
+1235432,2018-10-20,124321,Amount of principal payment received,20,EUR
+1235433,2018-10-20,124322,Amount of interest payment received,0.03,EUR
+1235434,2018-10-20,124323,Amount of principal payment received,20,EUR
+1235435,2018-10-19,124324,Investment,-20,EUR
+1235436,2018-10-19,124325,Amount of principal payment received,20,EUR
+1235437,2018-10-19,124326,Amount of interest payment received,0.14,EUR
+1235438,2018-10-19,124327,Investment,-20,EUR
+1235439,2018-10-19,124328,Amount of principal payment received,10,EUR
+1235440,2018-10-19,124329,Amount of interest payment received,0.21,EUR
+1235441,2018-10-19,124330,Amount of principal payment received,10,EUR
+1235442,2018-10-19,124331,Amount of interest payment received,0.21,EUR
+1235443,2018-10-19,124332,Investment,-11.05,EUR
+1235444,2018-10-19,124333,Investment,-20,EUR
+1235445,2018-10-19,124334,Investment,-20,EUR
+1235446,2018-10-19,124335,Amount of principal payment received,10,EUR
+1235447,2018-10-19,124336,Amount of interest payment received,0.21,EUR
+1235448,2018-10-19,124337,Amount of principal payment received,10,EUR
+1235449,2018-10-19,124338,Amount of interest payment received,0.21,EUR
+1235450,2018-10-19,124339,Amount of principal payment received,10,EUR
+1235451,2018-10-19,124340,Amount of interest payment received,0.21,EUR
+1235452,2018-10-19,124341,Amount of principal payment received,10,EUR
+1235453,2018-10-19,124342,Amount of interest payment received,0.21,EUR
+1235454,2018-10-19,124343,Amount of principal payment received,10,EUR
+1235455,2018-10-19,124344,Amount of interest payment received,0.21,EUR
+1235456,2018-10-18,124345,Investment,-10.75,EUR
+1235457,2018-10-18,124346,Investment,-20,EUR
+1235458,2018-10-18,124347,Amount of principal payment received,10,EUR
+1235459,2018-10-18,124348,Amount of interest payment received,0.24,EUR
+1235460,2018-10-18,124349,Amount of principal payment received,10,EUR
+1235461,2018-10-18,124350,Amount of interest payment received,0.24,EUR
+1235462,2018-10-18,124351,Amount of principal payment received,10,EUR
+1235463,2018-10-18,124352,Amount of interest payment received,0.27,EUR
+1235464,2018-10-18,124353,Investment,-18.99,EUR
+1235465,2018-10-18,124354,Amount of interest payment received,0.17,EUR
+1235466,2018-10-18,124355,Amount of principal payment received,17.71,EUR
+1235467,2018-10-18,124356,Investment,-20,EUR
+1235468,2018-10-18,124357,Investment,-20,EUR
+1235469,2018-10-17,124358,Amount of principal payment received,20,EUR
+1235470,2018-10-17,124359,Amount of interest payment received,0.18,EUR
+1235471,2018-10-17,124360,Amount of principal payment received,10,EUR
+1235472,2018-10-17,124361,Amount of interest payment received,0.21,EUR
+1235473,2018-10-17,124362,Amount of principal payment received,10,EUR
+1235474,2018-10-17,124363,Amount of interest payment received,0.28,EUR
+1235475,2018-10-17,124364,Investment,-20,EUR
+1235476,2018-10-17,124365,Amount of interest payment received,0.13,EUR
+1235477,2018-10-17,124366,Amount of principal payment received,20,EUR
+1235478,2018-10-17,124367,Investment,-20,EUR
+1235479,2018-10-17,124368,Investment,-20,EUR
+1235480,2018-10-17,124369,Amount of interest payment received,0.12,EUR
+1235481,2018-10-17,124370,Amount of principal payment received,20,EUR
+1235482,2018-10-17,124371,Amount of interest payment received,0.06,EUR
+1235483,2018-10-17,124372,Amount of principal payment received,11.13,EUR
+1235484,2018-10-16,124373,Investment,-11.71,EUR
+1235485,2018-10-16,124374,Amount of principal payment received,10,EUR
+1235486,2018-10-16,124375,Amount of interest payment received,0.27,EUR
+1235487,2018-10-16,124376,Amount of principal payment received,10.42,EUR
+1235488,2018-10-16,124377,Amount of interest payment received,0.02,EUR
+1235489,2018-10-16,124378,Investment,-10.76,EUR
+1235490,2018-10-16,124379,Amount of interest payment received,0.05,EUR
+1235491,2018-10-16,124380,Amount of principal payment received,10.57,EUR
+1235492,2018-10-16,124381,Investment,-20,EUR
+1235493,2018-10-16,124382,Amount of interest payment received,0.14,EUR
+1235494,2018-10-16,124383,Amount of principal payment received,20,EUR
+1235495,2018-10-16,124384,Investment,-10.51,EUR
+1235496,2018-10-16,124385,Amount of principal payment received,10.44,EUR
+1235497,2018-10-16,124386,Amount of interest payment received,0.07,EUR
+1235498,2018-10-15,124387,Investment,-10.58,EUR
+1235499,2018-10-15,124388,Investment,-20,EUR
+1235500,2018-10-15,124389,Amount of interest payment received,0.23,EUR
+1235501,2018-10-15,124390,Amount of principal payment received,20,EUR
+1235502,2018-10-15,124391,Amount of interest payment received,0.11,EUR
+1235503,2018-10-15,124392,Amount of principal payment received,10.24,EUR
+1235504,2018-10-15,124393,Investment,-10.94,EUR
+1235505,2018-10-15,124394,Investment,-20,EUR
+1235506,2018-10-15,124395,Investment,-20,EUR
+1235507,2018-10-15,124396,Investment,-20,EUR
+1235508,2018-10-15,124397,Investment,-20,EUR
+1235509,2018-10-15,124398,Amount of interest payment received,0.14,EUR
+1235510,2018-10-15,124399,Amount of principal payment received,20,EUR
+1235511,2018-10-15,124400,Amount of interest payment received,0.13,EUR
+1235512,2018-10-15,124401,Amount of principal payment received,20,EUR
+1235513,2018-10-15,124402,Amount of interest payment received,0.07,EUR
+1235514,2018-10-15,124403,Amount of principal payment received,20,EUR
+1235515,2018-10-15,124404,Amount of interest payment received,0.22,EUR
+1235516,2018-10-15,124405,Amount of principal payment received,20,EUR
+1235517,2018-10-15,124406,Amount of interest payment received,0.1,EUR
+1235518,2018-10-15,124407,Amount of principal payment received,10.14,EUR
+1235519,2018-10-15,124408,Investment,-20,EUR
+1235520,2018-10-15,124409,Investment,-20,EUR
+1235521,2018-10-15,124410,Amount of interest payment received,0.08,EUR
+1235522,2018-10-15,124411,Amount of principal payment received,20,EUR
+1235523,2018-10-15,124412,Amount of interest payment received,0.06,EUR
+1235524,2018-10-15,124413,Amount of principal payment received,20,EUR
+1235525,2018-10-14,124414,Investment,-10.27,EUR
+1235526,2018-10-14,124415,Amount of principal payment received,10,EUR
+1235527,2018-10-14,124416,Amount of interest payment received,0.27,EUR
+1235528,2018-10-14,124417,Investment,-18.72,EUR
+1235529,2018-10-13,124418,Amount of principal payment received,10.59,EUR
+1235530,2018-10-13,124419,Amount of interest payment received,0.1,EUR
+1235531,2018-10-13,124420,Investment,-20,EUR
+1235532,2018-10-13,124421,Investment,-20,EUR
+1235533,2018-10-13,124422,Amount of principal payment received,17.42,EUR
+1235534,2018-10-13,124423,Amount of interest payment received,0.17,EUR
+1235535,2018-10-13,124424,Amount of principal payment received,20,EUR
+1235536,2018-10-13,124425,Amount of interest payment received,0.22,EUR
+1235537,2018-10-13,124426,Amount of principal payment received,10,EUR
+1235538,2018-10-13,124427,Amount of interest payment received,0.22,EUR
+1235539,2018-10-13,124428,Investment,-10.2,EUR
+1235540,2018-10-12,124429,Amount of principal payment received,10.11,EUR
+1235541,2018-10-12,124430,Amount of interest payment received,0.09,EUR
+1235542,2018-10-12,124431,Investment,-10.54,EUR
+1235543,2018-10-12,124432,Investment,-20,EUR
+1235544,2018-10-12,124433,Amount of principal payment received,20,EUR
+1235545,2018-10-12,124434,Amount of interest payment received,0.19,EUR
+1235546,2018-10-12,124435,Amount of principal payment received,10.24,EUR
+1235547,2018-10-12,124436,Amount of interest payment received,0.11,EUR
+1235548,2018-10-12,124437,Investment,-11.35,EUR
+1235549,2018-10-12,124438,Investment,-20,EUR
+1235550,2018-10-12,124439,Investment,-20,EUR
+1235551,2018-10-12,124440,Investment,-20,EUR
+1235552,2018-10-12,124441,Investment,-20,EUR
+1235553,2018-10-12,124442,Amount of principal payment received,20,EUR
+1235554,2018-10-12,124443,Amount of interest payment received,0.18,EUR
+1235555,2018-10-12,124444,Amount of principal payment received,20,EUR
+1235556,2018-10-12,124445,Amount of interest payment received,0.18,EUR
+1235557,2018-10-12,124446,Amount of principal payment received,20,EUR
+1235558,2018-10-12,124447,Amount of interest payment received,0.18,EUR
+1235559,2018-10-12,124448,Amount of principal payment received,20,EUR
+1235560,2018-10-12,124449,Amount of interest payment received,0.18,EUR
+1235561,2018-10-11,124450,Amount of principal payment received,10,EUR
+1235562,2018-10-11,124451,Amount of interest payment received,0.25,EUR
+1235563,2018-10-11,124452,Investment,-20,EUR
+1235564,2018-10-11,124453,Amount of interest payment received,0.2,EUR
+1235565,2018-10-11,124454,Amount of principal payment received,10,EUR
+1235566,2018-10-11,124455,Amount of interest payment received,0.18,EUR
+1235567,2018-10-11,124456,Amount of principal payment received,10,EUR
+1235568,2018-10-10,124457,Investment,-10.38,EUR
+1235569,2018-10-10,124458,Amount of interest payment received,0.08,EUR
+1235570,2018-10-10,124459,Amount of principal payment received,10.26,EUR
+1235571,2018-10-10,124460,Investment,-20,EUR
+1235572,2018-10-10,124461,Amount of interest payment received,0.04,EUR
+1235573,2018-10-10,124462,Amount of principal payment received,20,EUR
+1235574,2018-10-10,124463,Investment,-10.32,EUR
+1235575,2018-10-09,124464,Amount of principal payment received,10,EUR
+1235576,2018-10-09,124465,Amount of interest payment received,0.32,EUR
+1235577,2018-10-09,124466,Investment,-10.42,EUR
+1235578,2018-10-09,124467,Investment,-20,EUR
+1235579,2018-10-09,124468,Amount of principal payment received,20,EUR
+1235580,2018-10-09,124469,Amount of interest payment received,0.06,EUR
+1235581,2018-10-09,124470,Amount of interest payment received,0.09,EUR
+1235582,2018-10-09,124471,Amount of principal payment received,10.27,EUR
+1235583,2018-10-09,124472,Investment,-11.91,EUR
+1235584,2018-10-09,124473,Investment,-20,EUR
+1235585,2018-10-09,124474,Amount of interest payment received,0.16,EUR
+1235586,2018-10-09,124475,Amount of principal payment received,20,EUR
+1235587,2018-10-09,124476,Amount of principal payment received,10,EUR
+1235588,2018-10-09,124477,Amount of interest payment received,0.24,EUR
+1235589,2018-10-08,124478,Investment,-20,EUR
+1235590,2018-10-08,124479,Amount of principal payment received,10,EUR
+1235591,2018-10-08,124480,Amount of interest payment received,0.23,EUR
+1235592,2018-10-08,124481,Amount of principal payment received,10.45,EUR
+1235593,2018-10-08,124482,Amount of interest payment received,0.08,EUR
+1235594,2018-10-08,124483,Investment,-20,EUR
+1235595,2018-10-08,124484,Investment,-20,EUR
+1235596,2018-10-08,124485,Amount of principal payment received,20,EUR
+1235597,2018-10-08,124486,Amount of interest payment received,0.17,EUR
+1235598,2018-10-08,124487,Amount of principal payment received,20,EUR
+1235599,2018-10-08,124488,Amount of interest payment received,0.19,EUR
+1235600,2018-10-07,124489,Investment,-20,EUR
+1235601,2018-10-07,124490,Amount of interest payment received,0.2,EUR
+1235602,2018-10-07,124491,Amount of principal payment received,20,EUR
+1235603,2018-10-07,124492,Investment,-20,EUR
+1235604,2018-10-07,124493,Amount of interest payment received,0.19,EUR
+1235605,2018-10-07,124494,Amount of principal payment received,20,EUR
+1235606,2018-10-07,124495,Investment,-11.48,EUR
+1235607,2018-10-06,124496,Amount of principal payment received,10,EUR
+1235608,2018-10-06,124497,Amount of interest payment received,0.26,EUR
+1235609,2018-10-06,124498,Investment,-20,EUR
+1235610,2018-10-05,124499,Amount of interest payment received,0.18,EUR
+1235611,2018-10-05,124500,Amount of principal payment received,20,EUR
+1235612,2018-10-05,124501,Investment,-20,EUR
+1235613,2018-10-05,124502,Investment,-20,EUR
+1235614,2018-10-05,124503,Investment,-20,EUR
+1235615,2018-10-05,124504,Amount of principal payment received,10.23,EUR
+1235616,2018-10-05,124505,Amount of interest payment received,0.07,EUR
+1235617,2018-10-05,124506,Amount of interest payment received,0.12,EUR
+1235618,2018-10-05,124507,Amount of principal payment received,20,EUR
+1235619,2018-10-05,124508,Investment,-20,EUR
+1235620,2018-10-04,124509,Amount of principal payment received,20,EUR
+1235621,2018-10-04,124510,Amount of interest payment received,0.17,EUR
+1235622,2018-10-04,124511,Amount of principal payment received,20,EUR
+1235623,2018-10-04,124512,Amount of interest payment received,0.17,EUR
+1235624,2018-10-04,124513,Amount of principal payment received,10.11,EUR
+1235625,2018-10-04,124514,Amount of interest payment received,0.09,EUR
+1235626,2018-10-04,124515,Investment,-20,EUR
+1235627,2018-10-04,124516,Amount of principal payment received,20,EUR
+1235628,2018-10-04,124517,Amount of interest payment received,0.08,EUR
+1235629,2018-10-04,124518,Investment,-13.13,EUR
+1235630,2018-10-04,124519,Investment,-17.76,EUR
+1235631,2018-10-04,124520,Investment,-20,EUR
+1235632,2018-10-04,124521,Amount of interest payment received,0.17,EUR
+1235633,2018-10-04,124522,Amount of principal payment received,20,EUR
+1235634,2018-10-04,124523,Amount of interest payment received,0.08,EUR
+1235635,2018-10-04,124524,Amount of principal payment received,10.47,EUR
+1235636,2018-10-04,124525,Amount of interest payment received,0.17,EUR
+1235637,2018-10-04,124526,Amount of principal payment received,20,EUR
+1235638,2018-10-04,124527,Investment,-11.23,EUR
+1235639,2018-10-04,124528,Amount of principal payment received,10,EUR
+1235640,2018-10-04,124529,Amount of interest payment received,0.22,EUR
+1235641,2018-10-03,124530,Investment,-20,EUR
+1235642,2018-10-03,124531,Investment,-20,EUR
+1235643,2018-10-03,124532,Investment,-20,EUR
+1235644,2018-10-03,124533,Investment,-20,EUR
+1235645,2018-10-03,124534,Investment,-20,EUR
+1235646,2018-10-03,124535,Investment,-20,EUR
+1235647,2018-10-03,124536,Amount of interest payment received,0.17,EUR
+1235648,2018-10-03,124537,Amount of principal payment received,20,EUR
+1235649,2018-10-03,124538,Amount of interest payment received,0.17,EUR
+1235650,2018-10-03,124539,Amount of principal payment received,20,EUR
+1235651,2018-10-03,124540,Amount of interest payment received,0.17,EUR
+1235652,2018-10-03,124541,Amount of principal payment received,20,EUR
+1235653,2018-10-03,124542,Amount of interest payment received,0.17,EUR
+1235654,2018-10-03,124543,Amount of principal payment received,20,EUR
+1235655,2018-10-03,124544,Amount of interest payment received,0.17,EUR
+1235656,2018-10-03,124545,Amount of principal payment received,20,EUR
+1235657,2018-10-03,124546,Amount of interest payment received,0.16,EUR
+1235658,2018-10-03,124547,Amount of principal payment received,20,EUR
+1235659,2018-10-03,124548,Investment,-10.16,EUR
+1235660,2018-10-03,124549,Amount of interest payment received,0.07,EUR
+1235661,2018-10-03,124550,Amount of principal payment received,10.09,EUR
+1235662,2018-10-03,124551,Investment,-13.19,EUR
+1235663,2018-10-03,124552,Amount of interest payment received,0.09,EUR
+1235664,2018-10-03,124553,Amount of principal payment received,13.1,EUR
+1235665,2018-10-03,124554,Investment,-19.88,EUR
+1235666,2018-10-03,124555,Amount of interest payment received,0.07,EUR
+1235667,2018-10-03,124556,Amount of principal payment received,10.24,EUR
+1235668,2018-10-03,124557,Investment,-20,EUR
+1235669,2018-10-03,124558,Amount of interest payment received,0.11,EUR
+1235670,2018-10-03,124559,Amount of principal payment received,20,EUR
+1235671,2018-10-03,124560,Investment,-20,EUR
+1235672,2018-10-03,124561,Amount of interest payment received,0.06,EUR
+1235673,2018-10-03,124562,Amount of principal payment received,10.15,EUR
+1235674,2018-10-03,124563,Amount of interest payment received,0.11,EUR
+1235675,2018-10-03,124564,Amount of principal payment received,19.14,EUR
+1235676,2018-10-03,124565,Investment,-10.99,EUR
+1235677,2018-10-03,124566,Amount of interest payment received,0.04,EUR
+1235678,2018-10-03,124567,Amount of principal payment received,10.79,EUR
+1235679,2018-10-02,124568,Investment,-20,EUR
+1235680,2018-10-02,124569,Amount of principal payment received,20,EUR
+1235681,2018-10-02,124570,Amount of interest payment received,0.16,EUR
+1235682,2018-10-02,124571,Investment,-15.75,EUR
+1235683,2018-10-02,124572,Amount of principal payment received,10.16,EUR
+1235684,2018-10-02,124573,Amount of interest payment received,0.08,EUR
+1235685,2018-10-02,124574,Investment,-20,EUR
+1235686,2018-10-02,124575,Amount of principal payment received,20,EUR
+1235687,2018-10-02,124576,Amount of interest payment received,0.17,EUR
+1235688,2018-10-02,124577,Investment,-20,EUR
+1235689,2018-10-02,124578,Investment,-20,EUR
+1235690,2018-10-02,124579,Amount of principal payment received,20,EUR
+1235691,2018-10-02,124580,Amount of interest payment received,0.07,EUR
+1235692,2018-10-02,124581,Amount of principal payment received,13.42,EUR
+1235693,2018-10-02,124582,Amount of interest payment received,0.06,EUR
+1235694,2018-10-02,124583,Amount of principal payment received,11.1,EUR
+1235695,2018-10-02,124584,Amount of interest payment received,0.06,EUR
+1235696,2018-10-01,124585,Investment,-20,EUR
+1235697,2018-10-01,124586,Investment,-20,EUR
+1235698,2018-10-01,124587,Investment,-20,EUR
+1235699,2018-10-01,124588,Amount of principal payment received,20,EUR
+1235700,2018-10-01,124589,Amount of interest payment received,0.08,EUR
+1235701,2018-10-01,124590,Amount of principal payment received,20,EUR
+1235702,2018-10-01,124591,Amount of interest payment received,0.1,EUR
+1235703,2018-10-01,124592,Amount of principal payment received,10.09,EUR
+1235704,2018-10-01,124593,Amount of interest payment received,0.05,EUR
+1235705,2018-10-01,124594,Amount of principal payment received,10.26,EUR
+1235706,2018-10-01,124595,Amount of interest payment received,0.05,EUR
+1235707,2018-09-30,124596,Investment,-10.57,EUR
+1235708,2018-09-30,124597,Investment,-20,EUR
+1235709,2018-09-30,124598,Amount of principal payment received,10,EUR
+1235710,2018-09-30,124599,Amount of interest payment received,0.21,EUR
+1235711,2018-09-30,124600,Amount of principal payment received,10.16,EUR
+1235712,2018-09-30,124601,Amount of interest payment received,0.04,EUR
+1235713,2018-09-30,124602,Amount of principal payment received,10.12,EUR
+1235714,2018-09-30,124603,Amount of interest payment received,0.04,EUR
+1235715,2018-09-29,124604,Investment,-11.13,EUR
+1235716,2018-09-29,124605,Investment,-20,EUR
+1235717,2018-09-29,124606,Investment,-20,EUR
+1235718,2018-09-29,124607,Investment,-20,EUR
+1235719,2018-09-29,124608,Investment,-20,EUR
+1235720,2018-09-29,124609,Amount of principal payment received,20,EUR
+1235721,2018-09-29,124610,Amount of interest payment received,0.14,EUR
+1235722,2018-09-29,124611,Amount of principal payment received,20,EUR
+1235723,2018-09-29,124612,Amount of interest payment received,0.14,EUR
+1235724,2018-09-29,124613,Amount of principal payment received,20,EUR
+1235725,2018-09-29,124614,Amount of interest payment received,0.14,EUR
+1235726,2018-09-29,124615,Amount of principal payment received,10.15,EUR
+1235727,2018-09-29,124616,Amount of interest payment received,0.05,EUR
+1235728,2018-09-29,124617,Amount of principal payment received,20,EUR
+1235729,2018-09-29,124618,Amount of interest payment received,0.12,EUR
+1235730,2018-09-28,124619,Investment,-20,EUR
+1235731,2018-09-28,124620,Investment,-20,EUR
+1235732,2018-09-28,124621,Investment,-20,EUR
+1235733,2018-09-28,124622,Amount of principal payment received,20,EUR
+1235734,2018-09-28,124623,Amount of interest payment received,0.11,EUR
+1235735,2018-09-28,124624,Amount of principal payment received,20,EUR
+1235736,2018-09-28,124625,Amount of interest payment received,0.14,EUR
+1235737,2018-09-28,124626,Amount of principal payment received,20,EUR
+1235738,2018-09-28,124627,Amount of interest payment received,0.14,EUR
+1235739,2018-09-28,124628,Investment,-10.63,EUR
+1235740,2018-09-28,124629,Amount of principal payment received,10,EUR
+1235741,2018-09-28,124630,Amount of interest payment received,0.26,EUR
+1235742,2018-09-26,124631,Investment,-20,EUR
+1235743,2018-09-26,124632,Investment,-20,EUR
+1235744,2018-09-26,124633,Investment,-20,EUR
+1235745,2018-09-26,124634,Amount of principal payment received,20,EUR
+1235746,2018-09-26,124635,Amount of interest payment received,0.11,EUR
+1235747,2018-09-26,124636,Amount of principal payment received,20,EUR
+1235748,2018-09-26,124637,Amount of interest payment received,0.13,EUR
+1235749,2018-09-26,124638,Amount of principal payment received,20,EUR
+1235750,2018-09-26,124639,Amount of interest payment received,0.13,EUR
+1235751,2018-09-26,124640,Investment,-11.13,EUR
+1235752,2018-09-26,124641,Investment,-20,EUR
+1235753,2018-09-26,124642,Amount of interest payment received,0.13,EUR
+1235754,2018-09-26,124643,Amount of principal payment received,20,EUR
+1235755,2018-09-26,124644,Amount of interest payment received,0.07,EUR
+1235756,2018-09-26,124645,Amount of principal payment received,10.64,EUR
+1235757,2018-09-25,124646,Investment,-20,EUR
+1235758,2018-09-25,124647,Amount of principal payment received,10,EUR
+1235759,2018-09-25,124648,Amount of interest payment received,0.13,EUR
+1235760,2018-09-25,124649,Amount of principal payment received,10,EUR
+1235761,2018-09-25,124650,Amount of interest payment received,0.16,EUR
+1235762,2018-09-25,124651,Investment,-10.46,EUR
+1235763,2018-09-25,124652,Amount of principal payment received,10,EUR
+1235764,2018-09-25,124653,Amount of interest payment received,0.19,EUR
+1235765,2018-09-23,124654,Investment,-20,EUR
+1235766,2018-09-23,124655,Amount of principal payment received,20,EUR
+1235767,2018-09-23,124656,Amount of interest payment received,0.2,EUR
+1235768,2018-09-23,124657,Investment,-20,EUR
+1235769,2018-09-22,124658,Amount of principal payment received,20,EUR
+1235770,2018-09-22,124659,Amount of interest payment received,0.07,EUR
+1235771,2018-09-21,124660,Investment,-10.44,EUR
+1235772,2018-09-21,124661,Investment,-20,EUR
+1235773,2018-09-21,124662,Amount of interest payment received,0.1,EUR
+1235774,2018-09-21,124663,Amount of principal payment received,20,EUR
+1235775,2018-09-21,124664,Amount of interest payment received,0.04,EUR
+1235776,2018-09-21,124665,Amount of principal payment received,10.3,EUR
+1235777,2018-09-20,124666,Investment,-10.25,EUR
+1235778,2018-09-20,124667,Amount of interest payment received,0.25,EUR
+1235779,2018-09-20,124668,Amount of principal payment received,10,EUR
+1235780,2018-09-20,124669,Investment,-10.34,EUR
+1235781,2018-09-20,124670,Amount of interest payment received,0.13,EUR
+1235782,2018-09-20,124671,Amount of principal payment received,10,EUR
+1235783,2018-09-20,124672,Investment,-20,EUR
+1235784,2018-09-20,124673,Amount of principal payment received,20,EUR
+1235785,2018-09-20,124674,Amount of interest payment received,0.06,EUR
+1235786,2018-09-19,124675,Investment,-20,EUR
+1235787,2018-09-19,124676,Amount of interest payment received,0.09,EUR
+1235788,2018-09-19,124677,Amount of principal payment received,20,EUR
+1235789,2018-09-19,124678,Investment,-20,EUR
+1235790,2018-09-19,124679,Amount of principal payment received,20,EUR
+1235791,2018-09-19,124680,Amount of interest payment received,0.06,EUR
+1235792,2018-09-18,124681,Investment,-10.79,EUR
+1235793,2018-09-18,124682,Investment,-20,EUR
+1235794,2018-09-18,124683,Amount of principal payment received,10,EUR
+1235795,2018-09-18,124684,Amount of interest payment received,0.26,EUR
+1235796,2018-09-18,124685,Amount of principal payment received,10,EUR
+1235797,2018-09-18,124686,Amount of interest payment received,0.26,EUR
+1235798,2018-09-18,124687,Amount of principal payment received,10,EUR
+1235799,2018-09-18,124688,Amount of interest payment received,0.27,EUR
+1235800,2018-09-18,124689,Investment,-10.17,EUR
+1235801,2018-09-18,124690,Amount of interest payment received,0.17,EUR
+1235802,2018-09-18,124691,Amount of principal payment received,10,EUR
+1235803,2018-09-17,124692,Investment,-10.16,EUR
+1235804,2018-09-17,124693,Amount of principal payment received,10,EUR
+1235805,2018-09-17,124694,Amount of interest payment received,0.16,EUR
+1235806,2018-09-17,124695,Investment,-17.71,EUR
+1235807,2018-09-17,124696,Amount of principal payment received,17.71,EUR
+1235808,2018-09-17,124697,Amount of interest payment received,0,EUR
+1235809,2018-09-17,124698,Investment,-10.12,EUR
+1235810,2018-09-17,124699,Amount of interest payment received,0.01,EUR
+1235811,2018-09-17,124700,Amount of principal payment received,10.11,EUR
+1235812,2018-09-17,124701,Investment,-17.71,EUR
+1235813,2018-09-17,124702,Amount of principal payment received,10,EUR
+1235814,2018-09-17,124703,Amount of interest payment received,0.25,EUR
+1235815,2018-09-16,124704,Investment,-13.42,EUR
+1235816,2018-09-16,124705,Investment,-20,EUR
+1235817,2018-09-16,124706,Investment,-20,EUR
+1235818,2018-09-16,124707,Amount of principal payment received,20,EUR
+1235819,2018-09-16,124708,Amount of interest payment received,0.09,EUR
+1235820,2018-09-16,124709,Amount of principal payment received,20,EUR
+1235821,2018-09-16,124710,Amount of interest payment received,0.09,EUR
+1235822,2018-09-16,124711,Amount of principal payment received,20,EUR
+1235823,2018-09-16,124712,Amount of interest payment received,0.09,EUR
+1235824,2018-09-16,124713,Investment,-20,EUR
+1235825,2018-09-16,124714,Amount of principal payment received,10,EUR
+1235826,2018-09-16,124715,Amount of interest payment received,0.27,EUR
+1235827,2018-09-16,124716,Amount of principal payment received,10,EUR
+1235828,2018-09-16,124717,Amount of interest payment received,0.27,EUR
+1235829,2018-09-15,124718,Investment,-20,EUR
+1235830,2018-09-15,124719,Amount of principal payment received,20,EUR
+1235831,2018-09-15,124720,Amount of interest payment received,0.07,EUR
+1235832,2018-09-15,124721,Investment,-10.26,EUR
+1235833,2018-09-15,124722,Amount of principal payment received,10,EUR
+1235834,2018-09-15,124723,Amount of interest payment received,0.26,EUR
+1235835,2018-09-14,124724,Investment,-11.1,EUR
+1235836,2018-09-14,124725,Investment,-20,EUR
+1235837,2018-09-14,124726,Amount of interest payment received,0.25,EUR
+1235838,2018-09-14,124727,Amount of principal payment received,10,EUR
+1235839,2018-09-14,124728,Amount of interest payment received,0.19,EUR
+1235840,2018-09-14,124729,Amount of principal payment received,10,EUR
+1235841,2018-09-14,124730,Amount of interest payment received,0.18,EUR
+1235842,2018-09-14,124731,Amount of principal payment received,10,EUR
+1235843,2018-09-14,124732,Investment,-20,EUR
+1235844,2018-09-14,124733,Amount of interest payment received,0.12,EUR
+1235845,2018-09-14,124734,Amount of principal payment received,10,EUR
+1235846,2018-09-14,124735,Amount of interest payment received,0.12,EUR
+1235847,2018-09-14,124736,Amount of principal payment received,10,EUR
+1235848,2018-09-14,124737,Investment,-20,EUR
+1235849,2018-09-14,124738,Amount of interest payment received,0.12,EUR
+1235850,2018-09-14,124739,Amount of principal payment received,10,EUR
+1235851,2018-09-14,124740,Amount of interest payment received,0.12,EUR
+1235852,2018-09-14,124741,Amount of principal payment received,10,EUR
+1235853,2018-09-14,124742,Investment,-10.11,EUR
+1235854,2018-09-14,124743,Amount of interest payment received,0.11,EUR
+1235855,2018-09-14,124744,Amount of principal payment received,10,EUR
+1235856,2018-09-14,124745,Investment,-10.11,EUR
+1235857,2018-09-14,124746,Amount of interest payment received,0.11,EUR
+1235858,2018-09-14,124747,Amount of principal payment received,10,EUR
+1235859,2018-09-13,124748,Investment,-19.14,EUR
+1235860,2018-09-13,124749,Investment,-20,EUR
+1235861,2018-09-13,124750,Amount of principal payment received,20,EUR
+1235862,2018-09-13,124751,Amount of interest payment received,0.06,EUR
+1235863,2018-09-13,124752,Amount of principal payment received,18.84,EUR
+1235864,2018-09-13,124753,Amount of interest payment received,0.06,EUR
+1235865,2018-09-13,124754,Investment,-20,EUR
+1235866,2018-09-13,124755,Investment,-20,EUR
+1235867,2018-09-13,124756,Investment,-20,EUR
+1235868,2018-09-13,124757,Investment,-20,EUR
+1235869,2018-09-13,124758,Amount of principal payment received,20,EUR
+1235870,2018-09-13,124759,Amount of interest payment received,0,EUR
+1235871,2018-09-13,124760,Amount of principal payment received,20,EUR
+1235872,2018-09-13,124761,Amount of interest payment received,0.06,EUR
+1235873,2018-09-13,124762,Amount of principal payment received,20,EUR
+1235874,2018-09-13,124763,Amount of interest payment received,0.06,EUR
+1235875,2018-09-13,124764,Amount of principal payment received,20,EUR
+1235876,2018-09-13,124765,Amount of interest payment received,0.06,EUR
+1235877,2018-09-13,124766,Investment,-10.45,EUR
+1235878,2018-09-13,124767,Investment,-20,EUR
+1235879,2018-09-13,124768,Amount of interest payment received,0.09,EUR
+1235880,2018-09-13,124769,Amount of principal payment received,10,EUR
+1235881,2018-09-13,124770,Amount of interest payment received,0.09,EUR
+1235882,2018-09-13,124771,Amount of principal payment received,10,EUR
+1235883,2018-09-13,124772,Amount of interest payment received,0.09,EUR
+1235884,2018-09-13,124773,Amount of principal payment received,10,EUR
+1235885,2018-09-13,124774,Investment,-20,EUR
+1235886,2018-09-13,124775,Amount of interest payment received,0.09,EUR
+1235887,2018-09-13,124776,Amount of principal payment received,10,EUR
+1235888,2018-09-13,124777,Amount of interest payment received,0.09,EUR
+1235889,2018-09-13,124778,Amount of principal payment received,10,EUR
+1235890,2018-09-13,124779,Investment,-10.09,EUR
+1235891,2018-09-13,124780,Amount of interest payment received,0.09,EUR
+1235892,2018-09-13,124781,Amount of principal payment received,10,EUR
+1235893,2018-09-12,124782,Investment,-10.23,EUR
+1235894,2018-09-12,124783,Amount of principal payment received,10,EUR
+1235895,2018-09-12,124784,Amount of interest payment received,0.23,EUR
+1235896,2018-09-12,124785,Investment,-10.26,EUR
+1235897,2018-09-12,124786,Amount of principal payment received,10,EUR
+1235898,2018-09-12,124787,Amount of interest payment received,0.26,EUR
+1235899,2018-09-12,124788,Investment,-10.15,EUR
+1235900,2018-09-12,124789,Amount of interest payment received,0.15,EUR
+1235901,2018-09-12,124790,Amount of principal payment received,10,EUR
+1235902,2018-09-11,124791,Investment,-10.15,EUR
+1235903,2018-09-11,124792,Amount of interest payment received,0.15,EUR
+1235904,2018-09-11,124793,Amount of principal payment received,10,EUR
+1235905,2018-09-11,124794,Investment,-10.08,EUR
+1235906,2018-09-11,124795,Amount of principal payment received,10,EUR
+1235907,2018-09-11,124796,Amount of interest payment received,0.08,EUR
+1235908,2018-09-10,124797,Investment,-10.27,EUR
+1235909,2018-09-10,124798,Amount of principal payment received,10,EUR
+1235910,2018-09-10,124799,Amount of interest payment received,0.27,EUR
+1235911,2018-09-10,124800,Investment,-10.47,EUR
+1235912,2018-09-10,124801,Amount of principal payment received,10,EUR
+1235913,2018-09-10,124802,Amount of interest payment received,0.31,EUR
+1235914,2018-09-10,124803,Investment,-20,EUR
+1235915,2018-09-10,124804,Investment,-20,EUR
+1235916,2018-09-10,124805,Investment,-20,EUR
+1235917,2018-09-10,124806,Investment,-20,EUR
+1235918,2018-09-10,124807,Amount of interest payment received,0.04,EUR
+1235919,2018-09-10,124808,Amount of principal payment received,20,EUR
+1235920,2018-09-10,124809,Amount of interest payment received,0.04,EUR
+1235921,2018-09-10,124810,Amount of principal payment received,20,EUR
+1235922,2018-09-10,124811,Amount of interest payment received,0.04,EUR
+1235923,2018-09-10,124812,Amount of principal payment received,20,EUR
+1235924,2018-09-10,124813,Amount of interest payment received,0.04,EUR
+1235925,2018-09-10,124814,Amount of principal payment received,20,EUR
+1235926,2018-09-10,124815,Investment,-10.24,EUR
+1235927,2018-09-10,124816,Amount of principal payment received,10,EUR
+1235928,2018-09-10,124817,Amount of interest payment received,0.08,EUR
+1235929,2018-09-10,124818,Investment,-20,EUR
+1235930,2018-09-10,124819,Amount of principal payment received,10,EUR
+1235931,2018-09-10,124820,Amount of interest payment received,0.08,EUR
+1235932,2018-09-10,124821,Amount of principal payment received,10,EUR
+1235933,2018-09-10,124822,Amount of interest payment received,0.08,EUR
+1235934,2018-09-10,124823,Investment,-10.59,EUR
+1235935,2018-09-10,124824,Amount of principal payment received,10,EUR
+1235936,2018-09-10,124825,Amount of interest payment received,0.09,EUR
+1235937,2018-09-08,124826,Investment,-20,EUR
+1235938,2018-09-08,124827,Investment,-20,EUR
+1235939,2018-09-08,124828,Investment,-20,EUR
+1235940,2018-09-08,124829,Investment,-20,EUR
+1235941,2018-09-08,124830,Investment,-20,EUR
+1235942,2018-09-08,124831,Amount of principal payment received,20,EUR
+1235943,2018-09-08,124832,Amount of interest payment received,0.1,EUR
+1235944,2018-09-08,124833,Amount of principal payment received,20,EUR
+1235945,2018-09-08,124834,Amount of interest payment received,0.1,EUR
+1235946,2018-09-08,124835,Amount of principal payment received,20,EUR
+1235947,2018-09-08,124836,Amount of interest payment received,0.1,EUR
+1235948,2018-09-08,124837,Amount of principal payment received,20,EUR
+1235949,2018-09-08,124838,Amount of interest payment received,0.1,EUR
+1235950,2018-09-08,124839,Amount of principal payment received,20,EUR
+1235951,2018-09-08,124840,Amount of interest payment received,0.1,EUR
+1235952,2018-09-08,124841,Investment,-10.07,EUR
+1235953,2018-09-08,124842,Amount of principal payment received,10,EUR
+1235954,2018-09-08,124843,Amount of interest payment received,0.07,EUR
+1235955,2018-09-08,124844,Investment,-10.14,EUR
+1235956,2018-09-08,124845,Amount of principal payment received,10,EUR
+1235957,2018-09-08,124846,Amount of interest payment received,0.14,EUR
+1235958,2018-09-08,124847,Investment,-13.1,EUR
+1235959,2018-09-08,124848,Amount of principal payment received,10,EUR
+1235960,2018-09-08,124849,Amount of interest payment received,0.14,EUR
+1235961,2018-09-08,124850,Investment,-17.42,EUR
+1235962,2018-09-08,124851,Amount of principal payment received,10,EUR
+1235963,2018-09-08,124852,Amount of interest payment received,0.09,EUR
+1235964,2018-09-08,124853,Amount of principal payment received,10,EUR
+1235965,2018-09-08,124854,Amount of interest payment received,0.09,EUR
+1235966,2018-09-08,124855,Investment,-20,EUR
+1235967,2018-09-08,124856,Amount of principal payment received,10,EUR
+1235968,2018-09-08,124857,Amount of interest payment received,0.1,EUR
+1235969,2018-09-08,124858,Amount of principal payment received,10,EUR
+1235970,2018-09-08,124859,Amount of interest payment received,0.1,EUR
+1235971,2018-09-07,124860,Investment,-10.09,EUR
+1235972,2018-09-07,124861,Amount of principal payment received,10,EUR
+1235973,2018-09-07,124862,Amount of interest payment received,0.09,EUR
+1235974,2018-09-07,124863,Investment,-10.3,EUR
+1235975,2018-09-07,124864,Investment,-20,EUR
+1235976,2018-09-07,124865,Amount of principal payment received,10,EUR
+1235977,2018-09-07,124866,Amount of interest payment received,0.09,EUR
+1235978,2018-09-07,124867,Amount of principal payment received,10,EUR
+1235979,2018-09-07,124868,Amount of interest payment received,0.09,EUR
+1235980,2018-09-07,124869,Amount of principal payment received,10,EUR
+1235981,2018-09-07,124870,Amount of interest payment received,0.09,EUR
+1235982,2018-09-07,124871,Investment,-20,EUR
+1235983,2018-09-07,124872,Amount of principal payment received,20,EUR
+1235984,2018-09-07,124873,Amount of interest payment received,0.03,EUR
+1235985,2018-09-06,124874,Investment,-15.17,EUR
+1235986,2018-09-06,124875,Investment,-20,EUR
+1235987,2018-09-06,124876,Investment,-20,EUR
+1235988,2018-09-06,124877,Investment,-20,EUR
+1235989,2018-09-06,124878,Amount of principal payment received,10,EUR
+1235990,2018-09-06,124879,Amount of interest payment received,0.27,EUR
+1235991,2018-09-06,124880,Amount of principal payment received,10,EUR
+1235992,2018-09-06,124881,Amount of interest payment received,0.31,EUR
+1235993,2018-09-06,124882,Amount of principal payment received,20,EUR
+1235994,2018-09-06,124883,Amount of interest payment received,0.09,EUR
+1235995,2018-09-06,124884,Amount of principal payment received,20,EUR
+1235996,2018-09-06,124885,Amount of interest payment received,0.09,EUR
+1235997,2018-09-06,124886,Amount of principal payment received,13.79,EUR
+1235998,2018-09-06,124887,Amount of interest payment received,0.06,EUR
+1235999,2018-09-06,124888,Investment,-20,EUR
+1236000,2018-09-06,124889,Amount of principal payment received,20,EUR
+1236001,2018-09-06,124890,Amount of interest payment received,0.02,EUR
+1236002,2018-09-06,124891,Investment,-20,EUR
+1236003,2018-09-06,124892,Investment,-20,EUR
+1236004,2018-09-06,124893,Investment,-20,EUR
+1236005,2018-09-06,124894,Amount of interest payment received,0.09,EUR
+1236006,2018-09-06,124895,Amount of principal payment received,10,EUR
+1236007,2018-09-06,124896,Amount of interest payment received,0.09,EUR
+1236008,2018-09-06,124897,Amount of principal payment received,10,EUR
+1236009,2018-09-06,124898,Amount of interest payment received,0.09,EUR
+1236010,2018-09-06,124899,Amount of principal payment received,10,EUR
+1236011,2018-09-06,124900,Amount of interest payment received,0.09,EUR
+1236012,2018-09-06,124901,Amount of principal payment received,10,EUR
+1236013,2018-09-06,124902,Amount of interest payment received,0.09,EUR
+1236014,2018-09-06,124903,Amount of principal payment received,10,EUR
+1236015,2018-09-06,124904,Amount of interest payment received,0.09,EUR
+1236016,2018-09-06,124905,Amount of principal payment received,10,EUR
+1236017,2018-09-06,124906,Investment,-10.64,EUR
+1236018,2018-09-06,124907,Amount of interest payment received,0.09,EUR
+1236019,2018-09-06,124908,Amount of principal payment received,10,EUR
+1236020,2018-09-05,124909,Investment,-20,EUR
+1236021,2018-09-05,124910,Amount of principal payment received,10,EUR
+1236022,2018-09-05,124911,Amount of interest payment received,0.27,EUR
+1236023,2018-09-05,124912,Amount of principal payment received,10,EUR
+1236024,2018-09-05,124913,Amount of interest payment received,0.28,EUR
+1236025,2018-09-05,124914,Investment,-10.11,EUR
+1236026,2018-09-05,124915,Investment,-20,EUR
+1236027,2018-09-05,124916,Investment,-20,EUR
+1236028,2018-09-05,124917,Investment,-20,EUR
+1236029,2018-09-05,124918,Amount of principal payment received,20,EUR
+1236030,2018-09-05,124919,Amount of interest payment received,0.01,EUR
+1236031,2018-09-05,124920,Amount of principal payment received,20,EUR
+1236032,2018-09-05,124921,Amount of interest payment received,0.01,EUR
+1236033,2018-09-05,124922,Amount of principal payment received,20,EUR
+1236034,2018-09-05,124923,Amount of interest payment received,0.01,EUR
+1236035,2018-09-05,124924,Amount of interest payment received,0.08,EUR
+1236036,2018-09-05,124925,Amount of principal payment received,10,EUR
+1236037,2018-09-05,124926,Investment,-10.24,EUR
+1236038,2018-09-05,124927,Amount of interest payment received,0.06,EUR
+1236039,2018-09-05,124928,Amount of principal payment received,10,EUR
+1236040,2018-09-05,124929,Investment,-20,EUR
+1236041,2018-09-05,124930,Amount of interest payment received,0.09,EUR
+1236042,2018-09-05,124931,Amount of principal payment received,10,EUR
+1236043,2018-09-05,124932,Amount of interest payment received,0.09,EUR
+1236044,2018-09-05,124933,Amount of principal payment received,10,EUR
+1236045,2018-09-05,124934,Investment,-10.08,EUR
+1236046,2018-09-05,124935,Amount of interest payment received,0.08,EUR
+1236047,2018-09-05,124936,Amount of principal payment received,10,EUR
+1236048,2018-09-05,124937,Investment,-10.24,EUR
+1236049,2018-09-05,124938,Amount of interest payment received,0.08,EUR
+1236050,2018-09-05,124939,Amount of principal payment received,10,EUR
+1236051,2018-09-05,124940,Investment,-20,EUR
+1236052,2018-09-05,124941,Amount of interest payment received,0.08,EUR
+1236053,2018-09-05,124942,Amount of principal payment received,10,EUR
+1236054,2018-09-05,124943,Amount of interest payment received,0.08,EUR
+1236055,2018-09-05,124944,Amount of principal payment received,10,EUR
+1236056,2018-09-05,124945,Investment,-10.06,EUR
+1236057,2018-09-05,124946,Amount of interest payment received,0.06,EUR
+1236058,2018-09-05,124947,Amount of principal payment received,10,EUR
+1236059,2018-09-05,124948,Investment,-10.16,EUR
+1236060,2018-09-05,124949,Amount of principal payment received,10,EUR
+1236061,2018-09-05,124950,Amount of interest payment received,0.06,EUR
+1236062,2018-09-04,124951,Investment,-20,EUR
+1236063,2018-09-04,124952,Amount of principal payment received,20,EUR
+1236064,2018-09-04,124953,Amount of interest payment received,0.01,EUR
+1236065,2018-09-04,124954,Investment,-20,EUR
+1236066,2018-09-04,124955,Amount of interest payment received,0.13,EUR
+1236067,2018-09-04,124956,Amount of principal payment received,10,EUR
+1236068,2018-09-03,124957,Investment,-20,EUR
+1236069,2018-09-03,124958,Investment,-20,EUR
+1236070,2018-09-03,124959,Investment,-20,EUR
+1236071,2018-09-03,124960,Investment,-20,EUR
+1236072,2018-09-03,124961,Investment,-20,EUR
+1236073,2018-09-03,124962,Investment,-20,EUR
+1236074,2018-09-03,124963,Investment,-20,EUR
+1236075,2018-09-03,124964,Investment,-20,EUR
+1236076,2018-09-03,124965,Investment,-20,EUR
+1236077,2018-09-03,124966,Investment,-20,EUR
+1236078,2018-09-03,124967,Investment,-20,EUR
+1236079,2018-09-03,124968,Investment,-20,EUR
+1236080,2018-09-03,124969,Investment,-20,EUR
+1236081,2018-09-03,124970,Investment,-20,EUR
+1236082,2018-09-03,124971,Investment,-20,EUR
+1236083,2018-09-03,124972,Investment,-20,EUR
+1236084,2018-09-03,124973,Investment,-20,EUR
+1236085,2018-09-03,124974,Investment,-20,EUR
+1236086,2018-09-03,124975,Investment,-20,EUR
+1236087,2018-09-03,124976,Investment,-20,EUR
+1236088,2018-09-03,124977,Investment,-20,EUR
+1236089,2018-09-03,124978,Investment,-20,EUR
+1236090,2018-09-03,124979,Investment,-20,EUR
+1236091,2018-09-03,124980,Investment,-20,EUR
+1236092,2018-09-03,124981,Investment,-20,EUR
+1236093,2018-09-03,124982,Investment,-20,EUR
+1236094,2018-09-03,124983,Investment,-20,EUR
+1236095,2018-09-03,124984,Investment,-20,EUR
+1236096,2018-09-03,124985,Investment,-20,EUR
+1236097,2018-09-03,124986,Investment,-20,EUR
+1236098,2018-09-03,124987,Investment,-20,EUR
+1236099,2018-09-03,124988,Investment,-18.84,EUR
+1236100,2018-09-03,124989,Investment,-20,EUR
+1236101,2018-09-03,124990,Investment,-20,EUR
+1236102,2018-09-03,124991,Investment,-20,EUR
+1236103,2018-09-03,124992,Investment,-20,EUR
+1236104,2018-09-03,124993,Investment,-20,EUR
+1236105,2018-09-03,124994,Investment,-20,EUR
+1236106,2018-09-03,124995,Investment,-20,EUR
+1236107,2018-09-03,124996,Investment,-20,EUR
+1236108,2018-09-03,124997,Investment,-20,EUR
+1236109,2018-09-03,124998,Amount of principal payment received,10,EUR
+1236110,2018-09-03,124999,Amount of interest payment received,0.05,EUR
+1236111,2018-09-03,125000,Amount of principal payment received,10,EUR
+1236112,2018-09-03,125001,Amount of interest payment received,0.05,EUR
+1236113,2018-09-03,125002,Amount of principal payment received,10,EUR
+1236114,2018-09-03,125003,Amount of interest payment received,0.05,EUR
+1236115,2018-09-03,125004,Amount of principal payment received,10,EUR
+1236116,2018-09-03,125005,Amount of interest payment received,0.05,EUR
+1236117,2018-09-03,125006,Amount of principal payment received,10,EUR
+1236118,2018-09-03,125007,Amount of interest payment received,0.05,EUR
+1236119,2018-09-03,125008,Amount of principal payment received,10,EUR
+1236120,2018-09-03,125009,Amount of interest payment received,0.05,EUR
+1236121,2018-09-02,125010,Amount of principal payment received,10,EUR
+1236122,2018-09-02,125011,Amount of interest payment received,0.05,EUR
+1236123,2018-09-02,125012,Amount of principal payment received,10,EUR
+1236124,2018-09-02,125013,Amount of interest payment received,0.05,EUR
+1236125,2018-09-02,125014,Amount of principal payment received,10,EUR
+1236126,2018-09-02,125015,Amount of interest payment received,0.05,EUR
+1236127,2018-09-02,125016,Amount of principal payment received,10,EUR
+1236128,2018-09-02,125017,Amount of interest payment received,0.05,EUR
+1236129,2018-09-02,125018,Amount of principal payment received,10,EUR
+1236130,2018-09-02,125019,Amount of interest payment received,0.05,EUR
+1236131,2018-09-02,125020,Amount of principal payment received,10,EUR
+1236132,2018-09-02,125021,Amount of interest payment received,0.05,EUR
+1236133,2018-09-02,125022,Amount of principal payment received,10,EUR
+1236134,2018-09-02,125023,Amount of interest payment received,0.05,EUR
+1236135,2018-09-02,125024,Amount of principal payment received,10,EUR
+1236136,2018-09-02,125025,Amount of interest payment received,0.05,EUR
+1236137,2018-09-02,125026,Amount of principal payment received,10,EUR
+1236138,2018-09-02,125027,Amount of interest payment received,0.07,EUR
+1236139,2018-09-02,125028,Amount of principal payment received,10,EUR
+1236140,2018-09-02,125029,Amount of interest payment received,0.07,EUR
+1236141,2018-09-02,125030,Amount of principal payment received,10,EUR
+1236142,2018-09-02,125031,Amount of interest payment received,0.07,EUR
+1236143,2018-09-02,125032,Amount of principal payment received,10,EUR
+1236144,2018-09-02,125033,Amount of interest payment received,0.08,EUR
+1236145,2018-09-02,125034,Amount of principal payment received,10,EUR
+1236146,2018-09-02,125035,Amount of interest payment received,0.08,EUR
+1236147,2018-09-02,125036,Amount of principal payment received,10,EUR
+1236148,2018-09-02,125037,Amount of interest payment received,0.08,EUR
+1236149,2018-09-02,125038,Amount of principal payment received,10,EUR
+1236150,2018-09-02,125039,Amount of interest payment received,0.09,EUR

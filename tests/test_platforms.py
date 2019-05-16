@@ -241,7 +241,7 @@ class PeerBerryTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'PeerBerry'
         self.Platform = p2p_platforms.PeerBerry
-        self.unknown_cf_types = ''
+        self.unknown_cf_types = 'TestCF1, TestCF2'
 
 
 class RobocashTests(BasePlatformTests):
