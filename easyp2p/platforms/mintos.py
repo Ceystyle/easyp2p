@@ -160,7 +160,7 @@ class Mintos:
             parser.df['Mintos_Cashflow-Typ'] = \
                 parser.df['Mintos_Cashflow-Typ'].str.split(
                     ' Rebuy purpose').str[0]
-        except KeyError:
+        except (KeyError, ValueError):
             pass
 
         # Define mapping between Mintos and easyp2p cashflow types and column
