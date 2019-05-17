@@ -17,8 +17,6 @@ from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
 
-import easyp2p.p2p_helper as p2p_helper
-
 
 class P2PParser:
 
@@ -248,7 +246,8 @@ class P2PParser:
                 statement which contains the cash flow type
 
         Returns:
-            Sorted set of strings with all unknown cash flow types.
+            Sorted string with all unknown cash flow types, separated by
+            commas.
 
         """
         if cashflow_types:
@@ -395,157 +394,191 @@ def _get_list_of_months(date_range: Tuple[date, date]) \
 
 
 def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
-    """
-    Sum up the results contained in data frames and write them to Excel file.
 
-    The results are presented in three ways: on a daily (in the Excel tab
-    'Tagesergebnisse') and monthly ('Monatsergebnisse') basis and the total
-    sums ('Gesamtergebnis') for the period between start and end date.
+    """
+    Function for writing daily, monthly and total investment results to Excel.
 
     Args:
-        df_result: DataFrame containing the parsed results from all selected
-            P2P platforms
-        output_file: Absolute path of the output file
+        df_result: DataFrame containing parsed account statements for all
+            selected P2P platforms.
+        output_file: File name including path where to save the Excel file.
 
     Returns:
-        True on success, False on failure
+        True on success, False on failure.
+
+    Raises:
+        RuntimeError: If date, platform or currency column are missing
+            in df_result.
 
     """
+
+    def get_daily_results() -> pd.DataFrame:
+        """
+        Get daily results from DataFrame.
+
+        Returns:
+            DataFrame with the daily results.
+
+        """
+        df = df_result.copy()
+        df.set_index(
+            [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.DATE],
+            inplace=True)
+        return df
+
+    def get_monthly_results() -> pd.DataFrame:
+        """
+        Get monthly results from DataFrame.
+
+        Returns:
+            DataFrame with the monthly results.
+
+        """
+        # Define index for pivot table
+        index = [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH]
+
+        df = df_result.pivot_table(
+            values=pivot_columns, index=index, aggfunc=aggfunc)
+        df = add_balances(df, df_result, index)
+        return df
+
+    def get_total_results() -> pd.DataFrame:
+        """
+        Get total results from DataFrame.
+
+        Returns:
+            DataFrame with the total results.
+
+        """
+        # Define index for pivot table
+        index = [P2PParser.PLATFORM, P2PParser.CURRENCY]
+
+        df = df_monthly.pivot_table(
+            values=pivot_columns, index=index, aggfunc=aggfunc, margins=True,
+            dropna=False, margins_name='Total')
+        df = add_balances(df, df_monthly, index)
+        return df
+
+    def add_balances(
+            df: pd.DataFrame, df_balances: pd.DataFrame,
+            groupby_columns: Sequence[str]) -> pd.DataFrame:
+        """
+        Add balance columns to DataFrame.
+
+        The balance columns must be treated separately since they cannot simply
+        be summed up during pivot table creation like the other columns.
+
+        Args:
+            df: DataFrame to which balance columns should be added.
+            df_balances: DataFrame which was used to create the pivot table.
+            groupby_columns: List of column names used to create the pivot
+                table.
+
+        """
+        try:
+            df[P2PParser.START_BALANCE_NAME] = \
+                df_balances.groupby(groupby_columns).first()[
+                    P2PParser.START_BALANCE_NAME]
+            df[P2PParser.END_BALANCE_NAME] = \
+                df_balances.groupby(groupby_columns).last()[
+                    P2PParser.END_BALANCE_NAME]
+        except KeyError:
+            pass
+
+        return df
+
+    def write_worksheet(worksheet_name: str, df: pd.DataFrame) -> None:
+        """
+        Write DataFrame to Excel worksheet and format columns.
+
+        For each column in the worksheet the width is set to the maximum length
+        * 1,2 of all entries in the column. For all non-index columns the_format
+        is set to money_format.
+
+        Args:
+            worksheet_name: Name of the worksheet where DataFrame should be
+                saved.
+            df: DataFrame containing the data to be written to the worksheet.
+
+        """
+        # Rounds results to 2 digits, sort columns and fill in missing values
+        df = df.round(2)
+        try:
+            df = df[P2PParser.TARGET_COLUMNS]
+        except KeyError:
+            pass
+        df.fillna('N/A', inplace=True)
+
+        df.to_excel(writer, worksheet_name)
+        worksheet = writer.sheets[worksheet_name]
+        index_length = len(df.index.names)
+        df = df.reset_index()
+        for index, col in enumerate(df.columns):
+            # Get length of header and longest data entry
+            header_length = len(col)
+            data_length = df[col].map(lambda x: len(str(x))).max()
+            if index < index_length:
+                worksheet.set_column(
+                    index, index, max(header_length, data_length) * 1.2)
+            else:
+                worksheet.set_column(
+                    index, index, max(header_length, data_length) * 1.2,
+                    money_format)
+
+    DAILY_RESULTS = 'Tagesergebnisse'
+    MONTHLY_RESULTS = 'Monatsergebnisse'
+    TOTAL_RESULTS = 'Gesamtergebnis'
+
     if df_result.empty:
         return False
 
-    # No calculation necessary to get daily results
-    df_daily = df_result.copy()
-    df_daily.reset_index(inplace=True)
-    df_daily[P2PParser.DATE] = pd.to_datetime(
-        df_daily[P2PParser.DATE], format='%Y-%m-%d').dt.strftime('%d.%m.%Y')
-    df_daily.set_index(
-        [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.DATE], inplace=True)
-
-    # Create Month column
+    # Get all columns with values
     df_result.reset_index(inplace=True)
+    balance_columns = [
+        P2PParser.START_BALANCE_NAME, P2PParser.END_BALANCE_NAME]
+    pivot_columns = [
+        column for column in P2PParser.TARGET_COLUMNS
+        if column in df_result.columns and column not in balance_columns]
+    if not pivot_columns:
+        return False
+
+    # Make sure that all index columns are present
+    for column in [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.DATE]:
+        if column not in df_result.columns:
+            raise RuntimeError(
+                'Schreiben nach Excel fehlgeschlagen! Spalte {} ist nicht '
+                'vorhanden!'.format(column))
+
+    # Format date column and add month column to DataFrame
     df_result[P2PParser.DATE] = pd.to_datetime(
         df_result[P2PParser.DATE], format='%Y-%m-%d')
     df_result[P2PParser.MONTH] = pd.to_datetime(
         df_result[P2PParser.DATE], format='%d.%m.%Y').dt.to_period('M')
 
-    # Calculate results per month and platform, keeping the NaNs
-    value_columns = [
-        column for column in P2PParser.TARGET_COLUMNS
-        if column in df_result.columns]
-    df_monthly = pd.pivot_table(
-        df_result, values=value_columns,
-        index=[P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH],
-        aggfunc=lambda x: x.sum(min_count=1))
-    _correct_balances(
-        df_monthly, df_result,
-        [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH])
+    # Define aggregation functions to create the pivot tables
+    # Only sum up columns with at least one non-NaN value. Otherwise NaN
+    # columns will be replaced by zeros when building the pivot table.
+    aggfunc = lambda x: x.sum(min_count=1)
 
-    # Calculate total results per platform
-    df_total = pd.pivot_table(
-        df_monthly, values=value_columns,
-        index=[P2PParser.PLATFORM, P2PParser.CURRENCY],
-        aggfunc=lambda x: x.sum(min_count=1), margins=True, dropna=False,
-        margins_name='Total')
-    _correct_balances(
-        df_total, df_monthly, [P2PParser.PLATFORM, P2PParser.CURRENCY])
+    # Get daily, monthly and total results
+    df_daily = get_daily_results()
+    df_monthly = get_monthly_results()
+    df_total = get_total_results()
 
-    df_daily = _format_df_columns(df_daily, value_columns)
-    df_monthly = _format_df_columns(df_monthly, value_columns)
-    df_total = _format_df_columns(df_total, value_columns)
+    # Write all three DataFrames to Excel
+    with pd.ExcelWriter(
+            output_file, datetime_format='DD.MM.YYYY',
+            engine='xlsxwriter') as writer:
+        # Define format for currency columns
+        workbook = writer.book
+        money_format = workbook.add_format({'num_format': '#,##0.00'})
 
-    # Write monthly results to file
-    writer = pd.ExcelWriter(
-        output_file, date_format='%d.%m.%Y', engine='xlsxwriter')
-    _write_worksheet(writer, 'Tagesergebnisse', df_daily)
-    _write_worksheet(writer, 'Monatsergebnisse', df_monthly)
-    _write_worksheet(writer, 'Gesamtergebnis', df_total)
-    writer.save()
+        # Write DataFrames to Excel file
+        write_worksheet(DAILY_RESULTS, df_daily)
+        write_worksheet(MONTHLY_RESULTS, df_monthly)
+        write_worksheet(TOTAL_RESULTS, df_total)
 
     return True
-
-
-def _correct_balances(
-        df: pd.DataFrame, df_correct: pd.DataFrame, groupby: Sequence[str]) \
-        -> None:
-    """
-    Correction of balances which were incorrectly summed up.
-
-    During creation of the pivot table df start and end balance columns were
-    summed up as well if they were present. That's obviously not correct, so we
-    will look up the correct values in df_correct and overwrite the sums.
-
-    Args:
-        df: DataFrame containing pivot table with the wrong balances
-        df_correct: DataFrame containing the correct balances
-        groupby: List of column names used to create the pivot table
-
-    """
-    try:
-        df[P2PParser.START_BALANCE_NAME] = df_correct.groupby(groupby).first()[
-            P2PParser.START_BALANCE_NAME]
-        df[P2PParser.END_BALANCE_NAME] = df_correct.groupby(groupby).last()[
-            P2PParser.END_BALANCE_NAME]
-    except KeyError:
-        pass
-
-
-def _format_df_columns(df: pd.DataFrame, sort_columns: Sequence[str]) \
-        -> pd.DataFrame:
-    """
-    Round, sort and fill N/As in all provided Dataframes.
-
-    Args:
-        df: DataFrame which needs to be formatted
-        sort_columns: List of column names in the order how they must be sorted
-
-    Returns:
-        The formatted DataFrame
-
-    """
-    # Round all results to 2 digits
-    df = df.round(2)
-
-    # Sort columns
-    df = df[sort_columns]
-
-    # Fill empty cells with N/A
-    df.fillna('N/A', inplace=True)
-
-    return df
-
-
-def _write_worksheet(
-        writer: pd.ExcelWriter, worksheet_name: str, df: pd.DataFrame) -> None:
-    """
-    Write DataFrame to Excel worksheet and format columns.
-
-    For each column in the worksheet the width is set to the maximum length
-    * 1,2 of all entries in the column. For all non-index columns the_format
-    is set to money_format.
-
-    Args:
-        writer: Handle of ExcelWriter
-        worksheet_name: Name of the worksheet where DataFrame should be saved
-        df: DataFrame containing the data to be written to the worksheet
-
-    """
-    workbook = writer.book
-    money_format = workbook.add_format({'num_format': '#,##0.00'})
-    df.to_excel(writer, worksheet_name)
-    worksheet = writer.sheets[worksheet_name]
-    index_length = len(df.index.names)
-    df = df.reset_index()
-    for index, col in enumerate(df.columns):
-        header_length = len(col)
-        data_length = df[col].map(lambda x: len(str(x))).max()
-        if index < index_length:
-            worksheet.set_column(
-                index, index, max(header_length, data_length) * 1.2)
-        else:
-            worksheet.set_column(
-                index, index, max(header_length, data_length) * 1.2,
-                money_format)
 
 
 def get_df_from_file(input_file: str, header: int = 0) -> pd.DataFrame:

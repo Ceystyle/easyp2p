@@ -34,38 +34,56 @@ class ParserTests(unittest.TestCase):
         """
         p2p_parser.write_results(df_result, result_file)
 
-        daily_pivot_table = pd.read_excel(
-            result_file, 'Tagesergebnisse')
-        daily_pivot_table_exp = pd.read_excel(
-            exp_result_file, 'Tagesergebnisse')
-        monthly_pivot_table = pd.read_excel(
+        df_daily = pd.read_excel(
+            result_file, 'Tagesergebnisse', parse_dates=[2])
+        exp_df_daily = pd.read_excel(
+            exp_result_file, 'Tagesergebnisse', parse_dates=[2])
+        df_monthly = pd.read_excel(
             result_file, 'Monatsergebnisse')
-        monthly_pivot_table_exp = pd.read_excel(
+        exp_df_monthly = pd.read_excel(
             exp_result_file, 'Monatsergebnisse')
-        totals_pivot_table = pd.read_excel(
+        df_total = pd.read_excel(
             result_file, 'Gesamtergebnis')
-        totals_pivot_table_exp = pd.read_excel(
+        exp_df_total = pd.read_excel(
             exp_result_file, 'Gesamtergebnis')
 
         try:
-            self.assertTrue(daily_pivot_table.equals(daily_pivot_table_exp))
+            self.assertTrue(df_daily.equals(exp_df_daily))
         except AssertionError:
-            print('Actual result:\n', daily_pivot_table)
-            print('Expected result:\n', daily_pivot_table_exp)
+            print(
+                'df_daily:\n',
+                df_daily.loc[(df_daily != exp_df_daily).any(1),
+                             (df_daily != exp_df_daily).any(0)])
+            print(
+                'exp_df_daily:\n',
+                exp_df_daily.loc[(df_daily != exp_df_daily).any(1),
+                                 (df_daily != exp_df_daily).any(0)])
             raise AssertionError
 
         try:
-            self.assertTrue(monthly_pivot_table.equals(monthly_pivot_table_exp))
+            self.assertTrue(df_monthly.equals(exp_df_monthly))
         except AssertionError:
-            print('Actual result:\n', monthly_pivot_table)
-            print('Expected result:\n', monthly_pivot_table_exp)
+            print(
+                'df_monthly:\n',
+                df_monthly.loc[(df_monthly != exp_df_monthly).any(1),
+                               (df_monthly != exp_df_monthly).any(0)])
+            print(
+                'df_monthly_expected:\n',
+                exp_df_monthly.loc[(df_monthly != exp_df_monthly).any(1),
+                                   (df_monthly != exp_df_monthly).any(0)])
             raise AssertionError
 
         try:
-            self.assertTrue(totals_pivot_table.equals(totals_pivot_table_exp))
+            self.assertTrue(df_total.equals(exp_df_total))
         except AssertionError:
-            print('Actual result:\n', totals_pivot_table)
-            print('Expected result:\n', totals_pivot_table_exp)
+            print(
+                'df_total:\n',
+                df_total.loc[(df_total != exp_df_total).any(1),
+                             (df_total != exp_df_total).any(0)])
+            print(
+                'df_daily_expected:\n',
+                exp_df_total.loc[(df_total != exp_df_total).any(1),
+                                 (df_total != exp_df_total).any(0)])
             raise AssertionError
 
     def test_write_results_all(self):
