@@ -50,40 +50,19 @@ class ParserTests(unittest.TestCase):
         try:
             self.assertTrue(df_daily.equals(exp_df_daily))
         except AssertionError:
-            print(
-                'df_daily:\n',
-                df_daily.loc[(df_daily != exp_df_daily).any(1),
-                             (df_daily != exp_df_daily).any(0)])
-            print(
-                'exp_df_daily:\n',
-                exp_df_daily.loc[(df_daily != exp_df_daily).any(1),
-                                 (df_daily != exp_df_daily).any(0)])
+            show_diffs(df_daily, exp_df_daily)
             raise AssertionError
 
         try:
             self.assertTrue(df_monthly.equals(exp_df_monthly))
         except AssertionError:
-            print(
-                'df_monthly:\n',
-                df_monthly.loc[(df_monthly != exp_df_monthly).any(1),
-                               (df_monthly != exp_df_monthly).any(0)])
-            print(
-                'df_monthly_expected:\n',
-                exp_df_monthly.loc[(df_monthly != exp_df_monthly).any(1),
-                                   (df_monthly != exp_df_monthly).any(0)])
+            show_diffs(df_monthly, exp_df_monthly)
             raise AssertionError
 
         try:
             self.assertTrue(df_total.equals(exp_df_total))
         except AssertionError:
-            print(
-                'df_total:\n',
-                df_total.loc[(df_total != exp_df_total).any(1),
-                             (df_total != exp_df_total).any(0)])
-            print(
-                'df_daily_expected:\n',
-                exp_df_total.loc[(df_total != exp_df_total).any(1),
-                                 (df_total != exp_df_total).any(0)])
+            show_diffs(df_total, exp_df_total)
             raise AssertionError
 
     def test_write_results_all(self):
@@ -103,6 +82,29 @@ class ParserTests(unittest.TestCase):
         # Clean up after test
         if os.path.isfile(result_file):
             os.remove(result_file)
+
+
+def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
+    """
+    Prints differences between two DataFrames.
+
+    Args:
+        df1: First DataFrame to compare.
+        df2: Second DataFrame to compare.
+
+    """
+    try:
+        df_diff = (df1 != df2)
+        print(df1.loc[df_diff.any(1), df_diff.any(0)])
+        print(df2.loc[df_diff.any(1), df_diff.any(0)])
+    except ValueError:
+        # Column names do not match
+        print(
+            'Unexpected columns:',
+            [column for column in df1.columns if column not in df2.columns])
+        print(
+            'Missing columns:',
+            [column for column in df2.columns if column not in df1.columns])
 
 
 if __name__ == "__main__":
