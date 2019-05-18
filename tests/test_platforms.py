@@ -16,6 +16,7 @@ from easyp2p.p2p_parser import get_df_from_file
 from easyp2p.p2p_webdriver import P2PWebDriver
 import easyp2p.platforms as p2p_platforms
 from tests import INPUT_PREFIX, PLATFORMS, RESULT_PREFIX, TEST_PREFIX
+from tests.test_parser import show_diffs
 
 SKIP_DL_TESTS = input('Run download tests (y/n)?: ').lower() != 'y'
 
@@ -109,11 +110,7 @@ class BasePlatformTests(unittest.TestCase):
             else:
                 self.assertTrue(df.equals(df_exp))
         except AssertionError as err:
-            print('\n')
-            print('df:', df.loc[(df != df_exp).any(1), (df != df_exp).any(0)])
-            print(
-                'df_exp:',
-                df_exp.loc[(df != df_exp).any(1), (df != df_exp).any(0)])
+            show_diffs(df, df_exp)
             raise AssertionError(err)
 
         self.assertEqual(unknown_cf_types, exp_unknown_cf_types)

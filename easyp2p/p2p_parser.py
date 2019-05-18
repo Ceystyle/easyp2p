@@ -363,6 +363,11 @@ class P2PParser:
         self.df.set_index(
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
 
+        # Drop all unnecessary columns
+        for column in self.df.columns:
+            if column not in self.TARGET_COLUMNS:
+                self.df.drop(columns=column, inplace=True)
+
         return unknown_cf_types
 
 
