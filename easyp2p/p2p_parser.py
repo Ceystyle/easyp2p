@@ -426,6 +426,7 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
 
         """
         df = df_result.copy()
+        df.drop(columns=P2PParser.MONTH, inplace=True)
         df.set_index(
             [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.DATE],
             inplace=True)
@@ -507,10 +508,9 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         """
         # Rounds results to 2 digits, sort columns and fill in missing values
         df = df.round(2)
-        try:
-            df = df[P2PParser.TARGET_COLUMNS]
-        except KeyError:
-            pass
+        df = df[[
+            column for column in P2PParser.TARGET_COLUMNS
+                if column in df.columns]]
         df.fillna('N/A', inplace=True)
 
         df.to_excel(writer, worksheet_name)
