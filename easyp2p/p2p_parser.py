@@ -441,7 +441,6 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         """
         # Define index for pivot table
         index = [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.MONTH]
-
         df = df_result.pivot_table(
             values=pivot_columns, index=index, aggfunc=aggfunc)
         df = add_balances(df, df_result, index)
@@ -533,6 +532,9 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
     DAILY_RESULTS = 'Tagesergebnisse'
     MONTHLY_RESULTS = 'Monatsergebnisse'
     TOTAL_RESULTS = 'Gesamtergebnis'
+
+    # Make a copy to prevent changing the original DataFrame
+    df_result = df_result.copy()
 
     if df_result.empty:
         return False
