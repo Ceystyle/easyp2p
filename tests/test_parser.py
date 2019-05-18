@@ -4,22 +4,21 @@
 """Module containing all tests write_results in p2p_parser."""
 
 import os
+import tempfile
 import unittest
 
 import pandas as pd
 
 from easyp2p.p2p_parser import get_df_from_file
 import easyp2p.p2p_parser as p2p_parser
-from tests import RESULT_PREFIX, PLATFORMS
+from tests import INPUT_PREFIX, RESULT_PREFIX
 
 
-class ParserTests(unittest.TestCase):
+class WriteResultsTests(unittest.TestCase):
 
     """Contains all p2p_parser.write_results tests."""
 
-    def run_write_results(
-            self, df_result: pd.DataFrame, result_file: str,
-            exp_result_file: str) -> None:
+    def run_write_results(self, input_file: str, exp_result_file: str) -> None:
         """
         Test the write_results functionality for the given platforms.
 
@@ -27,61 +26,95 @@ class ParserTests(unittest.TestCase):
         in exp_result_file first.
 
         Args:
-            df_result: DataFrame containing the parsed results
-            result_file: Output file of write_results
-            exp_result_file: File with expected results
+            input_file: Input file which contains the parsed results of all
+                selected P2P platforms.
+            exp_result_file: File with expected results.
 
         """
-        p2p_parser.write_results(df_result, result_file)
+        df = get_df_from_file(input_file)
+        df.set_index([
+            p2p_parser.P2PParser.PLATFORM, p2p_parser.P2PParser.DATE,
+            p2p_parser.P2PParser.CURRENCY], inplace=True)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
+            p2p_parser.write_results(df, output_file)
 
-        df_daily = pd.read_excel(
-            result_file, 'Tagesergebnisse', parse_dates=[2])
-        exp_df_daily = pd.read_excel(
-            exp_result_file, 'Tagesergebnisse', parse_dates=[2])
-        df_monthly = pd.read_excel(
-            result_file, 'Monatsergebnisse')
-        exp_df_monthly = pd.read_excel(
-            exp_result_file, 'Monatsergebnisse')
-        df_total = pd.read_excel(
-            result_file, 'Gesamtergebnis')
-        exp_df_total = pd.read_excel(
-            exp_result_file, 'Gesamtergebnis')
+            for worksheet in [
+                    'Tagesergebnisse', 'Monatsergebnisse', 'Gesamtergebnis']:
+                df = pd.read_excel(output_file, worksheet, index_col=[0, 1, 2])
+                df_exp = pd.read_excel(
+                    exp_result_file, worksheet, index_col=[0, 1, 2])
+                try:
+                    self.assertTrue(df.equals(df_exp))
+                except AssertionError:
+                    show_diffs(df, df_exp)
+                    raise AssertionError
 
-        try:
-            self.assertTrue(df_daily.equals(exp_df_daily))
-        except AssertionError:
-            show_diffs(df_daily, exp_df_daily)
-            raise AssertionError
+    def test_write_results_bondora(self):
+        """Test write_results if only Bondora is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'bondora_parser.csv',
+            RESULT_PREFIX + 'write_results_bondora.xlsx')
 
-        try:
-            self.assertTrue(df_monthly.equals(exp_df_monthly))
-        except AssertionError:
-            show_diffs(df_monthly, exp_df_monthly)
-            raise AssertionError
+    def test_write_results_dofinance(self):
+        """Test write_results if only DoFinance is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'dofinance_parser.csv',
+            RESULT_PREFIX + 'write_results_dofinance.xlsx')
 
-        try:
-            self.assertTrue(df_total.equals(exp_df_total))
-        except AssertionError:
-            show_diffs(df_total, exp_df_total)
-            raise AssertionError
+    def test_write_results_estateguru(self):
+        """Test write_results if only Estateguru is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'estateguru_parser.csv',
+            RESULT_PREFIX + 'write_results_estateguru.xlsx')
+
+    def test_write_results_grupeer(self):
+        """Test write_results if only Grupeer is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'grupeer_parser.csv',
+            RESULT_PREFIX + 'write_results_grupeer.xlsx')
+
+    def test_write_results_iuvo(self):
+        """Test write_results if only Iuvo is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'iuvo_parser.csv',
+            RESULT_PREFIX + 'write_results_iuvo.xlsx')
+
+    def test_write_results_mintos(self):
+        """Test write_results if only Mintos is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'mintos_parser.csv',
+            RESULT_PREFIX + 'write_results_mintos.xlsx')
+
+    def test_write_results_peerberry(self):
+        """Test write_results if only PeerBerry is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'peerberry_parser.csv',
+            RESULT_PREFIX + 'write_results_peerberry.xlsx')
+
+    def test_write_results_robocash(self):
+        """Test write_results if only Robocash is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'robocash_parser.csv',
+            RESULT_PREFIX + 'write_results_robocash.xlsx')
+
+    def test_write_results_swaper(self):
+        """Test write_results if only Swaper is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'swaper_parser.csv',
+            RESULT_PREFIX + 'write_results_swaper.xlsx')
+
+    def test_write_results_twino(self):
+        """Test write_results if only Twino is selected."""
+        self.run_write_results(
+            RESULT_PREFIX + 'twino_parser.csv',
+            RESULT_PREFIX + 'write_results_twino.xlsx')
 
     def test_write_results_all(self):
         """Test write_results for all supported platforms."""
-        df_result = pd.DataFrame()
-
-        for platform in PLATFORMS:
-            df = get_df_from_file(RESULT_PREFIX + '{0}_parser.csv'.format(
-                platform.lower()))
-            df.set_index(['Plattform', 'Datum', 'Währung'], inplace=True)
-            df_result = df_result.append(df, sort=True)
-
-        result_file = os.path.join('tests', 'test_write_results_all.xlsx')
         self.run_write_results(
-            df_result, result_file, RESULT_PREFIX + 'write_results_all.xlsx')
-
-        # Clean up after test
-        if os.path.isfile(result_file):
-            os.remove(result_file)
+            INPUT_PREFIX + 'write_results_all.csv',
+            RESULT_PREFIX + 'write_results_all.xlsx')
 
 
 def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
@@ -89,11 +122,13 @@ def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
     Prints differences between two DataFrames.
 
     Args:
-        df1: First DataFrame to compare.
-        df2: Second DataFrame to compare.
+        df1: DataFrame to compare.
+        df2: Reference DataFrame for comparison.
 
     """
     try:
+        df1.fillna('dummy', inplace=True)
+        df2.fillna('dummy', inplace=True)
         df_diff = (df1 != df2)
         print(df1.loc[df_diff.any(1), df_diff.any(0)])
         print(df2.loc[df_diff.any(1), df_diff.any(0)])
@@ -108,6 +143,4 @@ def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(verbosity=3)
-    suite = unittest.TestLoader().loadTestsFromTestCase(ParserTests)
-    result = runner.run(suite)
+    unittest.main()
