@@ -11,6 +11,7 @@ import pandas as pd
 
 from easyp2p.p2p_parser import get_df_from_file
 import easyp2p.p2p_parser as p2p_parser
+from easyp2p.p2p_parser import P2PParser
 from tests import INPUT_PREFIX, RESULT_PREFIX
 
 
@@ -33,14 +34,15 @@ class WriteResultsTests(unittest.TestCase):
         """
         df = get_df_from_file(input_file)
         df.set_index([
-            p2p_parser.P2PParser.PLATFORM, p2p_parser.P2PParser.DATE,
-            p2p_parser.P2PParser.CURRENCY], inplace=True)
+            P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
+            inplace=True)
         with tempfile.TemporaryDirectory() as temp_dir:
             output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
             p2p_parser.write_results(df, output_file)
 
             for worksheet in [
-                    'Tagesergebnisse', 'Monatsergebnisse', 'Gesamtergebnis']:
+                    p2p_parser.DAILY_RESULTS, p2p_parser.MONTHLY_RESULTS,
+                    p2p_parser.TOTAL_RESULTS]:
                 df = pd.read_excel(output_file, worksheet, index_col=[0, 1, 2])
                 df_exp = pd.read_excel(
                     exp_result_file, worksheet, index_col=[0, 1, 2])

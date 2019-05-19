@@ -17,6 +17,10 @@ from typing import List, Mapping, Optional, Sequence, Tuple
 
 import pandas as pd
 
+DAILY_RESULTS = 'Tagesergebnisse'
+MONTHLY_RESULTS = 'Monatsergebnisse'
+TOTAL_RESULTS = 'Gesamtergebnis'
+
 
 class P2PParser:
 
@@ -528,10 +532,6 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
                 worksheet.set_column(
                     index, index, max(header_length, data_length) * 1.2,
                     money_format)
-
-    DAILY_RESULTS = 'Tagesergebnisse'
-    MONTHLY_RESULTS = 'Monatsergebnisse'
-    TOTAL_RESULTS = 'Gesamtergebnis'
 
     # Make a copy to prevent changing the original DataFrame
     df_result = df_result.copy()
