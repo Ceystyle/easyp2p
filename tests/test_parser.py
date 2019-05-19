@@ -135,13 +135,19 @@ def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
         print(df1.loc[df_diff.any(1), df_diff.any(0)])
         print(df2.loc[df_diff.any(1), df_diff.any(0)])
     except ValueError:
-        # Column names do not match
+        # Column names or row numbers do not match
         print(
             'Unexpected columns:',
             [column for column in df1.columns if column not in df2.columns])
         print(
             'Missing columns:',
             [column for column in df2.columns if column not in df1.columns])
+        print(
+            'Unexpected rows:',
+            df1.loc[[index for index in df1.index if index not in df2.index]])
+        print(
+            'Missing rows:',
+            df2.loc[[index for index in df2.index if index not in df1.index]])
 
 
 if __name__ == "__main__":
