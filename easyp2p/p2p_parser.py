@@ -23,7 +23,6 @@ TOTAL_RESULTS = 'Gesamtergebnis'
 
 
 class P2PParser:
-
     """
     Parser class to transform P2P account statements into easyp2p format.
 
@@ -201,11 +200,11 @@ class P2PParser:
             # daily cashflow which needs to be subtracted again
             self.df[self.START_BALANCE_NAME] = \
                 (orig_df.groupby(self.DATE).first()[balance_column]
-                    - orig_df.groupby(self.DATE).first()[value_column])\
-                .reset_index()[0]
+                 - orig_df.groupby(self.DATE).first()[
+                     value_column]).reset_index()[0]
             self.df[self.END_BALANCE_NAME] = \
-                orig_df.groupby(self.DATE).last()[balance_column]\
-                .reset_index()[balance_column]
+                orig_df.groupby(self.DATE).last()[
+                    balance_column].reset_index()[balance_column]
 
     def _filter_date_range(self, date_format: str) -> None:
         """
@@ -234,8 +233,8 @@ class P2PParser:
                 pass
             else:
                 raise RuntimeError(
-                    '{0}: Spalte {1} nicht im Kontoauszug vorhanden!'
-                    .format(self.name, str(err)))
+                    '{0}: Spalte {1} nicht im Kontoauszug vorhanden!'.format(
+                        self.name, str(err)))
 
     def _map_cashflow_types(
             self, cashflow_types: Optional[Mapping[str, str]],
@@ -263,8 +262,8 @@ class P2PParser:
                 return ', '.join(sorted(unknown_cf_types))
             except KeyError:
                 raise RuntimeError(
-                    '{0}: Cashflowspalte {1} nicht im Kontoauszug vorhanden!'
-                    .format(self.name, orig_cf_column))
+                    '{0}: Cashflowspalte {1} nicht im Kontoauszug '
+                    'vorhanden!'.format(self.name, orig_cf_column))
         else:
             return ''
 
@@ -337,8 +336,8 @@ class P2PParser:
                     pass
                 else:
                     raise RuntimeError(
-                        '{0}: Spalte {1} ist nicht im Kontoauszug vorhanden!'
-                        .format(self.name, str(err)))
+                        '{0}: Spalte {1} ist nicht im Kontoauszug '
+                        'vorhanden!'.format(self.name, str(err)))
 
         # Make sure we only show results between start and end date
         if date_format:
@@ -358,6 +357,18 @@ class P2PParser:
         # currency is EUR
         if self.CURRENCY not in self.df.columns:
             self.df[self.CURRENCY] = 'EUR'
+
+        # Ensure that investments have a negative sign
+        try:
+            investment_col = self.df.loc[
+                self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column]
+            if investment_col.min() > 0.:
+                investment_col *= -1
+            self.df.loc[
+                self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column]\
+                = investment_col
+        except KeyError:
+            pass
 
         # Sum up the results per date and currency
         self._aggregate_results(value_column, balance_column)
