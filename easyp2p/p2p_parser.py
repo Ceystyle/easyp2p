@@ -413,8 +413,9 @@ def _get_list_of_months(date_range: Tuple[date, date]) \
     return months
 
 
-def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
-
+def write_results(
+        df_result: pd.DataFrame, output_file: str,
+        date_range: Tuple[date, date]) -> bool:
     """
     Function for writing daily, monthly and total investment results to Excel.
 
@@ -422,6 +423,8 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         df_result: DataFrame containing parsed account statements for all
             selected P2P platforms.
         output_file: File name including path where to save the Excel file.
+        date_range: Date range (start_date, end_date) for which the account
+            statement was generated.
 
     Returns:
         True on success, False on failure.
@@ -460,6 +463,7 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         df = df_result.pivot_table(
             values=pivot_columns, index=index, aggfunc=aggfunc)
         df = add_balances(df, df_result, index)
+        df = add_months_without_cashflows(df)
         return df
 
     def get_total_results() -> pd.DataFrame:
@@ -478,6 +482,96 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
             dropna=False, margins_name='Total')
         df = add_balances(df, df_monthly, index)
         return df
+
+    def add_months_without_cashflows(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Add a zero line for all months in date_range without cash flows.
+
+        Args:
+            df: DataFrame which should be checked for missing months.
+
+        Returns:
+            Input DataFrame with zero lines appended for each month without
+            cashflows.
+
+        """
+        months = get_list_of_months()
+
+        # For each platform/currency combination we expect one row per month
+        # in date_range
+        expected_rows = set(
+                (index[0], index[1], i) for index in df.index
+                for i in range(len(months)))
+        for platform, currency, i in expected_rows:
+            month = pd.Period(
+                freq='M', year=months[i].year, month=months[i].month)
+            if (platform, currency, month) not in df.index:
+                df.loc[platform, currency, month] = [0] * len(df.columns)
+
+                # Zero is not necessarily correct for the balance columns
+                if {P2PParser.START_BALANCE_NAME,
+                        P2PParser.END_BALANCE_NAME}.issubset(df.columns):
+                    if i > 0:
+                        previous_month = pd.Period(
+                            freq='M', year=months[i - 1].year,
+                            month=months[i - 1].month)
+                        balance = get_balance_for_months_without_cashflows(
+                            df, platform, currency, previous_month)
+                    else:
+                        balance = get_balance_for_months_without_cashflows(
+                            df, platform, currency)
+                    df.loc[
+                        (platform, currency, month),
+                        P2PParser.START_BALANCE_NAME] = balance
+                    df.loc[
+                        (platform, currency, month),
+                        P2PParser.END_BALANCE_NAME] = balance
+        df.sort_index(inplace=True)
+        return df
+
+    def get_balance_for_months_without_cashflows(
+            df: pd.DataFrame, platform: str, currency: str,
+            previous_month: Optional[pd.Period] = None):
+
+        if previous_month:
+            # If month is not the first month look up the correct value in
+            # previous month's row
+            balance = (
+                df.loc[
+                    (platform, currency, previous_month),
+                    P2PParser.END_BALANCE_NAME])
+        else:
+            # If month is the first month look up the correct value in the
+            # first existing month's row. If no month has cash flows assume
+            # that balance=0.
+            next_months = [
+                m for m in [index[2] for index in df.index]]
+            if next_months:
+                balance = (
+                    df.loc[
+                        (platform, currency, next_months[0]),
+                        P2PParser.START_BALANCE_NAME])
+            else:
+                balance = 0
+        return balance
+
+    def get_list_of_months() -> List[date]:
+        """
+        Get list of all months in date_range.
+
+        Returns:
+            List of all months in date_range.
+
+        """
+        months = []
+        current_date = date_range[0]
+        while current_date < date_range[1]:
+            days_in_month = calendar.monthrange(
+                current_date.year, current_date.month)[1]
+            months.append(current_date)
+            current_date += timedelta(days=days_in_month)
+
+        return months
 
     def add_balances(
             df: pd.DataFrame, df_balances: pd.DataFrame,
@@ -525,7 +619,7 @@ def write_results(df_result: pd.DataFrame, output_file: str) -> bool:
         df = df.round(2)
         df = df[[
             column for column in P2PParser.TARGET_COLUMNS
-                if column in df.columns]]
+            if column in df.columns]]
         df.fillna('N/A', inplace=True)
 
         df.to_excel(writer, worksheet_name)

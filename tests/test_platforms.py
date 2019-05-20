@@ -12,7 +12,9 @@ import unittest
 import pandas as pd
 
 from easyp2p.p2p_credentials import get_credentials
-from easyp2p.p2p_parser import get_df_from_file
+from easyp2p.p2p_parser import (
+    get_df_from_file, P2PParser, write_results, DAILY_RESULTS, MONTHLY_RESULTS,
+    TOTAL_RESULTS)
 from easyp2p.p2p_webdriver import P2PWebDriver
 import easyp2p.platforms as p2p_platforms
 from tests import INPUT_PREFIX, PLATFORMS, RESULT_PREFIX, TEST_PREFIX
@@ -34,6 +36,7 @@ class BasePlatformTests(unittest.TestCase):
         self.unknown_cf_types = ''
         self.DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
         self.DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+        self.DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     @unittest.skipIf(SKIP_DL_TESTS, 'Skipping download tests!')
     def run_download_test(
@@ -115,6 +118,39 @@ class BasePlatformTests(unittest.TestCase):
 
         self.assertEqual(unknown_cf_types, exp_unknown_cf_types)
 
+    def run_write_results(
+            self, input_file: str, exp_result_file: str,
+            date_range: Tuple[date, date]) -> None:
+        """
+        Test the write_results functionality for the given platforms.
+
+        In order to run these tests the known correct results need to be saved
+        in exp_result_file first.
+
+        Args:
+            input_file: Input file which contains the parsed results of all
+                selected P2P platforms.
+            exp_result_file: File with expected results.
+
+        """
+        df = get_df_from_file(input_file)
+        df.set_index([
+            P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
+            inplace=True)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
+            write_results(df, output_file, date_range)
+
+            for worksheet in [DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS]:
+                df = pd.read_excel(output_file, worksheet, index_col=[0, 1, 2])
+                df_exp = pd.read_excel(
+                    exp_result_file, worksheet, index_col=[0, 1, 2])
+                try:
+                    self.assertTrue(df.equals(df_exp))
+                except AssertionError:
+                    show_diffs(df, df_exp)
+                    raise AssertionError
+
     def test_download_statement(self) -> None:
         """Test downloading account statement for default date_range."""
         self.run_download_test(
@@ -147,6 +183,38 @@ class BasePlatformTests(unittest.TestCase):
             '{}_parser_unknown_cf'.format(self.name.lower()), self.DATE_RANGE,
             exp_unknown_cf_types=self.unknown_cf_types)
 
+    def test_parse_statement_missing_month(self):
+        self.run_parser_test(
+            '{}_parser_missing_month'.format(self.name.lower()),
+            self.DATE_RANGE_MISSING_MONTH)
+
+    def test_write_results(self):
+        """Test write_results when cashflows are present for all months."""
+        self.run_write_results(
+            RESULT_PREFIX + '{}_parser.csv'.format(self.name.lower()),
+            RESULT_PREFIX + 'write_results_{}.xlsx'.format(self.name.lower()),
+            self.DATE_RANGE)
+
+    @unittest.skip('Skip for now')
+    def test_write_results_no_cfs(self):
+        """Test write_results when there were no cashflows in date range."""
+        self.run_write_results(
+            RESULT_PREFIX + '{}_parser_no_cfs.csv'.format(self.name.lower()),
+            RESULT_PREFIX + 'write_results_{}_no_cfs.xlsx'.format(
+                self.name.lower()),
+            self.DATE_RANGE_NO_CFS)
+
+    def test_write_results_missing_month(self):
+        """
+        Test write_results when there are months without cashflows.
+        """
+        self.run_write_results(
+            RESULT_PREFIX + '{}_parser_missing_month.csv'.format(
+                self.name.lower()),
+            RESULT_PREFIX + 'write_results_{}_missing_month.xlsx'.format(
+                self.name.lower()),
+            self.DATE_RANGE_MISSING_MONTH)
+
 
 class BondoraTests(BasePlatformTests):
 
@@ -154,6 +222,7 @@ class BondoraTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Bondora'
@@ -167,6 +236,7 @@ class DoFinanceTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 5, 1), date(2018, 8, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 4, 1), date(2018, 9, 30))
 
     def setUp(self) -> None:
         self.name = 'DoFinance'
@@ -181,6 +251,7 @@ class EstateguruTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Estateguru'
@@ -195,6 +266,7 @@ class GrupeerTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Grupeer'
@@ -208,6 +280,7 @@ class IuvoTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Iuvo'
@@ -221,6 +294,7 @@ class MintosTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Mintos'
@@ -234,11 +308,17 @@ class PeerBerryTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'PeerBerry'
         self.Platform = p2p_platforms.PeerBerry
         self.unknown_cf_types = 'TestCF1, TestCF2'
+
+    def test_parse_statement_missing_month(self):
+        self.run_parser_test(
+            '{}_parser_missing_month'.format(self.name.lower()),
+            self.DATE_RANGE_MISSING_MONTH)
 
 
 class RobocashTests(BasePlatformTests):
@@ -247,6 +327,7 @@ class RobocashTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Robocash'
@@ -260,6 +341,7 @@ class SwaperTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Swaper'
@@ -273,6 +355,7 @@ class TwinoTests(BasePlatformTests):
 
     DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
     def setUp(self) -> None:
         self.name = 'Twino'

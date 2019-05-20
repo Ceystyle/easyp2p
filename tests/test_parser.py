@@ -3,9 +3,11 @@
 
 """Module containing all tests write_results in p2p_parser."""
 
+from datetime import date
 import os
 import tempfile
 import unittest
+from typing import Tuple
 
 import pandas as pd
 
@@ -19,7 +21,13 @@ class WriteResultsTests(unittest.TestCase):
 
     """Contains all p2p_parser.write_results tests."""
 
-    def run_write_results(self, input_file: str, exp_result_file: str) -> None:
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
+
+    def run_write_results(
+            self, input_file: str, exp_result_file: str,
+            date_range: Tuple[date, date]) -> None:
         """
         Test the write_results functionality for the given platforms.
 
@@ -38,7 +46,7 @@ class WriteResultsTests(unittest.TestCase):
             inplace=True)
         with tempfile.TemporaryDirectory() as temp_dir:
             output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
-            p2p_parser.write_results(df, output_file)
+            p2p_parser.write_results(df, output_file, date_range)
 
             for worksheet in [
                     p2p_parser.DAILY_RESULTS, p2p_parser.MONTHLY_RESULTS,
@@ -52,71 +60,18 @@ class WriteResultsTests(unittest.TestCase):
                     show_diffs(df, df_exp)
                     raise AssertionError
 
-    def test_write_results_bondora(self):
-        """Test write_results if only Bondora is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'bondora_parser.csv',
-            RESULT_PREFIX + 'write_results_bondora.xlsx')
-
-    def test_write_results_dofinance(self):
-        """Test write_results if only DoFinance is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'dofinance_parser.csv',
-            RESULT_PREFIX + 'write_results_dofinance.xlsx')
-
-    def test_write_results_estateguru(self):
-        """Test write_results if only Estateguru is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'estateguru_parser.csv',
-            RESULT_PREFIX + 'write_results_estateguru.xlsx')
-
-    def test_write_results_grupeer(self):
-        """Test write_results if only Grupeer is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'grupeer_parser.csv',
-            RESULT_PREFIX + 'write_results_grupeer.xlsx')
-
-    def test_write_results_iuvo(self):
-        """Test write_results if only Iuvo is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'iuvo_parser.csv',
-            RESULT_PREFIX + 'write_results_iuvo.xlsx')
-
-    def test_write_results_mintos(self):
-        """Test write_results if only Mintos is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'mintos_parser.csv',
-            RESULT_PREFIX + 'write_results_mintos.xlsx')
-
-    def test_write_results_peerberry(self):
-        """Test write_results if only PeerBerry is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'peerberry_parser.csv',
-            RESULT_PREFIX + 'write_results_peerberry.xlsx')
-
-    def test_write_results_robocash(self):
-        """Test write_results if only Robocash is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'robocash_parser.csv',
-            RESULT_PREFIX + 'write_results_robocash.xlsx')
-
-    def test_write_results_swaper(self):
-        """Test write_results if only Swaper is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'swaper_parser.csv',
-            RESULT_PREFIX + 'write_results_swaper.xlsx')
-
-    def test_write_results_twino(self):
-        """Test write_results if only Twino is selected."""
-        self.run_write_results(
-            RESULT_PREFIX + 'twino_parser.csv',
-            RESULT_PREFIX + 'write_results_twino.xlsx')
-
     def test_write_results_all(self):
         """Test write_results for all supported platforms."""
         self.run_write_results(
             INPUT_PREFIX + 'write_results_all.csv',
-            RESULT_PREFIX + 'write_results_all.xlsx')
+            RESULT_PREFIX + 'write_results_all.xlsx', self.DATE_RANGE)
+
+    def test_write_results_all_missing_month(self):
+        """Test write_results for all supported platforms."""
+        self.run_write_results(
+            INPUT_PREFIX + 'write_results_all_missing_month.csv',
+            RESULT_PREFIX + 'write_results_all_missing_month.xlsx',
+            self.DATE_RANGE_MISSING_MONTH)
 
 
 def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
@@ -132,8 +87,9 @@ def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
         df1.fillna('dummy', inplace=True)
         df2.fillna('dummy', inplace=True)
         df_diff = (df1 != df2)
-        print(df1.loc[df_diff.any(1), df_diff.any(0)])
-        print(df2.loc[df_diff.any(1), df_diff.any(0)])
+        print(
+            df1.loc[df_diff.any(1), df_diff.any(0)],
+            df2.loc[df_diff.any(1), df_diff.any(0)])
     except ValueError:
         # Column names or row numbers do not match
         print(
