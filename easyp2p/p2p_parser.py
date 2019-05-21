@@ -137,7 +137,7 @@ class P2PParser:
         # values in the original DataFrame and overwrite the sums.
         if balance_column:
             # The start balance value of each day already includes the first
-            # daily cashflow which needs to be subtracted again
+            # daily cash flow which needs to be subtracted again
             self.df[self.START_BALANCE_NAME] = \
                 (orig_df.groupby(self.DATE).first()[balance_column]
                  - orig_df.groupby(self.DATE).first()[
@@ -207,35 +207,6 @@ class P2PParser:
         else:
             return ''
 
-    def add_zero_cashflows(self, date_list: Sequence[date] = None):
-        """
-        Add a zero cashflow row to self.df for each date in date_list.
-
-        If no date_list is provided, one zero row will be added for each month
-        in self.date_range.
-
-        Keyword Args:
-            date_list: List of dates for which to add zero entries.
-
-        """
-        if not date_list:
-            list_of_months = _get_list_of_months(self.date_range)
-            date_list = [month[0] for month in list_of_months]
-
-        df = pd.DataFrame()
-        df[self.DATE] = date_list
-        df[self.PLATFORM] = self.name
-        df[self.CURRENCY] = 'EUR'
-        for column in self.TARGET_COLUMNS:
-            df[column] = 0.
-        df.set_index([self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
-
-        if self.df.empty:
-            self.df = df
-        else:
-            self.df = self.df.append(df, sort=True)
-        self.df.dropna(axis=1, inplace=True)
-
     def start_parser(
             self, date_format: str = None,
             rename_columns: Mapping[str, str] = None,
@@ -283,13 +254,19 @@ class P2PParser:
         if date_format:
             self._filter_date_range(date_format)
 
-        # Check if there were cashflows in date_range, if not add a zero row
-        # for each month in date_range
+        # If there were no cash flows in date_range add a single zero line
         if self.df.empty:
-            self.add_zero_cashflows()
+            data = [
+                (self.name, 'EUR', self.date_range[0],
+                 *[0.]*len(self.TARGET_COLUMNS))]
+            columns = [self.PLATFORM, self.CURRENCY, self.DATE,
+                       *self.TARGET_COLUMNS]
+            self.df = pd.DataFrame(data=data, columns=columns)
+            self.df.set_index(
+                [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
             return ''
 
-        # Convert cashflow types from platform to easyp2p types
+        # Convert cash flow types from platform to easyp2p types
         unknown_cf_types = self._map_cashflow_types(
             cashflow_types, orig_cf_column)
 
@@ -324,33 +301,6 @@ class P2PParser:
                 self.df.drop(columns=column, inplace=True)
 
         return unknown_cf_types
-
-
-def _get_list_of_months(date_range: Tuple[date, date]) \
-        -> List[Tuple[date, date]]:
-    """
-    Get list of months between (and including) start and end date.
-
-    Args:
-        date_range: Tuple (start_date, end_date)
-
-    Returns:
-        List of tuples (start_of_month, end_of_month) for all months between \
-        start and end date.
-
-    """
-    months = []
-    current_date = date_range[0]
-    while current_date < date_range[1]:
-        start_of_month = date(current_date.year, current_date.month, 1)
-        days_in_month = calendar.monthrange(
-            current_date.year, current_date.month)[1]
-        end_of_month = date(
-            current_date.year, current_date.month, days_in_month)
-        months.append((start_of_month, end_of_month))
-        current_date += timedelta(days=days_in_month)
-
-    return months
 
 
 def write_results(

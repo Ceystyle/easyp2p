@@ -1,5 +1,2 @@
-Plattform,Datum,Währung,Startguthaben,Endsaldo,Investitionen,Tilgungszahlungen,Rückkäufe,Zinszahlungen,Zinszahlungen aus Rückkäufen,Verzugsgebühren,Ausfälle,Gesamteinnahmen
-Estateguru,2016-09-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Estateguru,2016-10-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Estateguru,2016-11-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Estateguru,2016-12-01,EUR,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Plattform,Währung,Datum,Startguthaben,Endsaldo,Investitionen,Tilgungszahlungen,Rückkäufe,Zinszahlungen,Zinszahlungen aus Rückkäufen,Verzugsgebühren,Ausfälle,Gesamteinnahmen
+Estateguru,EUR,2016-09-01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
