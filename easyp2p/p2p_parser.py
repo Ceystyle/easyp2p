@@ -70,7 +70,8 @@ class P2PParser:
 
     def __init__(
             self, name: str, date_range: Tuple[date, date],
-            statement_file_name: str, header: int = 0) -> None:
+            statement_file_name: str, header: int = 0,
+            skipfooter: int = 0) -> None:
         """
         Constructor of P2PParser class.
 
@@ -82,6 +83,7 @@ class P2PParser:
                 downloaded account statement for this platform
             header: Row number to use as column names and start of data in the
                 statement.
+            skipfooter: Rows to skip at the end of the statement.
 
         Raises:
             RuntimeError: If the account statement could not be loaded from
@@ -91,7 +93,8 @@ class P2PParser:
         self.name = name
         self.date_range = date_range
         self.statement_file_name = statement_file_name
-        self.df = get_df_from_file(self.statement_file_name, header=header)
+        self.df = get_df_from_file(
+            self.statement_file_name, header=header, skipfooter=skipfooter)
 
         # Check if account statement exists
         if self.df is None:
@@ -629,14 +632,15 @@ def write_results(
 
     return True
 
-
-def get_df_from_file(input_file: str, header: int = 0) -> pd.DataFrame:
+def get_df_from_file(
+        input_file: str, header: int = 0, skipfooter: int = 0) -> pd.DataFrame:
     """
     Read a pandas.DataFrame from input_file.
 
     Args:
         input_file: File name including path.
         header: Row number to use as column names and start of data.
+        skipfooter: Rows to skip at the end of the statement.
 
     Returns:
         pandas.DataFrame: DataFrame which was read from the file.
@@ -651,9 +655,9 @@ def get_df_from_file(input_file: str, header: int = 0) -> pd.DataFrame:
 
     try:
         if file_format == '.csv':
-            df = pd.read_csv(input_file, header=header)
+            df = pd.read_csv(input_file, header=header, skipfooter=skipfooter)
         elif file_format in ('.xlsx', '.xls'):
-            df = pd.read_excel(input_file, header=header)
+            df = pd.read_excel(input_file, header=header, skipfooter=skipfooter)
         else:
             raise RuntimeError(
                 'Unbekanntes Dateiformat beim Import: ', input_file)

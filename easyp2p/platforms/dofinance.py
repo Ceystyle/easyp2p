@@ -95,10 +95,8 @@ class DoFinance:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
-
-        # Drop the last two rows which only contain a summary
-        parser.df = parser.df[:-2]
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, skipfooter=2)
 
         # Define mapping between DoFinance and easyp2p cashflow types and
         # column names

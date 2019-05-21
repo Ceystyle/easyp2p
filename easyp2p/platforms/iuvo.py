@@ -134,11 +134,8 @@ class Iuvo:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement, header=3)
-
-        # The last three rows only contain a summary
-        if not parser.df.empty:
-            parser.df = parser.df[:-3]
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, header=3, skipfooter=3)
 
         # Define mapping between Iuvo and easyp2p cashflow types and column
         # names

@@ -109,13 +109,7 @@ class Twino:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
-
-        # Format the header of the table
-        parser.df = parser.df[1:]  # First row only contains a generic header
-        new_header = parser.df.iloc[0] # Get the new first row as header
-        parser.df = parser.df[1:] # Remove the first row
-        parser.df.columns = new_header # Set the new header
+        parser = P2PParser(self.name, self.date_range, self.statement, header=2)
 
         # Create a new column for identifying cashflow types
         try:

@@ -119,10 +119,8 @@ class Estateguru:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
-
-        # Drop last line which only contains a summary
-        parser.df = parser.df[:-1]
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, skipfooter=1)
 
         # Only consider valid cashflows
         parser.df = parser.df[parser.df['Cashflow-Status'] == 'Genehmigt']
