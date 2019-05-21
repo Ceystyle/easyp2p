@@ -76,7 +76,7 @@ class BasePlatformTests(unittest.TestCase):
 
     def run_parser_test(
             self, result_file: str, date_range: Tuple[date, date],
-            exp_unknown_cf_types: str = '') -> None:
+            input_file: str = None, exp_unknown_cf_types: str = '') -> None:
         """
         Test the parser of the given platform.
 
@@ -87,12 +87,18 @@ class BasePlatformTests(unittest.TestCase):
             result_file: File with expected results without prefix or suffix.
             date_range: Date range tuple (start_date, end_date) for which the
                 account statement was generated.
+            input_file: Location of the input statement for the parser without
+                suffix. If None INPUT_PREFIX + result_file will be used by
+                default.
             exp_unknown_cf_types: Expected results for the unknown cashflow
                 types.
 
         """
         exp_result_file = RESULT_PREFIX + result_file + '.csv'
-        statement_without_suffix = INPUT_PREFIX + result_file
+        if input_file is None:
+            statement_without_suffix = INPUT_PREFIX + result_file
+        else:
+            statement_without_suffix = input_file
 
         platform = self.Platform(date_range, statement_without_suffix)
         (df, unknown_cf_types) = platform.parse_statement()
@@ -173,7 +179,9 @@ class BasePlatformTests(unittest.TestCase):
         """Test platform parser if there were no cashflows in date_range."""
         self.run_parser_test(
             '{}_parser_no_cfs'.format(self.name.lower()),
-            self.DATE_RANGE_NO_CFS)
+            self.DATE_RANGE_NO_CFS,
+            input_file=RESULT_PREFIX+'download_{}_statement_no_cfs'.format(
+                self.name.lower()))
 
     def test_parse_statement_unknown_cf(self) -> None:
         """Test platform parser when unknown cashflow types are present."""
