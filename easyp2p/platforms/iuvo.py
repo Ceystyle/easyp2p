@@ -134,21 +134,11 @@ class Iuvo:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
-
-        # Create a DataFrame with zero entries if there were no cashflows
-        if parser.df.empty:
-            parser.add_zero_cashflows()
-            return parser.df, ''
-
-        # Format the header of the table
-        parser.df = parser.df[2:]  # First two rows contain a generic header
-        new_header = parser.df.iloc[0]  # Get the new first row as header
-        parser.df = parser.df[1:]  # Remove the first row
-        parser.df.columns = new_header  # Set the new header
+        parser = P2PParser(self.name, self.date_range, self.statement, header=3)
 
         # The last three rows only contain a summary
-        parser.df = parser.df[:-3]
+        if not parser.df.empty:
+            parser.df = parser.df[:-3]
 
         # Define mapping between Iuvo and easyp2p cashflow types and column
         # names

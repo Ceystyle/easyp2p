@@ -70,7 +70,7 @@ class P2PParser:
 
     def __init__(
             self, name: str, date_range: Tuple[date, date],
-            statement_file_name: str) -> None:
+            statement_file_name: str, header: int = 0) -> None:
         """
         Constructor of P2PParser class.
 
@@ -80,6 +80,8 @@ class P2PParser:
                 statement was generated
             statement_file_name: File name including absolute path of the
                 downloaded account statement for this platform
+            header: Row number to use as column names and start of data in the
+                statement.
 
         Raises:
             RuntimeError: If the account statement could not be loaded from
@@ -89,7 +91,7 @@ class P2PParser:
         self.name = name
         self.date_range = date_range
         self.statement_file_name = statement_file_name
-        self.df = get_df_from_file(self.statement_file_name)
+        self.df = get_df_from_file(self.statement_file_name, header=header)
 
         # Check if account statement exists
         if self.df is None:
