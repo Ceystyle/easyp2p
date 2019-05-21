@@ -96,71 +96,6 @@ class P2PParser:
             raise RuntimeError(
                 '{0}-Parser: kein Kontoauszug vorhanden!'.format(self.name))
 
-    def _add_missing_months(self) -> None:
-        """
-        Add a zero row for all months in date_range without cashflows.
-
-        To ensure that months without cash flows show up in the final output
-        file this method will create one new row in the DataFrame self.df for
-        each month in date_range without cash flows.
-
-        """
-        # Get a list of all months in date_range with no cashflows
-        missing_months = self._get_missing_months()
-
-        # Create list of dates set to the first of each missing month
-        new_cf_dates = []
-        for month in missing_months:
-            new_cf_dates.append(
-                date(month[0].year, month[0].month, month[0].day))
-
-        # Create the new DataFrame and append it to the old one
-        df_new = pd.DataFrame(
-            data={self.DATE: new_cf_dates, self.CURRENCY: 'EUR'},
-            columns=[self.DATE, self.CURRENCY])
-
-        if self.df.empty:
-            self.df = df_new
-        else:
-            self.df = self.df.append(df_new, sort=True)
-
-        # Fill missing values with zero and sort the whole DataFrame by date
-        self.df.fillna(0., inplace=True)
-        self.df.sort_values(by=[self.DATE], inplace=True)
-
-    def _get_missing_months(self) -> List[Tuple[date, date]]:
-        """
-        Get list of months in date_range which have no cashflows.
-
-        This method will identify all months in date_range which do not contain
-        at least one cash flow in the provided DataFrame. A list of those
-        months is returned.
-
-        Returns:
-            List of month tuples (start_of_month, end_of_month) which do not
-            contain a cash flow
-
-        """
-        # Get a list of all months in date_range
-        list_of_months = _get_list_of_months(self.date_range)
-
-        # If there were no cashflows all months are missing
-        if self.df.empty:
-            return list_of_months
-
-        # Get all cashflow dates in date format from the DataFrame
-        cf_date_list = []
-        for elem in pd.to_datetime(self.df[self.DATE]).tolist():
-            cf_date_list.append(date(elem.year, elem.month, elem.day))
-
-        # Remove all months for which there is at least one cashflow
-        for cf_date in cf_date_list:
-            for month in list_of_months:
-                if month[0] <= cf_date <= month[1]:
-                    list_of_months.remove(month)
-
-        return list_of_months
-
     def _calculate_total_income(self):
         """ Calculate total income for each row of the DataFrame """
         income_columns = [
@@ -358,7 +293,7 @@ class P2PParser:
         if self.CURRENCY not in self.df.columns:
             self.df[self.CURRENCY] = 'EUR'
 
-        # Ensure that investments have a negative sign
+        # Ensure that investment cash flows have a negative sign
         try:
             investment_col = self.df.loc[
                 self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column]
