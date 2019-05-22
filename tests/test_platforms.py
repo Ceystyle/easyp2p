@@ -18,7 +18,6 @@ from easyp2p.p2p_parser import get_df_from_file, P2PParser
 from easyp2p.p2p_webdriver import P2PWebDriver
 import easyp2p.platforms as p2p_platforms
 from tests import INPUT_PREFIX, PLATFORMS, RESULT_PREFIX, TEST_PREFIX
-from tests.test_parser import show_diffs
 
 SKIP_DL_TESTS = input('Run download tests (y/n)?: ').lower() != 'y'
 
@@ -204,7 +203,6 @@ class BasePlatformTests(unittest.TestCase):
             RESULT_PREFIX + 'write_results_{}.xlsx'.format(self.name.lower()),
             self.DATE_RANGE)
 
-    # @unittest.skip('Skip for now')
     def test_write_results_no_cfs(self):
         """Test write_results when there were no cash flows in date range."""
         self.run_write_results(
@@ -237,6 +235,30 @@ class BondoraTests(BasePlatformTests):
         self.name = 'Bondora'
         self.Platform = p2p_platforms.Bondora
         self.unknown_cf_types = ''
+
+    # Below are some tests for write_results which affect more than just one
+    # platform.
+    def test_write_results_mixed_no_cfs(self):
+        """
+        Test write_results with one platform with and one without cash flows.
+        """
+        self.run_write_results(
+            INPUT_PREFIX + 'write_results_mixed_no_cfs.csv',
+            RESULT_PREFIX + 'write_results_mixed_no_cfs.xlsx',
+            self.DATE_RANGE)
+
+    def test_write_results_all(self):
+        """Test write_results for all supported platforms."""
+        self.run_write_results(
+            INPUT_PREFIX + 'write_results_all.csv',
+            RESULT_PREFIX + 'write_results_all.xlsx', self.DATE_RANGE)
+
+    def test_write_results_all_missing_month(self):
+        """Test write_results for all supported platforms."""
+        self.run_write_results(
+            INPUT_PREFIX + 'write_results_all_missing_month.csv',
+            RESULT_PREFIX + 'write_results_all_missing_month.xlsx',
+            self.DATE_RANGE_MISSING_MONTH)
 
 
 class DoFinanceTests(BasePlatformTests):
@@ -323,11 +345,6 @@ class PeerBerryTests(BasePlatformTests):
         self.name = 'PeerBerry'
         self.Platform = p2p_platforms.PeerBerry
         self.unknown_cf_types = 'TestCF1, TestCF2'
-
-    def test_parse_statement_missing_month(self):
-        self.run_parser_test(
-            '{}_parser_missing_month'.format(self.name.lower()),
-            self.DATE_RANGE_MISSING_MONTH)
 
 
 class RobocashTests(BasePlatformTests):
@@ -423,6 +440,38 @@ def _get_expected_df(exp_result_file: str) -> pd.DataFrame:
     df_exp[P2PParser.DATE] = pd.to_datetime(df_exp[P2PParser.DATE])
 
     return df_exp
+
+
+def show_diffs(df1: pd.DataFrame, df2: pd.DataFrame) -> None:
+    """
+    Prints differences between two DataFrames.
+
+    Args:
+        df1: DataFrame to compare.
+        df2: Reference DataFrame for comparison.
+
+    """
+    try:
+        df1.fillna('dummy', inplace=True)
+        df2.fillna('dummy', inplace=True)
+        df_diff = (df1 != df2)
+        print(
+            df1.loc[df_diff.any(1), df_diff.any(0)],
+            df2.loc[df_diff.any(1), df_diff.any(0)])
+    except ValueError:
+        # Column names or row numbers do not match
+        print(
+            'Unexpected columns:',
+            [column for column in df1.columns if column not in df2.columns])
+        print(
+            'Missing columns:',
+            [column for column in df2.columns if column not in df1.columns])
+        print(
+            'Unexpected rows:',
+            df1.loc[[index for index in df1.index if index not in df2.index]])
+        print(
+            'Missing rows:',
+            df2.loc[[index for index in df2.index if index not in df1.index]])
 
 
 if __name__ == '__main__':

@@ -115,7 +115,6 @@ def _get_monthly_results(
     pivot_columns = [
         column for column in P2PParser.TARGET_COLUMNS
         if column in df_result.columns]
-
     # Only sum up columns with at least one non-NaN value. Otherwise NaN
     # columns will be replaced by zeros when building the pivot table.
     df = df_result.pivot_table(
@@ -141,7 +140,6 @@ def _get_total_results(df_monthly: pd.DataFrame) -> pd.DataFrame:
     pivot_columns = [
         column for column in P2PParser.TARGET_COLUMNS
         if column in df_monthly.columns]
-
     df = df_monthly.pivot_table(
         values=pivot_columns, index=index, aggfunc=lambda x: x.sum(min_count=1),
         margins=True, dropna=False, margins_name='Total')
@@ -173,7 +171,9 @@ def _add_months_without_cashflows(
     for platform, currency, i in expected_rows:
         month = pd.Period(freq='M', year=months[i].year, month=months[i].month)
         if (platform, currency, month) not in df.index:
-            df.loc[platform, currency, month] = [0] * len(df.columns)
+            # Only fill columns with non-N/A values
+            fill_columns = df.loc[platform].dropna(axis=1).columns
+            df.loc[(platform, currency, month), fill_columns] = 0.
 
             # Zero is not necessarily correct for the balance columns
             if {P2PParser.START_BALANCE_NAME,
