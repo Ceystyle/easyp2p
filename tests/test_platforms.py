@@ -11,10 +11,10 @@ import unittest
 
 import pandas as pd
 
+from easyp2p.excel_writer import (
+    write_results, DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS)
 from easyp2p.p2p_credentials import get_credentials
-from easyp2p.p2p_parser import (
-    get_df_from_file, P2PParser, write_results, DAILY_RESULTS, MONTHLY_RESULTS,
-    TOTAL_RESULTS)
+from easyp2p.p2p_parser import get_df_from_file, P2PParser
 from easyp2p.p2p_webdriver import P2PWebDriver
 import easyp2p.platforms as p2p_platforms
 from tests import INPUT_PREFIX, PLATFORMS, RESULT_PREFIX, TEST_PREFIX
@@ -137,6 +137,7 @@ class BasePlatformTests(unittest.TestCase):
             input_file: Input file which contains the parsed results of all
                 selected P2P platforms.
             exp_result_file: File with expected results.
+            date_range: Date range for which to generate the results file.
 
         """
         df = get_df_from_file(input_file)
@@ -164,7 +165,7 @@ class BasePlatformTests(unittest.TestCase):
 
     def test_download_statement_no_cfs(self) -> None:
         """
-        Test downloading account statement for date_range without cashflows.
+        Test downloading account statement for date_range without cash flows.
         """
         self.run_download_test(
             'download_{}_statement_no_cfs'.format(self.name.lower()),
@@ -176,7 +177,7 @@ class BasePlatformTests(unittest.TestCase):
             '{}_parser'.format(self.name.lower()), self.DATE_RANGE)
 
     def test_parse_statement_no_cfs(self):
-        """Test platform parser if there were no cashflows in date_range."""
+        """Test platform parser if there were no cash flows in date_range."""
         self.run_parser_test(
             '{}_parser_no_cfs'.format(self.name.lower()),
             self.DATE_RANGE_NO_CFS,
@@ -184,9 +185,9 @@ class BasePlatformTests(unittest.TestCase):
                 self.name.lower()))
 
     def test_parse_statement_unknown_cf(self) -> None:
-        """Test platform parser when unknown cashflow types are present."""
+        """Test platform parser when unknown cash flow types are present."""
         if self.unknown_cf_types == '':
-            self.skipTest('No unknown cashflow types for this platform!')
+            self.skipTest('No unknown cash flow types for this platform!')
         self.run_parser_test(
             '{}_parser_unknown_cf'.format(self.name.lower()), self.DATE_RANGE,
             exp_unknown_cf_types=self.unknown_cf_types)
@@ -197,15 +198,15 @@ class BasePlatformTests(unittest.TestCase):
             self.DATE_RANGE_MISSING_MONTH)
 
     def test_write_results(self):
-        """Test write_results when cashflows are present for all months."""
+        """Test write_results when cash flows are present for all months."""
         self.run_write_results(
             RESULT_PREFIX + '{}_parser.csv'.format(self.name.lower()),
             RESULT_PREFIX + 'write_results_{}.xlsx'.format(self.name.lower()),
             self.DATE_RANGE)
 
-    @unittest.skip('Skip for now')
+    # @unittest.skip('Skip for now')
     def test_write_results_no_cfs(self):
-        """Test write_results when there were no cashflows in date range."""
+        """Test write_results when there were no cash flows in date range."""
         self.run_write_results(
             RESULT_PREFIX + '{}_parser_no_cfs.csv'.format(self.name.lower()),
             RESULT_PREFIX + 'write_results_{}_no_cfs.xlsx'.format(
@@ -214,7 +215,7 @@ class BasePlatformTests(unittest.TestCase):
 
     def test_write_results_missing_month(self):
         """
-        Test write_results when there are months without cashflows.
+        Test write_results when there are months without cash flows.
         """
         self.run_write_results(
             RESULT_PREFIX + '{}_parser_missing_month.csv'.format(
@@ -419,7 +420,7 @@ def _get_expected_df(exp_result_file: str) -> pd.DataFrame:
     df_exp.fillna('NaN', inplace=True)
 
     # Explicitly set the date column to datetime format
-    df_exp['Datum'] = pd.to_datetime(df_exp['Datum'])
+    df_exp[P2PParser.DATE] = pd.to_datetime(df_exp[P2PParser.DATE])
 
     return df_exp
 

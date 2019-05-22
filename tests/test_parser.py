@@ -11,6 +11,7 @@ from typing import Tuple
 
 import pandas as pd
 
+import easyp2p.excel_writer
 from easyp2p.p2p_parser import get_df_from_file
 import easyp2p.p2p_parser as p2p_parser
 from easyp2p.p2p_parser import P2PParser
@@ -49,8 +50,9 @@ class WriteResultsTests(unittest.TestCase):
             p2p_parser.write_results(df, output_file, date_range)
 
             for worksheet in [
-                    p2p_parser.DAILY_RESULTS, p2p_parser.MONTHLY_RESULTS,
-                    p2p_parser.TOTAL_RESULTS]:
+                easyp2p.excel_writer.DAILY_RESULTS,
+                easyp2p.excel_writer.MONTHLY_RESULTS,
+                easyp2p.excel_writer.TOTAL_RESULTS]:
                 df = pd.read_excel(output_file, worksheet, index_col=[0, 1, 2])
                 df_exp = pd.read_excel(
                     exp_result_file, worksheet, index_col=[0, 1, 2])
