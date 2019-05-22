@@ -191,9 +191,10 @@ class P2PParser:
             try:
                 self.df[self.CF_TYPE] = self.df[orig_cf_column].map(
                     cashflow_types)
-                unknown_cf_types = set(self.df[orig_cf_column].where(
-                    self.df[self.CF_TYPE].isna()).dropna().tolist())
-                return ', '.join(sorted(unknown_cf_types))
+                unknown_cf_types = sorted(list(set(
+                    self.df[orig_cf_column].where(
+                        self.df[self.CF_TYPE].isna()).dropna().tolist())))
+                return ', '.join(unknown_cf_types)
             except KeyError:
                 raise RuntimeError(
                     '{0}: Cashflowspalte {1} nicht im Kontoauszug '
