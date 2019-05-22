@@ -5,7 +5,6 @@
 
 from datetime import date
 import os
-from pathlib import Path
 import unittest.mock
 
 import pandas as pd
@@ -173,7 +172,7 @@ class WorkerTests(unittest.TestCase):
             "Bondora: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: "
             "{'TestCF1', 'TestCF2'}", self.worker.RED)
 
-    @unittest.mock.patch('easyp2p.p2p_worker.p2p_parser.write_results')
+    @unittest.mock.patch('easyp2p.p2p_worker.write_results')
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.download_statements')
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.parse_statements')
     def test_run(
@@ -189,10 +188,11 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(len(mock_download.call_args_list), len(PLATFORMS))
         self.assertEqual(len(mock_parse.call_args_list), len(PLATFORMS))
         mock_write_results.assert_called_once_with(
-            self.worker.df_result, self.settings.output_file)
+            self.worker.df_result, self.settings.output_file,
+            self.settings.date_range)
 
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.add_progress_text')
-    @unittest.mock.patch('easyp2p.p2p_worker.p2p_parser.write_results')
+    @unittest.mock.patch('easyp2p.p2p_worker.write_results')
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.download_statements')
     def test_run_no_results(
             self, mock_download, mock_write_results, mock_text):
@@ -201,7 +201,8 @@ class WorkerTests(unittest.TestCase):
         mock_write_results.return_value = False
         self.worker.run()
         mock_write_results.assert_called_once_with(
-            self.worker.df_result, self.settings.output_file)
+            self.worker.df_result, self.settings.output_file,
+            self.settings.date_range)
         mock_text.emit.assert_called_with(
             'Keine Ergebnisse vorhanden', self.worker.RED)
 

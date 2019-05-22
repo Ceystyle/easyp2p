@@ -13,7 +13,7 @@ import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 
-import easyp2p.p2p_parser as p2p_parser
+from easyp2p.excel_writer import write_results
 from easyp2p.p2p_settings import Settings
 import easyp2p.platforms as p2p_platforms
 from easyp2p.p2p_webdriver import P2PWebDriver, WebDriverNotFound
@@ -207,8 +207,9 @@ class WorkerThread(QThread):
         if self.abort:
             return
 
-        if not p2p_parser.write_results(
-                self.df_result, self.settings.output_file):
+        if not write_results(
+                self.df_result, self.settings.output_file,
+                self.settings.date_range):
             self.add_progress_text.emit(
                 'Keine Ergebnisse vorhanden', self.RED)
 
