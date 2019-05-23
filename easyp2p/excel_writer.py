@@ -11,7 +11,7 @@ results for the whole date range.
 """
 import calendar
 from datetime import date, timedelta
-from typing import List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
 
@@ -115,22 +115,8 @@ def _get_monthly_results(
     pivot_columns = [
         column for column in P2PParser.TARGET_COLUMNS
         if column in df_result.columns]
-
-    # Sum all columns except the balance columns, for those look up the correct
-    # value in df_result
-    aggfunc = dict()
-    for col in pivot_columns:
-        if col == P2PParser.START_BALANCE_NAME:
-            aggfunc[col] = lambda x: x.iloc[0]
-        elif col == P2PParser.END_BALANCE_NAME:
-            aggfunc[col] = lambda x: x.iloc[-1]
-        else:
-            # Only sum up columns with at least one non-NaN value. Otherwise
-            # NaN columns will be replaced by zeros.
-            aggfunc[col] = lambda x: x.sum(min_count=1)
-
     df = df_result.pivot_table(
-        values=pivot_columns, index=index, aggfunc=aggfunc)
+        values=pivot_columns, index=index, aggfunc=_get_aggfunc(pivot_columns))
     df = _add_months_without_cashflows(df, date_range)
     return df
 
@@ -151,20 +137,8 @@ def _get_total_results(df_monthly: pd.DataFrame) -> pd.DataFrame:
     pivot_columns = [
         column for column in P2PParser.TARGET_COLUMNS
         if column in df_monthly.columns]
-
-    # Sum all columns except the balance columns, for those look up the correct
-    # value in df_monthly
-    aggfunc = dict()
-    for col in pivot_columns:
-        if col == P2PParser.START_BALANCE_NAME:
-            aggfunc[col] = lambda x: x.groupby(index).first().iloc[0]
-        elif col == P2PParser.END_BALANCE_NAME:
-            aggfunc[col] = lambda x: x.groupby(index).last().iloc[0]
-        else:
-            aggfunc[col] = lambda x: x.sum(min_count=1)
-
     df_pivot = df_monthly.pivot_table(
-        values=pivot_columns, index=index, aggfunc=aggfunc,
+        values=pivot_columns, index=index, aggfunc=_get_aggfunc(pivot_columns),
         dropna=False)
     # Create the total row
     df = df_pivot.pivot_table(
@@ -172,6 +146,34 @@ def _get_total_results(df_monthly: pd.DataFrame) -> pd.DataFrame:
         margins=True, dropna=False, margins_name='Total')
 
     return df
+
+
+def _get_aggfunc(columns: Sequence[str]) -> Dict[str, Callable]:
+    """
+    Returns the aggregation function for building the pivot tables.
+
+    All columns except the balance columns will be summed up. For the start
+    (end) balance columns the first (last) entry per aggregation index will be
+    used.
+
+    Returns:
+        Dictionary where columns are the keys and the aggregation function are
+        the values.
+
+    """
+    # Sum all columns except the balance columns, for those look up the correct
+    # value in df_monthly
+    aggfunc = dict()
+    for col in columns:
+        if col == P2PParser.START_BALANCE_NAME:
+            aggfunc[col] = lambda x: x.iloc[0]
+        elif col == P2PParser.END_BALANCE_NAME:
+            aggfunc[col] = lambda x: x.iloc[-1]
+        else:
+            # Only sum up columns with at least one non-NaN value. Otherwise
+            # NaN columns will be replaced by zeros.
+            aggfunc[col] = lambda x: x.sum(min_count=1)
+    return aggfunc
 
 
 def _add_months_without_cashflows(
