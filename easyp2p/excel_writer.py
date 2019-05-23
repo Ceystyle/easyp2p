@@ -11,7 +11,7 @@ results for the whole date range.
 """
 import calendar
 from datetime import date, timedelta
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Optional, Tuple
 
 import pandas as pd
 
@@ -115,11 +115,22 @@ def _get_monthly_results(
     pivot_columns = [
         column for column in P2PParser.TARGET_COLUMNS
         if column in df_result.columns]
-    # Only sum up columns with at least one non-NaN value. Otherwise NaN
-    # columns will be replaced by zeros when building the pivot table.
+
+    # Sum all columns except the balance columns, for those look up the correct
+    # value in df_result
+    aggfunc = dict()
+    for col in pivot_columns:
+        if col == P2PParser.START_BALANCE_NAME:
+            aggfunc[col] = lambda x: x.iloc[0]
+        elif col == P2PParser.END_BALANCE_NAME:
+            aggfunc[col] = lambda x: x.iloc[-1]
+        else:
+            # Only sum up columns with at least one non-NaN value. Otherwise
+            # NaN columns will be replaced by zeros.
+            aggfunc[col] = lambda x: x.sum(min_count=1)
+
     df = df_result.pivot_table(
-        values=pivot_columns, index=index, aggfunc=lambda x: x.sum(min_count=1))
-    df = _add_balances(df, df_result, index)
+        values=pivot_columns, index=index, aggfunc=aggfunc)
     df = _add_months_without_cashflows(df, date_range)
     return df
 
@@ -140,10 +151,26 @@ def _get_total_results(df_monthly: pd.DataFrame) -> pd.DataFrame:
     pivot_columns = [
         column for column in P2PParser.TARGET_COLUMNS
         if column in df_monthly.columns]
-    df = df_monthly.pivot_table(
+
+    # Sum all columns except the balance columns, for those look up the correct
+    # value in df_monthly
+    aggfunc = dict()
+    for col in pivot_columns:
+        if col == P2PParser.START_BALANCE_NAME:
+            aggfunc[col] = lambda x: x.groupby(index).first().iloc[0]
+        elif col == P2PParser.END_BALANCE_NAME:
+            aggfunc[col] = lambda x: x.groupby(index).last().iloc[0]
+        else:
+            aggfunc[col] = lambda x: x.sum(min_count=1)
+
+    df_pivot = df_monthly.pivot_table(
+        values=pivot_columns, index=index, aggfunc=aggfunc,
+        dropna=False)
+    # Create the total row
+    df = df_pivot.pivot_table(
         values=pivot_columns, index=index, aggfunc=lambda x: x.sum(min_count=1),
         margins=True, dropna=False, margins_name='Total')
-    df = _add_balances(df, df_monthly, index)
+
     return df
 
 
@@ -244,35 +271,6 @@ def get_list_of_months(date_range: Tuple[date, date]) -> List[date]:
         current_date += timedelta(days=days_in_month)
 
     return months
-
-
-def _add_balances(
-        df: pd.DataFrame, df_balances: pd.DataFrame,
-        groupby_columns: Sequence[str]) -> pd.DataFrame:
-    """
-    Add balance columns to DataFrame.
-
-    The balance columns must be treated separately since they cannot simply
-    be summed up during pivot table creation like the other columns.
-
-    Args:
-        df: DataFrame to which balance columns should be added.
-        df_balances: DataFrame which was used to create the pivot table.
-        groupby_columns: List of column names used to create the pivot
-            table.
-
-    """
-    try:
-        df[P2PParser.START_BALANCE_NAME] = \
-            df_balances.groupby(groupby_columns).first()[
-                P2PParser.START_BALANCE_NAME]
-        df[P2PParser.END_BALANCE_NAME] = \
-            df_balances.groupby(groupby_columns).last()[
-                P2PParser.END_BALANCE_NAME]
-    except KeyError:
-        pass
-
-    return df
 
 
 def _write_worksheet(
