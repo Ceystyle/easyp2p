@@ -163,12 +163,9 @@ class P2PParser:
             # Convert date column from datetime to date:
             self.df[self.DATE] = self.df[self.DATE].dt.date
         except KeyError as err:
-            if self.df.empty:
-                pass
-            else:
-                raise RuntimeError(
-                    '{0}: Spalte {1} nicht im Kontoauszug vorhanden!'.format(
-                        self.name, str(err)))
+            raise RuntimeError(
+                '{0}: Spalte {1} nicht im Kontoauszug vorhanden!'.format(
+                    self.name, str(err)))
 
     def _map_cashflow_types(
             self, cashflow_types: Optional[Mapping[str, str]],
@@ -233,22 +230,6 @@ class P2PParser:
                 DataFrame
 
         """
-        # Rename columns in DataFrame
-        if rename_columns:
-            try:
-                self.df.rename(columns=rename_columns, inplace=True)
-            except KeyError as err:
-                if self.df.empty:
-                    pass
-                else:
-                    raise RuntimeError(
-                        '{0}: Spalte {1} ist nicht im Kontoauszug '
-                        'vorhanden!'.format(self.name, str(err)))
-
-        # Make sure we only show results between start and end date
-        if date_format:
-            self._filter_date_range(date_format)
-
         # If there were no cash flows in date_range add a single zero line
         if self.df.empty:
             data = [
@@ -260,6 +241,19 @@ class P2PParser:
             self.df.set_index(
                 [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
             return ''
+
+        # Rename columns in DataFrame
+        if rename_columns:
+            try:
+                self.df.rename(columns=rename_columns, inplace=True)
+            except KeyError as err:
+                raise RuntimeError(
+                    '{0}: Spalte {1} ist nicht im Kontoauszug '
+                    'vorhanden!'.format(self.name, str(err)))
+
+        # Make sure we only show results between start and end date
+        if date_format:
+            self._filter_date_range(date_format)
 
         # Convert cash flow types from platform to easyp2p types
         unknown_cf_types = self._map_cashflow_types(
