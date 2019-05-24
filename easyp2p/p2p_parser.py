@@ -199,6 +199,17 @@ class P2PParser:
         else:
             return ''
 
+    def _add_zero_line(self):
+        """Add a single zero cash flow for start date to the DataFrame."""
+        data = [
+            (self.name, 'EUR', self.date_range[0],
+             *[0.] * len(self.TARGET_COLUMNS))]
+        columns = [self.PLATFORM, self.CURRENCY, self.DATE,
+            *self.TARGET_COLUMNS]
+        self.df = pd.DataFrame(data=data, columns=columns)
+        self.df.set_index(
+            [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
+
     def run(
             self, date_format: str = None,
             rename_columns: Mapping[str, str] = None,
@@ -232,14 +243,7 @@ class P2PParser:
         """
         # If there were no cash flows in date_range add a single zero line
         if self.df.empty:
-            data = [
-                (self.name, 'EUR', self.date_range[0],
-                 *[0.]*len(self.TARGET_COLUMNS))]
-            columns = [self.PLATFORM, self.CURRENCY, self.DATE,
-                       *self.TARGET_COLUMNS]
-            self.df = pd.DataFrame(data=data, columns=columns)
-            self.df.set_index(
-                [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
+            self._add_zero_line()
             return ''
 
         # Rename columns in DataFrame
