@@ -135,7 +135,7 @@ class Twino:
             }
         rename_columns = {'Processing Date': parser.DATE}
 
-        unknown_cf_types = parser.start_parser(
+        unknown_cf_types = parser.run(
             '%d.%m.%Y %H:%M', rename_columns, cashflow_types,
             'Twino_Cashflow-Typ', 'Amount, EUR')
 

@@ -148,7 +148,6 @@ class Bondora:
             'Startguthaben': parser.START_BALANCE_NAME,
             'Zeitraum': parser.DATE}
 
-        unknown_cf_types = parser.start_parser(
-            '%d.%m.%Y', rename_columns=rename_columns)
+        unknown_cf_types = parser.run('%d.%m.%Y', rename_columns=rename_columns)
 
         return parser.df, unknown_cf_types

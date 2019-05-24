@@ -140,7 +140,7 @@ class Estateguru:
             'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
             'Bestätigungsdatum': parser.DATE}
 
-        unknown_cf_types = parser.start_parser(
+        unknown_cf_types = parser.run(
             '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
             'Estateguru_Cashflow-Typ', 'Betrag', 'Verfügbar für Investitionen')
 

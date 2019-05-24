@@ -161,8 +161,6 @@ def _get_aggfunc(columns: Sequence[str]) -> Dict[str, Callable]:
         the values.
 
     """
-    # Sum all columns except the balance columns, for those look up the correct
-    # value in df_monthly
     aggfunc = dict()
     for col in columns:
         if col == P2PParser.START_BALANCE_NAME:

@@ -202,7 +202,7 @@ class P2PParser:
         else:
             return ''
 
-    def start_parser(
+    def run(
             self, date_format: str = None,
             rename_columns: Mapping[str, str] = None,
             cashflow_types: Optional[Mapping[str, str]] = None,

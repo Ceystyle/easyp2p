@@ -114,7 +114,7 @@ class DoFinance:
 
         rename_columns = {'Bearbeitungsdatum': parser.DATE}
 
-        unknown_cf_types = parser.start_parser(
+        unknown_cf_types = parser.run(
             '%d.%m.%Y', rename_columns, cashflow_types, 'Art der Transaktion',
             'Betrag, €')
 

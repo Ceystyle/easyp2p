@@ -122,7 +122,7 @@ class Grupeer:
             'Principal': parser.REDEMPTION_PAYMENT}
         rename_columns = {'Date': parser.DATE, 'Currency': parser.CURRENCY}
 
-        unknown_cf_types = parser.start_parser(
+        unknown_cf_types = parser.run(
             '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount',
             'Balance')
 

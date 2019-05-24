@@ -143,7 +143,7 @@ class Robocash:
             'Zinsenzahlung': parser.INTEREST_PAYMENT}
         rename_columns = {'Datum und Laufzeit': parser.DATE}
 
-        unknown_cf_types = parser.start_parser(
+        unknown_cf_types = parser.run(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Operation', 'Betrag', 'Der Saldo des Portfolios')
 

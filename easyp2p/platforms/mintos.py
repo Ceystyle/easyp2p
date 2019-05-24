@@ -179,7 +179,7 @@ class Mintos:
             'Reversed incoming client payment': parser.OUTGOING_PAYMENT}
         rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
-        unknown_cf_types = parser.start_parser(
+        unknown_cf_types = parser.run(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Mintos_Cashflow-Typ', 'Turnover', 'Balance')
 
