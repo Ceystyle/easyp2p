@@ -70,7 +70,7 @@ class Swaper:
             swaper.log_into_page(
                 'email', 'password', credentials,
                 EC.presence_of_element_located((By.ID, 'open-investments')),
-                fill_delay=0.5)
+                fill_delay=0.1)
 
             swaper.open_account_statement_page((By.ID, 'account-statement'))
 

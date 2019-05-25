@@ -76,7 +76,8 @@ class Bondora:
 
             bondora.log_into_page(
                 'Email', 'Password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Cashflow')))
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Cash flow')),
+                fill_delay=0.1)
 
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 

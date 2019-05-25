@@ -188,6 +188,7 @@ class P2PPlatform:
             elem = self.driver.find_element_by_name(password_field)
             elem.clear()
             elem.send_keys(credentials[1])
+            time.sleep(fill_delay)
             elem.send_keys(Keys.RETURN)
             self.driver.wait(wait_until)
         except NoSuchElementException:
