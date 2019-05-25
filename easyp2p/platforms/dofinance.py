@@ -52,19 +52,19 @@ class DoFinance:
 
         """
         urls = {
-            'login': 'https://www.dofinance.eu/de/users/login',
-            'logout': 'https://www.dofinance.eu/de/users/logout',
-            'statement': 'https://www.dofinance.eu/de/users/statement',
+            'login': 'https://www.dofinance.eu/en/users/login',
+            'logout': 'https://www.dofinance.eu/en/users/logout',
+            'statement': 'https://www.dofinance.eu/en/users/statement',
         }
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
-                as dofinance:
+                EC.element_to_be_clickable(
+                    (By.LINK_TEXT, 'Log In'))) as dofinance:
 
             dofinance.log_into_page(
                 'email', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSAKTIONEN')))
+                EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSACTIONS')))
 
             dofinance.open_account_statement_page((By.ID, 'date-from'))
 
@@ -101,21 +101,21 @@ class DoFinance:
         # Define mapping between DoFinance and easyp2p cashflow types and
         # column names
         cashflow_types = {
-            'Abhebungen': parser.OUTGOING_PAYMENT,
-            'Gewinn': parser.INTEREST_PAYMENT}
+            'Withdrawal': parser.OUTGOING_PAYMENT,
+            'Profit': parser.INTEREST_PAYMENT}
 
-        for interest_rate in ['5%', '7%', '9%', '12%']:
-            cashflow_types[
-                'Rückzahlung\nRate: {0} Typ: automatisch'
-                .format(interest_rate)] = parser.REDEMPTION_PAYMENT
-            cashflow_types[
-                'Anlage\nRate: {0} Typ: automatisch'.format(interest_rate)] \
-                = parser.INVESTMENT_PAYMENT
+        for cf_type in parser.df['Transaction Type'].unique():
+            if cf_type.startswith('Repayment'):
+                cashflow_types[cf_type] = parser.REDEMPTION_PAYMENT
+            elif cf_type.startswith('Investment'):
+                cashflow_types[cf_type] = parser.INVESTMENT_PAYMENT
+            elif cf_type.startswith('Funding'):
+                cashflow_types[cf_type] = parser.INCOMING_PAYMENT
 
-        rename_columns = {'Bearbeitungsdatum': parser.DATE}
+        rename_columns = {'Processing Date': parser.DATE}
 
         unknown_cf_types = parser.run(
-            '%d.%m.%Y', rename_columns, cashflow_types, 'Art der Transaktion',
-            'Betrag, €')
+            '%d.%m.%Y', rename_columns, cashflow_types, 'Transaction Type',
+            'Amount, €')
 
         return parser.df, unknown_cf_types

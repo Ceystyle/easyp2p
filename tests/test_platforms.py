@@ -266,15 +266,15 @@ class DoFinanceTests(BasePlatformTests):
 
     """Class containing all tests for DoFinance."""
 
-    DATE_RANGE = (date(2018, 5, 1), date(2018, 8, 31))
+    DATE_RANGE = (date(2018, 1, 1), date(2018, 8, 31))
     DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
     DATE_RANGE_MISSING_MONTH = (date(2018, 4, 1), date(2018, 9, 30))
 
     def setUp(self) -> None:
         self.name = 'DoFinance'
         self.Platform = p2p_platforms.DoFinance
-        self.unknown_cf_types = \
-            'Anlage\nRate: 6% Typ: automatisch, TestCF1, TestCF2'
+        self.unknown_cf_types = 'TestCF1, TestCF2'
+        self.header = 0
 
 
 class EstateguruTests(BasePlatformTests):
