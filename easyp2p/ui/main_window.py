@@ -30,7 +30,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         # Initialize date combo boxes with previous month
         if date.today().month > 1:
-            start_month = p2p_helper.nbr_to_short_month(
+            start_month = p2p_helper.nbr_to_short_month_de(
                 str(date.today().month - 1))
             start_year = str(date.today().year)
         else:

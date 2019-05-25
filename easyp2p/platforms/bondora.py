@@ -15,7 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-from easyp2p.p2p_helper import nbr_to_short_month
+from easyp2p.p2p_helper import nbr_to_short_month_en
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import (
@@ -54,9 +54,9 @@ class Bondora:
 
         """
         urls = {
-            'login': 'https://www.bondora.com/de/login',
-            'logout': 'https://www.bondora.com/de/authorize/logout',
-            'statement': 'https://www.bondora.com/de/cashflow',
+            'login': 'https://www.bondora.com/en/login',
+            'logout': 'https://www.bondora.com/en/authorize/logout',
+            'statement': 'https://www.bondora.com/en/cashflow',
         }
         xpaths = {
             'no_payments': '/html/body/div[1]/div/div/div/div[3]/div',
@@ -81,8 +81,9 @@ class Bondora:
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
-            start_month = nbr_to_short_month(self.date_range[0].strftime('%m'))
-            end_month = nbr_to_short_month(self.date_range[1].strftime('%m'))
+            start_month = nbr_to_short_month_en(
+                self.date_range[0].strftime('%m'))
+            end_month = nbr_to_short_month_en(self.date_range[1].strftime('%m'))
             select = Select(bondora.driver.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(self.date_range[0].year))
             select = Select(bondora.driver.find_element_by_id('StartMonth'))
@@ -96,7 +97,7 @@ class Bondora:
             driver.find_element_by_xpath(xpaths['search_btn']).click()
 
             # Wait until statement generation is finished
-            no_payments_msg = 'Keine Zahlungen gefunden'
+            no_payments_msg = 'Payments were not found in the selected period.'
 
             conditions = [
                 EC.text_to_be_present_in_element(
@@ -135,18 +136,18 @@ class Bondora:
 
         # Calculate defaulted payments
         parser.df[parser.DEFAULTS] = (
-            parser.df['Erhaltener Kapitalbetrag - gesamt']
-            - parser.df['Geplanter Kapitalbetrag - gesamt'])
+            parser.df['Principal received - total']
+            - parser.df['Principal planned - total'])
 
         # Define mapping between Bondora and easyp2p column names
         rename_columns = {
-            'Eingesetztes Kapital (netto)': parser.INCOMING_PAYMENT,
-            'Endsaldo': parser.END_BALANCE_NAME,
-            'Erhaltener Kapitalbetrag - gesamt': parser.REDEMPTION_PAYMENT,
-            'Erhaltene Zinsen - gesamt': parser.INTEREST_PAYMENT,
-            'Investitionen (netto)': parser.INVESTMENT_PAYMENT,
-            'Startguthaben': parser.START_BALANCE_NAME,
-            'Zeitraum': parser.DATE}
+            'Net capital deployed': parser.INCOMING_PAYMENT,
+            'Closing balance': parser.END_BALANCE_NAME,
+            'Principal received - total': parser.REDEMPTION_PAYMENT,
+            'Interest received - total': parser.INTEREST_PAYMENT,
+            'Net loan investments': parser.INVESTMENT_PAYMENT,
+            'Opening balance': parser.START_BALANCE_NAME,
+            'Period': parser.DATE}
 
         unknown_cf_types = parser.run('%d.%m.%Y', rename_columns=rename_columns)
 

@@ -235,6 +235,7 @@ class BondoraTests(BasePlatformTests):
         self.name = 'Bondora'
         self.Platform = p2p_platforms.Bondora
         self.unknown_cf_types = ''
+        self.header = 0
 
     # Below are some tests for write_results which affect more than just one
     # platform.

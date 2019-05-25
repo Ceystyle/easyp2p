@@ -27,9 +27,30 @@ def short_month_to_nbr(short_name: str) -> str:
     return map_short_month_to_nbr[short_name]
 
 
-def nbr_to_short_month(nbr: str) -> str:
+def nbr_to_short_month_en(nbr: str) -> str:
     """
-    Helper method for translating numbers to month short names.
+    Helper method for translating numbers to English month short names.
+
+    Args:
+        nbr: Number of month with or without a leading zero
+
+    Returns:
+        Month short name
+
+    """
+    map_nbr_to_short_month = {
+        '1': 'Jan', '01': 'Jan', '2': 'Feb', '02': 'Feb',
+        '3': 'Mar', '03': 'Mar', '4': 'Apr', '04': 'Apr',
+        '5': 'May', '05': 'May', '6': 'Jun', '06': 'Jun',
+        '7': 'Jul', '07': 'Jul', '8': 'Aug', '08': 'Aug',
+        '9': 'Sep', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'}
+
+    return map_nbr_to_short_month[nbr]
+
+
+def nbr_to_short_month_de(nbr: str) -> str:
+    """
+    Helper method for translating numbers to German month short names.
 
     Args:
         nbr: Number of month with or without a leading zero
