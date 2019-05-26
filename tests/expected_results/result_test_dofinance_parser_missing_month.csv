@@ -1,4 +1,4 @@
-Plattform,Datum,Währung,Auszahlungen,Investitionen,Tilgungszahlungen,Zinszahlungen,Gesamteinnahmen
+Plattform,Datum,Währung,Ein-/Auszahlungen,Investitionen,Tilgungszahlungen,Zinszahlungen,Gesamteinnahmen
 DoFinance,2018-04-01,EUR,0.0,-10.0,10.0,0.0,0.0
 DoFinance,2018-04-02,EUR,0.0,-30.0,30.0,0.0,0.0
 DoFinance,2018-04-03,EUR,0.0,-10.0,210.0,0.0,0.0

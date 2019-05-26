@@ -142,7 +142,7 @@ class Bondora:
 
         # Define mapping between Bondora and easyp2p column names
         rename_columns = {
-            'Net capital deployed': parser.INCOMING_PAYMENT,
+            'Net capital deployed': parser.IN_OUT_PAYMENT,
             'Closing balance': parser.END_BALANCE_NAME,
             'Principal received - total': parser.REDEMPTION_PAYMENT,
             'Interest received - total': parser.INTEREST_PAYMENT,

@@ -174,9 +174,10 @@ class Mintos:
             'Investment principal rebuy': parser.BUYBACK_PAYMENT,
             'Investment principal increase': parser.INVESTMENT_PAYMENT,
             'Investment principal repayment': parser.REDEMPTION_PAYMENT,
-            'Incoming client payment': parser.INCOMING_PAYMENT,
+            'Incoming client payment': parser.IN_OUT_PAYMENT,
+            'Outgoing client payment': parser.IN_OUT_PAYMENT,
             'Late payment fee income': parser.LATE_FEE_PAYMENT,
-            'Reversed incoming client payment': parser.OUTGOING_PAYMENT}
+            'Reversed incoming client payment': parser.IN_OUT_PAYMENT}
         rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
         unknown_cf_types = parser.run(

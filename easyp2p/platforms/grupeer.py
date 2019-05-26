@@ -116,7 +116,8 @@ class Grupeer:
         cashflow_types = {
             # Treat cashback as interest payment:
             'Cashback': parser.INTEREST_PAYMENT,
-            'Deposit': parser.INCOMING_PAYMENT,
+            'Deposit': parser.IN_OUT_PAYMENT,
+            'Withdrawal': parser.IN_OUT_PAYMENT,
             'Interest': parser.INTEREST_PAYMENT,
             'Investment': parser.INVESTMENT_PAYMENT,
             'Principal': parser.REDEMPTION_PAYMENT}

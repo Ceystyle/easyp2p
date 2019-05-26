@@ -34,8 +34,7 @@ class P2PParser:
     IGNORE = 'Ignoriert'
     REDEMPTION_PAYMENT = 'Tilgungszahlungen'
     LATE_FEE_PAYMENT = 'Verzugsgebühren'
-    INCOMING_PAYMENT = 'Einzahlungen'
-    OUTGOING_PAYMENT = 'Auszahlungen'
+    IN_OUT_PAYMENT = 'Ein-/Auszahlungen'
     DEFAULTS = 'Ausfälle'
     START_BALANCE_NAME = 'Startguthaben'
     END_BALANCE_NAME = 'Endsaldo'
@@ -53,6 +52,7 @@ class P2PParser:
     TARGET_COLUMNS = [
         START_BALANCE_NAME,
         END_BALANCE_NAME,
+        IN_OUT_PAYMENT,
         INVESTMENT_PAYMENT,
         REDEMPTION_PAYMENT,
         BUYBACK_PAYMENT,
@@ -120,8 +120,8 @@ class P2PParser:
         """
         orig_df = self.df
         if value_column:
-            self.df = pd.pivot_table(
-                self.df, values=value_column, index=[self.DATE, self.CURRENCY],
+            self.df = self.df.pivot_table(
+                values=value_column, index=[self.DATE, self.CURRENCY],
                 columns=[self.CF_TYPE], aggfunc=sum)
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
@@ -133,11 +133,12 @@ class P2PParser:
             # The start balance value of each day already includes the first
             # daily cash flow which needs to be subtracted again
             self.df[self.START_BALANCE_NAME] = \
-                (orig_df.groupby(self.DATE).first()[balance_column]
+                (orig_df.groupby([self.DATE, self.CURRENCY]).first()[
+                    balance_column]
                  - orig_df.groupby(self.DATE).first()[
                      value_column]).reset_index()[0]
             self.df[self.END_BALANCE_NAME] = \
-                orig_df.groupby(self.DATE).last()[
+                orig_df.groupby([self.DATE, self.CURRENCY]).last()[
                     balance_column].reset_index()[balance_column]
 
     def _filter_date_range(self, date_format: str) -> None:
@@ -204,7 +205,8 @@ class P2PParser:
         data = [
             (self.name, 'EUR', self.date_range[0],
              *[0.] * len(self.TARGET_COLUMNS))]
-        columns = [self.PLATFORM, self.CURRENCY, self.DATE,
+        columns = [
+            self.PLATFORM, self.CURRENCY, self.DATE,
             *self.TARGET_COLUMNS]
         self.df = pd.DataFrame(data=data, columns=columns)
         self.df.set_index(
@@ -258,6 +260,9 @@ class P2PParser:
         # Make sure we only show results between start and end date
         if date_format:
             self._filter_date_range(date_format)
+            if self.df.empty:
+                self._add_zero_line()
+                return ''
 
         # Convert cash flow types from platform to easyp2p types
         unknown_cf_types = self._map_cashflow_types(

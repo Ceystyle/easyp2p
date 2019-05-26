@@ -122,7 +122,7 @@ class Swaper:
             'INVESTMENT': parser.INVESTMENT_PAYMENT,
             'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
             'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT,
-            'WITHDRAWAL': parser.OUTGOING_PAYMENT}
+            'WITHDRAWAL': parser.IN_OUT_PAYMENT}
         rename_columns = {'Booking date': parser.DATE}
 
         unknown_cf_types = parser.run(

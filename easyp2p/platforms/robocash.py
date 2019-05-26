@@ -135,8 +135,8 @@ class Robocash:
         # column names
         cashflow_types = {
             'Darlehenskauf': parser.INVESTMENT_PAYMENT,
-            'Die Geldauszahlung': parser.OUTGOING_PAYMENT,
-            'Geldeinzahlung': parser.INCOMING_PAYMENT,
+            'Die Geldauszahlung': parser.IN_OUT_PAYMENT,
+            'Geldeinzahlung': parser.IN_OUT_PAYMENT,
             'Kreditrückzahlung': parser.REDEMPTION_PAYMENT,
             # We don't report cash transfers within Robocash:
             'Portfolio auffüllen': parser.IGNORE,

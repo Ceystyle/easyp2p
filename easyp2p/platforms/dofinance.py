@@ -101,7 +101,7 @@ class DoFinance:
         # Define mapping between DoFinance and easyp2p cashflow types and
         # column names
         cashflow_types = {
-            'Withdrawal': parser.OUTGOING_PAYMENT,
+            'Withdrawal': parser.IN_OUT_PAYMENT,
             'Profit': parser.INTEREST_PAYMENT}
 
         for cf_type in parser.df['Transaction Type'].unique():
@@ -110,7 +110,7 @@ class DoFinance:
             elif cf_type.startswith('Investment'):
                 cashflow_types[cf_type] = parser.INVESTMENT_PAYMENT
             elif cf_type.startswith('Funding'):
-                cashflow_types[cf_type] = parser.INCOMING_PAYMENT
+                cashflow_types[cf_type] = parser.IN_OUT_PAYMENT
 
         rename_columns = {'Processing Date': parser.DATE}
 

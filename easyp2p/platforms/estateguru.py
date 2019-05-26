@@ -130,7 +130,8 @@ class Estateguru:
         cashflow_types = {
             # Treat bonus payments as normal interest payments
             'Bonus': parser.INTEREST_PAYMENT,
-            'Einzahlung(Banktransfer)': parser.INCOMING_PAYMENT,
+            'Einzahlung(Banktransfer)': parser.IN_OUT_PAYMENT,
+            'Auszahlung(Banktransfer)': parser.IN_OUT_PAYMENT,
             'Entschädigung': parser.LATE_FEE_PAYMENT,
             'Hauptbetrag': parser.REDEMPTION_PAYMENT,
             'Investition(Auto Investieren)': parser.INVESTMENT_PAYMENT,
