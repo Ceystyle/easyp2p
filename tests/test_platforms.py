@@ -364,6 +364,7 @@ class RobocashTests(BasePlatformTests):
         self.name = 'Robocash'
         self.Platform = p2p_platforms.Robocash
         self.unknown_cf_types = 'TestCF1, TestCF2'
+        self.header = 0
 
 
 class SwaperTests(BasePlatformTests):

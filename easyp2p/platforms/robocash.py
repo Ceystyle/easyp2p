@@ -58,22 +58,22 @@ class Robocash:
 
         """
         urls = {
-            'login': 'https://robo.cash/de',
-            'logout': 'https://robo.cash/de/logout',
-            'statement': 'https://robo.cash/de/cabinet/statement',
+            'login': 'https://robo.cash/',
+            'logout': 'https://robo.cash/logout',
+            'statement': 'https://robo.cash/cabinet/statement',
         }
         xpaths = {
             'login_field': '/html/body/header/div/div[2]/a',
         }
 
-        # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.title_contains('Willkommen')) as robocash:
+                EC.element_to_be_clickable(
+                    (By.XPATH, xpaths['login_field']))) as robocash:
 
             robocash.log_into_page(
                 'email', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')),
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Account statement')),
                 login_locator=(By.XPATH, xpaths['login_field']))
 
             robocash.open_account_statement_page((By.ID, 'new_statement'))
