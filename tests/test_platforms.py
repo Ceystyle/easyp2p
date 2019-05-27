@@ -304,6 +304,7 @@ class GrupeerTests(BasePlatformTests):
         self.name = 'Grupeer'
         self.Platform = p2p_platforms.Grupeer
         self.unknown_cf_types = 'TestCF1, TestCF2'
+        self.header = 0
 
 
 class IuvoTests(BasePlatformTests):

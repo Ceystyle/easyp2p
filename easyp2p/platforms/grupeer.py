@@ -53,8 +53,9 @@ class Grupeer:
 
         """
         urls = {
-            'login': 'https://www.grupeer.com/de/login',
-            'statement': 'https://www.grupeer.com/de/account-statement',
+            'login': 'https://www.grupeer.com/login',
+            'statement': ('https://www.grupeer.com/account-statement'
+                          '?currency_code=eur'),
         }
         xpaths = {
             'logout_hover': (
@@ -64,13 +65,13 @@ class Grupeer:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen')),
-                logout_locator=(By.LINK_TEXT, 'Ausloggen'),
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In')),
+                logout_locator=(By.LINK_TEXT, 'Logout'),
                 hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
 
             grupeer.log_into_page(
                 'email', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Meine Investments')))
+                EC.element_to_be_clickable((By.LINK_TEXT, 'My Investments')))
 
             grupeer.open_account_statement_page((By.ID, 'from'))
 
@@ -78,7 +79,7 @@ class Grupeer:
                 self.date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
                 wait_until=EC.text_to_be_present_in_element(
                     (By.CLASS_NAME, 'balance-block'),
-                    'Bilanz geöffnet am '
+                    'Starting balance on '
                     + str(self.date_range[0].strftime('%d.%m.%Y'))),
                 submit_btn_locator=(By.NAME, 'submit'))
 
@@ -111,7 +112,7 @@ class Grupeer:
         parser.df['Balance'] = parser.df['Balance'].apply(
             lambda x: x.replace(',', '.')).astype('float64')
 
-        # Define mapping between Grupeer and easyp2p cashflow types and column
+        # Define mapping between Grupeer and easyp2p cash flow types and column
         # names
         cashflow_types = {
             # Treat cashback as interest payment:
