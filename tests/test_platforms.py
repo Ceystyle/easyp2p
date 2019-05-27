@@ -392,9 +392,9 @@ class TwinoTests(BasePlatformTests):
 
     def setUp(self) -> None:
         self.name = 'Twino'
-        self.header = 2
         self.Platform = p2p_platforms.Twino
         self.unknown_cf_types = 'TestCF1 PRINCIPAL, TestCF2 INTEREST'
+        self.header = 2
 
 
 def are_files_equal(

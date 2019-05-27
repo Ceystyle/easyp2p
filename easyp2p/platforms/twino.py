@@ -52,9 +52,9 @@ class Twino:
 
         """
         urls = {
-            'login': 'https://www.twino.eu/de/',
+            'login': 'https://www.twino.eu/en/',
             'statement': (
-                'https://www.twino.eu/de/profile/investor/my-investments'
+                'https://www.twino.eu/en/profile/investor/my-investments'
                 '/account-transactions'),
         }
         xpaths = {
@@ -65,7 +65,7 @@ class Twino:
             'logout_btn': '//a[@href="/logout"]',
             'start_date': '//*[@date-picker="filterData.processingDateFrom"]',
             'statement': (
-                '//a[@href="/de/profile/investor/my-investments/'
+                '//a[@href="/en/profile/investor/my-investments/'
                 'individual-investments"]'),
         }
 
