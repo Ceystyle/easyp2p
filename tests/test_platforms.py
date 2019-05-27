@@ -334,6 +334,7 @@ class MintosTests(BasePlatformTests):
         self.name = 'Mintos'
         self.Platform = p2p_platforms.Mintos
         self.unknown_cf_types = 'Interestincome, TestCF1, TestCF2'
+        self.header = 0
 
 
 class PeerBerryTests(BasePlatformTests):

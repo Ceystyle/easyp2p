@@ -52,8 +52,8 @@ class Mintos:
 
         """
         urls = {
-            'login': 'https://www.mintos.com/de/login',
-            'statement': 'https://www.mintos.com/de/kontoauszug/'}
+            'login': 'https://www.mintos.com/en/login',
+            'statement': 'https://www.mintos.com/en/account-statement/'}
         xpaths = {
             'logout_btn': "//a[contains(@href,'logout')]"}
 
@@ -64,7 +64,7 @@ class Mintos:
 
             mintos.log_into_page(
                 '_username', '_password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
 
             mintos.open_account_statement_page((By.ID, 'period-from'))
 
@@ -119,7 +119,7 @@ class Mintos:
             return False
 
         if df.iloc[0][0] != (
-                'Anfangssaldo ' + self.date_range[0].strftime('%d.%m.%Y')):
+                'Opening balance ' + self.date_range[0].strftime('%d.%m.%Y')):
             return False
 
         # Start balance value
@@ -127,7 +127,7 @@ class Mintos:
             return False
 
         if df.iloc[1][0] != (
-                'Endsaldo ' + self.date_range[1].strftime('%d.%m.%Y')):
+                'Closing balance ' + self.date_range[1].strftime('%d.%m.%Y')):
             return False
 
         return True
@@ -155,10 +155,10 @@ class Mintos:
 
         try:
             # Create new columns for identifying cashflow types
-            parser.df['Mintos_Cashflow-Typ'], parser.df['Loan ID'] = \
+            parser.df['Cash Flow Type'], parser.df['Loan ID'] = \
                 parser.df['Details'].str.split(' Loan ID: ').str
-            parser.df['Mintos_Cashflow-Typ'] = \
-                parser.df['Mintos_Cashflow-Typ'].str.split(
+            parser.df['Cash Flow Type'] = \
+                parser.df['Cash Flow Type'].str.split(
                     ' Rebuy purpose').str[0]
         except (KeyError, ValueError):
             pass
@@ -182,6 +182,6 @@ class Mintos:
 
         unknown_cf_types = parser.run(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-            'Mintos_Cashflow-Typ', 'Turnover', 'Balance')
+            'Cash Flow Type', 'Turnover', 'Balance')
 
         return parser.df, unknown_cf_types
