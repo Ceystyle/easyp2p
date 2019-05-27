@@ -52,8 +52,8 @@ class Iuvo:
 
         """
         urls = {
-            'login': 'https://www.iuvo-group.com/de/login/',
-            'statement': 'https://www.iuvo-group.com/de/account-statement/',
+            'login': 'https://www.iuvo-group.com/en/login/',
+            'statement': 'https://www.iuvo-group.com/en/account-statement/',
         }
         xpaths = {
             'statement_check': (
@@ -63,13 +63,13 @@ class Iuvo:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.ID, 'einloggen')),
+                EC.element_to_be_clickable((By.ID, 'login')),
                 logout_locator=(By.ID, 'p2p_logout'),
                 hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
 
             iuvo.log_into_page(
                 'login', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
 
             # Click away cookie policy, if present
             try:
@@ -91,7 +91,8 @@ class Iuvo:
                 EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['statement_check']), check_txt),
                 EC.text_to_be_present_in_element(
-                    (By.CLASS_NAME, 'text-center'), 'Keine passenden Daten!')]
+                    (By.CLASS_NAME, 'text-center'),
+                    'There is no suitable data !')]
 
             iuvo.generate_statement_direct(
                 (self.date_range[0], self.date_range[1]), (By.ID, 'date_from'),
@@ -102,11 +103,11 @@ class Iuvo:
             try:
                 no_cashflows = bool(
                     iuvo.driver.find_element_by_class_name(
-                        'text-center').text == 'Keine passenden Daten!')
+                        'text-center').text == 'There is no suitable data !')
             except NoSuchElementException:
                 no_cashflows = False
 
-            # If there were no cashflows write an empty DataFrame to the file
+            # If there were no cash flows write an empty DataFrame to the file
             if no_cashflows:
                 df = pd.DataFrame()
                 df.to_excel(self.statement)

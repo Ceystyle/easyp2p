@@ -319,6 +319,7 @@ class IuvoTests(BasePlatformTests):
         self.name = 'Iuvo'
         self.Platform = p2p_platforms.Iuvo
         self.unknown_cf_types = 'TestCF1, TestCF2'
+        self.header = 3
 
 
 class MintosTests(BasePlatformTests):
