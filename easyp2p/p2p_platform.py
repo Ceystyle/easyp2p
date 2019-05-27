@@ -16,7 +16,7 @@ import glob
 import os
 import shutil
 import time
-from typing import Mapping, Optional, Tuple
+from typing import Mapping, Optional, Tuple, Union
 
 from selenium.common.exceptions import (
     TimeoutException, NoSuchElementException, StaleElementReferenceException)
@@ -126,7 +126,7 @@ class P2PPlatform:
 
     def log_into_page(
             self, name_field: str, password_field: str,
-            credentials: Tuple[str, str], wait_until: bool,
+            credentials: Tuple[str, str], wait_until: Union[bool, WebElement],
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.) -> None:
         """
@@ -231,7 +231,7 @@ class P2PPlatform:
 
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
-            wait_until: bool,
+            wait_until: Union[bool, WebElement],
             hover_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         P2P platform logout using the provided logout button.
@@ -267,7 +267,7 @@ class P2PPlatform:
             raise RuntimeWarning(
                 '{0}-Logout war nicht erfolgreich!'.format(self.name))
 
-    def logout_by_url(self, wait_until: bool) -> None:
+    def logout_by_url(self, wait_until: Union[bool, WebElement]) -> None:
         """
         P2P platform logout using the provided URL.
 
@@ -292,8 +292,9 @@ class P2PPlatform:
     def generate_statement_direct(
             self, date_range: Tuple[date, date],
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
-            date_format: str, wait_until: bool = None,
-            submit_btn_locator: Tuple[str, str] = None) -> None:
+            date_format: str,
+            wait_until: Optional[Union[bool, WebElement]] = None,
+            submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         Generate account statement when date fields can be edited directly.
 

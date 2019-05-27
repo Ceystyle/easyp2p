@@ -4,7 +4,7 @@
 """Module implementing P2PWebDriver."""
 
 import os
-from typing import Callable, cast, List
+from typing import Callable, cast, List, Union
 
 from selenium import webdriver
 from selenium.common.exceptions import (
@@ -58,7 +58,9 @@ class P2PWebDriver(webdriver.Chrome):
                 'behavior': 'allow', 'downloadPath': self.download_directory}
             self.execute_cdp_cmd('Page.setDownloadBehavior', params)
 
-    def wait(self, wait_until: bool, delay: float = 5.0) -> WebElement:
+    def wait(
+            self, wait_until: Union[bool, WebElement],
+            delay: float = 5.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
 
