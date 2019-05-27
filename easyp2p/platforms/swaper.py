@@ -113,7 +113,7 @@ class Swaper:
 
         parser = P2PParser(self.name, self.date_range, self.statement)
 
-        # Define mapping between Swaper and easyp2p cashflow types and column
+        # Define mapping between Swaper and easyp2p cash flow types and column
         # names
         cashflow_types = {
             'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,

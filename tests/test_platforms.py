@@ -379,6 +379,7 @@ class SwaperTests(BasePlatformTests):
         self.name = 'Swaper'
         self.Platform = p2p_platforms.Swaper
         self.unknown_cf_types = 'TestCF1, TestCF2'
+        self.header = 0
 
 
 class TwinoTests(BasePlatformTests):
