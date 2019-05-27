@@ -53,14 +53,17 @@ class PeerBerry:
 
         """
         urls = {
-            'login': 'https://peerberry.com/de/login',
-            'statement': 'https://peerberry.com/de/statement',
+            'login': 'https://peerberry.com/en/login',
+            'statement': 'https://peerberry.com/en/statement',
         }
         xpaths = {
             'cookie_policy': '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]',
             'download_btn': (
                 '//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]'
                 '/div'),
+            'login_btn': (
+                '/html/body/div[1]/div/div/div/div[2]/div/div/div/div[1]/div'
+                '/div/form/input'),
             'logout_btn': (
                 '//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div'),
             'start_balance': (
@@ -71,15 +74,14 @@ class PeerBerry:
                 '/div[2]/div/div[2]/div/span'),
         }
 
-        # TODO: do not rely on text in title for checking successful logout
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.title_contains('Einloggen'),
+                EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
                 logout_locator=(By.XPATH, xpaths['logout_btn'])) as peerberry:
 
             peerberry.log_into_page(
                 'email', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Kontoauszug')))
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Statement')))
 
             peerberry.open_account_statement_page((By.NAME, 'startDate'))
 
@@ -115,7 +117,7 @@ class PeerBerry:
                 driver.wait(
                     EC.text_to_be_present_in_element(
                         (By.XPATH, xpaths['start_balance']),
-                        'Eröffnungssaldo '+str(
+                        'Opening balance '+str(
                             self.date_range[0]).format('%Y-%m-%d')))
             except NoSuchElementException:
                 raise RuntimeError('Generierung des {0}-Kontoauszugs konnte '
@@ -149,8 +151,8 @@ class PeerBerry:
 
         parser = P2PParser(self.name, self.date_range, self.statement)
 
-        # Define mapping between PeerBerry and easyp2p cashflow types and column
-        # names
+        # Define mapping between PeerBerry and easyp2p cash flow types and
+        # column names
         cashflow_types = {
             'Amount of interest payment received': parser.INTEREST_PAYMENT,
             'Amount of principal payment received': parser.REDEMPTION_PAYMENT,
