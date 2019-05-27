@@ -1,2 +1,2 @@
-"UniqueId","Zahlungsdatum","Bestätigungsdatum","Cashflow-Typ","Cashflow-Status","Projektname","Währung","Betrag","Verfügbar für Investitionen"
-"Derzeit verfügbare Mittel","","","","","",,,""
+UniqueId,Payment Date,Confirmation Date,Cash Flow Type,Cash Flow Status,Project Name,Currency,Amount,Available to invest
+Funds available at the end of the period,,,,,,,,

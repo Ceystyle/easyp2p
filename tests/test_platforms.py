@@ -288,8 +288,8 @@ class EstateguruTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Estateguru'
         self.Platform = p2p_platforms.Estateguru
-        self.unknown_cf_types = \
-            'Investition(AutoInvestieren), TestCF1, TestCF2'
+        self.unknown_cf_types = 'TestCF1, TestCF2'
+        self.header = 0
 
 
 class GrupeerTests(BasePlatformTests):

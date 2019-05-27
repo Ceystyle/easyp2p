@@ -51,7 +51,7 @@ class Estateguru:
 
         """
         urls = {
-            'login': 'https://estateguru.co/de/?switch=de',
+            'login': 'https://estateguru.co/?switch=en',
             'logout': 'https://estateguru.co/portal/logout/index',
             'statement': 'https://estateguru.co/portal/portfolio/account',
         }
@@ -72,13 +72,13 @@ class Estateguru:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Einloggen'))) \
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Log In'))) \
                 as estateguru:
 
             estateguru.log_into_page(
                 'username', 'password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'KONTOSTAND')),
-                login_locator=(By.LINK_TEXT, 'Einloggen'))
+                EC.element_to_be_clickable((By.LINK_TEXT, 'ACCOUNT BALANCE')),
+                login_locator=(By.LINK_TEXT, 'Log In'))
 
             estateguru.open_account_statement_page(
                 (By.XPATH, xpaths['filter_btn']))
@@ -122,27 +122,27 @@ class Estateguru:
         parser = P2PParser(
             self.name, self.date_range, self.statement, skipfooter=1)
 
-        # Only consider valid cashflows
-        parser.df = parser.df[parser.df['Cashflow-Status'] == 'Genehmigt']
+        # Only consider valid cash flows
+        parser.df = parser.df[parser.df['Cash Flow Status'] == 'Approved']
 
-        # Define mapping between Estateguru and easyp2p cashflow types and
+        # Define mapping between Estateguru and easyp2p cash flow types and
         # column names
         cashflow_types = {
             # Treat bonus payments as normal interest payments
             'Bonus': parser.INTEREST_PAYMENT,
-            'Einzahlung(Banktransfer)': parser.IN_OUT_PAYMENT,
-            'Auszahlung(Banktransfer)': parser.IN_OUT_PAYMENT,
-            'Entschädigung': parser.LATE_FEE_PAYMENT,
-            'Hauptbetrag': parser.REDEMPTION_PAYMENT,
-            'Investition(Auto Investieren)': parser.INVESTMENT_PAYMENT,
-            'Strafe': parser.LATE_FEE_PAYMENT,
-            'Zins': parser.INTEREST_PAYMENT}
+            'Deposit': parser.IN_OUT_PAYMENT,
+            'Withdrawal': parser.IN_OUT_PAYMENT,
+            'Indemnity': parser.LATE_FEE_PAYMENT,
+            'Principal': parser.REDEMPTION_PAYMENT,
+            'Investment(Auto Invest)': parser.INVESTMENT_PAYMENT,
+            'Penalty': parser.LATE_FEE_PAYMENT,
+            'Interest': parser.INTEREST_PAYMENT}
         rename_columns = {
-            'Cashflow-Typ': 'Estateguru_Cashflow-Typ',
-            'Bestätigungsdatum': parser.DATE}
+            'Cash Flow Type': 'EG Cash Flow Type',
+            'Confirmation Date': parser.DATE}
 
         unknown_cf_types = parser.run(
             '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
-            'Estateguru_Cashflow-Typ', 'Betrag', 'Verfügbar für Investitionen')
+            'EG Cash Flow Type', 'Amount', 'Available to invest')
 
         return parser.df, unknown_cf_types
