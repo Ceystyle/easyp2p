@@ -105,7 +105,7 @@ class BasePlatformTests(unittest.TestCase):
         df_exp = _get_expected_df(exp_result_file)
 
         # Round data frame to avoid minor rounding errors during the comparison
-        df = df.round(2)
+        df = df.round(5)
 
         # Reset the index to allow comparing index values/types too
         df.reset_index(inplace=True)
@@ -173,7 +173,8 @@ class BasePlatformTests(unittest.TestCase):
     def test_parse_statement(self):
         """Test parsing platform default statement."""
         self.run_parser_test(
-            '{}_parser'.format(self.name.lower()), self.DATE_RANGE)
+            '{}_parser'.format(self.name.lower()), self.DATE_RANGE,
+            RESULT_PREFIX+'download_{}_statement'.format(self.name.lower()))
 
     def test_parse_statement_no_cfs(self):
         """Test platform parser if there were no cash flows in date_range."""
@@ -437,7 +438,7 @@ def _get_expected_df(exp_result_file: str) -> pd.DataFrame:
     df_exp = pd.read_csv(exp_result_file, index_col=[0, 1, 2])
 
     # Round data frame to avoid minor rounding errors during the comparison
-    df_exp = df_exp.round(2)
+    df_exp = df_exp.round(5)
 
     # Reset the index to allow comparing index values/types too
     df_exp.reset_index(inplace=True)
