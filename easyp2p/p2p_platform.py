@@ -102,6 +102,10 @@ class P2PPlatform:
         """
         End of context management protocol.
 
+        If the context manager finishes the user will be logged out of the
+        P2P platform. This ensures that easyp2p cleanly logs out of the website
+        even in case of errors.
+
         Raises:
             RuntimeError: If no logout method is provided
 
@@ -171,12 +175,12 @@ class P2PPlatform:
             # Make sure that the correct URL was loaded
             if self.driver.current_url != self.urls['login']:
                 raise RuntimeError(
-                    'Die {0}-Webseite konnte nicht geladen werden.'
-                    .format(self.name))
+                    'Die {0}-Webseite konnte nicht geladen werden.'.format(
+                        self.name))
         except TimeoutException:
             raise RuntimeError(
-                'Das Laden der {0}-Webseite hat zu lange gedauert.'
-                .format(self.name))
+                'Das Laden der {0}-Webseite hat zu lange gedauert.'.format(
+                    self.name))
 
         # Enter credentials in name and password field
         try:
@@ -221,13 +225,12 @@ class P2PPlatform:
 
         """
         try:
-            # TODO: catch error if url cannot be loaded
             self.driver.get(self.urls['statement'])
             self.driver.wait(EC.presence_of_element_located(check_locator))
         except TimeoutException:
             raise RuntimeError(
-                '{0}-Kontoauszugsseite konnte nicht geladen werden!'
-                .format(self.name))
+                '{0}-Kontoauszugsseite konnte nicht geladen werden!'.format(
+                    self.name))
 
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
@@ -374,7 +377,9 @@ class P2PPlatform:
             default_dates: Tuple[date, date],
             arrows: Mapping[str, str],
             days_table: Mapping[str, object],
-            calendar_locator: Tuple[Tuple[str, str], ...]) -> None:
+            calendar_locator: Tuple[Tuple[str, str], ...],
+            wait_until: Optional[Union[bool, WebElement]] = None,
+            submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         Generate account statement by clicking days in a calendar.
 
@@ -387,8 +392,8 @@ class P2PPlatform:
 
         Args:
             date_range: Date range (start_date, end_date) for which the
-                account statement must be generated
-            default_dates: Pre-filled default dates of the two date pickers
+                account statement must be generated.
+            default_dates: Pre-filled default dates of the two date pickers.
             arrows: Dictionary with three entries: class name of left arrows
                 (left_arrow_class), class name of right arrows
                 (right_arrow_class), tag name of arrows (arrow_tag)
@@ -398,7 +403,12 @@ class P2PPlatform:
                 id of current day ('current_day_id'),
                 is day contained in id? ('id_from_calendar')
             calendar_locator: Tuple containing locators for the two calendars.
-                It must have either length 1 or 2
+                It must have either length 1 or 2.
+            wait_until: Expected condition in case of successful account
+                statement generation. Default is None.
+            submit_btn_locator: Locator of button which needs to clicked to
+                start account statement generation. Not all P2P platforms
+                require this. Default is None.
 
         Raises:
             RuntimeError: - If a web element cannot be found
@@ -421,8 +431,8 @@ class P2PPlatform:
             else:
                 # This should never happen
                 raise RuntimeError(
-                    '{0}: Ungültiger Locator für Kalender übergeben'
-                    .format(self.name))
+                    '{0}: Ungültiger Locator für Kalender übergeben'.format(
+                        self.name))
 
             # How many clicks on the arrow buttons are necessary?
             start_calendar_clicks = _get_calendar_clicks(
@@ -448,6 +458,13 @@ class P2PPlatform:
                 end_calendar, date_range[1].day, end_calendar_clicks,
                 left_arrows[1], right_arrows[1], days_table)
 
+            if submit_btn_locator is not None:
+                submit_btn = self.driver.wait(EC.element_to_be_clickable(
+                    submit_btn_locator))
+                submit_btn.click()
+
+            if wait_until is not None:
+                self.driver.wait(wait_until)
         except NoSuchElementException:
             raise RuntimeError(
                 'Generierung des {0}-Kontoauszugs konnte nicht gestartet '

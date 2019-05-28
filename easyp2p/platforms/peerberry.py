@@ -108,23 +108,12 @@ class PeerBerry:
 
             peerberry.generate_statement_calendar(
                 self.date_range, default_dates, arrows, days_table,
-                calendar_locator)
-
-            # After setting the dates, the statement button needs to be clicked
-            # in order to actually generate the statement
-            try:
-                driver.find_element_by_xpath(xpaths['statement_btn']).click()
-                driver.wait(
-                    EC.text_to_be_present_in_element(
-                        (By.XPATH, xpaths['start_balance']),
-                        'Opening balance '+str(
-                            self.date_range[0]).format('%Y-%m-%d')))
-            except NoSuchElementException:
-                raise RuntimeError('Generierung des {0}-Kontoauszugs konnte '
-                                   'nicht gestartet werden.'.format(self.name))
-            except TimeoutException:
-                raise RuntimeError('Generierung des {0}-Kontoauszugs hat '
-                                   'zu lange gedauert.'.format(self.name))
+                calendar_locator,
+                wait_until=EC.text_to_be_present_in_element(
+                    (By.XPATH, xpaths['start_balance']),
+                    'Opening balance '+str(self.date_range[0]).format(
+                        '%Y-%m-%d')),
+                submit_btn_locator=(By.XPATH, xpaths['statement_btn']))
 
             peerberry.download_statement(
                 self.statement, (By.XPATH, xpaths['download_btn']),
