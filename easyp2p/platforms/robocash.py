@@ -104,8 +104,8 @@ class Robocash:
                     wait += 1
                     if wait > 10:  # Roughly 10*delay seconds
                         raise RuntimeError(
-                            'Generierung des {0}-Kontoauszugs hat zu lange '
-                            'gedauert!'.format(self.name))
+                            'Generierung des Robocash-Kontoauszugs hat zu '
+                            'lange gedauert!')
 
             robocash.download_statement(
                 self.statement, (By.ID, 'download_statement'))
@@ -131,20 +131,23 @@ class Robocash:
 
         parser = P2PParser(self.name, self.date_range, self.statement)
 
-        # Define mapping between Robocash and easyp2p cashflow types and
+        # Define mapping between Robocash and easyp2p cash flow types and
         # column names
         cashflow_types = {
-            'Darlehenskauf': parser.INVESTMENT_PAYMENT,
-            'Die Geldauszahlung': parser.IN_OUT_PAYMENT,
-            'Geldeinzahlung': parser.IN_OUT_PAYMENT,
-            'Kreditrückzahlung': parser.REDEMPTION_PAYMENT,
+            'Adding funds': parser.IN_OUT_PAYMENT,
+            'Paying interest': parser.INTEREST_PAYMENT,
+            'Purchasing a loan': parser.INVESTMENT_PAYMENT,
+            'Returning a loan': parser.REDEMPTION_PAYMENT,
+            'Withdrawal of Funds': parser.IN_OUT_PAYMENT,
             # We don't report cash transfers within Robocash:
-            'Portfolio auffüllen': parser.IGNORE,
-            'Zinsenzahlung': parser.INTEREST_PAYMENT}
-        rename_columns = {'Datum und Laufzeit': parser.DATE}
+            'Creating a portfolio': parser.IGNORE,
+            'Refilling a portfolio': parser.IGNORE,
+            'Withdrawing from a portfolio': parser.IGNORE,
+        }
+        rename_columns = {'Date and time': parser.DATE}
 
         unknown_cf_types = parser.run(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-            'Operation', 'Betrag', 'Der Saldo des Portfolios')
+            'Operation', 'Amount', "Portfolio's balance")
 
         return parser.df, unknown_cf_types
