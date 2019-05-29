@@ -337,6 +337,19 @@ class MintosTests(BasePlatformTests):
         self.unknown_cf_types = 'Interestincome, TestCF1, TestCF2'
         self.header = 0
 
+    def test_parser_multicurrency(self) -> None:
+        """Test parser if more than one currency is present."""
+        self.run_parser_test(
+            'mintos_parser_multicurrency',
+            self.DATE_RANGE, INPUT_PREFIX + 'mintos_parser_multicurrency')
+
+    def test_write_results_multicurrency(self) -> None:
+        """Test write_results if more than one currency is present."""
+        self.run_write_results(
+            INPUT_PREFIX + 'write_results_multicurrency.csv',
+            RESULT_PREFIX + 'write_results_multicurrency.xlsx',
+            self.DATE_RANGE)
+
 
 class PeerBerryTests(BasePlatformTests):
 

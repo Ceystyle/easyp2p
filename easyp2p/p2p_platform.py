@@ -356,7 +356,7 @@ class P2PPlatform:
                     time.sleep(1)
                 submit_btn.click()
 
-            # Iuvo needs some time to update the field if there were cashflows
+            # Iuvo needs some time to update the field if there were cash flows
             # TODO: find better fix
             if self.name == 'Iuvo':
                 time.sleep(1)

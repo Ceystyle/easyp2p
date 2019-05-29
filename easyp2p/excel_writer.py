@@ -93,6 +93,8 @@ def _get_daily_results(df_result: pd.DataFrame) -> pd.DataFrame:
     df.set_index(
         [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.DATE],
         inplace=True)
+    df.sort_index(inplace=True)
+
     return df
 
 
@@ -140,10 +142,15 @@ def _get_total_results(df_monthly: pd.DataFrame) -> pd.DataFrame:
     df_pivot = df_monthly.pivot_table(
         values=pivot_columns, index=index, aggfunc=_get_aggfunc(pivot_columns),
         dropna=False)
-    # Create the total row
-    df = df_pivot.pivot_table(
-        values=pivot_columns, index=index, aggfunc=lambda x: x.sum(min_count=1),
-        margins=True, dropna=False, margins_name='Total')
+
+    # Create the total row per currency
+    df_total = df_pivot.reset_index().set_index(P2PParser.CURRENCY)
+    df_total = df_total.groupby(P2PParser.CURRENCY).sum()
+    df_total[P2PParser.PLATFORM] = 'Total'
+    df_total = df_total.reset_index().set_index(
+        [P2PParser.PLATFORM, P2PParser.CURRENCY])
+    df = df_pivot.append(df_total, sort=True)
+    df.dropna(how='all', inplace=True)
 
     return df
 
@@ -193,8 +200,8 @@ def _add_months_without_cashflows(
     # For each platform/currency combination we expect one row per month
     # in date_range
     expected_rows = sorted(list(set(
-            (index[0], index[1], i) for index in df.index
-            for i in range(len(months)))))
+        (index[0], index[1], i) for index in df.index for i in range(
+            len(months)))))
     for platform, currency, i in expected_rows:
         month = pd.Period(freq='M', year=months[i].year, month=months[i].month)
         if (platform, currency, month) not in df.index:

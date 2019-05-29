@@ -13,6 +13,7 @@ from datetime import date
 from pathlib import Path
 from typing import Mapping, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 
@@ -122,7 +123,7 @@ class P2PParser:
         if value_column:
             self.df = self.df.pivot_table(
                 values=value_column, index=[self.DATE, self.CURRENCY],
-                columns=[self.CF_TYPE], aggfunc=sum)
+                columns=[self.CF_TYPE], aggfunc=np.sum)
             self.df.reset_index(inplace=True)
         self.df.fillna(0, inplace=True)
 

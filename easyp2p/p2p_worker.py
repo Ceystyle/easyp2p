@@ -217,5 +217,3 @@ class WorkerThread(QThread):
 class PlatformFailedError(BaseException):
 
     """Will be raised if evaluation of a P2P platform fails."""
-
-    pass
