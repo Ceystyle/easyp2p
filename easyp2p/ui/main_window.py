@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import Set, Tuple
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import (
     QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
@@ -18,6 +18,8 @@ from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
+
+translate = QCoreApplication.translate
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -30,7 +32,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         # Initialize date combo boxes with previous month
         if date.today().month > 1:
-            start_month = p2p_helper.nbr_to_short_month_de(
+            start_month = p2p_helper.nbr_to_short_month(
                 str(date.today().month - 1))
             start_year = str(date.today().year)
         else:

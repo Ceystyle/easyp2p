@@ -15,7 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-from easyp2p.p2p_helper import nbr_to_short_month_en
+from easyp2p.p2p_helper import nbr_to_short_month
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import (
@@ -82,9 +82,9 @@ class Bondora:
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
-            start_month = nbr_to_short_month_en(
+            start_month = nbr_to_short_month(
                 self.date_range[0].strftime('%m'))
-            end_month = nbr_to_short_month_en(self.date_range[1].strftime('%m'))
+            end_month = nbr_to_short_month(self.date_range[1].strftime('%m'))
             select = Select(bondora.driver.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(self.date_range[0].year))
             select = Select(bondora.driver.find_element_by_id('StartMonth'))

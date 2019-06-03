@@ -5,6 +5,8 @@
 p2p_helper contains some helper functions for easyp2p.
 
 """
+from PyQt5.QtCore import QCoreApplication
+translate = QCoreApplication.translate
 
 
 def short_month_to_nbr(short_name: str) -> str:
@@ -27,9 +29,9 @@ def short_month_to_nbr(short_name: str) -> str:
     return map_short_month_to_nbr[short_name]
 
 
-def nbr_to_short_month_en(nbr: str) -> str:
+def nbr_to_short_month(nbr: str) -> str:
     """
-    Helper method for translating numbers to English month short names.
+    Helper method for translating numbers to month short names.
 
     Args:
         nbr: Number of month with or without a leading zero
@@ -39,32 +41,27 @@ def nbr_to_short_month_en(nbr: str) -> str:
 
     """
     map_nbr_to_short_month = {
-        '1': 'Jan', '01': 'Jan', '2': 'Feb', '02': 'Feb',
-        '3': 'Mar', '03': 'Mar', '4': 'Apr', '04': 'Apr',
-        '5': 'May', '05': 'May', '6': 'Jun', '06': 'Jun',
-        '7': 'Jul', '07': 'Jul', '8': 'Aug', '08': 'Aug',
-        '9': 'Sep', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'}
-
-    return map_nbr_to_short_month[nbr]
-
-
-def nbr_to_short_month_de(nbr: str) -> str:
-    """
-    Helper method for translating numbers to German month short names.
-
-    Args:
-        nbr: Number of month with or without a leading zero
-
-    Returns:
-        Month short name
-
-    """
-    # Only German locale is used so far
-    map_nbr_to_short_month = {
-        '1': 'Jan', '01': 'Jan', '2': 'Feb', '02': 'Feb',
-        '3': 'Mrz', '03': 'Mrz', '4': 'Apr', '04': 'Apr',
-        '5': 'Mai', '05': 'Mai', '6': 'Jun', '06': 'Jun',
-        '7': 'Jul', '07': 'Jul', '8': 'Aug', '08': 'Aug',
-        '9': 'Sep', '09': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Dez'}
+        '1': translate('MainWindow', 'Jan'),
+        '01': translate('MainWindow', 'Jan'),
+        '2': translate('MainWindow', 'Feb'),
+        '02': translate('MainWindow', 'Feb'),
+        '3': translate('MainWindow', 'Mar'),
+        '03': translate('MainWindow', 'Mar'),
+        '4': translate('MainWindow', 'Apr'),
+        '04': translate('MainWindow', 'Apr'),
+        '5': translate('MainWindow', 'May'),
+        '05': translate('MainWindow', 'May'),
+        '6': translate('MainWindow', 'Jun'),
+        '06': translate('MainWindow', 'Jun'),
+        '7': translate('MainWindow', 'Jul'),
+        '07': translate('MainWindow', 'Jul'),
+        '8': translate('MainWindow', 'Aug'),
+        '08': translate('MainWindow', 'Aug'),
+        '9': translate('MainWindow', 'Sep'),
+        '09': translate('MainWindow', 'Sep'),
+        '10': translate('MainWindow', 'Oct'),
+        '11': translate('MainWindow', 'Nov'),
+        '12': translate('MainWindow', 'Dec'),
+    }
 
     return map_nbr_to_short_month[nbr]
