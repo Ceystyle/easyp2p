@@ -11,7 +11,7 @@ from typing import Set, Tuple
 
 from PyQt5.QtCore import pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import (
-    QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
+    QApplication, QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_settings import Settings
@@ -38,11 +38,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             start_month = translate('MainWindow', 'Dec')
             start_year = str(date.today().year - 1)
+        self.init_combo_boxes()
         self.set_date_range(start_month, start_year, start_month, start_year)
         self.output_file_changed = False
         self.set_output_file()
         self.settings = Settings(
             self.get_date_range(), self.line_edit_output_file.text())
+
+    def init_combo_boxes(self):
+        """Set the items for all date combo boxes."""
+        month_list = [
+            translate('MainWindow', 'Jan'),
+            translate('MainWindow', 'Feb'),
+            translate('MainWindow', 'Mar'),
+            translate('MainWindow', 'Apr'),
+            translate('MainWindow', 'May'),
+            translate('MainWindow', 'Jun'),
+            translate('MainWindow', 'Jul'),
+            translate('MainWindow', 'Aug'),
+            translate('MainWindow', 'Sep'),
+            translate('MainWindow', 'Oct'),
+            translate('MainWindow', 'Nov'),
+            translate('MainWindow', 'Dec')]
+        year_list = [str(year) for year in range(2010, date.today().year + 1)]
+        self.combo_box_start_month.addItems(month_list)
+        self.combo_box_end_month.addItems(month_list)
+        self.combo_box_start_year.addItems(year_list)
+        self.combo_box_end_year.addItems(year_list)
 
     def set_date_range(
             self, start_month: str, start_year: str,
