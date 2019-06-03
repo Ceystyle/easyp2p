@@ -36,7 +36,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 str(date.today().month - 1))
             start_year = str(date.today().year)
         else:
-            start_month = 'Dez'
+            start_month = translate('MainWindow', 'Dec')
             start_year = str(date.today().year - 1)
         self.set_date_range(start_month, start_year, start_month, start_year)
         self.output_file_changed = False
@@ -109,7 +109,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         date_range = self.get_date_range()
         if not self.output_file_changed:
             output_file = os.path.join(
-                Path.home(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
+                 Path.home(), translate('MainWindow', 'P2P_Results') \
+                    + '_{0}-{1}.xlsx'.format(
                     date_range[0].strftime('%d%m%Y'),
                     date_range[1].strftime('%d%m%Y')))
             QLineEdit.setText(self.line_edit_output_file, output_file)
@@ -142,8 +143,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         output_file, _ = QFileDialog.getSaveFileName(
-            self, "Ausgabedatei wählen", self.line_edit_output_file.text(),
-            "MS Excel Dateien (*.xlsx)", options=options)
+            self, translate('MainWindow', 'Choose output file'),
+            self.line_edit_output_file.text(),
+            'MS Excel ' + translate('MainWindow', 'files') + ' (*.xlsx)',
+            options=options)
         if output_file:
             # The file name must include xlsx file format. Otherwise the Excel
             # writer will crash later.
@@ -180,15 +183,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Check that start date is before end date
         if date_range[0] > date_range[1]:
             QMessageBox.warning(
-                self, 'Startdatum liegt nach Enddatum!',
-                'Das Startdatum darf nicht nach dem Enddatum liegen!')
+                self,
+                translate('MainWindow', 'Start date is after end date!'),
+                translate(
+                    'MainWindow',
+                    'Start date must be before end date!'))
             return
 
         # Check that at least one platform is selected
         if not platforms:
             QMessageBox.warning(
-                self, 'Keine P2P Plattform ausgewählt!',
-                'Bitte wähle mindestens eine P2P Plattform aus!')
+                self, translate(
+                    'MainWindow', 'No P2P platform selected!'),
+               translate(
+                   'MainWindow',
+                   'Please choose at least one P2P platform!'))
             return
 
         self.settings.date_range = self.get_date_range()

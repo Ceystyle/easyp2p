@@ -10,15 +10,37 @@
     <height>464</height>
    </rect>
   </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
+  </property>
   <property name="windowTitle">
-   <string>easyp2p</string>
+   <string notr="true">easyp2p</string>
+  </property>
+  <property name="documentMode">
+   <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
      <widget class="QGroupBox" name="group_box_platform_top">
+      <property name="locale">
+       <locale language="English" country="UnitedStates"/>
+      </property>
       <property name="title">
-       <string>Für welche P2P-Plattformen sollen Ergebnisse geladen werden?</string>
+       <string>For which P2P platforms should the results be loaded?</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -145,7 +167,7 @@
          <item>
           <widget class="QCheckBox" name="check_box_select_all">
            <property name="text">
-            <string>Alle aus-/abwählen</string>
+            <string>Select/deselect all</string>
            </property>
           </widget>
          </item>
@@ -158,8 +180,11 @@
      <layout class="QHBoxLayout" name="horizontalLayout_date_range">
       <item>
        <widget class="QGroupBox" name="groupBox_start_date">
+        <property name="locale">
+         <locale language="English" country="UnitedStates"/>
+        </property>
         <property name="title">
-         <string>Startdatum</string>
+         <string>Start date</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -168,122 +193,10 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
-            <widget class="QComboBox" name="combo_box_start_month">
-             <item>
-              <property name="text">
-               <string>Jan</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Feb</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mrz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Apr</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mai</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Jun</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Jul</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Aug</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Sep</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Okt</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Nov</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Dez</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="combo_box_start_month"/>
            </item>
            <item>
-            <widget class="QComboBox" name="combo_box_start_year">
-             <item>
-              <property name="text">
-               <string>2010</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2011</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2012</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2013</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2014</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2015</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2016</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2017</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2018</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2019</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="combo_box_start_year"/>
            </item>
           </layout>
          </item>
@@ -293,7 +206,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox_end_date">
         <property name="title">
-         <string>Enddatum</string>
+         <string>End date</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -302,122 +215,10 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
-            <widget class="QComboBox" name="combo_box_end_month">
-             <item>
-              <property name="text">
-               <string>Jan</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Feb</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mrz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Apr</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mai</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Jun</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Jul</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Aug</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Sep</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Okt</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Nov</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Dez</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="combo_box_end_month"/>
            </item>
            <item>
-            <widget class="QComboBox" name="combo_box_end_year">
-             <item>
-              <property name="text">
-               <string>2010</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2011</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2012</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2013</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2014</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2015</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2016</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2017</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2018</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2019</string>
-              </property>
-             </item>
-            </widget>
+            <widget class="QComboBox" name="combo_box_end_year"/>
            </item>
           </layout>
          </item>
@@ -428,8 +229,11 @@
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox_5">
+      <property name="locale">
+       <locale language="English" country="UnitedStates"/>
+      </property>
       <property name="title">
-       <string>In welcher Datei sollen die Ergebnisse gespeichert werden?</string>
+       <string>Where should the results be saved?</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -447,7 +251,7 @@
          <item>
           <widget class="QPushButton" name="push_button_file_chooser">
            <property name="text">
-            <string>Datei wählen</string>
+            <string>Choose File</string>
            </property>
           </widget>
          </item>
@@ -460,15 +264,18 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="push_button_start">
+        <property name="locale">
+         <locale language="English" country="UnitedStates"/>
+        </property>
         <property name="text">
-         <string>Starte Auswertung</string>
+         <string>Start evaluation</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="tool_button_settings">
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
        </widget>
       </item>
@@ -476,6 +283,46 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>736</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuLanguage">
+    <property name="title">
+     <string>&amp;Language</string>
+    </property>
+    <addaction name="actionEnglish"/>
+    <addaction name="actionGerman"/>
+   </widget>
+   <addaction name="menuLanguage"/>
+  </widget>
+  <action name="actionEnglish">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>English</string>
+   </property>
+  </action>
+  <action name="actionGerman">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>German</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
