@@ -32,7 +32,7 @@ class WorkerThread(QThread):
     """
 
     # Signals for communicating with ProgressWindow
-    abort_easyp2p = pyqtSignal(str)
+    abort_easyp2p = pyqtSignal(str, str)
     update_progress_bar = pyqtSignal()
     add_progress_text = pyqtSignal(str, QColor)
 

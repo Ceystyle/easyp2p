@@ -7,7 +7,7 @@ import sys
 
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 
 from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_settings import Settings
@@ -39,6 +39,9 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.progress_bar.setMaximum(len(settings.platforms))
         self.progress_bar.setValue(0)
 
+        # Disable the Ok button
+        self.button_box.button(QDialogButtonBox.Ok).setEnabled(False)
+
         # Initialize and start worker thread
         self.worker = WorkerThread(settings, credentials)
         self.worker.abort_easyp2p.connect(self.abort_easyp2p)
@@ -49,7 +52,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.worker.start()
 
     @pyqtSlot()
-    def on_push_button_abort_clicked(self) -> None:
+    def on_button_box_rejected(self) -> None:
         """
         Abort the evaluation of the selected P2P platforms.
 
@@ -69,7 +72,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
         self.progress_bar.setValue(self.progress_bar.value() + 1)
         if self.progress_bar.value() == self.progress_bar.maximum():
-            self.push_button_ok.setEnabled(True)
+            self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
     def add_progress_text(self, txt: str, color: QColor) -> None:
         """

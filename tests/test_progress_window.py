@@ -8,7 +8,7 @@ import sys
 import unittest.mock
 from datetime import date
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QMessageBox
 
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
@@ -41,10 +41,12 @@ class ProgressWindowTests(unittest.TestCase):
     def test_defaults(self):
         """Test default behaviour of ProgressWindow."""
         self.assertEqual(self.form.progress_bar.value(), 0)
-        self.assertEqual(self.form.progress_text.isReadOnly(), True)
+        self.assertTrue(self.form.progress_text.isReadOnly())
         self.assertEqual(self.form.progress_text.toPlainText(), '')
-        self.assertEqual(self.form.push_button_ok.isEnabled(), False)
-        self.assertEqual(self.form.push_button_abort.isEnabled(), True)
+        self.assertFalse(
+            self.form.button_box.button(QDialogButtonBox.Ok).isEnabled())
+        self.assertTrue(
+            self.form.button_box.button(QDialogButtonBox.Cancel).isEnabled())
 
     def test_progress_text(self):
         """Test appending a line to progress_text."""
@@ -59,7 +61,8 @@ class ProgressWindowTests(unittest.TestCase):
         self.form.worker.update_progress_bar.emit()
         self.assertEqual(self.form.progress_bar.value(), 2)
         # Two is the maximum value so the ok button must be enabled
-        self.assertEqual(self.form.push_button_ok.isEnabled(), True)
+        self.assertTrue(
+            self.form.button_box.button(QDialogButtonBox.Ok).isEnabled())
         # Further increasing the progress_bar should not work
         self.form.worker.update_progress_bar.emit()
         self.assertEqual(self.form.progress_bar.value(), 2)
@@ -68,22 +71,22 @@ class ProgressWindowTests(unittest.TestCase):
     @unittest.mock.patch('easyp2p.ui.progress_window.QMessageBox.critical')
     def test_abort_easyp2p(self, mock_msg_box, mock_sys):
         """Test emitting the abort_easyp2p signal."""
-        self.form.worker.abort_easyp2p.emit('Test abort_easyp2p!')
-        # 2097152 is QMessageBox.Close
+        self.form.worker.abort_easyp2p.emit(
+            'Test abort_easyp2p!', 'Test header')
         mock_msg_box.assert_called_once_with(
-            self.form, 'Kritischer Fehler', 'Test abort_easyp2p!', 2097152)
+            self.form, 'Test header', 'Test abort_easyp2p!', QMessageBox.Close)
         mock_sys.exit.assert_called_once_with()
 
     def test_push_button_abort(self):
         """Test that the worker thread is aborted if user clicks cancel."""
-        self.form.push_button_abort.click()
+        self.form.button_box.button(QDialogButtonBox.Cancel).click()
         self.assertTrue(self.form.worker.abort)
         self.assertTrue(self.form.rejected)
 
     def test_push_button_ok(self):
         """Test that the Ok button closes the window."""
         self.form.progress_bar.maximum()
-        self.form.push_button_ok.click()
+        self.form.button_box.button(QDialogButtonBox.Ok).click()
         self.assertTrue(self.form.accepted)
 
 

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>easyP2P</string>
+   <string notr="true">easyp2p</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -45,19 +45,9 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="push_button_ok">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>OK</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="push_button_abort">
-         <property name="text">
-          <string>Abbrechen</string>
+        <widget class="QDialogButtonBox" name="button_box">
+         <property name="standardButtons">
+          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
          </property>
         </widget>
        </item>
@@ -70,13 +60,13 @@
  <resources/>
  <connections>
   <connection>
-   <sender>push_button_ok</sender>
-   <signal>clicked()</signal>
+   <sender>button_box</sender>
+   <signal>accepted()</signal>
    <receiver>ProgressWindow</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>271</x>
+     <x>136</x>
      <y>260</y>
     </hint>
     <hint type="destinationlabel">
