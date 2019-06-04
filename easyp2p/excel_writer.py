@@ -14,12 +14,15 @@ from datetime import date, timedelta
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
+from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 
-DAILY_RESULTS = 'Tagesergebnisse'
-MONTHLY_RESULTS = 'Monatsergebnisse'
-TOTAL_RESULTS = 'Gesamtergebnis'
+translate = QCoreApplication.translate
+
+DAILY_RESULTS = translate('excel_writer', 'Tagesergebnisse')
+MONTHLY_RESULTS = translate('excel_writer', 'Monatsergebnisse')
+TOTAL_RESULTS = translate('excel_writer', 'Gesamtergebnis')
 
 
 def write_results(

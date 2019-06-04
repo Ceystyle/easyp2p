@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>736</width>
-    <height>464</height>
+    <height>482</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -296,12 +296,12 @@
     <property name="title">
      <string>&amp;Language</string>
     </property>
-    <addaction name="actionEnglish"/>
-    <addaction name="actionGerman"/>
+    <addaction name="action_english"/>
+    <addaction name="action_german"/>
    </widget>
    <addaction name="menuLanguage"/>
   </widget>
-  <action name="actionEnglish">
+  <action name="action_english">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -309,10 +309,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>English</string>
+    <string>&amp;English</string>
    </property>
   </action>
-  <action name="actionGerman">
+  <action name="action_german">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -320,7 +320,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>German</string>
+    <string>&amp;German</string>
    </property>
   </action>
  </widget>

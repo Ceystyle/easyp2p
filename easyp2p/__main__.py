@@ -7,7 +7,7 @@ people-to-people (P2P) lending platforms.
 
 """
 import sys
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 
 from easyp2p.ui.main_window import MainWindow
 
@@ -17,9 +17,6 @@ name = 'easyp2p'  # pylint: disable=invalid-name
 def main():
     """Open the main window of easyp2p."""
     app = QtWidgets.QApplication(sys.argv)
-    translator = QtCore.QTranslator()
-    translator.load("i18n/ts/easyp2p_de")
-    app.installTranslator(translator)
     ui = MainWindow(app)  # pylint: disable=invalid-name
     ui.show()
     sys.exit(app.exec_())

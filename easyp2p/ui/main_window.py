@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import Set, Tuple
 
-from PyQt5.QtCore import pyqtSlot, QCoreApplication
+from PyQt5.QtCore import pyqtSlot, QCoreApplication, QTranslator
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
@@ -19,24 +19,26 @@ from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
 
-translate = QCoreApplication.translate
+_translate = QCoreApplication.translate
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
     """This class defines the main window of easyp2p."""
 
-    def __init__(self) -> None:
+    def __init__(self, app: QApplication) -> None:
         """Constructor of MainWindow."""
         super().__init__()
         self.setupUi(self)
+        self._app = app
+        self._translator = QTranslator()
         # Initialize date combo boxes with previous month
         if date.today().month > 1:
             start_month = p2p_helper.nbr_to_short_month(
                 str(date.today().month - 1))
             start_year = str(date.today().year)
         else:
-            start_month = translate('MainWindow', 'Dec')
+            start_month = _translate('MainWindow', 'Dec')
             start_year = str(date.today().year - 1)
         self.init_combo_boxes()
         self.set_date_range(start_month, start_year, start_month, start_year)
@@ -48,18 +50,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def init_combo_boxes(self):
         """Set the items for all date combo boxes."""
         month_list = [
-            translate('MainWindow', 'Jan'),
-            translate('MainWindow', 'Feb'),
-            translate('MainWindow', 'Mar'),
-            translate('MainWindow', 'Apr'),
-            translate('MainWindow', 'May'),
-            translate('MainWindow', 'Jun'),
-            translate('MainWindow', 'Jul'),
-            translate('MainWindow', 'Aug'),
-            translate('MainWindow', 'Sep'),
-            translate('MainWindow', 'Oct'),
-            translate('MainWindow', 'Nov'),
-            translate('MainWindow', 'Dec')]
+            _translate('MainWindow', 'Jan'),
+            _translate('MainWindow', 'Feb'),
+            _translate('MainWindow', 'Mar'),
+            _translate('MainWindow', 'Apr'),
+            _translate('MainWindow', 'May'),
+            _translate('MainWindow', 'Jun'),
+            _translate('MainWindow', 'Jul'),
+            _translate('MainWindow', 'Aug'),
+            _translate('MainWindow', 'Sep'),
+            _translate('MainWindow', 'Oct'),
+            _translate('MainWindow', 'Nov'),
+            _translate('MainWindow', 'Dec')]
         year_list = [str(year) for year in range(2010, date.today().year + 1)]
         self.combo_box_start_month.addItems(month_list)
         self.combo_box_end_month.addItems(month_list)
@@ -131,11 +133,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         date_range = self.get_date_range()
         if not self.output_file_changed:
             output_file = os.path.join(
-                 Path.home(), translate('MainWindow', 'P2P_Results') \
+                 Path.home(), _translate('MainWindow', 'P2P_Results') \
                     + '_{0}-{1}.xlsx'.format(
                     date_range[0].strftime('%d%m%Y'),
                     date_range[1].strftime('%d%m%Y')))
             QLineEdit.setText(self.line_edit_output_file, output_file)
+
+    @pyqtSlot(bool)
+    def on_action_german_triggered(self):
+        """_translate GUI to English."""
+        self.action_english.setChecked(False)
+        self.action_german.setChecked(True)
+        self._translator.load("easyp2p/i18n/ts/easyp2p_de")
+        self._app.installTranslator(self._translator)
+        self.retranslateUi(self)
+
+    @pyqtSlot(bool)
+    def on_action_english_triggered(self):
+        """_translate GUI to English."""
+        self.action_english.setChecked(True)
+        self.action_german.setChecked(False)
+        self._app.removeTranslator(self._translator)
+        self.retranslateUi(self)
 
     @pyqtSlot(str)
     def on_combo_box_start_month_activated(self) -> None:
@@ -165,9 +184,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         output_file, _ = QFileDialog.getSaveFileName(
-            self, translate('MainWindow', 'Choose output file'),
+            self, _translate('MainWindow', 'Choose output file'),
             self.line_edit_output_file.text(),
-            'MS Excel ' + translate('MainWindow', 'files') + ' (*.xlsx)',
+            'MS Excel ' + _translate('MainWindow', 'files') + ' (*.xlsx)',
             options=options)
         if output_file:
             # The file name must include xlsx file format. Otherwise the Excel
@@ -206,8 +225,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if date_range[0] > date_range[1]:
             QMessageBox.warning(
                 self,
-                translate('MainWindow', 'Start date is after end date!'),
-                translate(
+                _translate('MainWindow', 'Start date is after end date!'),
+                _translate(
                     'MainWindow',
                     'Start date must be before end date!'))
             return
@@ -215,9 +234,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Check that at least one platform is selected
         if not platforms:
             QMessageBox.warning(
-                self, translate(
+                self, _translate(
                     'MainWindow', 'No P2P platform selected!'),
-               translate(
+               _translate(
                    'MainWindow',
                    'Please choose at least one P2P platform!'))
             return
