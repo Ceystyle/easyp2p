@@ -5,10 +5,12 @@
 
 from typing import Optional
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
 from easyp2p.ui.Ui_credentials_window import Ui_CredentialsWindow
+
+_translate = QCoreApplication.translate
 
 
 class CredentialsWindow(QDialog, Ui_CredentialsWindow):
@@ -36,8 +38,9 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         self.password: Optional[str] = None
         self.save_in_keyring = False
         self.label_platform.setText(
-            'Bitte Benutzername und Passwort für {0} eingeben:'.format(
-                platform))
+            _translate(
+                'CredentialsWindow',
+                'Please enter username and password for {}:'.format(platform)))
         if not keyring_exists:
             self.check_box_save_in_keyring.setEnabled(False)
         elif save_in_keyring:
@@ -53,8 +56,11 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         if not self.line_edit_username.text() or \
                 not self.line_edit_password.text():
             QMessageBox.warning(
-                self, 'Felder nicht ausgefüllt',
-                'Bitte Felder für Benutzername und Passwort ausfüllen!')
+                self,
+                _translate('CredentialsWindow', 'Fields are not filled'),
+                _translate(
+                    'CredentialsWindow',
+                    'Please fill in fields for username and password!'))
             return
 
         self.username = self.line_edit_username.text()

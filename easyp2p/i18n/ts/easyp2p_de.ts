@@ -2,6 +2,39 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de" sourcelanguage="en">
 <context>
+    <name>CredentialsWindow</name>
+    <message>
+        <location filename="../../ui/credentials_window.ui" line="14"/>
+        <source>Enter credentials</source>
+        <translation>Zugangsdaten eingeben</translation>
+    </message>
+    <message>
+        <location filename="../../ui/credentials_window.ui" line="44"/>
+        <source>Username</source>
+        <translation>Benutzername</translation>
+    </message>
+    <message>
+        <location filename="../../ui/credentials_window.ui" line="51"/>
+        <source>Password</source>
+        <translation>Passwort</translation>
+    </message>
+    <message>
+        <location filename="../../ui/credentials_window.ui" line="70"/>
+        <source>Save in keyring (recommended)</source>
+        <translation>In Keyring speichern (empfohlen)</translation>
+    </message>
+    <message>
+        <location filename="../../ui/credentials_window.py" line="59"/>
+        <source>Fields are not filled</source>
+        <translation>Felder nicht ausgefüllt</translation>
+    </message>
+    <message>
+        <location filename="../../ui/credentials_window.py" line="59"/>
+        <source>Please fill in fields for username and password!</source>
+        <translation>Bitte fülle die Felder für Benutzername und Passwort aus!</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <location filename="../../ui/main_window.ui" line="43"/>
@@ -104,32 +137,32 @@
         <translation>P2P_Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="181"/>
+        <location filename="../../ui/main_window.py" line="186"/>
         <source>Choose output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="181"/>
+        <location filename="../../ui/main_window.py" line="186"/>
         <source>files</source>
         <translation>Dateien</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="221"/>
+        <location filename="../../ui/main_window.py" line="226"/>
         <source>Start date is after end date!</source>
         <translation>Startdatum liegt nach Enddatum!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="221"/>
+        <location filename="../../ui/main_window.py" line="226"/>
         <source>Start date must be before end date!</source>
         <translation>Startdatum muss vor dem Enddatum liegen!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="231"/>
+        <location filename="../../ui/main_window.py" line="236"/>
         <source>No P2P platform selected!</source>
         <translation>Keine P2P-Plattform ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="231"/>
+        <location filename="../../ui/main_window.py" line="236"/>
         <source>Please choose at least one P2P platform!</source>
         <translation>Bitte wähle mindestens eine P2P-Plattform aus!</translation>
     </message>
@@ -147,24 +180,6 @@
         <location filename="../../ui/main_window.ui" line="323"/>
         <source>&amp;German</source>
         <translation>Deutsch</translation>
-    </message>
-</context>
-<context>
-    <name>excel_writer</name>
-    <message>
-        <location filename="../../excel_writer.py" line="23"/>
-        <source>Tagesergebnisse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excel_writer.py" line="24"/>
-        <source>Monatsergebnisse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excel_writer.py" line="25"/>
-        <source>Gesamtergebnis</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

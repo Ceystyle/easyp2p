@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/niko/workspace/easyp2p/easyp2p/ui/credentials_window.ui'
+# Form implementation generated from reading ui file 'ui/credentials_window.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.12.1
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_CredentialsWindow(object):
     def setupUi(self, CredentialsWindow):
@@ -18,6 +19,7 @@ class Ui_CredentialsWindow(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.label_platform = QtWidgets.QLabel(CredentialsWindow)
+        self.label_platform.setText("Label will be set by app")
         self.label_platform.setWordWrap(True)
         self.label_platform.setObjectName("label_platform")
         self.verticalLayout_3.addWidget(self.label_platform)
@@ -54,19 +56,9 @@ class Ui_CredentialsWindow(object):
 
     def retranslateUi(self, CredentialsWindow):
         _translate = QtCore.QCoreApplication.translate
-        CredentialsWindow.setWindowTitle(_translate("CredentialsWindow", "Bitte Benutzername und Passwort eingeben!"))
-        self.label_platform.setText(_translate("CredentialsWindow", "Bitte geben Sie Benutzername und Passwort für $platform ein:"))
-        self.label_username.setText(_translate("CredentialsWindow", "Benutzername"))
-        self.label_password.setText(_translate("CredentialsWindow", "Passwort"))
-        self.check_box_save_in_keyring.setText(_translate("CredentialsWindow", "Im Keyring speichern (empfohlen)"))
+        CredentialsWindow.setWindowTitle(_translate("CredentialsWindow", "Enter credentials"))
+        self.label_username.setText(_translate("CredentialsWindow", "Username"))
+        self.label_password.setText(_translate("CredentialsWindow", "Password"))
+        self.check_box_save_in_keyring.setText(_translate("CredentialsWindow", "Save in keyring (recommended)"))
 
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    CredentialsWindow = QtWidgets.QDialog()
-    ui = Ui_CredentialsWindow()
-    ui.setupUi(CredentialsWindow)
-    CredentialsWindow.show()
-    sys.exit(app.exec_())
 

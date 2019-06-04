@@ -27,7 +27,7 @@ class CredentialsWindowTests(unittest.TestCase):
         self.assertFalse(self.form.line_edit_password.text())
         self.assertEqual(
             self.form.label_platform.text(),
-            'Bitte Benutzername und Passwort für TestPlatform eingeben:')
+            'Please enter username and password for TestPlatform:')
         self.assertFalse(self.form.check_box_save_in_keyring.isChecked())
 
     def test_defaults_without_keyring(self):
@@ -37,7 +37,7 @@ class CredentialsWindowTests(unittest.TestCase):
         self.assertFalse(self.form.line_edit_password.text())
         self.assertEqual(
             self.form.label_platform.text(),
-            'Bitte Benutzername und Passwort für TestPlatform eingeben:')
+            'Please enter username and password for TestPlatform:')
         self.assertFalse(self.form.check_box_save_in_keyring.isChecked())
         self.assertFalse(self.form.check_box_save_in_keyring.isEnabled())
 
@@ -59,8 +59,8 @@ class CredentialsWindowTests(unittest.TestCase):
         self.form.button_box.button(self.form.button_box.Ok).click()
         # Check that a warning was emitted and the window is still open
         mock_warning.assert_called_once_with(
-            self.form, 'Felder nicht ausgefüllt',
-            'Bitte Felder für Benutzername und Passwort ausfüllen!')
+            self.form, 'Fields are not filled',
+            'Please fill in fields for username and password!')
         self.assertFalse(self.form.result())
         self.assertIsNone(self.form.username)
         self.assertIsNone(self.form.password)
@@ -73,8 +73,8 @@ class CredentialsWindowTests(unittest.TestCase):
         self.form.button_box.button(self.form.button_box.Ok).click()
         # Check that a warning was emitted and the window is still open
         mock_warning.assert_called_once_with(
-            self.form, 'Felder nicht ausgefüllt',
-            'Bitte Felder für Benutzername und Passwort ausfüllen!')
+            self.form, 'Fields are not filled',
+            'Please fill in fields for username and password!')
         self.assertFalse(self.form.result())
         self.assertIsNone(self.form.username)
         self.assertIsNone(self.form.password)
@@ -87,8 +87,8 @@ class CredentialsWindowTests(unittest.TestCase):
         self.form.button_box.button(self.form.button_box.Ok).click()
         # Check that a warning was emitted and the window is still open
         mock_warning.assert_called_once_with(
-            self.form, 'Felder nicht ausgefüllt',
-            'Bitte Felder für Benutzername und Passwort ausfüllen!')
+            self.form, 'Fields are not filled',
+            'Please fill in fields for username and password!')
         self.assertFalse(self.form.result())
         self.assertIsNone(self.form.username)
         self.assertIsNone(self.form.password)
