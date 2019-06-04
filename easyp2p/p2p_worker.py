@@ -153,7 +153,7 @@ class WorkerThread(QThread):
                         platform.download_statement(
                             driver, self.credentials[name])
         except WebDriverNotFound as err:
-            self.abort_easyp2p.emit(str(err))
+            self.abort_easyp2p.emit(str(err), 'ChromeDriver not found!')
             self.abort = True
             return
         except RuntimeError as err:

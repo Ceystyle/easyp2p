@@ -83,15 +83,16 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.progress_text.setTextColor(color)
         self.progress_text.append(txt)
 
-    def abort_easyp2p(self, error_msg: str) -> None:
+    def abort_easyp2p(self, error_msg: str, header: str) -> None:
         """
         Abort the program in case of critical errors.
 
         Args:
-            error_msg: Message to display to the user before aborting
+            error_msg: Message to display to the user before aborting.
+            header: Header text of the error message window.
 
         """
         self.reject()
         QMessageBox.critical(
-            self, "Kritischer Fehler", error_msg, QMessageBox.Close)
+            self, header, error_msg, QMessageBox.Close)
         sys.exit()
