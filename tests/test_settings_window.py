@@ -34,7 +34,7 @@ class SettingsWindowTests(unittest.TestCase):
         self.assertTrue(self.form.check_box_headless.isChecked())
         self.assertEqual(1, self.form.list_widget_platforms.count())
         self.assertEqual(
-            'Kein Keyring vorhanden!',
+            'No keyring available!',
             self.form.list_widget_platforms.item(0).text())
         self.assertFalse(self.form.push_button_add.isEnabled())
         self.assertFalse(self.form.push_button_change.isEnabled())
@@ -131,9 +131,8 @@ class SettingsWindowTests(unittest.TestCase):
         self.form = SettingsWindow(self.platforms, self.settings)
         self.form.push_button_add.click()
         mock_info.assert_called_once_with(
-            self.form, 'Keine weiteren Plattformen verfügbar!',
-            ('Es sind bereits Zugangsdaten für alle unterstützten '
-             'Plattformen vorhanden!'))
+            self.form, 'No other P2P platforms available!',
+            'Credentials for all supported P2P platforms are already present!')
         self.assertEqual(
             len(self.platforms), self.form.list_widget_platforms.count())
         self.assertEqual(self.form.saved_platforms, set(self.platforms))
@@ -162,8 +161,8 @@ class SettingsWindowTests(unittest.TestCase):
         self.form.list_widget_platforms.setCurrentRow(0)
         self.form.push_button_delete.click()
         mock_question.assert_called_once_with(
-            self.form, 'Zugangsdaten löschen?',
-            'Zugangsdaten für TestPlatform2 wirklich löschen?')
+            self.form, 'Delete credentials?',
+            'Really delete credentials for TestPlatform2?')
         mock_cred.delete_platform_from_keyring.assert_called_once_with(
             'TestPlatform2')
         self.assertEqual(set(), self.form.saved_platforms)
@@ -181,8 +180,8 @@ class SettingsWindowTests(unittest.TestCase):
         self.form.list_widget_platforms.setCurrentRow(1)
         self.form.push_button_delete.click()
         mock_question.assert_called_once_with(
-            self.form, 'Zugangsdaten löschen?',
-            'Zugangsdaten für TestPlatform2 wirklich löschen?')
+            self.form, 'Delete credentials?',
+            'Really delete credentials for TestPlatform2?')
         mock_cred.delete_platform_from_keyring.assert_called_once_with(
             'TestPlatform2')
         self.assertEqual(

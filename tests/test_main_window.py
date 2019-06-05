@@ -24,7 +24,7 @@ class MainWindowTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create the GUI."""
-        self.form = MainWindow()
+        self.form = MainWindow(APP)
 
     def test_defaults(self) -> None:
         """Test GUI in default state."""
@@ -37,7 +37,7 @@ class MainWindowTests(unittest.TestCase):
         date_range = self.form.get_date_range()
         self.assertEqual(
             self.form.line_edit_output_file.text(), os.path.join(
-                Path.home(), 'P2P_Ergebnisse_{0}-{1}.xlsx'.format(
+                Path.home(), 'P2P_Results_{0}-{1}.xlsx'.format(
                     date_range[0].strftime('%d%m%Y'),
                     date_range[1].strftime('%d%m%Y'))))
 
@@ -129,7 +129,7 @@ class MainWindowTests(unittest.TestCase):
         new_output_file = self.form.line_edit_output_file.text()
         self.assertNotEqual(new_output_file, old_output_file)
         self.assertEqual(new_output_file, os.path.join(
-            Path.home(), 'P2P_Ergebnisse_01022017-30092017.xlsx'))
+            Path.home(), 'P2P_Results_01022017-30092017.xlsx'))
 
     def test_output_file_on_date_change_after_user_change(self) -> None:
         """Test output file after date change if user already changed file."""
@@ -152,8 +152,8 @@ class MainWindowTests(unittest.TestCase):
         # Check that QMessageBox was opened and ProgressWindow was not
         mock_warning.assert_called_once_with(
             self.form,
-            'Keine P2P Plattform ausgewählt!',
-            'Bitte wähle mindestens eine P2P Plattform aus!')
+            'No P2P platform selected!',
+            'Please choose at least one P2P platform!')
         self.assertFalse(mock_dialog.called)
 
     @unittest.mock.patch('easyp2p.ui.main_window.ProgressWindow')
@@ -167,8 +167,8 @@ class MainWindowTests(unittest.TestCase):
         # Check that QMessageBox was opened and ProgressWindow was not
         mock_warning.assert_called_once_with(
             self.form,
-            'Startdatum liegt nach Enddatum!',
-            'Das Startdatum darf nicht nach dem Enddatum liegen!')
+            'Start date is after end date!',
+            'Start date must be before end date!')
         self.assertFalse(mock_dialog.called, 'ProgressWindow was opened!')
 
     @unittest.mock.patch('easyp2p.ui.main_window.ProgressWindow')

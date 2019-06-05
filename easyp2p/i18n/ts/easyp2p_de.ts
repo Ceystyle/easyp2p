@@ -36,7 +36,12 @@
     <message>
         <location filename="../../ui/credentials_window.py" line="40"/>
         <source>Please enter username and password for {}</source>
-        <translation>Bitte Benutzername und Passwort für {} eingeben</translation>
+        <translation type="obsolete">Bitte Benutzername und Passwort für {} eingeben</translation>
+    </message>
+    <message>
+        <location filename="../../ui/credentials_window.py" line="40"/>
+        <source>Please enter username and password for {}:</source>
+        <translation>Bitte Benutzername und Passwort für {} eingeben:</translation>
     </message>
 </context>
 <context>
@@ -280,47 +285,52 @@
     <message>
         <location filename="../../p2p_worker.py" line="111"/>
         <source>{0}: unknown cash flow type will be ignored in result:</source>
-        <translation>{}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert:</translation>
+        <translation type="obsolete">{}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert:</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="134"/>
+        <location filename="../../p2p_worker.py" line="131"/>
         <source>Credentials for {} are not available!</source>
         <translation>Zugangsdaten für {} sind nicht vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="140"/>
+        <location filename="../../p2p_worker.py" line="136"/>
         <source>Starting evaluation of {}...</source>
         <translation>Start der Auswertung von {}...</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="150"/>
+        <location filename="../../p2p_worker.py" line="145"/>
         <source>Iuvo is not supported with headless ChromeDriver!</source>
         <translation>Iuvo wird nicht mit unsichtbarem ChromeDriver unterstützt!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="157"/>
+        <location filename="../../p2p_worker.py" line="150"/>
         <source>Making ChromeDriver visible!</source>
         <translation>Mache ChromeDriver sichtbar!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="173"/>
+        <location filename="../../p2p_worker.py" line="165"/>
         <source>ChromeDriver not found!</source>
         <translation>ChromeDriver konnte nicht gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="215"/>
+        <location filename="../../p2p_worker.py" line="207"/>
         <source>{} successfully evaluated!</source>
         <translation>{} erfolgreich ausgewertet!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="224"/>
+        <location filename="../../p2p_worker.py" line="215"/>
         <source>{} will be ignored!</source>
         <translation>{} wird ignoriert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="238"/>
+        <location filename="../../p2p_worker.py" line="228"/>
         <source>No results available!</source>
         <translation>Keine Ergebnisse vorhanden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="110"/>
+        <source>{0}: unknown cash flow type will be ignored in result: {1}</source>
+        <translation>{0}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: {1}</translation>
     </message>
 </context>
 </TS>

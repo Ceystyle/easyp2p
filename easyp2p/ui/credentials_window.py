@@ -40,7 +40,7 @@ class CredentialsWindow(QDialog, Ui_CredentialsWindow):
         self.label_platform.setText(
             _translate(
                 'CredentialsWindow',
-                'Please enter username and password for {}').format(platform))
+                'Please enter username and password for {}:').format(platform))
         if not keyring_exists:
             self.check_box_save_in_keyring.setEnabled(False)
         elif save_in_keyring:
