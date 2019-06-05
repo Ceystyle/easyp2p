@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import Set, Tuple
 
-from PyQt5.QtCore import pyqtSlot, QCoreApplication, QTranslator
+from PyQt5.QtCore import pyqtSlot, QCoreApplication, QTranslator, QLibraryInfo
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
@@ -32,6 +32,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self._app = app
         self._translator = QTranslator()
+        self._qttranslator = QTranslator()
         # Initialize date combo boxes with previous month
         if date.today().month > 1:
             start_month = p2p_helper.nbr_to_short_month(
@@ -133,8 +134,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         date_range = self.get_date_range()
         if not self.output_file_changed:
             output_file = os.path.join(
-                 Path.home(), _translate('MainWindow', 'P2P_Results') \
-                    + '_{0}-{1}.xlsx'.format(
+                Path.home(),
+                _translate('MainWindow', 'P2P_Results_{0}-{1}.xlsx').format(
                     date_range[0].strftime('%d%m%Y'),
                     date_range[1].strftime('%d%m%Y')))
             QLineEdit.setText(self.line_edit_output_file, output_file)
@@ -144,8 +145,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """_translate GUI to English."""
         self.action_english.setChecked(False)
         self.action_german.setChecked(True)
-        self._translator.load("easyp2p/i18n/ts/easyp2p_de")
+        self._translator.load('easyp2p_de', 'easyp2p/i18n/ts')
         self._app.installTranslator(self._translator)
+        self._qttranslator.load(
+            'qtbase_de', QLibraryInfo.location(QLibraryInfo.TranslationsPath))
+        self._app.installTranslator(self._qttranslator)
         self.retranslateUi(self)
 
     @pyqtSlot(bool)
@@ -154,6 +158,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.action_english.setChecked(True)
         self.action_german.setChecked(False)
         self._app.removeTranslator(self._translator)
+        self._app.removeTranslator(self._qttranslator)
         self.retranslateUi(self)
 
     @pyqtSlot(str)
