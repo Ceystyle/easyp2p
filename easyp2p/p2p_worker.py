@@ -10,13 +10,15 @@ import tempfile
 from typing import Callable, Mapping, Optional, Tuple
 
 import pandas as pd
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal, QThread, QCoreApplication
 from PyQt5.QtGui import QColor
 
 from easyp2p.excel_writer import write_results
 from easyp2p.p2p_settings import Settings
 import easyp2p.platforms as p2p_platforms
 from easyp2p.p2p_webdriver import P2PWebDriver, WebDriverNotFound
+
+_translate = QCoreApplication.translate
 
 
 class WorkerThread(QThread):
@@ -79,7 +81,8 @@ class WorkerThread(QThread):
             platform = getattr(p2p_platforms, name)
         except AttributeError:
             raise PlatformFailedError(
-                name.lower(), '.py konnte nicht gefunden werden!')
+                _translate('WorkerThread', '{}.py could not be found!').format(
+                    name.lower()))
         else:
             return platform(self.settings.date_range, statement_without_suffix)
 
@@ -104,9 +107,9 @@ class WorkerThread(QThread):
             raise PlatformFailedError(str(err))
 
         if unknown_cf_types:
-            warning_msg = (
-                '{0}: unbekannter Cashflow-Typ wird im Ergebnis '
-                'ignoriert: {1}'.format(name, unknown_cf_types))
+            warning_msg = _translate(
+                'WorkerThread', '{0}: unknown cash flow type will be ignored '
+                'in result: {1}').format(name, unknown_cf_types)
             self.add_progress_text.emit(warning_msg, self.RED)
 
     def download_statements(
@@ -126,21 +129,27 @@ class WorkerThread(QThread):
         """
         if self.credentials[name] is None:
             raise PlatformFailedError(
-                'Keine Zugangsdaten für {0} vorhanden!'.format(name))
+                _translate(
+                    'WorkerThread', 'Credentials for {} are not '
+                    'available!').format(name))
 
         self.add_progress_text.emit(
-            'Start der Auswertung von {0}...'.format(name), self.BLACK)
+            _translate('WorkerThread', 'Starting evaluation of {}...').format(
+                name), self.BLACK)
 
         try:
             if name == 'Iuvo' and self.settings.headless:
-                # Iuvo is currently not supported in headless Chromedriver mode
+                # Iuvo is currently not supported in headless ChromeDriver mode
                 # because it opens a new window for downloading the statement.
-                # Chromedriver does not allow that due to security reasons.
+                # ChromeDriver does not allow that due to security reasons.
                 self.add_progress_text.emit(
-                    'Iuvo wird nicht mit unsichtbarem Chromedriver '
-                    'unterstützt!', self.RED)
+                    _translate(
+                        'WorkerThread',
+                        'Iuvo is not supported with headless ChromeDriver!'),
+                    self.RED)
                 self.add_progress_text.emit(
-                    'Mache Chromedriver sichtbar!', self.RED)
+                    _translate('WorkerThread', 'Making ChromeDriver visible!'),
+                    self.RED)
                 with tempfile.TemporaryDirectory() as download_directory:
                     with P2PWebDriver(download_directory, False) as driver:
                         platform.download_statement(
@@ -153,7 +162,8 @@ class WorkerThread(QThread):
                         platform.download_statement(
                             driver, self.credentials[name])
         except WebDriverNotFound as err:
-            self.abort_easyp2p.emit(str(err), 'ChromeDriver not found!')
+            self.abort_easyp2p.emit(
+                str(err), _translate('WorkerThread', 'ChromeDriver not found!'))
             self.abort = True
             return
         except RuntimeError as err:
@@ -195,12 +205,17 @@ class WorkerThread(QThread):
 
                 self.parse_statements(name, platform)
                 self.add_progress_text.emit(
-                    '{0} erfolgreich ausgewertet!'.format(name), self.BLACK)
+                    _translate(
+                        'WorkerThread', '{} successfully evaluated!').format(
+                            name),
+                    self.BLACK)
                 self.update_progress_bar.emit()
             except PlatformFailedError as err:
                 self.add_progress_text.emit(str(err), self.RED)
                 self.add_progress_text.emit(
-                    '{0} wird ignoriert!'.format(name), self.RED)
+                    _translate('WorkerThread', '{} will be ignored!').format(
+                        name),
+                    self.RED)
                 self.update_progress_bar.emit()
                 continue
 
@@ -211,7 +226,7 @@ class WorkerThread(QThread):
                 self.df_result, self.settings.output_file,
                 self.settings.date_range):
             self.add_progress_text.emit(
-                'Keine Ergebnisse vorhanden', self.RED)
+                _translate('WorkerThread', 'No results available!'), self.RED)
 
 
 class PlatformFailedError(BaseException):

@@ -99,7 +99,8 @@ class WorkerTests(unittest.TestCase):
         bondora.download_statement.assert_called_once_with(
             mock_webdriver().__enter__('/tmp/test', True),
             ('TestUser', 'TestPass'))
-        mock_abort.emit.assert_called_once_with('Test error')
+        mock_abort.emit.assert_called_once_with(
+            'Test error', 'ChromeDriver not found!')
 
     @unittest.mock.patch('easyp2p.p2p_worker.p2p_platforms.Bondora')
     @unittest.mock.patch('easyp2p.p2p_worker.P2PWebDriver')
@@ -169,7 +170,7 @@ class WorkerTests(unittest.TestCase):
                 pd.DataFrame(
                     data=[1, 2, 3, 4, 5, 6], index=[0, 1, 2, 0, 1, 2])))
         mock_text.emit.assert_called_with(
-            "Bondora: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: "
+            "Bondora: unknown cash flow type will be ignored in result: "
             "{'TestCF1', 'TestCF2'}", self.worker.RED)
 
     @unittest.mock.patch('easyp2p.p2p_worker.write_results')
@@ -204,7 +205,7 @@ class WorkerTests(unittest.TestCase):
             self.worker.df_result, self.settings.output_file,
             self.settings.date_range)
         mock_text.emit.assert_called_with(
-            'Keine Ergebnisse vorhanden', self.worker.RED)
+            'No results available!', self.worker.RED)
 
 
 if __name__ == "__main__":

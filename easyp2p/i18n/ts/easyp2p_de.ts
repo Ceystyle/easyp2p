@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="en">
+<!DOCTYPE TS>
+<TS version="2.1" language="de" sourcelanguage="en">
 <context>
     <name>CredentialsWindow</name>
     <message>
@@ -188,7 +189,7 @@
     <message>
         <location filename="../../ui/main_window.py" line="136"/>
         <source>P2P_Results_{0}-{1}.xlsx</source>
-        <translation type="unfinished"></translation>
+        <translation>P2P_Ergebnisse_{0}-{1}.xlsx</translation>
     </message>
 </context>
 <context>
@@ -267,6 +268,59 @@
         <location filename="../../ui/settings_window.py" line="88"/>
         <source>Really delete credentials for {}?</source>
         <translation>Zugangsdaten für {} wirklich löschen?</translation>
+    </message>
+</context>
+<context>
+    <name>WorkerThread</name>
+    <message>
+        <location filename="../../p2p_worker.py" line="83"/>
+        <source>{}.py could not be found!</source>
+        <translation>{}.py konnte nicht gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="111"/>
+        <source>{0}: unknown cash flow type will be ignored in result:</source>
+        <translation>{}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert:</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="134"/>
+        <source>Credentials for {} are not available!</source>
+        <translation>Zugangsdaten für {} sind nicht vorhanden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="140"/>
+        <source>Starting evaluation of {}...</source>
+        <translation>Start der Auswertung von {}...</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="150"/>
+        <source>Iuvo is not supported with headless ChromeDriver!</source>
+        <translation>Iuvo wird nicht mit unsichtbarem ChromeDriver unterstützt!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="157"/>
+        <source>Making ChromeDriver visible!</source>
+        <translation>Mache ChromeDriver sichtbar!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="173"/>
+        <source>ChromeDriver not found!</source>
+        <translation>ChromeDriver konnte nicht gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="215"/>
+        <source>{} successfully evaluated!</source>
+        <translation>{} erfolgreich ausgewertet!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="224"/>
+        <source>{} will be ignored!</source>
+        <translation>{} wird ignoriert!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_worker.py" line="238"/>
+        <source>No results available!</source>
+        <translation>Keine Ergebnisse vorhanden!</translation>
     </message>
 </context>
 </TS>
