@@ -101,6 +101,8 @@ class BasePlatformTests(unittest.TestCase):
 
         platform = self.Platform(date_range, statement_without_suffix)
         (df, unknown_cf_types) = platform.parse_statement()
+        # df.to_csv('tests/test_results/test_' + result_file + '.csv')
+        df.to_csv('tests/test_results/test_multicurrency.csv')
 
         df_exp = _get_expected_df(exp_result_file)
 
@@ -144,7 +146,8 @@ class BasePlatformTests(unittest.TestCase):
             P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
             inplace=True)
         with tempfile.TemporaryDirectory() as temp_dir:
-            output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
+            #output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
+            output_file = 'tests/test_results/test_write_results.xlsx'
             write_results(df, output_file, date_range)
 
             for worksheet in [DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS]:

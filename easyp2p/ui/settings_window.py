@@ -4,12 +4,14 @@
 """Module implementing SettingsWindow, the settings window of easyp2p."""
 from typing import AbstractSet, Set
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox
 
 import easyp2p.p2p_credentials as p2p_cred
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.Ui_settings_window import Ui_SettingsWindow
+
+_translate = QCoreApplication.translate
 
 
 class SettingsWindow(QDialog, Ui_SettingsWindow):
@@ -37,7 +39,8 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
                     self.list_widget_platforms.addItem(platform)
                     self.saved_platforms.add(platform)
         else:
-            self.list_widget_platforms.addItem('Kein Keyring vorhanden!')
+            self.list_widget_platforms.addItem(
+                _translate('SettingsWindow', 'No keyring available!'))
             self.push_button_add.setEnabled(False)
             self.push_button_change.setEnabled(False)
             self.push_button_delete.setEnabled(False)
@@ -52,14 +55,17 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
 
         if not_saved_platforms:
             platform, accepted = QInputDialog.getItem(
-                self, 'P2P-Plattform auswählen',
-                'Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt '
-                'werden?', sorted(not_saved_platforms), 0, False)
+                self, _translate('SettingsWindow', 'Choose P2P platform'),
+                _translate('SettingsWindow', 'For which P2P platform would '
+                    'you like to add credentials?'),
+                sorted(not_saved_platforms), 0, False)
         else:
             QMessageBox.information(
-                self, 'Keine weiteren Plattformen verfügbar!',
-                ('Es sind bereits Zugangsdaten für alle unterstützten '
-                 'Plattformen vorhanden!'))
+                self, _translate(
+                    'SettingsWindow', 'No other P2P platforms available!'),
+                _translate(
+                    'SettingsWindow', 'Credentials for all supported '
+                    'P2P platforms are already present!'))
             return
 
         if platform and accepted:
@@ -80,14 +86,18 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         """Delete credentials for a platform from the keyring."""
         platform = self.list_widget_platforms.currentItem().text()
         msg = QMessageBox.question(
-            self, 'Zugangsdaten löschen?',
-            'Zugangsdaten für {0} wirklich löschen?'.format(platform))
+            self, _translate('SettingsWindow', 'Delete credentials?'),
+            _translate(
+                'SettingsWindow', 'Really delete credentials for {}?').format(
+                    platform))
         if msg == QMessageBox.Yes:
             if not p2p_cred.delete_platform_from_keyring(platform):
                 QMessageBox.warning(
-                    self, 'Löschen nicht erfolgreich!',
-                    ('Leider konnten die {0}-Zugangsdaten nicht gelöscht '
-                     'werden!'.format(platform)))
+                    self, _translate(
+                        'SettingsWindow', 'Delete not successful!'),
+                    platform + _translate(
+                        'SettingsWindow', ' credentials could not be '
+                        'deleted!'))
                 return
             self.list_widget_platforms.takeItem(
                 self.list_widget_platforms.row(

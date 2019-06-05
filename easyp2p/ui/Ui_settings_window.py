@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/niko/workspace/easyp2p/easyp2p/ui/settings_window.ui'
+# Form implementation generated from reading ui file 'ui/settings_window.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.12.1
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
@@ -55,21 +56,12 @@ class Ui_SettingsWindow(object):
 
     def retranslateUi(self, SettingsWindow):
         _translate = QtCore.QCoreApplication.translate
-        SettingsWindow.setWindowTitle(_translate("SettingsWindow", "Einstellungen"))
-        self.groupBox.setTitle(_translate("SettingsWindow", "Im Keyring gespeicherte Zugangsdaten"))
+        SettingsWindow.setWindowTitle(_translate("SettingsWindow", "Settings"))
+        self.groupBox.setTitle(_translate("SettingsWindow", "Credentials saved in keyring"))
         self.list_widget_platforms.setSortingEnabled(True)
-        self.push_button_add.setText(_translate("SettingsWindow", "Hinzufügen"))
-        self.push_button_change.setText(_translate("SettingsWindow", "Ändern"))
-        self.push_button_delete.setText(_translate("SettingsWindow", "Löschen"))
-        self.check_box_headless.setText(_translate("SettingsWindow", "ChromeDriver-Fenster unsichtbar"))
+        self.push_button_add.setText(_translate("SettingsWindow", "Add"))
+        self.push_button_change.setText(_translate("SettingsWindow", "Change"))
+        self.push_button_delete.setText(_translate("SettingsWindow", "Delete"))
+        self.check_box_headless.setText(_translate("SettingsWindow", "ChromeDriver window invisible"))
 
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    SettingsWindow = QtWidgets.QDialog()
-    ui = Ui_SettingsWindow()
-    ui.setupUi(SettingsWindow)
-    SettingsWindow.show()
-    sys.exit(app.exec_())
 

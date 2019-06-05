@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Einstellungen</string>
+   <string>Settings</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -26,7 +26,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Im Keyring gespeicherte Zugangsdaten</string>
+      <string>Credentials saved in keyring</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
@@ -41,21 +41,21 @@
         <item>
          <widget class="QPushButton" name="push_button_add">
           <property name="text">
-           <string>Hinzufügen</string>
+           <string>Add</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="push_button_change">
           <property name="text">
-           <string>Ändern</string>
+           <string>Change</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="push_button_delete">
           <property name="text">
-           <string>Löschen</string>
+           <string>Delete</string>
           </property>
          </widget>
         </item>
@@ -67,7 +67,7 @@
    <item>
     <widget class="QCheckBox" name="check_box_headless">
      <property name="text">
-      <string>ChromeDriver-Fenster unsichtbar</string>
+      <string>ChromeDriver window invisible</string>
      </property>
     </widget>
    </item>
