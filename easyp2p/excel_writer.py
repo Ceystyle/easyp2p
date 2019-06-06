@@ -18,11 +18,11 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 
-translate = QCoreApplication.translate
+_translate = QCoreApplication.translate
 
-DAILY_RESULTS = translate('excel_writer', 'Tagesergebnisse')
-MONTHLY_RESULTS = translate('excel_writer', 'Monatsergebnisse')
-TOTAL_RESULTS = translate('excel_writer', 'Gesamtergebnis')
+DAILY_RESULTS = _translate('excel_writer', 'Daily results')
+MONTHLY_RESULTS = _translate('excel_writer', 'Monthly results')
+TOTAL_RESULTS = _translate('excel_writer', 'Total results')
 
 
 def write_results(
@@ -54,8 +54,9 @@ def write_results(
     for column in [P2PParser.PLATFORM, P2PParser.CURRENCY, P2PParser.DATE]:
         if column not in df_result.columns:
             raise RuntimeError(
-                'Schreiben nach Excel fehlgeschlagen! Spalte {} ist nicht '
-                'vorhanden!'.format(column))
+                _translate(
+                    'excel_writer', 'Writing results to Excel was not '
+                    'successful! Column {} is missing!').format(column))
 
     # Format date column and add month column to DataFrame
     df_result[P2PParser.DATE] = pd.to_datetime(

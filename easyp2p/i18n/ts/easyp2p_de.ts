@@ -333,4 +333,27 @@
         <translation>{0}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: {1}</translation>
     </message>
 </context>
+<context>
+    <name>excel_writer</name>
+    <message>
+        <location filename="../../excel_writer.py" line="26"/>
+        <source>Daily results</source>
+        <translation>Tagesergebnisse</translation>
+    </message>
+    <message>
+        <location filename="../../excel_writer.py" line="27"/>
+        <source>Monthly results</source>
+        <translation>Monatsergebnisse</translation>
+    </message>
+    <message>
+        <location filename="../../excel_writer.py" line="28"/>
+        <source>Total results</source>
+        <translation>Gesamtergebnisse</translation>
+    </message>
+    <message>
+        <location filename="../../excel_writer.py" line="59"/>
+        <source>Writing results to Excel was not successful! Column {} is missing!</source>
+        <translation>Schreiben der Ergebnisse nach Excel war nicht erfolgreich! Spalte {} ist nicht vorhanden!</translation>
+    </message>
+</context>
 </TS>
