@@ -149,25 +149,17 @@ class P2PParser:
         Args:
             date_format: Date format which the platform uses
 
-        Raises:
-            RuntimeError: If date column cannot be found in dataframe.
-
         """
         start_date = pd.Timestamp(self.date_range[0])
         end_date = pd.Timestamp(self.date_range[1]).replace(
             hour=23, minute=59, second=59)
-        try:
-            self.df[self.DATE] = pd.to_datetime(
-                self.df[self.DATE], format=date_format)
-            self.df = self.df[
-                (self.df[self.DATE] >= start_date)
-                & (self.df[self.DATE] <= end_date)]
-            # Convert date column from datetime to date:
-            self.df[self.DATE] = self.df[self.DATE].dt.date
-        except KeyError as err:
-            raise RuntimeError(
-                '{0}: Spalte {1} nicht im Kontoauszug vorhanden!'.format(
-                    self.name, str(err)))
+        self.df[self.DATE] = pd.to_datetime(
+            self.df[self.DATE], format=date_format)
+        self.df = self.df[
+            (self.df[self.DATE] >= start_date)
+            & (self.df[self.DATE] <= end_date)]
+        # Convert date column from datetime to date:
+        self.df[self.DATE] = self.df[self.DATE].dt.date
 
     def _map_cashflow_types(
             self, cashflow_types: Optional[Mapping[str, str]],
@@ -187,17 +179,11 @@ class P2PParser:
 
         """
         if cashflow_types:
-            try:
-                self.df[self.CF_TYPE] = self.df[orig_cf_column].map(
-                    cashflow_types)
-                unknown_cf_types = sorted(list(set(
-                    self.df[orig_cf_column].where(
-                        self.df[self.CF_TYPE].isna()).dropna().tolist())))
-                return ', '.join(unknown_cf_types)
-            except KeyError:
-                raise RuntimeError(
-                    '{0}: Cashflowspalte {1} nicht im Kontoauszug '
-                    'vorhanden!'.format(self.name, orig_cf_column))
+            self.df[self.CF_TYPE] = self.df[orig_cf_column].map(cashflow_types)
+            unknown_cf_types = sorted(list(set(
+                self.df[orig_cf_column].where(
+                    self.df[self.CF_TYPE].isna()).dropna().tolist())))
+            return ', '.join(unknown_cf_types)
         else:
             return ''
 
@@ -228,7 +214,7 @@ class P2PParser:
             rename_columns: Dictionary containing a mapping between platform
                 and easyp2p column names
             cashflow_types: Dictionary containing a mapping between platform
-                and easyp2p cashflow types
+                and easyp2p cash flow types
             orig_cf_column: Name of the column in the platform account
                 statement which contains the cash flow type
             value_column: Name of the DataFrame column which contains the
@@ -240,7 +226,7 @@ class P2PParser:
             Sorted set of strings with all unknown cash flow types.
 
         Raises:
-            RuntimeError: If date or cashflow columns cannot be found in
+            RuntimeError: If date or cash flow columns cannot be found in
                 DataFrame
 
         """
@@ -249,25 +235,25 @@ class P2PParser:
             self._add_zero_line()
             return ''
 
-        # Rename columns in DataFrame
-        if rename_columns:
-            try:
+        try:
+            # Rename columns in DataFrame
+            if rename_columns:
                 self.df.rename(columns=rename_columns, inplace=True)
-            except KeyError as err:
-                raise RuntimeError(
-                    '{0}: Spalte {1} ist nicht im Kontoauszug '
-                    'vorhanden!'.format(self.name, str(err)))
 
-        # Make sure we only show results between start and end date
-        if date_format:
-            self._filter_date_range(date_format)
-            if self.df.empty:
-                self._add_zero_line()
-                return ''
+            # Make sure we only show results between start and end date
+            if date_format:
+                self._filter_date_range(date_format)
+                if self.df.empty:
+                    self._add_zero_line()
+                    return ''
 
-        # Convert cash flow types from platform to easyp2p types
-        unknown_cf_types = self._map_cashflow_types(
-            cashflow_types, orig_cf_column)
+            # Convert cash flow types from platform to easyp2p types
+            unknown_cf_types = self._map_cashflow_types(
+                cashflow_types, orig_cf_column)
+        except KeyError as err:
+            raise RuntimeError(
+                '{0}: Spalte {1} ist nicht im Kontoauszug '
+                'vorhanden!'.format(self.name, str(err)))
 
         # If the platform does not explicitly report currencies assume that
         # currency is EUR
