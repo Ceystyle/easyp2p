@@ -162,7 +162,7 @@ class WorkerTests(unittest.TestCase):
         self.worker.df_result = pd.DataFrame([1, 2, 3])
         bondora = mock_bondora(self.settings.date_range, 'test')
         bondora.parse_statement.return_value = (
-            pd.DataFrame([4, 5, 6]), {'TestCF1', 'TestCF2'})
+            pd.DataFrame([4, 5, 6]), ['TestCF1', 'TestCF2'])
         self.worker.parse_statements('Bondora', bondora)
         bondora.parse_statement.assert_called_once_with()
         self.assertTrue(
@@ -171,7 +171,7 @@ class WorkerTests(unittest.TestCase):
                     data=[1, 2, 3, 4, 5, 6], index=[0, 1, 2, 0, 1, 2])))
         mock_text.emit.assert_called_with(
             "Bondora: unknown cash flow type will be ignored in result: "
-            "{'TestCF1', 'TestCF2'}", self.worker.RED)
+            "['TestCF1', 'TestCF2']", self.worker.RED)
 
     @unittest.mock.patch('easyp2p.p2p_worker.write_results')
     @unittest.mock.patch('easyp2p.p2p_worker.WorkerThread.download_statements')

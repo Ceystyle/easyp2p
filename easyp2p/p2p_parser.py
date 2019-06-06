@@ -163,19 +163,19 @@ class P2PParser:
 
     def _map_cashflow_types(
             self, cashflow_types: Optional[Mapping[str, str]],
-            orig_cf_column: Optional[str]) -> str:
+            orig_cf_column: Optional[str]) -> List[str]:
         """
         Map platform cashflow types to easyp2p cashflow types.
 
         Args:
             cashflow_types: Dictionary containing a mapping between platform
-                and easyp2p cashflow types
+                and easyp2p cash flow types
             orig_cf_column: Name of the column in the platform account
                 statement which contains the cash flow type
 
         Returns:
-            Sorted string with all unknown cash flow types, separated by
-            commas.
+            Sorted list of strings with all unknown cash flow types or an
+            empty list if no unknown cash flow types were found.
 
         """
         if cashflow_types:
@@ -183,9 +183,9 @@ class P2PParser:
             unknown_cf_types = sorted(list(set(
                 self.df[orig_cf_column].where(
                     self.df[self.CF_TYPE].isna()).dropna().tolist())))
-            return ', '.join(unknown_cf_types)
+            return unknown_cf_types
         else:
-            return ''
+            return []
 
     def _add_zero_line(self):
         """Add a single zero cash flow for start date to the DataFrame."""
@@ -205,7 +205,7 @@ class P2PParser:
             cashflow_types: Optional[Mapping[str, str]] = None,
             orig_cf_column: Optional[str] = None,
             value_column: Optional[str] = None,
-            balance_column: Optional[str] = None) -> str:
+            balance_column: Optional[str] = None) -> List[str]:
         """
         Parse the account statement from platform format to easyp2p format.
 
@@ -223,7 +223,7 @@ class P2PParser:
                 balances
 
         Returns:
-            Sorted set of strings with all unknown cash flow types.
+            Sorted list of strings with all unknown cash flow types.
 
         Raises:
             RuntimeError: If date or cash flow columns cannot be found in
@@ -233,7 +233,7 @@ class P2PParser:
         # If there were no cash flows in date_range add a single zero line
         if self.df.empty:
             self._add_zero_line()
-            return ''
+            return []
 
         try:
             # Rename columns in DataFrame
@@ -245,7 +245,7 @@ class P2PParser:
                 self._filter_date_range(date_format)
                 if self.df.empty:
                     self._add_zero_line()
-                    return ''
+                    return []
 
             # Convert cash flow types from platform to easyp2p types
             unknown_cf_types = self._map_cashflow_types(
