@@ -336,24 +336,47 @@
 <context>
     <name>excel_writer</name>
     <message>
-        <location filename="../../excel_writer.py" line="26"/>
+        <location filename="../../excel_writer.py" line="23"/>
         <source>Daily results</source>
         <translation>Tagesergebnisse</translation>
     </message>
     <message>
-        <location filename="../../excel_writer.py" line="27"/>
+        <location filename="../../excel_writer.py" line="24"/>
         <source>Monthly results</source>
         <translation>Monatsergebnisse</translation>
     </message>
     <message>
-        <location filename="../../excel_writer.py" line="28"/>
+        <location filename="../../excel_writer.py" line="25"/>
         <source>Total results</source>
         <translation>Gesamtergebnisse</translation>
     </message>
     <message>
-        <location filename="../../excel_writer.py" line="59"/>
+        <location filename="../../excel_writer.py" line="56"/>
         <source>Writing results to Excel was not successful! Column {} is missing!</source>
         <translation>Schreiben der Ergebnisse nach Excel war nicht erfolgreich! Spalte {} ist nicht vorhanden!</translation>
+    </message>
+</context>
+<context>
+    <name>p2p_credentials</name>
+    <message>
+        <location filename="../../p2p_credentials.py" line="86"/>
+        <source>Saving in keyring failed!</source>
+        <translation>Speichern im Keyring fehlgeschlagen!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_credentials.py" line="86"/>
+        <source>Saving password in keyring was not successful!</source>
+        <translation>Speichern des Passworts im Keyring war nicht erfolgreich!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_credentials.py" line="130"/>
+        <source>{} was not found in keyring!</source>
+        <translation>{} wurde nicht im Keyring gefunden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_credentials.py" line="163"/>
+        <source>User name &quot;username&quot; is not allowed!</source>
+        <translation>Benutzername &quot;username&quot; ist nicht erlaubt!</translation>
     </message>
 </context>
 </TS>

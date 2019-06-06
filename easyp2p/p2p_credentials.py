@@ -9,8 +9,11 @@ from typing import Optional, Tuple
 
 import keyring
 from keyring.errors import PasswordDeleteError
+from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.ui.credentials_window import CredentialsWindow
+
+_translate = QCoreApplication.translate
 
 
 def keyring_exists() -> bool:
@@ -81,9 +84,10 @@ def get_credentials_from_user(
         if not save_platform_in_keyring(
                 platform, cred_window.username, cred_window.password):
             cred_window.warn_user(
-                'Speichern im Keyring fehlgeschlagen!',
-                'Speichern des Passworts im Keyring war leider nicht '
-                'erfolgreich!')
+                _translate('p2p_credentials', 'Saving in keyring failed!'),
+                _translate(
+                    'p2p_credentials', 'Saving password in keyring was not '
+                    'successful!'))
 
     return cred_window.username, cred_window.password
 
@@ -121,7 +125,9 @@ def delete_platform_from_keyring(platform: str) -> bool:
         username = keyring.get_password(platform, 'username')
         if not username:
             raise RuntimeError(
-                '{0} wurde nicht im Keyring gefunden!'.format(platform))
+                _translate(
+                    'p2p_credentials', '{} was not found in keyring!').format(
+                        platform))
         keyring.delete_password(platform, username)
         keyring.delete_password(platform, 'username')
     except PasswordDeleteError:
@@ -146,11 +152,13 @@ def save_platform_in_keyring(
         RuntimeError: If username == 'username'
 
     """
-    # We use 'username' to save the username of the platform, thus it cannot be
-    # used as a "normal" username. This is only a hypothetical problem since
-    # P2P platforms use email addresses as usernames
+    # We use 'username' to save the user name of the platform, thus it cannot be
+    # used as a "normal" user name. This is only a hypothetical problem since
+    # P2P platforms use email addresses as user names
     if username == 'username':
-        raise RuntimeError('Benutzername "username" ist nicht erlaubt!')
+        raise RuntimeError(
+            _translate(
+                'p2p_credentials', 'User name "username" is not allowed!'))
 
     try:
         keyring.set_password(platform, 'username', username)

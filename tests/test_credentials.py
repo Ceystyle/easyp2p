@@ -128,8 +128,8 @@ class CredentialsTests(unittest.TestCase):
         self.assertEqual(username, 'TestUser')
         self.assertEqual(password, 'TestPass')
         mock_cw.warn_user.assert_called_once_with(
-            'Speichern im Keyring fehlgeschlagen!',
-            'Speichern des Passworts im Keyring war leider nicht erfolgreich!')
+            'Saving in keyring failed!',
+            'Saving password in keyring was not successful!')
 
     def test_get_credentials_if_in_keyring(self, mock_keyring):
         """Get credentials which exist in the keyring."""
