@@ -200,24 +200,172 @@
 <context>
     <name>P2PParser</name>
     <message>
-        <location filename="../../p2p_parser.py" line="117"/>
+        <location filename="../../p2p_parser.py" line="100"/>
         <source>{} parser: no account statement available!</source>
         <translation>{} Parser: kein Kontoauszug vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_parser.py" line="277"/>
+        <location filename="../../p2p_parser.py" line="259"/>
         <source>{0}: column {1} is missing in account statement!</source>
         <translation>{0}: Spalte {1} ist nicht im Kontoauszug vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_parser.py" line="344"/>
+        <location filename="../../p2p_parser.py" line="323"/>
         <source>Unknown file format during import:</source>
         <translation>Unbekanntes Dateiformat beim Import:</translation>
     </message>
     <message>
-        <location filename="../../p2p_parser.py" line="348"/>
+        <location filename="../../p2p_parser.py" line="326"/>
         <source>{} could not be found!</source>
         <translation>{} konnte nicht gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="34"/>
+        <source>Interest payments</source>
+        <translation>Zinszahlungen</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="35"/>
+        <source>Buyback interest payments</source>
+        <translation>Zinszahlungen aus Rückkäufen</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="37"/>
+        <source>Buybacks</source>
+        <translation>Rückkäufe</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="38"/>
+        <source>Investments</source>
+        <translation>Investitionen</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="40"/>
+        <source>Redemption payments</source>
+        <translation>Tilgungszahlungen</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="41"/>
+        <source>Late fee payments</source>
+        <translation>Verzugsgebühren</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="42"/>
+        <source>Deposit/Outpayment</source>
+        <translation>Ein-/Auszahlung</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="43"/>
+        <source>Defaults</source>
+        <translation>Ausfälle</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="44"/>
+        <source>Start balance</source>
+        <translation>Startguthaben</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="45"/>
+        <source>End balance</source>
+        <translation>Endguthaben</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="46"/>
+        <source>Total income</source>
+        <translation>Gesamteinkommen</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="49"/>
+        <source>Date</source>
+        <translation>Datum</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="50"/>
+        <source>Month</source>
+        <translation>Monat</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="51"/>
+        <source>Platform</source>
+        <translation>Plattform</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="52"/>
+        <source>Currency</source>
+        <translation>Währung</translation>
+    </message>
+</context>
+<context>
+    <name>P2PPlatform</name>
+    <message>
+        <location filename="../../p2p_platform.py" line="82"/>
+        <source>{}: no login URL found!</source>
+        <translation>{}: Login-URL konnte nicht gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="86"/>
+        <source>{}: no account statement URL found!</source>
+        <translation>{}: Kontoauszugs-URL konnte nicht gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="131"/>
+        <source>{}: no method for logout provided!</source>
+        <translation>{}: keine Logout-Methode übergeben!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="186"/>
+        <source>{}: loading the website failed!</source>
+        <translation>{}: Laden der Webseite ist fehlgeschlagen!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="210"/>
+        <source>{}: username or password fields could not befound on the login site!</source>
+        <translation type="obsolete">{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="216"/>
+        <source>{}: login was not successful. Are the credentials correct?</source>
+        <translation>{}: Login war nicht erfolgreich. Sind die Zugangsdaten korrekt?</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="245"/>
+        <source>{}: loading account statement page was not successful!</source>
+        <translation>{}: Kontoauszugsseite konnte nicht geladen werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="309"/>
+        <source>{}: logout was not successful!</source>
+        <translation>{}: Logout war nicht erfolgreich!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="492"/>
+        <source>{}: starting account statement generation failed!</source>
+        <translation>{}: Generierung des Kontoauszugs konnte nicht gestartet werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="498"/>
+        <source>{}: account statement generation took too long!</source>
+        <translation>{}: Generierung des Kontoauszugs hat zu lange gedauert!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="455"/>
+        <source>{}: invalid locator for calendar provided!</source>
+        <translation>{}: ungültiger Locator für Kalender übergeben!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="603"/>
+        <source>{}: starting download of account statement failed!</source>
+        <translation>{}: Download des Kontoauszugs konnte nicht gestartet werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="210"/>
+        <source>{}: username or password field could not befound on the login site!</source>
+        <translation>{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="650"/>
+        <source>Download directory {} is not empty!</source>
+        <translation>Downloadverzeichnis {} ist nicht leer!</translation>
     </message>
 </context>
 <context>
