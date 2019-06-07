@@ -11,10 +11,13 @@ single output format.
 """
 from datetime import date
 from pathlib import Path
-from typing import Mapping, Optional, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from PyQt5.QtCore import QCoreApplication
+
+_translate = QCoreApplication.translate
 
 
 class P2PParser:
@@ -28,25 +31,26 @@ class P2PParser:
     """
 
     # Define all necessary payment types
-    INTEREST_PAYMENT = 'Zinszahlungen'
-    BUYBACK_INTEREST_PAYMENT = 'Zinszahlungen aus Rückkäufen'
-    BUYBACK_PAYMENT = 'Rückkäufe'
-    INVESTMENT_PAYMENT = 'Investitionen'
-    IGNORE = 'Ignoriert'
-    REDEMPTION_PAYMENT = 'Tilgungszahlungen'
-    LATE_FEE_PAYMENT = 'Verzugsgebühren'
-    IN_OUT_PAYMENT = 'Ein-/Auszahlungen'
-    DEFAULTS = 'Ausfälle'
-    START_BALANCE_NAME = 'Startguthaben'
-    END_BALANCE_NAME = 'Endsaldo'
-    TOTAL_INCOME = 'Gesamteinnahmen'
+    INTEREST_PAYMENT = _translate('P2PParser', 'Interest payments')
+    BUYBACK_INTEREST_PAYMENT = _translate(
+        'P2PParser', 'Buyback interest payments')
+    BUYBACK_PAYMENT = _translate('P2PParser', 'Buybacks')
+    INVESTMENT_PAYMENT = _translate('P2PParser', 'Investments')
+    IGNORE = 'Ignored'
+    REDEMPTION_PAYMENT = _translate('P2PParser', 'Redemption payments')
+    LATE_FEE_PAYMENT = _translate('P2PParser', 'Late fee payments')
+    IN_OUT_PAYMENT = _translate('P2PParser', 'Deposit/Outpayment')
+    DEFAULTS = _translate('P2PParser', 'Defaults')
+    START_BALANCE_NAME = _translate('P2PParser', 'Start balance')
+    END_BALANCE_NAME = _translate('P2PParser', 'End balance')
+    TOTAL_INCOME = _translate('P2PParser', 'Total income')
 
     # Define additional column names
-    DATE = 'Datum'
-    MONTH = 'Monat'
-    PLATFORM = 'Plattform'
-    CURRENCY = 'Währung'
-    CF_TYPE = 'Cashflow-Typ'
+    DATE = _translate('P2PParser', 'Date')
+    MONTH = _translate('P2PParser', 'Month')
+    PLATFORM = _translate('P2PParser', 'Platform')
+    CURRENCY = _translate('P2PParser', 'Currency')
+    CF_TYPE = 'Cash flow type'
 
     # TARGET_COLUMNS are the columns which will be shown in the final result
     # file
@@ -93,8 +97,9 @@ class P2PParser:
 
         # Check if account statement exists
         if self.df is None:
-            raise RuntimeError(
-                '{0}-Parser: kein Kontoauszug vorhanden!'.format(self.name))
+            raise RuntimeError(_translate(
+                'P2PParser',
+                '{} parser: no account statement available!').format(self.name))
 
     def _calculate_total_income(self):
         """ Calculate total income for each row of the DataFrame """
@@ -251,9 +256,10 @@ class P2PParser:
             unknown_cf_types = self._map_cashflow_types(
                 cashflow_types, orig_cf_column)
         except KeyError as err:
-            raise RuntimeError(
-                '{0}: Spalte {1} ist nicht im Kontoauszug '
-                'vorhanden!'.format(self.name, str(err)))
+            raise RuntimeError(_translate(
+                'P2PParser',
+                '{0}: column {1} is missing in account statement!').format(
+                    self.name, str(err)))
 
         # If the platform does not explicitly report currencies assume that
         # currency is EUR
@@ -280,10 +286,9 @@ class P2PParser:
         self.df.set_index(
             [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
 
-        # Drop all unnecessary columns
-        for column in self.df.columns:
-            if column not in self.TARGET_COLUMNS:
-                self.df.drop(columns=column, inplace=True)
+        # Sort and drop all unnecessary columns
+        self.df = self.df[[
+            col for col in self.TARGET_COLUMNS if col in self.df.columns]]
 
         return unknown_cf_types
 
@@ -315,10 +320,10 @@ def get_df_from_file(
         elif file_format in ('.xlsx', '.xls'):
             df = pd.read_excel(input_file, header=header, skipfooter=skipfooter)
         else:
-            raise RuntimeError(
-                'Unbekanntes Dateiformat beim Import: ', input_file)
+            raise RuntimeError(_translate(
+                'P2PParser', 'Unknown file format during import:'), input_file)
     except FileNotFoundError:
-        raise RuntimeError(
-            '{0} konnte nicht gefunden werden!'.format(input_file))
+        raise RuntimeError(_translate(
+            'P2PParser', '{} could not be found!').format(input_file))
 
     return df

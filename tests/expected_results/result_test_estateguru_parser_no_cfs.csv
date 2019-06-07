@@ -1,2 +1,2 @@
-Plattform,Währung,Datum,Startguthaben,Endsaldo,Ein-/Auszahlungen,Investitionen,Tilgungszahlungen,Rückkäufe,Zinszahlungen,Zinszahlungen aus Rückkäufen,Verzugsgebühren,Ausfälle,Gesamteinnahmen
+Platform,Currency,Date,Start balance,End balance,Deposit/Outpayment,Investments,Redemption payments,Buybacks,Interest payments,Buyback interest payments,Late fee payments,Defaults,Total income
 Estateguru,EUR,2016-09-01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0

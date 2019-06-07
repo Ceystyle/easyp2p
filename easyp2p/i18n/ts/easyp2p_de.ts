@@ -198,6 +198,29 @@
     </message>
 </context>
 <context>
+    <name>P2PParser</name>
+    <message>
+        <location filename="../../p2p_parser.py" line="117"/>
+        <source>{} parser: no account statement available!</source>
+        <translation>{} Parser: kein Kontoauszug vorhanden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="277"/>
+        <source>{0}: column {1} is missing in account statement!</source>
+        <translation>{0}: Spalte {1} ist nicht im Kontoauszug vorhanden!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="344"/>
+        <source>Unknown file format during import:</source>
+        <translation>Unbekanntes Dateiformat beim Import:</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_parser.py" line="348"/>
+        <source>{} could not be found!</source>
+        <translation>{} konnte nicht gefunden werden!</translation>
+    </message>
+</context>
+<context>
     <name>SettingsWindow</name>
     <message>
         <location filename="../../ui/settings_window.ui" line="20"/>
@@ -369,12 +392,12 @@
         <translation>Speichern des Passworts im Keyring war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../../p2p_credentials.py" line="130"/>
+        <location filename="../../p2p_credentials.py" line="127"/>
         <source>{} was not found in keyring!</source>
         <translation>{} wurde nicht im Keyring gefunden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_credentials.py" line="163"/>
+        <location filename="../../p2p_credentials.py" line="159"/>
         <source>User name &quot;username&quot; is not allowed!</source>
         <translation>Benutzername &quot;username&quot; ist nicht erlaubt!</translation>
     </message>

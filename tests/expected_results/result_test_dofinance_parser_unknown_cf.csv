@@ -1,4 +1,4 @@
-Plattform,Datum,Währung,Ein-/Auszahlungen,Investitionen,Tilgungszahlungen,Zinszahlungen,Gesamteinnahmen
+Platform,Date,Currency,Deposit/Outpayment,Investments,Redemption payments,Interest payments,Total income
 DoFinance,2018-01-23,EUR,1050.0,-1050.0,0.0,0.0,0.0
 DoFinance,2018-01-25,EUR,10.5,-10.0,0.0,0.0,0.0
 DoFinance,2018-01-27,EUR,0.0,-10.0,10.0,0.0,0.0
