@@ -13,10 +13,13 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
+
+_translate = QCoreApplication.translate
 
 
 class Mintos:
@@ -85,18 +88,17 @@ class Mintos:
                         'overview-results')
                     df = pd.read_html(
                         cashflow_table.get_attribute("innerHTML"))[0]
-                except ValueError:
-                    raise RuntimeError(
-                        'Der Mintos-Kontoauszug konnte nicht erfolgreich '
-                        'generiert werden')
 
-                if self._no_cashflows(df):
-                    df = pd.DataFrame()
-                    df.to_excel(self.statement)
-                else:
-                    raise RuntimeError(
-                        'Der Mintos-Kontoauszug konnte nicht erfolgreich '
-                        'generiert werden')
+                    if self._no_cashflows(df):
+                        df = pd.DataFrame()
+                        df.to_excel(self.statement)
+                    else:
+                        raise ValueError
+                except ValueError:
+                    raise RuntimeError(_translate(
+                        'P2PPlatform',
+                        '{}: account statement generation failed!').format(
+                            self.name))
             else:
                 mintos.download_statement(
                     self.statement, (By.ID, 'export-button'))

@@ -12,10 +12,13 @@ from typing import Optional, Tuple
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
+
+_translate = QCoreApplication.translate
 
 
 class Twino:
@@ -111,15 +114,17 @@ class Twino:
 
         parser = P2PParser(self.name, self.date_range, self.statement, header=2)
 
-        # Create a new column for identifying cashflow types
+        # Create a new column for identifying cash flow types
         try:
-            parser.df['Twino_Cashflow-Typ'] = parser.df['Type'] + ' ' \
+            parser.df['Cash Flow Type'] = parser.df['Type'] + ' ' \
                 + parser.df['Description']
-        except KeyError:
-            raise RuntimeError(
-                'Twino: Cashflowspalte nicht im Kontoauszug vorhanden!')
+        except KeyError as err:
+            raise RuntimeError(_translate(
+                'P2PParser',
+                '{0}: column {1} is missing in account statement!').format(
+                    self.name, str(err)))
 
-        # Define mapping between Twino and easyp2p cashflow types and column
+        # Define mapping between Twino and easyp2p cash flow types and column
         # names
         cashflow_types = {
             'BUYBACK INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
@@ -137,6 +142,6 @@ class Twino:
 
         unknown_cf_types = parser.run(
             '%d.%m.%Y %H:%M', rename_columns, cashflow_types,
-            'Twino_Cashflow-Typ', 'Amount, EUR')
+            'Cash Flow Type', 'Amount, EUR')
 
         return parser.df, unknown_cf_types

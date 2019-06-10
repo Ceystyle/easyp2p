@@ -14,10 +14,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
+from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import P2PWebDriver
+
+_translate = QCoreApplication.translate
 
 
 class Robocash:
@@ -81,9 +84,9 @@ class Robocash:
             try:
                 driver.find_element_by_id('new_statement').click()
             except NoSuchElementException:
-                raise RuntimeError(
-                    'Generierung des Robocash-Kontoauszugs konnte nicht '
-                    'gestartet werden.')
+                raise RuntimeError(_translate(
+                    'P2PPlatform', '{}: starting account statement generation '
+                                   'failed!').format(self.name))
 
             robocash.generate_statement_direct(
                 self.date_range, (By.ID, 'date-after'),
@@ -103,9 +106,10 @@ class Robocash:
                 except TimeoutException:
                     wait += 1
                     if wait > 10:  # Roughly 10*delay seconds
-                        raise RuntimeError(
-                            'Generierung des Robocash-Kontoauszugs hat zu '
-                            'lange gedauert!')
+                        raise RuntimeError(_translate(
+                            'P2PPlatform',
+                            '{}: account statement generation took too '
+                            'long!').format(self.name))
 
             robocash.download_statement(
                 self.statement, (By.ID, 'download_statement'))

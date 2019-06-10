@@ -62,62 +62,62 @@
         <translation>Startdatum</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="68"/>
+        <location filename="../../ui/main_window.py" line="54"/>
         <source>Jan</source>
         <translation>Jan</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="69"/>
+        <location filename="../../ui/main_window.py" line="55"/>
         <source>Feb</source>
         <translation>Feb</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="70"/>
+        <location filename="../../ui/main_window.py" line="56"/>
         <source>Mar</source>
         <translation>Mär</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="71"/>
+        <location filename="../../ui/main_window.py" line="57"/>
         <source>Apr</source>
         <translation>Apr</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="72"/>
+        <location filename="../../ui/main_window.py" line="58"/>
         <source>May</source>
         <translation>Mai</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="73"/>
+        <location filename="../../ui/main_window.py" line="59"/>
         <source>Jun</source>
         <translation>Jun</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="74"/>
+        <location filename="../../ui/main_window.py" line="60"/>
         <source>Jul</source>
         <translation>Jul</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="75"/>
+        <location filename="../../ui/main_window.py" line="61"/>
         <source>Aug</source>
         <translation>Aug</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="76"/>
+        <location filename="../../ui/main_window.py" line="62"/>
         <source>Sep</source>
         <translation>Sep</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="77"/>
+        <location filename="../../ui/main_window.py" line="63"/>
         <source>Oct</source>
         <translation>Okt</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="78"/>
+        <location filename="../../ui/main_window.py" line="64"/>
         <source>Nov</source>
         <translation>Nov</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="79"/>
+        <location filename="../../ui/main_window.py" line="65"/>
         <source>Dec</source>
         <translation>Dez</translation>
     </message>
@@ -147,32 +147,32 @@
         <translation type="obsolete">P2P_Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="205"/>
+        <location filename="../../ui/main_window.py" line="191"/>
         <source>Choose output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="205"/>
+        <location filename="../../ui/main_window.py" line="191"/>
         <source>files</source>
         <translation>Dateien</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="245"/>
+        <location filename="../../ui/main_window.py" line="231"/>
         <source>Start date is after end date!</source>
         <translation>Startdatum liegt nach Enddatum!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="245"/>
+        <location filename="../../ui/main_window.py" line="231"/>
         <source>Start date must be before end date!</source>
         <translation>Startdatum muss vor dem Enddatum liegen!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="255"/>
+        <location filename="../../ui/main_window.py" line="241"/>
         <source>No P2P platform selected!</source>
         <translation>Keine P2P-Plattform ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="255"/>
+        <location filename="../../ui/main_window.py" line="241"/>
         <source>Please choose at least one P2P platform!</source>
         <translation>Bitte wähle mindestens eine P2P-Plattform aus!</translation>
     </message>
@@ -192,7 +192,7 @@
         <translation>&amp;Deutsch</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="150"/>
+        <location filename="../../ui/main_window.py" line="136"/>
         <source>P2P_Results_{0}-{1}.xlsx</source>
         <translation>P2P_Ergebnisse_{0}-{1}.xlsx</translation>
     </message>
@@ -366,6 +366,11 @@
         <location filename="../../p2p_platform.py" line="629"/>
         <source>Download directory {} is not empty!</source>
         <translation>Downloadverzeichnis {} ist nicht leer!</translation>
+    </message>
+    <message>
+        <location filename="../../platforms/mintos.py" line="98"/>
+        <source>{}: account statement generation failed!</source>
+        <translation>{}: Erstellung des Kontoauszugs ist fehlgeschlagen!</translation>
     </message>
 </context>
 <context>
