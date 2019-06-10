@@ -11,6 +11,9 @@ from selenium.common.exceptions import (
     NoSuchElementException, WebDriverException)
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
+from PyQt5.QtCore import QCoreApplication
+
+_translate = QCoreApplication.translate
 
 
 class P2PWebDriver(webdriver.Chrome):
@@ -23,8 +26,8 @@ class P2PWebDriver(webdriver.Chrome):
 
         Args:
             download_directory: Will be set as download directory for the
-                Chromedriver
-            headless: If True run Chromedriver in headless mode
+                ChromeDriver
+            headless: If True run ChromeDriver in headless mode
 
         """
         self.download_directory = download_directory
@@ -47,10 +50,18 @@ class P2PWebDriver(webdriver.Chrome):
                     options=options)
             else:
                 super().__init__(options=options)
-        except WebDriverException as err:
-            raise WebDriverNotFound(
-                'Chromedriver konnte nicht gefunden werden!\n'
-                'easyp2p wird beendet!\n', err)
+        except WebDriverException:
+            raise WebDriverNotFound(_translate(
+                'P2PWebDriver', 'ChromeDriver could not be found!\n\n') +
+                _translate(
+                    'P2PWebDriver', 'In Linux this can usually be fixed by:') +
+                '\n\n\tsudo apt-get install chromium-driver\n\n' +
+                _translate(
+                    'P2PWebDriver', 'In Windows ChromeDriver can be downloaded '
+                    'from:') +
+                '\n\nhttps://sites.google.com/a/chromium.org/chromedriver'
+                '/downloads\n\n' +
+                _translate('P2PWebDriver', 'easyp2p will be aborted now!'))
 
         if headless:
             # This is needed to allow downloads in headless mode

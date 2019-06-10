@@ -62,62 +62,62 @@
         <translation>Startdatum</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="54"/>
+        <location filename="../../ui/main_window.py" line="68"/>
         <source>Jan</source>
         <translation>Jan</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="55"/>
+        <location filename="../../ui/main_window.py" line="69"/>
         <source>Feb</source>
         <translation>Feb</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="56"/>
+        <location filename="../../ui/main_window.py" line="70"/>
         <source>Mar</source>
         <translation>Mär</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="57"/>
+        <location filename="../../ui/main_window.py" line="71"/>
         <source>Apr</source>
         <translation>Apr</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="58"/>
+        <location filename="../../ui/main_window.py" line="72"/>
         <source>May</source>
         <translation>Mai</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="59"/>
+        <location filename="../../ui/main_window.py" line="73"/>
         <source>Jun</source>
         <translation>Jun</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="60"/>
+        <location filename="../../ui/main_window.py" line="74"/>
         <source>Jul</source>
         <translation>Jul</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="61"/>
+        <location filename="../../ui/main_window.py" line="75"/>
         <source>Aug</source>
         <translation>Aug</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="62"/>
+        <location filename="../../ui/main_window.py" line="76"/>
         <source>Sep</source>
         <translation>Sep</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="63"/>
+        <location filename="../../ui/main_window.py" line="77"/>
         <source>Oct</source>
         <translation>Okt</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="64"/>
+        <location filename="../../ui/main_window.py" line="78"/>
         <source>Nov</source>
         <translation>Nov</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="65"/>
+        <location filename="../../ui/main_window.py" line="79"/>
         <source>Dec</source>
         <translation>Dez</translation>
     </message>
@@ -147,32 +147,32 @@
         <translation type="obsolete">P2P_Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="191"/>
+        <location filename="../../ui/main_window.py" line="205"/>
         <source>Choose output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="191"/>
+        <location filename="../../ui/main_window.py" line="205"/>
         <source>files</source>
         <translation>Dateien</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="231"/>
+        <location filename="../../ui/main_window.py" line="245"/>
         <source>Start date is after end date!</source>
         <translation>Startdatum liegt nach Enddatum!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="231"/>
+        <location filename="../../ui/main_window.py" line="245"/>
         <source>Start date must be before end date!</source>
         <translation>Startdatum muss vor dem Enddatum liegen!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="241"/>
+        <location filename="../../ui/main_window.py" line="255"/>
         <source>No P2P platform selected!</source>
         <translation>Keine P2P-Plattform ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="241"/>
+        <location filename="../../ui/main_window.py" line="255"/>
         <source>Please choose at least one P2P platform!</source>
         <translation>Bitte wähle mindestens eine P2P-Plattform aus!</translation>
     </message>
@@ -192,7 +192,7 @@
         <translation>&amp;Deutsch</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="136"/>
+        <location filename="../../ui/main_window.py" line="150"/>
         <source>P2P_Results_{0}-{1}.xlsx</source>
         <translation>P2P_Ergebnisse_{0}-{1}.xlsx</translation>
     </message>
@@ -303,17 +303,17 @@
         <translation>{}: Login-URL konnte nicht gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="86"/>
+        <location filename="../../p2p_platform.py" line="85"/>
         <source>{}: no account statement URL found!</source>
         <translation>{}: Kontoauszugs-URL konnte nicht gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="131"/>
+        <location filename="../../p2p_platform.py" line="127"/>
         <source>{}: no method for logout provided!</source>
         <translation>{}: keine Logout-Methode übergeben!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="186"/>
+        <location filename="../../p2p_platform.py" line="181"/>
         <source>{}: loading the website failed!</source>
         <translation>{}: Laden der Webseite ist fehlgeschlagen!</translation>
     </message>
@@ -323,49 +323,90 @@
         <translation type="obsolete">{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="216"/>
+        <location filename="../../p2p_platform.py" line="207"/>
         <source>{}: login was not successful. Are the credentials correct?</source>
         <translation>{}: Login war nicht erfolgreich. Sind die Zugangsdaten korrekt?</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="245"/>
+        <location filename="../../p2p_platform.py" line="235"/>
         <source>{}: loading account statement page was not successful!</source>
         <translation>{}: Kontoauszugsseite konnte nicht geladen werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="309"/>
+        <location filename="../../p2p_platform.py" line="297"/>
         <source>{}: logout was not successful!</source>
         <translation>{}: Logout war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="492"/>
+        <location filename="../../p2p_platform.py" line="475"/>
         <source>{}: starting account statement generation failed!</source>
         <translation>{}: Generierung des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="498"/>
+        <location filename="../../p2p_platform.py" line="479"/>
         <source>{}: account statement generation took too long!</source>
         <translation>{}: Generierung des Kontoauszugs hat zu lange gedauert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="455"/>
+        <location filename="../../p2p_platform.py" line="439"/>
         <source>{}: invalid locator for calendar provided!</source>
         <translation>{}: ungültiger Locator für Kalender übergeben!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="603"/>
+        <location filename="../../p2p_platform.py" line="583"/>
         <source>{}: starting download of account statement failed!</source>
         <translation>{}: Download des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="210"/>
+        <location filename="../../p2p_platform.py" line="203"/>
         <source>{}: username or password field could not befound on the login site!</source>
         <translation>{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="650"/>
+        <location filename="../../p2p_platform.py" line="629"/>
         <source>Download directory {} is not empty!</source>
         <translation>Downloadverzeichnis {} ist nicht leer!</translation>
+    </message>
+</context>
+<context>
+    <name>P2PWebDriver</name>
+    <message>
+        <location filename="../../p2p_webdriver.py" line="54"/>
+        <source>ChromeDriver could not be found!
+</source>
+        <translation type="obsolete">ChromeDriver konnte nicht gefunden werden!
+</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_webdriver.py" line="54"/>
+        <source>In Linux this can usually be fixed by
+</source>
+        <translation type="obsolete">Unter Linux kann dies durch folgenden Befehl behoben werden:
+</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_webdriver.py" line="54"/>
+        <source>easyp2p will be aborted now!</source>
+        <translation>easyp2p wird jetzt beendet!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_webdriver.py" line="54"/>
+        <source>In Linux this can usually be fixed by:</source>
+        <translation>In Linux kann das normalerweise behoben werden durch:</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_webdriver.py" line="54"/>
+        <source>In Windows ChromeDriver can be downloaded from:</source>
+        <translation>Unter Windows kann ChromeDriver von hier heruntergeladen werden:</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_webdriver.py" line="54"/>
+        <source>ChromeDriver could not be found!
+
+</source>
+        <translation>ChromeDriver konnte nicht gefunden werden!
+
+</translation>
     </message>
 </context>
 <context>
