@@ -241,7 +241,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(
                 self, _translate(
                     'MainWindow', 'No P2P platform selected!'),
-               _translate(
+                _translate(
                    'MainWindow',
                    'Please choose at least one P2P platform!'))
             return

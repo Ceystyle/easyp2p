@@ -98,8 +98,9 @@ class DownloadFinishedTests(unittest.TestCase):
         file = open(
             os.path.join(self.download_directory, 'test2.xlsx'), 'w+')
         file.close()
-        self.assertRaises(RuntimeError, p2p_platform._download_finished,
-            self.statement, self.download_directory)
+        self.assertRaises(
+            RuntimeError, p2p_platform._download_finished, self.statement,
+            self.download_directory)
         self.assertFalse(os.path.isfile(self.statement))
 
 

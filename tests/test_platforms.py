@@ -6,7 +6,7 @@
 from datetime import date
 import os
 import tempfile
-from typing import Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 import unittest
 
 import pandas as pd
@@ -76,7 +76,7 @@ class BasePlatformTests(unittest.TestCase):
     def run_parser_test(
             self, result_file: str, date_range: Tuple[date, date],
             input_file: str = None,
-            exp_unknown_cf_types: Sequence[str] = []) -> None:
+            exp_unknown_cf_types: Optional[Sequence[str]] = None) -> None:
         """
         Test the parser of the given platform.
 
@@ -102,8 +102,7 @@ class BasePlatformTests(unittest.TestCase):
 
         platform = self.Platform(date_range, statement_without_suffix)
         (df, unknown_cf_types) = platform.parse_statement()
-        # df.to_csv('tests/test_results/test_' + result_file + '.csv')
-        df.to_csv('tests/test_results/test_multicurrency.csv')
+        df.to_csv('tests/test_results/test_' + result_file + '.csv')
 
         df_exp = _get_expected_df(exp_result_file)
 
@@ -124,6 +123,8 @@ class BasePlatformTests(unittest.TestCase):
             show_diffs(df, df_exp)
             raise AssertionError(err)
 
+        if exp_unknown_cf_types is None:
+            exp_unknown_cf_types = []
         self.assertEqual(unknown_cf_types, exp_unknown_cf_types)
 
     def run_write_results(
@@ -147,8 +148,7 @@ class BasePlatformTests(unittest.TestCase):
             P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
             inplace=True)
         with tempfile.TemporaryDirectory() as temp_dir:
-            #output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
-            output_file = 'tests/test_results/test_write_results.xlsx'
+            output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
             write_results(df, output_file, date_range)
 
             for worksheet in [DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS]:
@@ -190,7 +190,7 @@ class BasePlatformTests(unittest.TestCase):
 
     def test_parse_statement_unknown_cf(self) -> None:
         """Test platform parser when unknown cash flow types are present."""
-        if self.unknown_cf_types == []:
+        if not self.unknown_cf_types:
             self.skipTest('No unknown cash flow types for this platform!')
         self.run_parser_test(
             '{}_parser_unknown_cf'.format(self.name.lower()), self.DATE_RANGE,

@@ -56,8 +56,9 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         if not_saved_platforms:
             platform, accepted = QInputDialog.getItem(
                 self, _translate('SettingsWindow', 'Choose P2P platform'),
-                _translate('SettingsWindow', 'For which P2P platform would '
-                    'you like to add credentials?'),
+                _translate(
+                    'SettingsWindow', 'For which P2P platform would you like '
+                    'to add credentials?'),
                 sorted(not_saved_platforms), 0, False)
         else:
             QMessageBox.information(

@@ -15,6 +15,7 @@ from easyp2p.ui.settings_window import SettingsWindow
 
 app = QApplication(sys.argv)
 
+
 @unittest.mock.patch('easyp2p.ui.settings_window.p2p_cred')
 class SettingsWindowTests(unittest.TestCase):
     """Test the settings window of easyp2p."""
