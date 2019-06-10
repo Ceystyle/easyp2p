@@ -9,10 +9,12 @@ import os
 from pathlib import Path
 from typing import Set, Tuple
 
-from PyQt5.QtCore import pyqtSlot, QCoreApplication, QTranslator, QLibraryInfo
+from PyQt5.QtCore import (
+    pyqtSlot, QCoreApplication, QLocale, QTranslator, QLibraryInfo)
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
+import easyp2p
 import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
@@ -33,6 +35,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._app = app
         self._translator = QTranslator()
         self._qttranslator = QTranslator()
+        self.set_language()
         # Initialize date combo boxes with previous month
         if date.today().month > 1:
             start_month = p2p_helper.nbr_to_short_month(
@@ -48,7 +51,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.settings = Settings(
             self.get_date_range(), self.line_edit_output_file.text())
 
-    def init_combo_boxes(self):
+    def init_combo_boxes(self) -> None:
         """Set the items for all date combo boxes."""
         month_list = [
             _translate('MainWindow', 'Jan'),
@@ -68,6 +71,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.combo_box_end_month.addItems(month_list)
         self.combo_box_start_year.addItems(year_list)
         self.combo_box_end_year.addItems(year_list)
+
+    def set_language(self, locale: str = None) -> None:
+        """
+        Translate GUI into language of locale.
+
+        Args:
+            locale: Locale into which the GUI must be translated. If None the
+                system locale will be used.
+
+        """
+        if not locale:
+            locale = QLocale().name()
+        if locale.startswith('de'):
+            self.action_english.setChecked(False)
+            self.action_german.setChecked(True)
+        else:
+            self.action_english.setChecked(True)
+            self.action_german.setChecked(False)
+        self._translator.load('easyp2p_' + locale, os.path.join(
+            easyp2p.__path__[0], 'i18n', 'ts'))
+        self._app.installTranslator(self._translator)
+        self._qttranslator.load(
+            'qtbase_' + locale, QLibraryInfo.location(
+                QLibraryInfo.TranslationsPath))
+        self._app.installTranslator(self._qttranslator)
+        self.retranslateUi(self)
 
     def set_date_range(
             self, start_month: str, start_year: str,
@@ -142,24 +171,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(bool)
     def on_action_german_triggered(self):
-        """_translate GUI to English."""
-        self.action_english.setChecked(False)
-        self.action_german.setChecked(True)
-        self._translator.load('easyp2p_de', 'easyp2p/i18n/ts')
-        self._app.installTranslator(self._translator)
-        self._qttranslator.load(
-            'qtbase_de', QLibraryInfo.location(QLibraryInfo.TranslationsPath))
-        self._app.installTranslator(self._qttranslator)
-        self.retranslateUi(self)
+        """Translate GUI to German."""
+        self.set_language('de_de')
 
     @pyqtSlot(bool)
     def on_action_english_triggered(self):
-        """_translate GUI to English."""
-        self.action_english.setChecked(True)
-        self.action_german.setChecked(False)
-        self._app.removeTranslator(self._translator)
-        self._app.removeTranslator(self._qttranslator)
-        self.retranslateUi(self)
+        """Translate GUI to English."""
+        self.set_language('en_US')
 
     @pyqtSlot(str)
     def on_combo_box_start_month_activated(self) -> None:
