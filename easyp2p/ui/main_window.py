@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018-19 Niko Sandschneider
 
-"""Module implementing MainWindow, the main window of easyp2p."""
+"""
+Application for downloading and presenting investment results for
+several people-to-people (P2P) lending platforms.
+
+"""
 
 import calendar
 from datetime import date
 import os
 from pathlib import Path
+import sys
 from typing import Set, Tuple
 
 from PyQt5.QtCore import (
@@ -22,6 +27,8 @@ from easyp2p.ui.settings_window import SettingsWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
 
 _translate = QCoreApplication.translate
+
+name = 'easyp2p'  # pylint: disable=invalid-name
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -278,3 +285,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         settings_window = SettingsWindow(
             self.get_platforms(False), self.settings)
         settings_window.exec_()
+
+
+def main():
+    """Open the main window of easyp2p."""
+    app = QApplication(sys.argv)
+    ui = MainWindow(app)  # pylint: disable=invalid-name
+    ui.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
