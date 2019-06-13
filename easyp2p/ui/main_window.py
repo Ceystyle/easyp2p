@@ -7,8 +7,7 @@ several people-to-people (P2P) lending platforms.
 
 """
 
-import calendar
-from datetime import date
+from datetime import date, timedelta
 import os
 from pathlib import Path
 import sys
@@ -20,7 +19,6 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QFileDialog, QLineEdit, QCheckBox, QMessageBox)
 
 import easyp2p
-import easyp2p.p2p_helper as p2p_helper
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
@@ -42,42 +40,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._app = app
         self._translator = QTranslator()
         self._qttranslator = QTranslator()
+        end_last_month = date.today().replace(day=1) - timedelta(days=1)
+        self.date_range = (end_last_month.replace(day=1), end_last_month)
         self.set_language()
-        # Initialize date combo boxes with previous month
-        if date.today().month > 1:
-            start_month = p2p_helper.nbr_to_short_month(
-                str(date.today().month - 1))
-            start_year = str(date.today().year)
-        else:
-            start_month = _translate('MainWindow', 'Dec')
-            start_year = str(date.today().year - 1)
-        self.init_combo_boxes()
-        self.set_date_range(start_month, start_year, start_month, start_year)
         self.output_file_changed = False
         self.set_output_file()
         self.settings = Settings(
             self.get_date_range(), self.line_edit_output_file.text())
 
-    def init_combo_boxes(self) -> None:
+    def init_date_combo_boxes(self) -> None:
         """Set the items for all date combo boxes."""
         month_list = [
-            _translate('MainWindow', 'Jan'),
-            _translate('MainWindow', 'Feb'),
-            _translate('MainWindow', 'Mar'),
-            _translate('MainWindow', 'Apr'),
-            _translate('MainWindow', 'May'),
-            _translate('MainWindow', 'Jun'),
-            _translate('MainWindow', 'Jul'),
-            _translate('MainWindow', 'Aug'),
-            _translate('MainWindow', 'Sep'),
-            _translate('MainWindow', 'Oct'),
-            _translate('MainWindow', 'Nov'),
-            _translate('MainWindow', 'Dec')]
+            QLocale(QLocale().name()).monthName(i, 1) for i in range(1, 13)]
         year_list = [str(year) for year in range(2010, date.today().year + 1)]
-        self.combo_box_start_month.addItems(month_list)
-        self.combo_box_end_month.addItems(month_list)
-        self.combo_box_start_year.addItems(year_list)
-        self.combo_box_end_year.addItems(year_list)
+        for combo_box in [self.combo_box_start_month, self.combo_box_end_month]:
+            combo_box.clear()
+            combo_box.addItems(month_list)
+        for combo_box in [self.combo_box_start_year, self.combo_box_end_year]:
+            combo_box.clear()
+            combo_box.addItems(year_list)
+        self.set_date_range(
+            month_list[self.date_range[0].month - 1],
+            str(self.date_range[0].year),
+            month_list[self.date_range[1].month - 1],
+            str(self.date_range[1].year))
 
     def set_language(self, locale: str = None) -> None:
         """
@@ -90,6 +76,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         if not locale:
             locale = QLocale().name()
+        QLocale.setDefault(QLocale(locale))
         if locale.startswith('de'):
             self.action_english.setChecked(False)
             self.action_german.setChecked(True)
@@ -104,6 +91,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 QLibraryInfo.TranslationsPath))
         self._app.installTranslator(self._qttranslator)
         self.retranslateUi(self)
+        self.init_date_combo_boxes()
 
     def set_date_range(
             self, start_month: str, start_year: str,
@@ -135,15 +123,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Date range (start_date, end_date)
 
         """
-        start_month = int(p2p_helper.short_month_to_nbr(
-            str(self.combo_box_start_month.currentText())))
-        start_year = int(self.combo_box_start_year.currentText())
-        end_month = int(p2p_helper.short_month_to_nbr(
-            str(self.combo_box_end_month.currentText())))
-        end_year = int(self.combo_box_end_year.currentText())
-        last_day_of_month = calendar.monthrange(end_year, end_month)[1]
-        return (date(start_year, start_month, 1),
-                date(end_year, end_month, last_day_of_month))
+        start_month = self.combo_box_start_month.currentText()
+        start_year = self.combo_box_start_year.currentText()
+        start_date = QLocale().toDate('1'+start_month+start_year, 'dMMMyyyy')
+        end_month = self.combo_box_end_month.currentText()
+        end_year = self.combo_box_end_year.currentText()
+        end_date = QLocale().toDate('1'+end_month+end_year, 'dMMMyyyy')
+        end_date.setDate(
+            end_date.year(), end_date.month(), end_date.daysInMonth())
+        return start_date.toPyDate(), end_date.toPyDate()
 
     def get_platforms(self, checked: bool = True) -> Set[str]:
         """
@@ -167,13 +155,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def set_output_file(self) -> None:
         """Helper method to set the name of the output file."""
-        date_range = self.get_date_range()
+        self.date_range = self.get_date_range()
         if not self.output_file_changed:
             output_file = os.path.join(
                 Path.home(),
                 _translate('MainWindow', 'P2P_Results_{0}-{1}.xlsx').format(
-                    date_range[0].strftime('%d%m%Y'),
-                    date_range[1].strftime('%d%m%Y')))
+                    self.date_range[0].strftime('%d%m%Y'),
+                    self.date_range[1].strftime('%d%m%Y')))
             QLineEdit.setText(self.line_edit_output_file, output_file)
 
     @pyqtSlot(bool)

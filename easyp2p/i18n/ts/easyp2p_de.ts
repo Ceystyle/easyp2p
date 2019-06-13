@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="de" sourcelanguage="en">
+<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="en">
 <context>
     <name>CredentialsWindow</name>
     <message>
@@ -64,62 +63,62 @@
     <message>
         <location filename="../../ui/main_window.py" line="54"/>
         <source>Jan</source>
-        <translation>Jan</translation>
+        <translation type="obsolete">Jan</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="55"/>
         <source>Feb</source>
-        <translation>Feb</translation>
+        <translation type="obsolete">Feb</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="56"/>
         <source>Mar</source>
-        <translation>Mär</translation>
+        <translation type="obsolete">Mär</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="57"/>
         <source>Apr</source>
-        <translation>Apr</translation>
+        <translation type="obsolete">Apr</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="58"/>
         <source>May</source>
-        <translation>Mai</translation>
+        <translation type="obsolete">Mai</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="59"/>
         <source>Jun</source>
-        <translation>Jun</translation>
+        <translation type="obsolete">Jun</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="60"/>
         <source>Jul</source>
-        <translation>Jul</translation>
+        <translation type="obsolete">Jul</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="61"/>
         <source>Aug</source>
-        <translation>Aug</translation>
+        <translation type="obsolete">Aug</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="62"/>
         <source>Sep</source>
-        <translation>Sep</translation>
+        <translation type="obsolete">Sep</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="63"/>
         <source>Oct</source>
-        <translation>Okt</translation>
+        <translation type="obsolete">Okt</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="64"/>
         <source>Nov</source>
-        <translation>Nov</translation>
+        <translation type="obsolete">Nov</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="65"/>
         <source>Dec</source>
-        <translation>Dez</translation>
+        <translation type="obsolete">Dez</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.ui" line="209"/>
@@ -147,32 +146,32 @@
         <translation type="obsolete">P2P_Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="191"/>
+        <location filename="../../ui/main_window.py" line="204"/>
         <source>Choose output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="191"/>
+        <location filename="../../ui/main_window.py" line="204"/>
         <source>files</source>
         <translation>Dateien</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="231"/>
+        <location filename="../../ui/main_window.py" line="244"/>
         <source>Start date is after end date!</source>
         <translation>Startdatum liegt nach Enddatum!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="231"/>
+        <location filename="../../ui/main_window.py" line="244"/>
         <source>Start date must be before end date!</source>
         <translation>Startdatum muss vor dem Enddatum liegen!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="241"/>
+        <location filename="../../ui/main_window.py" line="254"/>
         <source>No P2P platform selected!</source>
         <translation>Keine P2P-Plattform ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="241"/>
+        <location filename="../../ui/main_window.py" line="254"/>
         <source>Please choose at least one P2P platform!</source>
         <translation>Bitte wähle mindestens eine P2P-Plattform aus!</translation>
     </message>
@@ -192,7 +191,7 @@
         <translation>&amp;Deutsch</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="136"/>
+        <location filename="../../ui/main_window.py" line="160"/>
         <source>P2P_Results_{0}-{1}.xlsx</source>
         <translation>P2P_Ergebnisse_{0}-{1}.xlsx</translation>
     </message>
@@ -462,32 +461,32 @@
         <translation>Für welche P2P-Plattform sollen Zugangsdaten hinzugefügt werden?</translation>
     </message>
     <message>
-        <location filename="../../ui/settings_window.py" line="63"/>
+        <location filename="../../ui/settings_window.py" line="64"/>
         <source>No other P2P platforms available!</source>
         <translation>Keine weiteren P2P-Plattformen verfügbar!</translation>
     </message>
     <message>
-        <location filename="../../ui/settings_window.py" line="63"/>
+        <location filename="../../ui/settings_window.py" line="64"/>
         <source>Credentials for all supported P2P platforms are already present!</source>
         <translation>Zugangsdaten für alle unterstützten P2P-Plattformen sind bereits vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../ui/settings_window.py" line="88"/>
+        <location filename="../../ui/settings_window.py" line="89"/>
         <source>Delete credentials?</source>
         <translation>Zugangsdaten löschen?</translation>
     </message>
     <message>
-        <location filename="../../ui/settings_window.py" line="95"/>
+        <location filename="../../ui/settings_window.py" line="96"/>
         <source>Delete not successful!</source>
         <translation>Löschen nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../../ui/settings_window.py" line="95"/>
+        <location filename="../../ui/settings_window.py" line="96"/>
         <source> credentials could not be deleted!</source>
         <translation> Zugangsdaten konnten nicht gelöscht werden!</translation>
     </message>
     <message>
-        <location filename="../../ui/settings_window.py" line="88"/>
+        <location filename="../../ui/settings_window.py" line="89"/>
         <source>Really delete credentials for {}?</source>
         <translation>Zugangsdaten für {} wirklich löschen?</translation>
     </message>
