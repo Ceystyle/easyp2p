@@ -15,7 +15,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
-from easyp2p.p2p_helper import nbr_to_short_month
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_webdriver import (
@@ -70,6 +69,13 @@ class Bondora:
                 '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'),
         }
 
+        # Use a dict to handle nbr to short name conversion, so we do not have
+        # to rely on English locale to be installed
+        map_nbr_to_short_month = {
+            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May',
+            '06': 'Jun', '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct',
+            '11': 'Nov', '12': 'Dec'}
+
         with P2PPlatform(
                 self.name, driver, urls,
                 EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
@@ -82,9 +88,10 @@ class Bondora:
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 
             # Change the date values to the given start and end dates
-            start_month = nbr_to_short_month(
-                self.date_range[0].strftime('%m'))
-            end_month = nbr_to_short_month(self.date_range[1].strftime('%m'))
+            start_month = map_nbr_to_short_month[
+                self.date_range[0].strftime('%m')]
+            end_month = map_nbr_to_short_month[
+                self.date_range[1].strftime('%m')]
             select = Select(bondora.driver.find_element_by_id('StartYear'))
             select.select_by_visible_text(str(self.date_range[0].year))
             select = Select(bondora.driver.find_element_by_id('StartMonth'))
