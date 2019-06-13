@@ -3,24 +3,15 @@
 
 """Module containing all configurable settings for easyp2p."""
 
+from dataclasses import dataclass
 from datetime import date
-from typing import Tuple
+from typing import Optional, Set, Tuple
 
 
+@dataclass
 class Settings:
-
     """A class to store all settings of easyp2p."""
-
-    def __init__(self, date_range: Tuple[date, date], output_file: str) -> None:
-        """
-        Initialize all easyp2p settings.
-
-        date_range: Date range for which to evaluate investment results.
-        output_file: File name including path where the final results should
-            be saved.
-
-        """
-        self.platforms = set()
-        self.date_range = date_range
-        self.output_file = output_file
-        self.headless = True
+    date_range: Tuple[date, date]
+    output_file: str
+    headless: bool = True
+    platforms: Optional[Set[str]] = None

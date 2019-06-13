@@ -271,8 +271,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                    'Please choose at least one P2P platform!'))
             return
 
-        self.settings.date_range = self.get_date_range()
-        self.settings.platforms = self.get_platforms()
+        self.settings.date_range = date_range
+        self.settings.platforms = platforms
         self.settings.output_file = self.line_edit_output_file.text()
 
         # Open progress window
