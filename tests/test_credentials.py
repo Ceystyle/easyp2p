@@ -145,7 +145,14 @@ class CredentialsTests(unittest.TestCase):
             self, mock_user_credentials, mock_keyring):
         """Get credentials which do not exist in the keyring."""
         mock_keyring.get_keyring.return_value = True
-        mock_keyring.get_password.return_value = None
+        return_values = {'username': None}
+
+        def side_effect(_, arg):
+            if arg is None:
+                raise TypeError('NoneType instead of str')
+            return return_values[arg]
+
+        mock_keyring.get_password.side_effect = side_effect
         mock_user_credentials.return_value = ('TestUser', 'TestPass')
         credentials = get_credentials('TestPlatform')
         self.assertEqual(credentials[0], 'TestUser')

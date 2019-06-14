@@ -51,7 +51,8 @@ def get_credentials(
 
     if keyring.get_keyring():
         username = keyring.get_password(platform, 'username')
-        password = keyring.get_password(platform, username)
+        if username is not None:
+            password = keyring.get_password(platform, username)
 
     if not username or not password and ask_user:
         (username, password) = get_credentials_from_user(platform)
