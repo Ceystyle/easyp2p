@@ -246,6 +246,46 @@ class MainWindowTests(unittest.TestCase):
         mock_dialog.assert_called_once_with(
             self.form.get_platforms(False), self.form.settings)
 
+    def test_change_language_to_german(self) -> None:
+        """Test changing the language to German."""
+        self.form.action_german.trigger()
+        all_months = {
+            self.form.combo_box_start_month.itemText(i) for i in
+            range(self.form.combo_box_start_month.count())}
+        all_months_expected = {
+            QLocale('de_de').monthName(i, 1) for i in range(1, 13)}
+        self.assertEqual(self.form.groupBox_start_date.title(), 'Startdatum')
+        self.assertEqual(all_months, all_months_expected)
+
+    def test_change_language_to_german_to_english(self) -> None:
+        """Test changing the language to German and then back to English."""
+        self.form.action_german.trigger()
+        self.form.action_english.trigger()
+        all_months = {
+            self.form.combo_box_start_month.itemText(i) for i in
+            range(self.form.combo_box_start_month.count())}
+        all_months_expected = {
+            QLocale('en_US').monthName(i, 1) for i in range(1, 13)}
+        self.assertEqual(self.form.groupBox_start_date.title(), 'Start date')
+        self.assertEqual(all_months, all_months_expected)
+
+    def test_change_language_to_german_after_date_update(self) -> None:
+        """
+        Test changing the language to German if the dates have been changed.
+        """
+        self.set_date_combo_boxes(4, 7, 11, 8)
+        self.form.action_german.trigger()
+        self.assertEqual(
+            QLocale('de_de').monthName(5, 1),
+            self.form.combo_box_start_month.currentText())
+        self.assertEqual(
+            '2017', self.form.combo_box_start_year.currentText())
+        self.assertEqual(
+            QLocale('de_de').monthName(12, 1),
+            self.form.combo_box_end_month.currentText())
+        self.assertEqual(
+            '2018', self.form.combo_box_end_year.currentText())
+
 
 if __name__ == "__main__":
     runner = unittest.TextTestRunner(verbosity=3)
