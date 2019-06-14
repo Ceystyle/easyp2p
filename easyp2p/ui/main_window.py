@@ -46,24 +46,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.output_file_changed = False
         self.set_output_file()
         self.settings = Settings(
-            self.get_date_range(), self.line_edit_output_file.text())
+            self.date_range, self.line_edit_output_file.text())
 
     def init_date_combo_boxes(self) -> None:
         """Set the items for all date combo boxes."""
         month_list = [
             QLocale(QLocale().name()).monthName(i, 1) for i in range(1, 13)]
         year_list = [str(year) for year in range(2010, date.today().year + 1)]
-        for combo_box in [self.combo_box_start_month, self.combo_box_end_month]:
+        for i, combo_box in zip(
+                range(2),
+                [self.combo_box_start_month, self.combo_box_end_month]):
             combo_box.clear()
             combo_box.addItems(month_list)
-        for combo_box in [self.combo_box_start_year, self.combo_box_end_year]:
+            combo_box.setCurrentIndex(self.date_range[i].month - 1)
+        for i, combo_box in zip(
+                range(2), [self.combo_box_start_year, self.combo_box_end_year]):
             combo_box.clear()
             combo_box.addItems(year_list)
-        self.set_date_range(
-            month_list[self.date_range[0].month - 1],
-            str(self.date_range[0].year),
-            month_list[self.date_range[1].month - 1],
-            str(self.date_range[1].year))
+            combo_box.setCurrentIndex(self.date_range[i].year - 2010)
 
     def set_language(self, locale: str = None) -> None:
         """
@@ -93,36 +93,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.retranslateUi(self)
         self.init_date_combo_boxes()
 
-    def set_date_range(
-            self, start_month: str, start_year: str,
-            end_month: str, end_year: str) -> None:
-        """
-        Set start and end dates in the combo boxes.
-
-        Args:
-            start_month: Start month
-            start_year: Start year
-            end_month: End month
-            end_year: End year
-
-        """
-        self.combo_box_start_month.setCurrentIndex(
-            self.combo_box_start_month.findText(start_month))
-        self.combo_box_start_year.setCurrentIndex(
-            self.combo_box_start_year.findText(start_year))
-        self.combo_box_end_month.setCurrentIndex(
-            self.combo_box_end_month.findText(end_month))
-        self.combo_box_end_year.setCurrentIndex(
-            self.combo_box_end_year.findText(end_year))
-
-    def get_date_range(self) -> Tuple[date, date]:
-        """
-        Get currently selected date range from combo boxes.
-
-        Returns:
-            Date range (start_date, end_date)
-
-        """
+    def set_date_range(self) -> None:
+        """Set currently in combo boxes selected date range."""
         start_month = self.combo_box_start_month.currentText()
         start_year = self.combo_box_start_year.currentText()
         start_date = QLocale().toDate('1'+start_month+start_year, 'dMMMyyyy')
@@ -131,7 +103,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         end_date = QLocale().toDate('1'+end_month+end_year, 'dMMMyyyy')
         end_date.setDate(
             end_date.year(), end_date.month(), end_date.daysInMonth())
-        return start_date.toPyDate(), end_date.toPyDate()
+        self.date_range = (start_date.toPyDate(), end_date.toPyDate())
+        self.set_output_file()
 
     def get_platforms(self, checked: bool = True) -> Set[str]:
         """
@@ -155,7 +128,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def set_output_file(self) -> None:
         """Helper method to set the name of the output file."""
-        self.date_range = self.get_date_range()
         if not self.output_file_changed:
             output_file = os.path.join(
                 Path.home(),
@@ -177,22 +149,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(str)
     def on_combo_box_start_month_activated(self) -> None:
         """Update output file if user changed start month in the combo box."""
-        self.set_output_file()
+        self.set_date_range()
 
     @pyqtSlot(str)
     def on_combo_box_start_year_activated(self) -> None:
         """Update output file if user changed start year in the combo box."""
-        self.set_output_file()
+        self.set_date_range()
 
     @pyqtSlot(str)
     def on_combo_box_end_month_activated(self) -> None:
         """Update output file if user changed end month in the combo box."""
-        self.set_output_file()
+        self.set_date_range()
 
     @pyqtSlot(str)
     def on_combo_box_end_year_activated(self) -> None:
         """Update output file if user changed end year in the combo box."""
-        self.set_output_file()
+        self.set_date_range()
 
     @pyqtSlot()
     def on_push_button_file_chooser_clicked(self) -> None:
@@ -236,11 +208,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Progress is tracked in ProgressWindow.
 
         """
-        date_range = self.get_date_range()
         platforms = self.get_platforms()
 
         # Check that start date is before end date
-        if date_range[0] > date_range[1]:
+        if self.date_range[0] > self.date_range[1]:
             QMessageBox.warning(
                 self,
                 _translate('MainWindow', 'Start date is after end date!'),
@@ -259,7 +230,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                    'Please choose at least one P2P platform!'))
             return
 
-        self.settings.date_range = date_range
+        self.settings.date_range = self.date_range
         self.settings.platforms = platforms
         self.settings.output_file = self.line_edit_output_file.text()
 

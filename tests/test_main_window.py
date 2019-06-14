@@ -4,12 +4,14 @@
 """Module containing all tests for the main window of easyp2p."""
 
 import calendar
+from datetime import timedelta
 import os
 import sys
 import unittest.mock
 from datetime import date
 from pathlib import Path
 
+from PyQt5.QtCore import QLocale
 from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
 
 from easyp2p.ui.main_window import MainWindow
@@ -26,6 +28,25 @@ class MainWindowTests(unittest.TestCase):
         """Create the GUI."""
         self.form = MainWindow(APP)
 
+    def set_date_combo_boxes(
+            self, start_month: int, start_year: int, end_month: int,
+            end_year: int) -> None:
+        """
+        Helper method to set the indices of the date combo boxes
+
+        Args:
+            start_month: Index of start month combo box entry.
+            start_year: Index of start year combo box entry.
+            end_month: Index of end month combo box entry.
+            end_year: Index of end year combo box entry.
+
+        """
+        self.form.combo_box_start_month.setCurrentIndex(start_month)
+        self.form.combo_box_start_year.setCurrentIndex(start_year)
+        self.form.combo_box_end_month.setCurrentIndex(end_month)
+        self.form.combo_box_end_year.setCurrentIndex(end_year)
+        self.form.on_combo_box_start_year_activated()
+
     def test_defaults(self) -> None:
         """Test GUI in default state."""
 
@@ -33,31 +54,32 @@ class MainWindowTests(unittest.TestCase):
         for check_box in self.form.group_box_platforms.findChildren(QCheckBox):
             self.assertFalse(check_box.isChecked())
 
+        # Check if date_range is correct
+        end_last_month = date.today().replace(day=1) - timedelta(days=1)
+        date_range = (end_last_month.replace(day=1), end_last_month)
+        self.assertEqual(date_range, self.form.date_range)
+
+        # Check if date combo boxes are correct
+        self.assertEqual(
+            QLocale().monthName(date_range[0].month, 1),
+            self.form.combo_box_start_month.currentText())
+        self.assertEqual(
+            str(date_range[0].year),
+            self.form.combo_box_start_year.currentText())
+        self.assertEqual(
+            QLocale().monthName(date_range[1].month, 1),
+            self.form.combo_box_end_month.currentText())
+        self.assertEqual(
+            str(date_range[1].year),
+            self.form.combo_box_end_year.currentText())
+
         # Check if output file name is set correctly
-        date_range = self.form.get_date_range()
+        # date_range = self.form.get_date_range()
         self.assertEqual(
             self.form.line_edit_output_file.text(), os.path.join(
                 Path.home(), 'P2P_Results_{0}-{1}.xlsx'.format(
                     date_range[0].strftime('%d%m%Y'),
                     date_range[1].strftime('%d%m%Y'))))
-
-        # Check if combo boxes are set correctly
-        date_range = self.form.get_date_range()
-        today = date.today()
-        if today.month > 1:
-            self.assertEqual(
-                date_range, (date(today.year, today.month - 1, 1), date(
-                    today.year, today.month - 1,
-                    calendar.monthrange(today.year, today.month - 1)[1])))
-        else:
-            self.assertEqual(date_range, (date(today.year - 1, 12, 1), date(
-                today.year - 1, 12, 31)))
-
-    def test_set_get_date_range(self):
-        """Test set and get date range methods."""
-        self.form.set_date_range('Feb', '2014', 'Nov', '2017')
-        date_range = self.form.get_date_range()
-        self.assertEqual(date_range, (date(2014, 2, 1), date(2017, 11, 30)))
 
     def test_select_all_platforms(self) -> None:
         """Test the Select All Platforms checkbox."""
@@ -122,23 +144,22 @@ class MainWindowTests(unittest.TestCase):
         """Test output file name after a date change."""
         old_output_file = self.form.line_edit_output_file.text()
 
-        # Change start and/or end date
-        self.form.set_date_range('Feb', '2017', 'Sep', '2017')
-        self.form.on_combo_box_start_month_activated()
+        # Change start and end date
+        self.set_date_combo_boxes(4, 0, 10, 5)
 
         new_output_file = self.form.line_edit_output_file.text()
         self.assertNotEqual(new_output_file, old_output_file)
-        self.assertEqual(new_output_file, os.path.join(
-            Path.home(), 'P2P_Results_01022017-30092017.xlsx'))
+        self.assertEqual(
+            os.path.join(Path.home(), 'P2P_Results_01052010-30112015.xlsx'),
+            new_output_file)
 
     def test_output_file_on_date_change_after_user_change(self) -> None:
         """Test output file after date change if user already changed file."""
         QLineEdit.setText(self.form.line_edit_output_file, 'Test.xlsx')
         self.form.output_file_changed = True
 
-        # Change start and/or end date
-        self.form.set_date_range('Feb', '2017', 'Sep', '2017')
-        self.form.on_combo_box_start_month_activated()
+        # Change start and end date
+        self.set_date_combo_boxes(4, 0, 10, 5)
 
         # Check that the output file name was not changed
         self.assertEqual(self.form.line_edit_output_file.text(), 'Test.xlsx')
@@ -161,7 +182,7 @@ class MainWindowTests(unittest.TestCase):
     def test_end_date_before_start_date(
             self, mock_warning, mock_dialog) -> None:
         """Test clicking start with end date set before start date."""
-        self.form.set_date_range('Feb', '2017', 'Sep', '2016')
+        self.set_date_combo_boxes(5, 6, 11, 5)
         self.form.push_button_start.click()
 
         # Check that QMessageBox was opened and ProgressWindow was not
@@ -175,7 +196,7 @@ class MainWindowTests(unittest.TestCase):
     def test_push_start_button_with_bondora_selected(self, mock_dialog) -> None:
         """Test pushing start button after selecting Bondora."""
         self.form.check_box_bondora.setChecked(True)
-        self.form.set_date_range('Sep', '2018', 'Feb', '2019')
+        self.set_date_combo_boxes(8, 8, 1, 9)
         QLineEdit.setText(self.form.line_edit_output_file, 'Test.xlsx')
         self.form.push_button_start.click()
 
@@ -195,7 +216,7 @@ class MainWindowTests(unittest.TestCase):
         """
         Test push start button with increasing number of selected platforms.
         """
-        self.form.set_date_range('Sep', '2018', 'Feb', '2019')
+        self.set_date_combo_boxes(8, 8, 1, 9)
         QLineEdit.setText(self.form.line_edit_output_file, 'Test.xlsx')
 
         selected_platforms = set()
