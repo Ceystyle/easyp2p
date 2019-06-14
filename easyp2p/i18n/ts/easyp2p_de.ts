@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="en">
+<!DOCTYPE TS>
+<TS version="2.1" language="de" sourcelanguage="en">
 <context>
     <name>CredentialsWindow</name>
     <message>
@@ -146,32 +147,32 @@
         <translation type="obsolete">P2P_Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="204"/>
+        <location filename="../../ui/main_window.py" line="176"/>
         <source>Choose output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="204"/>
+        <location filename="../../ui/main_window.py" line="176"/>
         <source>files</source>
         <translation>Dateien</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="244"/>
+        <location filename="../../ui/main_window.py" line="215"/>
         <source>Start date is after end date!</source>
         <translation>Startdatum liegt nach Enddatum!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="244"/>
+        <location filename="../../ui/main_window.py" line="215"/>
         <source>Start date must be before end date!</source>
         <translation>Startdatum muss vor dem Enddatum liegen!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="254"/>
+        <location filename="../../ui/main_window.py" line="225"/>
         <source>No P2P platform selected!</source>
         <translation>Keine P2P-Plattform ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="254"/>
+        <location filename="../../ui/main_window.py" line="225"/>
         <source>Please choose at least one P2P platform!</source>
         <translation>Bitte wähle mindestens eine P2P-Plattform aus!</translation>
     </message>
@@ -191,7 +192,7 @@
         <translation>&amp;Deutsch</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="160"/>
+        <location filename="../../ui/main_window.py" line="132"/>
         <source>P2P_Results_{0}-{1}.xlsx</source>
         <translation>P2P_Ergebnisse_{0}-{1}.xlsx</translation>
     </message>
@@ -414,6 +415,14 @@
     </message>
 </context>
 <context>
+    <name>ProgressWindow</name>
+    <message>
+        <location filename="../../ui/progress_window.ui" line="14"/>
+        <source>Progress</source>
+        <translation>Fortschritt</translation>
+    </message>
+</context>
+<context>
     <name>SettingsWindow</name>
     <message>
         <location filename="../../ui/settings_window.ui" line="20"/>
@@ -567,7 +576,7 @@
         <translation>Gesamtergebnisse</translation>
     </message>
     <message>
-        <location filename="../../excel_writer.py" line="56"/>
+        <location filename="../../excel_writer.py" line="60"/>
         <source>Writing results to Excel was not successful! Column {} is missing!</source>
         <translation>Schreiben der Ergebnisse nach Excel war nicht erfolgreich! Spalte {} ist nicht vorhanden!</translation>
     </message>
@@ -575,22 +584,22 @@
 <context>
     <name>p2p_credentials</name>
     <message>
-        <location filename="../../p2p_credentials.py" line="86"/>
+        <location filename="../../p2p_credentials.py" line="87"/>
         <source>Saving in keyring failed!</source>
         <translation>Speichern im Keyring fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../../p2p_credentials.py" line="86"/>
+        <location filename="../../p2p_credentials.py" line="87"/>
         <source>Saving password in keyring was not successful!</source>
         <translation>Speichern des Passworts im Keyring war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../../p2p_credentials.py" line="127"/>
+        <location filename="../../p2p_credentials.py" line="128"/>
         <source>{} was not found in keyring!</source>
         <translation>{} wurde nicht im Keyring gefunden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_credentials.py" line="159"/>
+        <location filename="../../p2p_credentials.py" line="160"/>
         <source>User name &quot;username&quot; is not allowed!</source>
         <translation>Benutzername &quot;username&quot; ist nicht erlaubt!</translation>
     </message>

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">easyp2p</string>
+   <string>Progress</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>

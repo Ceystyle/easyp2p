@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/progress_window.ui'
+# Form implementation generated from reading ui file 'progress_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.1
 #
@@ -13,7 +13,6 @@ class Ui_ProgressWindow(object):
     def setupUi(self, ProgressWindow):
         ProgressWindow.setObjectName("ProgressWindow")
         ProgressWindow.resize(412, 286)
-        ProgressWindow.setWindowTitle("easyp2p")
         ProgressWindow.setSizeGripEnabled(True)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(ProgressWindow)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -42,6 +41,7 @@ class Ui_ProgressWindow(object):
         QtCore.QMetaObject.connectSlotsByName(ProgressWindow)
 
     def retranslateUi(self, ProgressWindow):
-        pass
+        _translate = QtCore.QCoreApplication.translate
+        ProgressWindow.setWindowTitle(_translate("ProgressWindow", "Progress"))
 
 
