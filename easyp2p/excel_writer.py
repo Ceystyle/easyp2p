@@ -46,6 +46,10 @@ def write_results(
             in df_result.
 
     """
+    # Check if there were any results
+    if df_result.empty:
+        return False
+
     # Make a copy to prevent changing the original DataFrame
     df_result = df_result.copy()
     df_result.reset_index(inplace=True)
