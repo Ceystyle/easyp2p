@@ -266,6 +266,16 @@ class BondoraTests(BasePlatformTests):
             RESULT_PREFIX + 'write_results_all_missing_month.xlsx',
             self.DATE_RANGE_MISSING_MONTH)
 
+    def test_write_results_no_results(self):
+        """Test write_results if there were no results."""
+        df = get_df_from_file(INPUT_PREFIX + 'write_results_no_results.csv')
+        # df.set_index([
+        #     P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
+        #     inplace=True)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
+            self.assertFalse(write_results(df, output_file, self.DATE_RANGE))
+
 
 class DoFinanceTests(BasePlatformTests):
 
