@@ -1,12 +1,15 @@
 # easyp2p
 
-## Überblick
+[German README](README_de.md)
 
-easyp2p ist ein Python-Tool um automatisiert Daten von verschiedenen P2P-Investitionsplattformen herunterzuladen und diese in einem einheitlichen Format darzustellen.
-Das Tool besitzt eine einfache Benutzeroberfläche, in der die gewünschten Plattformen und der Berichtszeitraum festgelegt werden können. Die Ergebnisse (Zinszahlungen,
-Tilungszahlungen usw.) werden in Form einer Excel-Tabelle für den gesamten Zeitraum und pro Monat ausgegeben, so dass man unter anderem einen schnellen Überblick über
-die monatlichen Einnahmen aus P2P-Investitionen erhält.  
-Momentan werden folgende P2P-Plattformen unterstützt:
+## Overview
+
+easyp2p is a Python tool for downloading and aggregating account statements 
+from several people-to-people (P2P) investment platforms. The tool has a simple
+graphical user interface in which the platforms and the date range of interest
+can be selected. The investment results (interest payments, redemptions, ...)
+will be written to an Excel file on a daily, monthly and total basis.
+Currently the following P2P platforms are supported:
 
 * Bondora
 * DoFinance
@@ -19,42 +22,39 @@ Momentan werden folgende P2P-Plattformen unterstützt:
 * Swaper
 * Twino
 
-## Warum easyp2p?
+## Why easyp2p?
 
-Bei der Investition in P2P-Plattformen handelt es sich um eine riskante Geldanlage. Daher sollte keinesfalls ein zu großer Betrag in eine einzelne Plattform investiert
-werden. Wie bei jeder Geldanlage gilt: nicht alle Eier in einen Korb, Diversifikation ist wichtig! Allerdings wird es mit einer zunehmenden Anzahl von Plattformen auch
-gleichzeitig schwieriger einen Überblick über den tatsächlichen Verdienst zu behalten. Ist man beispielsweise auf zehn verschiedenen Plattformen aktiv und möchte einen
-monatlichen Überblick über erhaltene Zinszahlungen muss man sich auf allen zehn Plattformen einloggen, sich zum jeweiligen Kontoauszug durchklicken, diesen herunterladen
-und anschließend händisch die Ergebnisse zusammen kopieren, da natürlich alle Plattformen ihr ganz eigenes Kontoauszugsformat haben. An dieser Stelle kommt easyp2p ins
-Spiel, da es diesen Prozess komplett automatisiert und man mit wenigen Klicks einen Überblick über alle Zahlungen für beliebige Zeiträume erhält.
+Investing money in P2P platforms involves significant risks. Thus the saying
+"Don't put all your eggs in one basket" is even more true than for other asset
+classes and investments should be split across more than just one platform.
+However, that makes it more difficult to track the actual investment
+performance since you need to log into all the platforms, download account
+statements and afterwards manually aggregate them. easyp2p provides a fully
+automated solution to this problem.
 
-## Voraussetzungen
+## Prerequisites
 
-Um easyp2p verwenden zu können sind Zugangsdaten zu mindestens einer der unterstützten P2P-Plattformen erforderlich.
+To use easyp2p you need to be registered with at least one of the supported
+P2P platforms.
 
 ## Installation
 
 ### Linux
 
-Auf Linux-basierten Systemen ist Python 3.x in der Regel schon vorinstalliert. Daher muss als externe Abhängigkeit lediglich ChromeDriver installiert werden, das von easyp2p benutzt wird, um auf die Webseiten der P2P-Plattformen zuzugreifen:
+On most Linux based systems Python 3 is usually already included. The only
+other external dependency of easyp2p is ChromeDriver which can be installed
+by:
 
     sudo apt-get install chromium-driver
 
-Anschließend kann easyp2p durch den folgenden Befehl installiert werden:
+After downloading all files from GitHub easyp2p can simply be installed by:
 
     python3 setup.py install
 
 ### Windows & Mac
 
-Momentan leider noch nicht unterstützt.
+Unfortunately not officially supported yet.
 
-## Bedienungsanleitung
+## User manual
 
-Die Benutzeroberfläche von easyp2p ist (hoffentlich) weitgehend selbsterklärend:
-
-![Hauptfenster von easyp2p](docs/main_window_screenshot.png)
-
-Im oberen Teil können die P2P-Plattformen ausgewählt werden, für die Ergebnisse erzeugt werden sollen. Im Feld darunter wird der Berichtszeitraum eingestellt. easyp2p unterstützt nur volle Monate. Die Ergebnisse werden in Form einer Excel-Datei ausgegeben, die im nächsten Feld ausgewählt werden kann. Mit dem Button "Starte Auswertung" kann die Auswertung gestartet werden.
-
-Zunächst öffnet sich ein Fenster, um die Zugangsdaten zu den ausgewählten P2P-Plattformen abzufragen. Diese können entweder jedes Mal aufs Neue eingegeben werden oder (sofern vom Betriebssystem unterstützt) im Keyring gespeichert werden. Ist letzteres gewünscht, so muss der Haken in der Checkbox gesetzt werden. Für Plattformen, die bereits im Keyring gespeichert sind, werden die Zugangsdaten nicht erneut abgefragt. Sollen die im Keyring gespeicherten Zugangsdaten gelöscht oder geändert werden, z.B. nach einer Aktualisierung des Passworts, so kann dies im Einstellungsfenster, das man über den Button mit den drei Punkten erreicht, geschehen.
-Nachdem alle Zugangsdaten abgefragt wurdem, öffnet sich ein neues Fenster, in dem der Fortschritt zu sehen ist. Neben allgemeinen Informationen zum Status werden hier auch evtl. Fehlermeldungen angezeigt.
+The user manual can be found [here](docs/user_manual_en.md).
