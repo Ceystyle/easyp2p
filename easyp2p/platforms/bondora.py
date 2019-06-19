@@ -7,7 +7,7 @@ Download and parse Bondora statement.
 """
 
 from datetime import date
-from typing import Optional, Tuple
+from typing import Mapping, Optional, Tuple
 
 import pandas as pd
 from selenium.webdriver.support.ui import Select
@@ -69,13 +69,6 @@ class Bondora:
                 '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'),
         }
 
-        # Use a dict to handle nbr to short name conversion, so we do not have
-        # to rely on English locale to be installed
-        map_nbr_to_short_month = {
-            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May',
-            '06': 'Jun', '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct',
-            '11': 'Nov', '12': 'Dec'}
-
         with P2PPlatform(
                 self.name, driver, urls,
                 EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
@@ -87,39 +80,59 @@ class Bondora:
 
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 
-            # Change the date values to the given start and end dates
-            start_month = map_nbr_to_short_month[
-                self.date_range[0].strftime('%m')]
-            end_month = map_nbr_to_short_month[
-                self.date_range[1].strftime('%m')]
-            select = Select(bondora.driver.find_element_by_id('StartYear'))
-            select.select_by_visible_text(str(self.date_range[0].year))
-            select = Select(bondora.driver.find_element_by_id('StartMonth'))
-            select.select_by_visible_text(start_month)
-            select = Select(bondora.driver.find_element_by_id('EndYear'))
-            select.select_by_visible_text(str(self.date_range[1].year))
-            select = Select(bondora.driver.find_element_by_id('EndMonth'))
-            select.select_by_visible_text(end_month)
-
-            # Start the account statement generation
-            driver.find_element_by_xpath(xpaths['search_btn']).click()
-
-            # Wait until statement generation is finished
-            no_payments_msg = 'Payments were not found in the selected period.'
-
-            conditions = [
-                EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['start_date']), '{0} {1}'.format(
-                        start_month, self.date_range[0].year)),
-                EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['no_payments']), no_payments_msg)]
-            try:
-                driver.wait(one_of_many_expected_conditions_true(conditions))
-            except TimeoutException as err:
-                raise TimeoutException(err)
+            self._generate_statement(bondora, driver, xpaths)
 
             bondora.download_statement(
                 self.statement, (By.XPATH, xpaths['download_btn']))
+
+    def _generate_statement(
+            self, bondora: P2PPlatform, driver: P2PWebDriver,
+            xpaths: Mapping[str, str]) -> None:
+        """
+        Generate the Bondora statement.
+
+        Args:
+            bondora: Instance of P2PPlatform class for Bondora.
+            driver: Instance of P2PWebDriver class.
+            xpaths: List of XPaths for Bondora.
+
+        """
+        # Use a dict to handle nbr to short name conversion, so we do not have
+        # to rely on English locale to be installed
+        map_nbr_to_short_month = {
+            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May',
+            '06': 'Jun', '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct',
+            '11': 'Nov', '12': 'Dec'}
+
+        # Change the date values to the given start and end dates
+        start_month = map_nbr_to_short_month[
+            self.date_range[0].strftime('%m')]
+        end_month = map_nbr_to_short_month[
+            self.date_range[1].strftime('%m')]
+        select = Select(bondora.driver.find_element_by_id('StartYear'))
+        select.select_by_visible_text(str(self.date_range[0].year))
+        select = Select(bondora.driver.find_element_by_id('StartMonth'))
+        select.select_by_visible_text(start_month)
+        select = Select(bondora.driver.find_element_by_id('EndYear'))
+        select.select_by_visible_text(str(self.date_range[1].year))
+        select = Select(bondora.driver.find_element_by_id('EndMonth'))
+        select.select_by_visible_text(end_month)
+
+        # Start the account statement generation
+        driver.find_element_by_xpath(xpaths['search_btn']).click()
+
+        # Wait until statement generation is finished
+        no_payments_msg = 'Payments were not found in the selected period.'
+        conditions = [
+            EC.text_to_be_present_in_element(
+                (By.XPATH, xpaths['start_date']), '{0} {1}'.format(
+                    start_month, self.date_range[0].year)),
+            EC.text_to_be_present_in_element(
+                (By.XPATH, xpaths['no_payments']), no_payments_msg)]
+        try:
+            driver.wait(one_of_many_expected_conditions_true(conditions))
+        except TimeoutException as err:
+            raise TimeoutException(err)
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, str]:
