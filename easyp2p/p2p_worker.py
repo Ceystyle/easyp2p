@@ -150,17 +150,9 @@ class WorkerThread(QThread):
                 self.add_progress_text.emit(
                     _translate('WorkerThread', 'Making ChromeDriver visible!'),
                     self.RED)
-                with tempfile.TemporaryDirectory() as download_directory:
-                    with P2PWebDriver(download_directory, False) as driver:
-                        platform.download_statement(
-                            driver, self.credentials[name])
+                self._download_statement(name, platform, False)
             else:
-                with tempfile.TemporaryDirectory() as download_directory:
-                    with P2PWebDriver(
-                            download_directory,
-                            self.settings.headless) as driver:
-                        platform.download_statement(
-                            driver, self.credentials[name])
+                self._download_statement(name, platform, self.settings.headless)
         except WebDriverNotFound as err:
             self.abort_easyp2p.emit(
                 str(err), _translate('WorkerThread', 'ChromeDriver not found!'))
@@ -171,6 +163,22 @@ class WorkerThread(QThread):
         except RuntimeWarning as warning:
             self.add_progress_text.emit(str(warning), self.RED)
             # Continue anyway
+
+    def _download_statement(
+            self, name: str, platform: Callable[[Tuple[date, date]], None],
+            headless: bool) -> None:
+        """
+        Call platform.download_statement.
+
+        Args:
+            name: Name of the P2P platform.
+            platform: Instance of P2PPlatform class.
+            headless: If True use ChromeDriver in headless mode, if False not.
+
+        """
+        with tempfile.TemporaryDirectory() as download_directory:
+            with P2PWebDriver(download_directory, headless) as driver:
+                platform.download_statement(driver, self.credentials[name])
 
     def run(self) -> None:
         """
