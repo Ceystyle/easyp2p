@@ -137,7 +137,7 @@ class P2PPlatform:
             self, name_field: str, password_field: str,
             credentials: Tuple[str, str], wait_until: Union[bool, WebElement],
             login_locator: Tuple[str, str] = None,
-            fill_delay: float = 0.) -> None:
+            fill_delay: float = 0.2) -> None:
         """
         Log into the P2P platform using the provided credentials.
 
