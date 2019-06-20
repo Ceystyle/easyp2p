@@ -25,6 +25,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_webdriver import P2PWebDriver
@@ -537,6 +538,53 @@ class P2PPlatform:
                 if (elem.text == str(day) and elem.get_attribute('class')
                         == days_table['current_day_id']):
                     elem.click()
+
+    def generate_statement_combo_boxes(
+            self, date_dict: Mapping[Tuple[str, str], str],
+            submit_btn_locator: Tuple[str, str],
+            wait_until: Union[bool, WebElement]) -> None:
+        """
+        Generate account statement by selecting dates in combo boxes.
+
+        This method generates the account statement for P2P sites where start
+        and end date need to be set in combo boxes, e.g. Bondora. It will
+        locate the combo boxes, select provided start/end date entries and then
+        start the account statement generation by clicking the submit button.
+
+        Args:
+            date_dict: Dictionary mapping the locators of each combo box with
+                the string text which should be selected in this combo box.
+            submit_btn_locator: Locator of the submit button for starting
+                account statement generation.
+            wait_until: Expected condition in case of successful account
+                statement generation.
+
+        Raises:
+            RuntimeError: If one of the web elements can not be found or if
+                statement generation takes too long.
+
+        """
+        try:
+            # Change the date values to the given start and end dates
+            for locator in date_dict.keys():
+                select = Select(self.driver.find_element(*locator))
+                select.select_by_visible_text(date_dict[locator])
+
+            # Start the account statement generation
+            submit_btn = self.driver.wait(
+                    EC.element_to_be_clickable(submit_btn_locator))
+            submit_btn.click()
+
+            # Wait until statement generation is finished
+            self.driver.wait(wait_until)
+        except NoSuchElementException:
+            raise RuntimeError(_translate(
+                'P2PPlatform', '{}: starting account statement generation '
+                'failed!').format(self.name))
+        except TimeoutException:
+            raise RuntimeError(_translate(
+                'P2PPlatform', '{}: account statement generation took too '
+                'long!').format(self.name))
 
     def download_statement(
             self, statement: str, download_locator: Tuple[str, str],
