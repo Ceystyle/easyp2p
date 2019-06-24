@@ -105,16 +105,16 @@ class Mintos:
 
     def _no_cashflows(self, df: pd.DataFrame) -> bool:
         """
-        Helper method to determine if there were any cashflows in date_range.
+        Helper method to determine if there were any cash flows in date_range.
 
-        If there were no cashflows the Mintos cashflow table contains just two
-        lines with start and end balance equal to zero.
+        If there were no cash flows the Mintos cash flow table contains just
+        two lines with start and end balance.
 
         Args:
-            df: DataFrame containing the Mintos cashflow table.
+            df: DataFrame containing the Mintos cash flow table.
 
         Returns:
-            True if there were no cashflows, False otherwise.
+            True if there were no cash flows, False otherwise.
 
         """
         if len(df) != 2:
@@ -122,10 +122,6 @@ class Mintos:
 
         if df.iloc[0][0] != (
                 'Opening balance ' + self.date_range[0].strftime('%d.%m.%Y')):
-            return False
-
-        # Start balance value
-        if df.iloc[0][1] != 0:
             return False
 
         if df.iloc[1][0] != (
