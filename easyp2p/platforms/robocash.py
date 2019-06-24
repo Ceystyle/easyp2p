@@ -18,6 +18,7 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import PlatformFailedError, BLACK, RED, Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 _translate = QCoreApplication.translate
@@ -29,9 +30,12 @@ class Robocash:
     Contains methods for downloading/parsing Robocash account statements.
     """
 
+    signals = Signals()
+
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of Robocash class.
 
@@ -40,11 +44,14 @@ class Robocash:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'Robocash'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xls'
+        if signals:
+            self.signals.connect_signals(signals)
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -56,7 +63,7 @@ class Robocash:
             credentials: Tuple (username, password) for Robocash.
 
         Raises:
-            RuntimeError: - If the statement button cannot be found
+            PlatformFailedError: If the statement button cannot be found
                           - If the download of the statement takes too long
 
         """
@@ -71,8 +78,8 @@ class Robocash:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable(
-                    (By.XPATH, xpaths['login_field']))) as robocash:
+                EC.element_to_be_clickable((By.XPATH, xpaths['login_field'])),
+                signals=self.signals) as robocash:
 
             robocash.log_into_page(
                 'email', 'password', credentials,
@@ -82,37 +89,59 @@ class Robocash:
             robocash.open_account_statement_page((By.ID, 'new_statement'))
 
             try:
-                driver.find_element_by_id('new_statement').click()
+                statement_btn = driver.wait(EC.element_to_be_clickable(
+                    (By.ID, 'new_statement')))
+                statement_btn.click()
             except NoSuchElementException:
-                raise RuntimeError(_translate(
+                self.signals.add_progress_text.emit(_translate(
                     'P2PPlatform', '{}: starting account statement generation '
-                                   'failed!').format(self.name))
+                    'failed!').format(self.name), RED)
+                raise PlatformFailedError
 
             robocash.generate_statement_direct(
                 self.date_range, (By.ID, 'date-after'),
                 (By.ID, 'date-before'), '%Y-%m-%d')
 
-            # Robocash does not automatically show download button after
-            # statement generation is done. An explicit reload of the page is
-            # needed.
-            present = False
-            wait = 0
-            while not present:
-                try:
-                    driver.get(urls['statement'])
-                    driver.wait(EC.element_to_be_clickable(
-                        (By.ID, 'download_statement')))
-                    present = True
-                except TimeoutException:
-                    wait += 1
-                    if wait > 10:  # Roughly 10*delay seconds
-                        raise RuntimeError(_translate(
-                            'P2PPlatform',
-                            '{}: account statement generation took too '
-                            'long!').format(self.name))
+            self._wait_for_statement(driver, urls['statement'])
 
             robocash.download_statement(
                 self.statement, (By.ID, 'download_statement'))
+
+    def _wait_for_statement(self, driver: P2PWebDriver, url: str) -> None:
+        """
+        Helper method to wait for successful statement generation.
+
+        Robocash does not automatically show download button after
+        statement generation is done. An explicit reload of the page is
+        needed.
+
+        Args:
+            driver:
+            url: URL of the account statement page.
+
+        Raises:
+            PlatformFailedError: If the account statement generation takes
+                too long.
+
+        """
+        wait = 0
+        self.signals.add_progress_text.emit(_translate(
+            'P2PPlatform', 'Note: generating the Robocash account '
+            'statement can take up to 30 seconds!'), BLACK)
+        while True:
+            try:
+                driver.get(url)
+                driver.wait(EC.element_to_be_clickable(
+                    (By.ID, 'download_statement')))
+                break
+            except TimeoutException:
+                wait += 1
+                if wait > 10:  # Roughly 10*delay seconds
+                    self.signals.add_progress_text.emit(_translate(
+                        'P2PPlatform',
+                        '{}: account statement generation took too '
+                        'long!').format(self.name), RED)
+                    raise PlatformFailedError
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, str]:
@@ -133,7 +162,8 @@ class Robocash:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, signals=self.signals)
 
         # Define mapping between Robocash and easyp2p cash flow types and
         # column names

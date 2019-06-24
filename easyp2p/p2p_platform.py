@@ -28,6 +28,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from PyQt5.QtCore import QCoreApplication
 
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 _translate = QCoreApplication.translate
@@ -43,11 +44,15 @@ class P2PPlatform:
 
     """
 
+    # Signals for communicating with the GUI
+    signals = Signals()
+
     def __init__(
             self, name: str, driver: P2PWebDriver, urls: Mapping[str, str],
             logout_wait_until: bool,
             logout_locator: Optional[Tuple[str, str]] = None,
-            hover_locator: Optional[Tuple[str, str]] = None) -> None:
+            hover_locator: Optional[Tuple[str, str]] = None,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of P2P class.
 
@@ -59,11 +64,10 @@ class P2PPlatform:
                 and optionally logout page (key: 'logout')
             logout_wait_until: Expected condition in case
                 of successful logout
-
-        Keyword Args:
             logout_locator: Locator of logout web element
             hover_locator: Locator of web element where the
                 mouse needs to hover in order to make logout button visible
+            signals: Signals instance for communicating with the calling class.
 
        Raises:
             RuntimeError: If no URL for login or statement page or no logout
@@ -76,6 +80,8 @@ class P2PPlatform:
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
+        if signals:
+            self.signals.connect_signals(signals)
         self.logged_in = False
 
         # Make sure URLs for login and statement page are provided
@@ -133,6 +139,7 @@ class P2PPlatform:
         if exc_type:
             raise exc_type(exc_value)
 
+    @signals.update_progress
     def log_into_page(
             self, name_field: str, password_field: str,
             credentials: Tuple[str, str], wait_until: Union[bool, WebElement],
@@ -211,6 +218,7 @@ class P2PPlatform:
 
         self.logged_in = True
 
+    @signals.update_progress
     def open_account_statement_page(
             self, check_locator: Tuple[str, str]) -> None:
         """
@@ -237,6 +245,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: loading account statement page was not '
                 'successful!').format(self.name))
 
+    @signals.update_progress
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
             wait_until: Union[bool, WebElement],
@@ -276,6 +285,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: logout was not successful!').format(
                     self.name))
 
+    @signals.update_progress
     def logout_by_url(self, wait_until: Union[bool, WebElement]) -> None:
         """
         P2P platform logout using the provided URL.
@@ -299,6 +309,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: logout was not successful!').format(
                     self.name))
 
+    @signals.update_progress
     def generate_statement_direct(
             self, date_range: Tuple[date, date],
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
@@ -379,6 +390,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: account statement generation took too '
                 'long!').format(self.name))
 
+    @signals.update_progress
     def generate_statement_calendar(
             self, date_range: Tuple[date, date],
             default_dates: Tuple[date, date],
@@ -539,6 +551,7 @@ class P2PPlatform:
                         == days_table['current_day_id']):
                     elem.click()
 
+    @signals.update_progress
     def generate_statement_combo_boxes(
             self, date_dict: Mapping[Tuple[str, str], str],
             submit_btn_locator: Tuple[str, str],
@@ -586,6 +599,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: account statement generation took too '
                 'long!').format(self.name))
 
+    @signals.update_progress
     def download_statement(
             self, statement: str, download_locator: Tuple[str, str],
             actions=None) -> None:

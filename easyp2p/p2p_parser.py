@@ -17,6 +17,8 @@ import numpy as np
 import pandas as pd
 from PyQt5.QtCore import QCoreApplication
 
+from easyp2p.p2p_signals import Signals
+
 _translate = QCoreApplication.translate
 
 
@@ -29,6 +31,8 @@ class P2PParser:
     files into a single unified easyp2p statement format.
 
     """
+    # Signals for communicating with the GUI
+    signals = Signals()
 
     # Define all necessary payment types
     INTEREST_PAYMENT = _translate('P2PParser', 'Interest payments')
@@ -70,7 +74,7 @@ class P2PParser:
     def __init__(
             self, name: str, date_range: Tuple[date, date],
             statement_file_name: str, header: int = 0,
-            skipfooter: int = 0) -> None:
+            skipfooter: int = 0, signals: Optional[Signals] = None) -> None:
         """
         Constructor of P2PParser class.
 
@@ -83,6 +87,7 @@ class P2PParser:
             header: Row number to use as column names and start of data in the
                 statement.
             skipfooter: Rows to skip at the end of the statement.
+            signals: Signals instance for communicating with the calling class.
 
         Raises:
             RuntimeError: If the account statement could not be loaded from
@@ -94,6 +99,8 @@ class P2PParser:
         self.statement_file_name = statement_file_name
         self.df = get_df_from_file(
             self.statement_file_name, header=header, skipfooter=skipfooter)
+        if signals:
+            self.signals.connect_signals(signals)
 
         # Check if account statement exists
         if self.df is None:
@@ -204,6 +211,7 @@ class P2PParser:
         self.df.set_index(
             [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
 
+    @signals.update_progress
     def run(
             self, date_format: str = None,
             rename_columns: Mapping[str, str] = None,

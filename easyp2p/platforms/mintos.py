@@ -12,11 +12,12 @@ from typing import Optional, Tuple
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 _translate = QCoreApplication.translate
@@ -27,9 +28,12 @@ class Mintos:
     Contains methods for downloading/parsing Mintos account statements.
     """
 
+    signals = Signals()
+
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of Mintos class.
 
@@ -38,11 +42,14 @@ class Mintos:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'Mintos'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xlsx'
+        if signals:
+            self.signals.connect_signals(signals)
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -63,7 +70,8 @@ class Mintos:
         with P2PPlatform(
                 self.name, driver, urls,
                 EC.element_to_be_clickable((By.ID, 'header-login-button')),
-                logout_locator=(By.XPATH, xpaths['logout_btn'])) as mintos:
+                logout_locator=(By.XPATH, xpaths['logout_btn']),
+                signals=self.signals) as mintos:
 
             mintos.log_into_page(
                 '_username', '_password', credentials,
@@ -76,32 +84,33 @@ class Mintos:
                 (By.ID, 'period-to'), '%d.%m.%Y',
                 submit_btn_locator=(By.ID, 'filter-button'))
 
-            # If there were no cashflows in date_range, the download button will
-            # not appear. In that case test if there really were no cashflows.
-            # If that is the case write an empty DataFrame to the file.
+            # If there were no cash flows in date_range, the download button
+            # will not appear. In that case test if there really were no cash
+            # flows. If true write an empty DataFrame to the file.
             try:
                 driver.wait(
                     EC.presence_of_element_located((By.ID, 'export-button')))
             except TimeoutException:
-                try:
-                    cashflow_table = driver.find_element_by_id(
-                        'overview-results')
-                    df = pd.read_html(
-                        cashflow_table.get_attribute("innerHTML"))[0]
-
-                    if self._no_cashflows(df):
-                        df = pd.DataFrame()
-                        df.to_excel(self.statement)
-                    else:
-                        raise ValueError
-                except ValueError:
-                    raise RuntimeError(_translate(
-                        'P2PPlatform',
-                        '{}: account statement generation failed!').format(
-                            self.name))
+                self._create_empty_statement(driver)
             else:
                 mintos.download_statement(
                     self.statement, (By.ID, 'export-button'))
+
+    @signals.update_progress
+    def _create_empty_statement(self, driver: P2PWebDriver):
+        try:
+            cashflow_table = driver.find_element_by_id('overview-results')
+            df = pd.read_html(cashflow_table.get_attribute("innerHTML"))[0]
+
+            if self._no_cashflows(df):
+                df = pd.DataFrame()
+                df.to_excel(self.statement)
+            else:
+                raise ValueError
+        except (NoSuchElementException, ValueError):
+            raise RuntimeError(_translate(
+                'P2PPlatform',
+                '{}: account statement generation failed!').format(self.name))
 
     def _no_cashflows(self, df: pd.DataFrame) -> bool:
         """
@@ -149,10 +158,11 @@ class Mintos:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, signals=self.signals)
 
         try:
-            # Create new columns for identifying cashflow types
+            # Create new columns for identifying cash flow types
             parser.df['Cash Flow Type'], parser.df['Loan ID'] = \
                 parser.df['Details'].str.split(' Loan ID: ').str
             parser.df['Cash Flow Type'] = \
@@ -161,7 +171,7 @@ class Mintos:
         except (KeyError, ValueError):
             pass
 
-        # Define mapping between Mintos and easyp2p cashflow types and column
+        # Define mapping between Mintos and easyp2p cash flow types and column
         # names
         cashflow_types = {
             # Treat bonus/cashback payments as normal interest payments:

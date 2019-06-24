@@ -11,12 +11,12 @@ from typing import Callable, Mapping, Optional, Tuple
 
 import pandas as pd
 from PyQt5.QtCore import pyqtSignal, QThread, QCoreApplication
-from PyQt5.QtGui import QColor
 
 from easyp2p.excel_writer import write_results
 from easyp2p.p2p_settings import Settings
-import easyp2p.platforms as p2p_platforms
+from easyp2p.p2p_signals import BLACK, RED, Signals, PlatformFailedError
 from easyp2p.p2p_webdriver import P2PWebDriver, WebDriverNotFound
+import easyp2p.platforms as p2p_platforms
 
 _translate = QCoreApplication.translate
 
@@ -35,12 +35,7 @@ class WorkerThread(QThread):
 
     # Signals for communicating with ProgressWindow
     abort_easyp2p = pyqtSignal(str, str)
-    update_progress_bar = pyqtSignal()
-    add_progress_text = pyqtSignal(str, QColor)
-
-    # Colors for text output
-    BLACK = QColor(0, 0, 0)
-    RED = QColor(100, 0, 0)
+    signals = Signals()
 
     def __init__(
             self, settings: Settings,
@@ -54,10 +49,11 @@ class WorkerThread(QThread):
                 each selected P2P platform
 
         """
-        QThread.__init__(self)
+        super().__init__()
         self.settings = settings
         self.credentials = credentials
         self.abort = False
+        self.done = False
         self.df_result = pd.DataFrame()
 
     def get_platform_instance(self, name: str, statement_without_suffix: str) \
@@ -79,12 +75,15 @@ class WorkerThread(QThread):
         """
         try:
             platform = getattr(p2p_platforms, name)
+            instance = platform(
+                self.settings.date_range, statement_without_suffix,
+                signals=self.signals)
         except AttributeError:
             raise PlatformFailedError(
                 _translate('WorkerThread', '{}.py could not be found!').format(
                     name.lower()))
         else:
-            return platform(self.settings.date_range, statement_without_suffix)
+            return instance
 
     def parse_statements(
             self, name: str,
@@ -133,23 +132,23 @@ class WorkerThread(QThread):
                     'WorkerThread', 'Credentials for {} are not '
                     'available!').format(name))
 
-        self.add_progress_text.emit(
+        self.signals.add_progress_text.emit(
             _translate('WorkerThread', 'Starting evaluation of {}...').format(
-                name), self.BLACK)
+                name), BLACK)
 
         try:
             if name == 'Iuvo' and self.settings.headless:
                 # Iuvo is currently not supported in headless ChromeDriver mode
                 # because it opens a new window for downloading the statement.
                 # ChromeDriver does not allow that due to security reasons.
-                self.add_progress_text.emit(
+                self.signals.add_progress_text.emit(
                     _translate(
                         'WorkerThread',
                         'Iuvo is not supported with headless ChromeDriver!'),
-                    self.RED)
-                self.add_progress_text.emit(
+                    RED)
+                self.signals.add_progress_text.emit(
                     _translate('WorkerThread', 'Making ChromeDriver visible!'),
-                    self.RED)
+                    RED)
                 self._download_statement(name, platform, False)
             else:
                 self._download_statement(name, platform, self.settings.headless)
@@ -158,11 +157,6 @@ class WorkerThread(QThread):
                 str(err), _translate('WorkerThread', 'ChromeDriver not found!'))
             self.abort = True
             return
-        except RuntimeError as err:
-            raise PlatformFailedError(str(err))
-        except RuntimeWarning as warning:
-            self.add_progress_text.emit(str(warning), self.RED)
-            # Continue anyway
 
     def _download_statement(
             self, name: str, platform: Callable[[Tuple[date, date]], None],
@@ -180,6 +174,7 @@ class WorkerThread(QThread):
             with P2PWebDriver(download_directory, headless) as driver:
                 platform.download_statement(driver, self.credentials[name])
 
+    @signals.update_progress
     def run(self) -> None:
         """
         Get and output results from all selected P2P platforms.
@@ -212,19 +207,14 @@ class WorkerThread(QThread):
                     return
 
                 self.parse_statements(name, platform)
-                self.add_progress_text.emit(
+                self.signals.add_progress_text.emit(
                     _translate(
                         'WorkerThread', '{} successfully evaluated!').format(
-                            name),
-                    self.BLACK)
-                self.update_progress_bar.emit()
-            except PlatformFailedError as err:
-                self.add_progress_text.emit(str(err), self.RED)
-                self.add_progress_text.emit(
+                            name), BLACK)
+            except PlatformFailedError:
+                self.signals.add_progress_text.emit(
                     _translate('WorkerThread', '{} will be ignored!').format(
-                        name),
-                    self.RED)
-                self.update_progress_bar.emit()
+                        name), RED)
                 continue
 
         if self.abort:
@@ -233,10 +223,7 @@ class WorkerThread(QThread):
         if not write_results(
                 self.df_result, self.settings.output_file,
                 self.settings.date_range):
-            self.add_progress_text.emit(
-                _translate('WorkerThread', 'No results available!'), self.RED)
+            self.signals.add_progress_text.emit(
+                _translate('WorkerThread', 'No results available!'), RED)
 
-
-class PlatformFailedError(BaseException):
-
-    """Will be raised if evaluation of a P2P platform fails."""
+        self.done = True

@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import (
     P2PWebDriver, one_of_many_expected_conditions_true)
 
@@ -26,7 +27,8 @@ class Iuvo:
 
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of Iuvo class.
 
@@ -35,11 +37,13 @@ class Iuvo:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'Iuvo'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xlsx'
+        self.signals = signals
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -65,7 +69,8 @@ class Iuvo:
                 self.name, driver, urls,
                 EC.element_to_be_clickable((By.ID, 'login')),
                 logout_locator=(By.ID, 'p2p_logout'),
-                hover_locator=(By.LINK_TEXT, 'User name')) as iuvo:
+                hover_locator=(By.LINK_TEXT, 'User name'),
+                signals=self.signals) as iuvo:
 
             iuvo.log_into_page(
                 'login', 'password', credentials,
@@ -136,7 +141,8 @@ class Iuvo:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, header=3, skipfooter=3)
+            self.name, self.date_range, self.statement, header=3, skipfooter=3,
+            signals=self.signals)
 
         # Define mapping between Iuvo and easyp2p cashflow types and column
         # names

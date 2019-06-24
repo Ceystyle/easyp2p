@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import (
     P2PWebDriver, one_of_many_expected_conditions_true)
 
@@ -25,7 +26,8 @@ class Bondora:
 
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of Bondora class.
 
@@ -34,11 +36,13 @@ class Bondora:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'Bondora'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xlsx'
+        self.signals = signals
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -89,12 +93,12 @@ class Bondora:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.NAME, 'Email'))) as bondora:
+                EC.element_to_be_clickable((By.NAME, 'Email')),
+                signals=self.signals) as bondora:
 
             bondora.log_into_page(
                 'Email', 'Password', credentials,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Cash flow')),
-                fill_delay=0.1)
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Cash flow')))
 
             bondora.open_account_statement_page((By.ID, 'StartYear'))
 
@@ -124,7 +128,8 @@ class Bondora:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, signals=self.signals)
 
         # Calculate defaulted payments
         parser.df[parser.DEFAULTS] = (

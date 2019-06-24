@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 
@@ -26,7 +27,7 @@ class DoFinance:
 
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str, signals: Optional[Signals]) -> None:
         """
         Constructor of DoFinance class.
 
@@ -35,11 +36,13 @@ class DoFinance:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'DoFinance'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xlsx'
+        self.signals = signals
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -59,8 +62,8 @@ class DoFinance:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable(
-                    (By.LINK_TEXT, 'Log In'))) as dofinance:
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Log In')),
+                signals=self.signals) as dofinance:
 
             dofinance.log_into_page(
                 'email', 'password', credentials,
@@ -96,7 +99,8 @@ class DoFinance:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, skipfooter=2)
+            self.name, self.date_range, self.statement, skipfooter=2,
+            signals=self.signals)
 
         # Define mapping between DoFinance and easyp2p cashflow types and
         # column names

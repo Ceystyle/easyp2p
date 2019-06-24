@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 
@@ -25,7 +26,8 @@ class Estateguru:
 
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of Estateguru class.
 
@@ -34,11 +36,13 @@ class Estateguru:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'Estateguru'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.csv'
+        self.signals = signals
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -72,8 +76,8 @@ class Estateguru:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Log In'))) \
-                as estateguru:
+                EC.element_to_be_clickable((By.LINK_TEXT, 'Log In')),
+                signals=self.signals) as estateguru:
 
             estateguru.log_into_page(
                 'username', 'password', credentials,
@@ -120,7 +124,8 @@ class Estateguru:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, skipfooter=1)
+            self.name, self.date_range, self.statement, skipfooter=1,
+            signals=self.signals)
 
         # Only consider valid cash flows
         parser.df = parser.df[parser.df['Cash Flow Status'] == 'Approved']

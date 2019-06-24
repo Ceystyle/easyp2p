@@ -36,7 +36,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             credentials[platform] = get_credentials(platform)
 
         # Initialize progress bar
-        self.progress_bar.setMaximum(len(settings.platforms))
+        self.progress_bar.setMaximum(len(settings.platforms) * 6)
         self.progress_bar.setValue(0)
 
         # Disable the Ok button
@@ -45,9 +45,9 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         # Initialize and start worker thread
         self.worker = WorkerThread(settings, credentials)
         self.worker.abort_easyp2p.connect(self.abort_easyp2p)
-        self.worker.update_progress_bar.connect(
+        self.worker.signals.update_progress_bar.connect(
             self.update_progress_bar)
-        self.worker.add_progress_text.connect(
+        self.worker.signals.add_progress_text.connect(
             self.add_progress_text)
         self.worker.start()
 
@@ -69,8 +69,10 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
     def update_progress_bar(self) -> None:
         """Update the progress bar in ProgressWindow to new value."""
-
-        self.progress_bar.setValue(self.progress_bar.value() + 1)
+        if self.worker.done:
+            self.progress_bar.setValue(self.progress_bar.maximum())
+        else:
+            self.progress_bar.setValue(self.progress_bar.value() + 1)
         if self.progress_bar.value() == self.progress_bar.maximum():
             self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
@@ -96,6 +98,5 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
         """
         self.reject()
-        QMessageBox.critical(
-            self, header, error_msg, QMessageBox.Close)
+        QMessageBox.critical(self, header, error_msg, QMessageBox.Close)
         sys.exit()

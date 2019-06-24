@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 
@@ -26,7 +27,8 @@ class Swaper:
 
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of Swaper class.
 
@@ -35,11 +37,13 @@ class Swaper:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'Swaper'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xlsx'
+        self.signals = signals
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -65,7 +69,8 @@ class Swaper:
         with P2PPlatform(
                 self.name, driver, urls,
                 EC.presence_of_element_located((By.ID, 'about')),
-                logout_locator=(By.XPATH, xpaths['logout_btn'])) as swaper:
+                logout_locator=(By.XPATH, xpaths['logout_btn']),
+                signals=self.signals) as swaper:
 
             swaper.log_into_page(
                 'email', 'password', credentials,
@@ -111,7 +116,8 @@ class Swaper:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, signals=self.signals)
 
         # Define mapping between Swaper and easyp2p cash flow types and column
         # names

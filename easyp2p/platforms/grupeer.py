@@ -12,9 +12,9 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-# from easyp2p.p2p_helper import create_statement_location
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 
@@ -27,7 +27,8 @@ class Grupeer:
 
     def __init__(
             self, date_range: Tuple[date, date],
-            statement_without_suffix: str) -> None:
+            statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of Grupeer class.
 
@@ -36,11 +37,13 @@ class Grupeer:
                 statements must be generated.
             statement_without_suffix: File name including path but without
                 suffix where the account statement should be saved.
+            signals: Signals instance for communicating with the calling class.
 
         """
         self.name = 'Grupeer'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xlsx'
+        self.signals = signals
 
     def download_statement(
             self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
@@ -67,7 +70,8 @@ class Grupeer:
                 self.name, driver, urls,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In')),
                 logout_locator=(By.LINK_TEXT, 'Logout'),
-                hover_locator=(By.XPATH, xpaths['logout_hover'])) as grupeer:
+                hover_locator=(By.XPATH, xpaths['logout_hover']),
+                signals=self.signals) as grupeer:
 
             grupeer.log_into_page(
                 'email', 'password', credentials,
@@ -104,7 +108,8 @@ class Grupeer:
         if statement:
             self.statement = statement
 
-        parser = P2PParser(self.name, self.date_range, self.statement)
+        parser = P2PParser(
+            self.name, self.date_range, self.statement, signals=self.signals)
 
         # Convert amount and balance to float64
         parser.df['Amount'] = parser.df['Amount'].apply(
