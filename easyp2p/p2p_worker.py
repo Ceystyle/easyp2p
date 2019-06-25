@@ -14,7 +14,7 @@ from PyQt5.QtCore import pyqtSignal, QThread, QCoreApplication
 
 from easyp2p.excel_writer import write_results
 from easyp2p.p2p_settings import Settings
-from easyp2p.p2p_signals import BLACK, RED, Signals, PlatformFailedError
+from easyp2p.p2p_signals import Signals, PlatformFailedError
 from easyp2p.p2p_webdriver import P2PWebDriver, WebDriverNotFound
 import easyp2p.platforms as p2p_platforms
 
@@ -109,7 +109,7 @@ class WorkerThread(QThread):
             warning_msg = _translate(
                 'WorkerThread', '{0}: unknown cash flow type will be ignored '
                 'in result: {1}').format(name, unknown_cf_types)
-            self.add_progress_text.emit(warning_msg, self.RED)
+            self.add_progress_text.emit(warning_msg, True)
 
     def download_statements(
             self, name: str,
@@ -134,7 +134,7 @@ class WorkerThread(QThread):
 
         self.signals.add_progress_text.emit(
             _translate('WorkerThread', 'Starting evaluation of {}...').format(
-                name), BLACK)
+                name), False)
 
         try:
             if name == 'Iuvo' and self.settings.headless:
@@ -145,10 +145,10 @@ class WorkerThread(QThread):
                     _translate(
                         'WorkerThread',
                         'Iuvo is not supported with headless ChromeDriver!'),
-                    RED)
+                    True)
                 self.signals.add_progress_text.emit(
                     _translate('WorkerThread', 'Making ChromeDriver visible!'),
-                    RED)
+                    True)
                 self._download_statement(name, platform, False)
             else:
                 self._download_statement(name, platform, self.settings.headless)
@@ -210,11 +210,11 @@ class WorkerThread(QThread):
                 self.signals.add_progress_text.emit(
                     _translate(
                         'WorkerThread', '{} successfully evaluated!').format(
-                            name), BLACK)
+                            name), False)
             except PlatformFailedError:
                 self.signals.add_progress_text.emit(
                     _translate('WorkerThread', '{} will be ignored!').format(
-                        name), RED)
+                        name), True)
                 continue
 
         if self.abort:
@@ -224,6 +224,6 @@ class WorkerThread(QThread):
                 self.df_result, self.settings.output_file,
                 self.settings.date_range):
             self.signals.add_progress_text.emit(
-                _translate('WorkerThread', 'No results available!'), RED)
+                _translate('WorkerThread', 'No results available!'), True)
 
         self.done = True

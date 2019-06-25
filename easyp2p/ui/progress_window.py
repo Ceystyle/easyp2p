@@ -79,15 +79,20 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         if self.progress_bar.value() == self.progress_bar.maximum():
             self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
-    def add_progress_text(self, txt: str, color: QColor) -> None:
+    def add_progress_text(self, txt: str, print_red: bool) -> None:
         """
         Append a new line to the progress text in ProgressWindow.
 
         Args:
             txt: String to add to progress text
-            color: Color in which the message should be displayed
+            print_red: If True print the message in red, if False print in
+                black.
 
         """
+        if print_red:
+            color = QColor(100, 0, 0)  # red
+        else:
+            color = QColor(0, 0, 0)  # black
         self.progress_text.setTextColor(color)
         self.progress_text.append(txt)
 

@@ -1,11 +1,6 @@
 from functools import wraps
 
 from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtGui import QColor
-
-# Colors for text output
-BLACK = QColor(0, 0, 0)
-RED = QColor(100, 0, 0)
 
 
 class Signals(QObject):
@@ -13,19 +8,25 @@ class Signals(QObject):
     """Class for signal communication between worker classes and GUI."""
 
     update_progress_bar = pyqtSignal()
-    add_progress_text = pyqtSignal(str, QColor)
+    add_progress_text = pyqtSignal(str, bool)
+    abort_signal = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.abort = False
+        self.abort_signal.connect(self.abort_evaluation)
 
     def update_progress(self, func):
-        """Decorator for emitting signals to the progress window."""
+        """Decorator for updating progress text and progress bar."""
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 result = func(*args, **kwargs)
             except RuntimeError as err:
-                self.add_progress_text.emit(str(err), RED)
+                self.add_progress_text.emit(str(err), True)
                 raise PlatformFailedError from err
             except RuntimeWarning as err:
-                self.add_progress_text.emit(str(err), RED)
+                self.add_progress_text.emit(str(err), True)
             finally:
                 self.update_progress_bar.emit()
             return result

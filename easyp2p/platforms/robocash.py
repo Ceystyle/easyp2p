@@ -18,7 +18,7 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import PlatformFailedError, BLACK, RED, Signals
+from easyp2p.p2p_signals import PlatformFailedError, Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 _translate = QCoreApplication.translate
@@ -95,7 +95,7 @@ class Robocash:
             except NoSuchElementException:
                 self.signals.add_progress_text.emit(_translate(
                     'P2PPlatform', '{}: starting account statement generation '
-                    'failed!').format(self.name), RED)
+                    'failed!').format(self.name), True)
                 raise PlatformFailedError
 
             robocash.generate_statement_direct(
@@ -127,7 +127,7 @@ class Robocash:
         wait = 0
         self.signals.add_progress_text.emit(_translate(
             'P2PPlatform', 'Note: generating the Robocash account '
-            'statement can take up to 30 seconds!'), BLACK)
+            'statement can take up to 30 seconds!'), False)
         while True:
             try:
                 driver.get(url)
@@ -140,7 +140,7 @@ class Robocash:
                     self.signals.add_progress_text.emit(_translate(
                         'P2PPlatform',
                         '{}: account statement generation took too '
-                        'long!').format(self.name), RED)
+                        'long!').format(self.name), True)
                     raise PlatformFailedError
 
     def parse_statement(self, statement: Optional[str] = None) \
