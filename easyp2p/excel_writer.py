@@ -16,6 +16,7 @@ from typing import Callable, Dict, List, Optional, Sequence, Tuple
 import pandas as pd
 from PyQt5.QtCore import QCoreApplication
 
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_parser import P2PParser
 
 _translate = QCoreApplication.translate
@@ -24,7 +25,11 @@ DAILY_RESULTS = _translate('excel_writer', 'Daily results')
 MONTHLY_RESULTS = _translate('excel_writer', 'Monthly results')
 TOTAL_RESULTS = _translate('excel_writer', 'Total results')
 
+# Signals for communicating with the GUI
+signals = Signals()
 
+
+@signals.update_progress
 def write_results(
         df_result: pd.DataFrame, output_file: str,
         date_range: Tuple[date, date]) -> bool:

@@ -36,7 +36,10 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             credentials[platform] = get_credentials(platform)
 
         # Initialize progress bar
-        self.progress_bar.setMaximum(len(settings.platforms) * 6)
+        # Each platform has 6 stages (log in, open statement page,
+        # generate statement, download statement, log out, parse statement)
+        # plus one common stage for writing the results to Excel
+        self.progress_bar.setMaximum(len(settings.platforms) * 6 + 1)
         self.progress_bar.setValue(0)
 
         # Disable the Ok button
