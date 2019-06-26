@@ -50,22 +50,22 @@ class ProgressWindowTests(unittest.TestCase):
 
     def test_progress_text(self):
         """Test appending a line to progress_text."""
-        self.form.worker.add_progress_text.emit(
-            'Test message', self.form.worker.BLACK)
+        self.form.worker.signals.add_progress_text.emit(
+            'Test message', False)
         self.assertEqual(self.form.progress_text.toPlainText(), 'Test message')
 
     def test_progress_bar(self):
         """Test updating progress_bar to maximum value."""
-        self.form.worker.update_progress_bar.emit()
-        self.assertEqual(self.form.progress_bar.value(), 1)
-        self.form.worker.update_progress_bar.emit()
-        self.assertEqual(self.form.progress_bar.value(), 2)
-        # Two is the maximum value so the ok button must be enabled
+        for progress in range(2 * 5 + 1):
+            self.form.worker.signals.update_progress_bar.emit()
+            self.assertEqual(self.form.progress_bar.value(), progress + 1)
+        # 11 is the maximum value for two platforms so the ok button must be
+        # enabled
         self.assertTrue(
             self.form.button_box.button(QDialogButtonBox.Ok).isEnabled())
         # Further increasing the progress_bar should not work
-        self.form.worker.update_progress_bar.emit()
-        self.assertEqual(self.form.progress_bar.value(), 2)
+        self.form.worker.signals.update_progress_bar.emit()
+        self.assertEqual(self.form.progress_bar.value(), 11)
 
     @unittest.mock.patch('easyp2p.ui.progress_window.sys')
     @unittest.mock.patch('easyp2p.ui.progress_window.QMessageBox.critical')
@@ -80,7 +80,7 @@ class ProgressWindowTests(unittest.TestCase):
     def test_push_button_abort(self):
         """Test that the worker thread is aborted if user clicks cancel."""
         self.form.button_box.button(QDialogButtonBox.Cancel).click()
-        self.assertTrue(self.form.worker.abort)
+        self.assertTrue(self.form.worker.signals.abort)
         self.assertTrue(self.form.rejected)
 
     def test_push_button_ok(self):

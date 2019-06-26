@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# Copyright 2019 Niko Sandschneider
+
+"""Module implementing Signals for communicating with the GUI."""
+
 from functools import wraps
 
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -21,7 +26,10 @@ class Signals(QObject):
         @wraps(func)
         def wrapper(*args, **kwargs):
             try:
-                result = func(*args, **kwargs)
+                if self.abort:
+                    raise RuntimeError('Abort by user')
+                else:
+                    result = func(*args, **kwargs)
             except RuntimeError as err:
                 self.add_progress_text.emit(str(err), True)
                 raise PlatformFailedError from err
@@ -29,6 +37,20 @@ class Signals(QObject):
                 self.add_progress_text.emit(str(err), True)
             finally:
                 self.update_progress_bar.emit()
+            return result
+        return wrapper
+
+    def watch_errors(self, func):
+        """Decorator for emitting error messages to the progress window."""
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                result = func(*args, **kwargs)
+            except RuntimeError as err:
+                self.add_progress_text.emit(str(err), True)
+                raise PlatformFailedError from err
+            except RuntimeWarning as err:
+                self.add_progress_text.emit(str(err), True)
             return result
         return wrapper
 
@@ -42,6 +64,12 @@ class Signals(QObject):
         """
         self.update_progress_bar.connect(other.update_progress_bar)
         self.add_progress_text.connect(other.add_progress_text)
+        other.abort_signal.connect(self.abort_signal)
+        self.abort = other.abort
+
+    def abort_evaluation(self):
+        """Set the abort flag to True."""
+        self.abort = True
 
 
 class PlatformFailedError(Exception):

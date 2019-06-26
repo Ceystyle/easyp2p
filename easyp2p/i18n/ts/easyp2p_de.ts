@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="de" sourcelanguage="en">
+<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="en">
 <context>
     <name>CredentialsWindow</name>
     <message>
@@ -308,12 +307,12 @@
         <translation>{}: Kontoauszugs-URL konnte nicht gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="134"/>
+        <location filename="../../p2p_platform.py" line="135"/>
         <source>{}: no method for logout provided!</source>
         <translation>{}: keine Logout-Methode übergeben!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="189"/>
+        <location filename="../../p2p_platform.py" line="190"/>
         <source>{}: loading the website failed!</source>
         <translation>{}: Laden der Webseite ist fehlgeschlagen!</translation>
     </message>
@@ -323,47 +322,47 @@
         <translation type="obsolete">{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="215"/>
+        <location filename="../../p2p_platform.py" line="216"/>
         <source>{}: login was not successful. Are the credentials correct?</source>
         <translation>{}: Login war nicht erfolgreich. Sind die Zugangsdaten korrekt?</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="244"/>
+        <location filename="../../p2p_platform.py" line="245"/>
         <source>{}: loading account statement page was not successful!</source>
         <translation>{}: Kontoauszugsseite konnte nicht geladen werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="308"/>
+        <location filename="../../p2p_platform.py" line="309"/>
         <source>{}: logout was not successful!</source>
         <translation>{}: Logout war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="594"/>
+        <location filename="../../p2p_platform.py" line="595"/>
         <source>{}: starting account statement generation failed!</source>
         <translation>{}: Generierung des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="598"/>
+        <location filename="../../p2p_platform.py" line="599"/>
         <source>{}: account statement generation took too long!</source>
         <translation>{}: Generierung des Kontoauszugs hat zu lange gedauert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="452"/>
+        <location filename="../../p2p_platform.py" line="453"/>
         <source>{}: invalid locator for calendar provided!</source>
         <translation>{}: ungültiger Locator für Kalender übergeben!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="645"/>
+        <location filename="../../p2p_platform.py" line="646"/>
         <source>{}: starting download of account statement failed!</source>
         <translation>{}: Download des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="211"/>
+        <location filename="../../p2p_platform.py" line="212"/>
         <source>{}: username or password field could not befound on the login site!</source>
         <translation>{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="691"/>
+        <location filename="../../p2p_platform.py" line="692"/>
         <source>Download directory {} is not empty!</source>
         <translation>Downloadverzeichnis {} ist nicht leer!</translation>
     </message>
@@ -373,7 +372,7 @@
         <translation>{}: Erstellung des Kontoauszugs ist fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../../platforms/robocash.py" line="146"/>
+        <location filename="../../platforms/robocash.py" line="128"/>
         <source>Note: generating the Robocash account statement can take up to 30 seconds!</source>
         <translation>Hinweis: Erzeugung des Robocash-Kontoauszugs kann bis zu 30 Sekunden dauern!</translation>
     </message>
@@ -543,17 +542,17 @@
         <translation>ChromeDriver konnte nicht gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="210"/>
+        <location filename="../../p2p_worker.py" line="201"/>
         <source>{} successfully evaluated!</source>
         <translation>{} erfolgreich ausgewertet!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="215"/>
+        <location filename="../../p2p_worker.py" line="206"/>
         <source>{} will be ignored!</source>
         <translation>{} wird ignoriert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="226"/>
+        <location filename="../../p2p_worker.py" line="214"/>
         <source>No results available!</source>
         <translation>Keine Ergebnisse vorhanden!</translation>
     </message>
@@ -566,22 +565,22 @@
 <context>
     <name>excel_writer</name>
     <message>
-        <location filename="../../excel_writer.py" line="23"/>
+        <location filename="../../excel_writer.py" line="24"/>
         <source>Daily results</source>
         <translation>Tagesergebnisse</translation>
     </message>
     <message>
-        <location filename="../../excel_writer.py" line="24"/>
+        <location filename="../../excel_writer.py" line="25"/>
         <source>Monthly results</source>
         <translation>Monatsergebnisse</translation>
     </message>
     <message>
-        <location filename="../../excel_writer.py" line="25"/>
+        <location filename="../../excel_writer.py" line="26"/>
         <source>Total results</source>
         <translation>Gesamtergebnisse</translation>
     </message>
     <message>
-        <location filename="../../excel_writer.py" line="60"/>
+        <location filename="../../excel_writer.py" line="65"/>
         <source>Writing results to Excel was not successful! Column {} is missing!</source>
         <translation>Schreiben der Ergebnisse nach Excel war nicht erfolgreich! Spalte {} ist nicht vorhanden!</translation>
     </message>

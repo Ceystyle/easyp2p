@@ -109,6 +109,7 @@ class P2PPlatform:
         """
         return self
 
+    @signals.watch_errors
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         """
         End of context management protocol.
@@ -245,7 +246,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: loading account statement page was not '
                 'successful!').format(self.name))
 
-    @signals.update_progress
+    @signals.watch_errors
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
             wait_until: Union[bool, WebElement],
@@ -285,7 +286,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: logout was not successful!').format(
                     self.name))
 
-    @signals.update_progress
+    @signals.watch_errors
     def logout_by_url(self, wait_until: Union[bool, WebElement]) -> None:
         """
         P2P platform logout using the provided URL.

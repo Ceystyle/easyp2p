@@ -52,7 +52,7 @@ class WorkerThread(QThread):
         super().__init__()
         self.settings = settings
         self.credentials = credentials
-        self.abort = False
+        self.signals.abort = False
         self.done = False
         self.df_result = pd.DataFrame()
 
@@ -109,7 +109,7 @@ class WorkerThread(QThread):
             warning_msg = _translate(
                 'WorkerThread', '{0}: unknown cash flow type will be ignored '
                 'in result: {1}').format(name, unknown_cf_types)
-            self.add_progress_text.emit(warning_msg, True)
+            self.signals.add_progress_text.emit(warning_msg, True)
 
     def download_statements(
             self, name: str,
@@ -155,7 +155,6 @@ class WorkerThread(QThread):
         except WebDriverNotFound as err:
             self.abort_easyp2p.emit(
                 str(err), _translate('WorkerThread', 'ChromeDriver not found!'))
-            self.abort = True
             return
 
     def _download_statement(
@@ -185,10 +184,6 @@ class WorkerThread(QThread):
 
         """
         for name in self.settings.platforms:
-
-            if self.abort:
-                return
-
             # Set target location of account statement file
             statement_without_suffix = os.path.join(
                 Path.home(), '.easyp2p', name.lower(),
@@ -200,12 +195,7 @@ class WorkerThread(QThread):
             try:
                 platform = self.get_platform_instance(
                     name, statement_without_suffix)
-
                 self.download_statements(name, platform)
-
-                if self.abort:
-                    return
-
                 self.parse_statements(name, platform)
                 self.signals.add_progress_text.emit(
                     _translate(
@@ -216,9 +206,6 @@ class WorkerThread(QThread):
                     _translate('WorkerThread', '{} will be ignored!').format(
                         name), True)
                 continue
-
-        if self.abort:
-            return
 
         if not write_results(
                 self.df_result, self.settings.output_file,

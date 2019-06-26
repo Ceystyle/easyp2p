@@ -26,8 +26,8 @@ class DoFinance:
     """
 
     def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str, signals: Optional[Signals]) -> None:
+            self, date_range: Tuple[date, date], statement_without_suffix: str,
+            signals: Optional[Signals] = None) -> None:
         """
         Constructor of DoFinance class.
 

@@ -5,7 +5,7 @@
 
 import sys
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 
@@ -18,6 +18,8 @@ from easyp2p.ui.Ui_progress_window import Ui_ProgressWindow
 class ProgressWindow(QDialog, Ui_ProgressWindow):
 
     """Contains code for handling events for the Progress Window."""
+
+    abort = pyqtSignal()
 
     def __init__(self, settings: Settings) -> None:
         """
@@ -36,10 +38,10 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             credentials[platform] = get_credentials(platform)
 
         # Initialize progress bar
-        # Each platform has 6 stages (log in, open statement page,
-        # generate statement, download statement, log out, parse statement)
-        # plus one common stage for writing the results to Excel
-        self.progress_bar.setMaximum(len(settings.platforms) * 6 + 1)
+        # Each platform has 5 stages (log in, open statement page,
+        # generate + download + parse statement) plus one common stage for
+        # writing the results to Excel
+        self.progress_bar.setMaximum(len(settings.platforms) * 5 + 1)
         self.progress_bar.setValue(0)
 
         # Disable the Ok button
@@ -52,6 +54,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             self.update_progress_bar)
         self.worker.signals.add_progress_text.connect(
             self.add_progress_text)
+        self.abort.connect(self.worker.signals.abort_signal)
         self.worker.start()
 
     @pyqtSlot()
@@ -64,11 +67,8 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         immediately to ensure a clean logout of the P2P site.
 
         """
-        self.worker.abort = True
+        self.abort.emit()
         self.reject()
-        if self.worker.isRunning():
-            self.worker.quit()
-            self.worker.wait()
 
     def update_progress_bar(self) -> None:
         """Update the progress bar in ProgressWindow to new value."""
@@ -105,6 +105,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             header: Header text of the error message window.
 
         """
+        self.abort.emit()
         self.reject()
         QMessageBox.critical(self, header, error_msg, QMessageBox.Close)
         sys.exit()
