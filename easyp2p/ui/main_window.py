@@ -8,6 +8,7 @@ several people-to-people (P2P) lending platforms.
 """
 
 from datetime import date, timedelta
+import gc
 import os
 from pathlib import Path
 import sys
@@ -20,6 +21,7 @@ from PyQt5.QtWidgets import (
 
 import easyp2p
 from easyp2p.p2p_settings import Settings
+from easyp2p.p2p_signals import Signals
 from easyp2p.ui.progress_window import ProgressWindow
 from easyp2p.ui.settings_window import SettingsWindow
 from easyp2p.ui.Ui_main_window import Ui_MainWindow
@@ -208,6 +210,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Progress is tracked in ProgressWindow.
 
         """
+        # Make sure all abort flags are False in case the user aborted the
+        # previous run
+        for obj in gc.get_objects():
+            if isinstance(obj, Signals):
+                obj.abort = False
         platforms = self.get_platforms()
 
         # Check that start date is before end date

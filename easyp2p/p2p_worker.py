@@ -51,7 +51,6 @@ class WorkerThread(QThread):
         super().__init__()
         self.settings = settings
         self.credentials = credentials
-        self.signals.abort = False
         self.done = False
         self.df_result = pd.DataFrame()
 
