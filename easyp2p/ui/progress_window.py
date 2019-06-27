@@ -38,10 +38,10 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             credentials[platform] = get_credentials(platform)
 
         # Initialize progress bar
-        # Each platform has 5 stages (log in, open statement page,
-        # generate + download + parse statement) plus one common stage for
+        # Each platform has 5 stages (init ChromeDriver, log in, open statement
+        # page, generate + download + parse statement) plus one common stage for
         # writing the results to Excel
-        self.progress_bar.setMaximum(len(settings.platforms) * 5 + 1)
+        self.progress_bar.setMaximum(len(settings.platforms) * 6 + 1)
         self.progress_bar.setValue(0)
 
         # Disable the Ok button
@@ -49,7 +49,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
         # Initialize and start worker thread
         self.worker = WorkerThread(settings, credentials)
-        self.worker.abort_easyp2p.connect(self.abort_easyp2p)
+        self.worker.signals.end_easyp2p.connect(self.end_easyp2p)
         self.worker.signals.update_progress_bar.connect(
             self.update_progress_bar)
         self.worker.signals.add_progress_text.connect(
@@ -96,7 +96,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.progress_text.setTextColor(color)
         self.progress_text.append(txt)
 
-    def abort_easyp2p(self, error_msg: str, header: str) -> None:
+    def end_easyp2p(self, error_msg: str, header: str) -> None:
         """
         Abort the program in case of critical errors.
 
@@ -105,7 +105,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             header: Header text of the error message window.
 
         """
+        QMessageBox.critical(self, header, error_msg, QMessageBox.Close)
         self.abort.emit()
         self.reject()
-        QMessageBox.critical(self, header, error_msg, QMessageBox.Close)
         sys.exit()

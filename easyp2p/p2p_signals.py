@@ -15,6 +15,7 @@ class Signals(QObject):
     update_progress_bar = pyqtSignal()
     add_progress_text = pyqtSignal(str, bool)
     abort_signal = pyqtSignal()
+    end_easyp2p = pyqtSignal(str, str)
 
     def __init__(self):
         super().__init__()
@@ -64,6 +65,7 @@ class Signals(QObject):
         """
         self.update_progress_bar.connect(other.update_progress_bar)
         self.add_progress_text.connect(other.add_progress_text)
+        self.end_easyp2p.connect(other.end_easyp2p)
         other.abort_signal.connect(self.abort_signal)
         self.abort = other.abort
 

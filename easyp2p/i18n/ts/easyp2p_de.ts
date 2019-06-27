@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="en">
+<!DOCTYPE TS>
+<TS version="2.1" language="de" sourcelanguage="en">
 <context>
     <name>CredentialsWindow</name>
     <message>
@@ -396,26 +397,51 @@
     <message>
         <location filename="../../p2p_webdriver.py" line="54"/>
         <source>easyp2p will be aborted now!</source>
-        <translation>easyp2p wird jetzt beendet!</translation>
+        <translation type="obsolete">easyp2p wird jetzt beendet!</translation>
     </message>
     <message>
         <location filename="../../p2p_webdriver.py" line="54"/>
         <source>In Linux this can usually be fixed by:</source>
-        <translation>In Linux kann das normalerweise behoben werden durch:</translation>
+        <translation type="obsolete">In Linux kann das normalerweise behoben werden durch:</translation>
     </message>
     <message>
         <location filename="../../p2p_webdriver.py" line="54"/>
         <source>In Windows ChromeDriver can be downloaded from:</source>
-        <translation>Unter Windows kann ChromeDriver von hier heruntergeladen werden:</translation>
+        <translation type="obsolete">Unter Windows kann ChromeDriver von hier heruntergeladen werden:</translation>
     </message>
     <message>
         <location filename="../../p2p_webdriver.py" line="54"/>
         <source>ChromeDriver could not be found!
 
 </source>
-        <translation>ChromeDriver konnte nicht gefunden werden!
+        <translation type="obsolete">ChromeDriver konnte nicht gefunden werden!
 
 </translation>
+    </message>
+    <message>
+        <location filename="../../p2p_webdriver.py" line="67"/>
+        <source>ChromeDriver could not be found!
+
+In Linux this can usually be fixed by:
+
+	{0}
+
+In Windows ChromeDriver can be downloaded from:
+
+{1}
+
+easyp2p will be aborted now!</source>
+        <translation>ChromeDriver konnte nicht gefunden werden!
+
+In Linux kann dies normalerweise behoben werden durch:
+
+	{0}
+
+In Windows kann ChromeDriver von hier heruntergeladen werden:
+
+{1}
+
+easyp2p wird jetzt beendet!</translation>
     </message>
 </context>
 <context>
@@ -507,7 +533,7 @@
 <context>
     <name>WorkerThread</name>
     <message>
-        <location filename="../../p2p_worker.py" line="82"/>
+        <location filename="../../p2p_worker.py" line="81"/>
         <source>{}.py could not be found!</source>
         <translation>{}.py konnte nicht gefunden werden!</translation>
     </message>
@@ -517,47 +543,47 @@
         <translation type="obsolete">{}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert:</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="130"/>
+        <location filename="../../p2p_worker.py" line="129"/>
         <source>Credentials for {} are not available!</source>
         <translation>Zugangsdaten für {} sind nicht vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="135"/>
+        <location filename="../../p2p_worker.py" line="134"/>
         <source>Starting evaluation of {}...</source>
         <translation>Start der Auswertung von {}...</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="144"/>
+        <location filename="../../p2p_worker.py" line="142"/>
         <source>Iuvo is not supported with headless ChromeDriver!</source>
         <translation>Iuvo wird nicht mit unsichtbarem ChromeDriver unterstützt!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="149"/>
+        <location filename="../../p2p_worker.py" line="146"/>
         <source>Making ChromeDriver visible!</source>
         <translation>Mache ChromeDriver sichtbar!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="156"/>
+        <location filename="../../p2p_webdriver.py" line="67"/>
         <source>ChromeDriver not found!</source>
         <translation>ChromeDriver konnte nicht gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="201"/>
+        <location filename="../../p2p_worker.py" line="193"/>
         <source>{} successfully evaluated!</source>
         <translation>{} erfolgreich ausgewertet!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="206"/>
+        <location filename="../../p2p_worker.py" line="198"/>
         <source>{} will be ignored!</source>
         <translation>{} wird ignoriert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="214"/>
+        <location filename="../../p2p_worker.py" line="206"/>
         <source>No results available!</source>
         <translation>Keine Ergebnisse vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="109"/>
+        <location filename="../../p2p_worker.py" line="108"/>
         <source>{0}: unknown cash flow type will be ignored in result: {1}</source>
         <translation>{0}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: {1}</translation>
     </message>

@@ -4,23 +4,31 @@
 """Module implementing P2PWebDriver."""
 
 import os
-from typing import Callable, cast, List, Union
+from typing import Callable, cast, List, Optional, Union
 
-from selenium import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException, WebDriverException)
+from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from PyQt5.QtCore import QCoreApplication
 
+from easyp2p.p2p_signals import Signals
+
 _translate = QCoreApplication.translate
 
 
-class P2PWebDriver(webdriver.Chrome):
+class P2PWebDriver(Chrome):
 
     """A class for providing webdriver support to easyp2p."""
 
-    def __init__(self, download_directory: str, headless: bool) -> None:
+    # Signals for communicating with the GUI
+    signals = Signals()
+
+    @signals.update_progress
+    def __init__(
+            self, download_directory: str, headless: bool,
+            signals: Optional[Signals] = None) -> None:
         """
         Initialize the P2PWebDriver class.
 
@@ -31,14 +39,16 @@ class P2PWebDriver(webdriver.Chrome):
 
         """
         self.download_directory = download_directory
-        self.driver = cast(webdriver.Chrome, None)
-        options = webdriver.ChromeOptions()
+        self.driver = cast(Chrome, None)
+        options = ChromeOptions()
         prefs = {"download.default_directory": self.download_directory}
         options.add_experimental_option("prefs", prefs)
         options.add_argument("start-maximized")
         if headless:
             options.add_argument("--headless")
             options.add_argument("--window-size=1920,1200")
+        if signals:
+            self.signals.connect_signals(signals)
 
         # Ubuntu doesn't put chromedriver in PATH so we need to
         # explicitly specify its location.
@@ -51,17 +61,17 @@ class P2PWebDriver(webdriver.Chrome):
             else:
                 super().__init__(options=options)
         except WebDriverException:
-            raise WebDriverNotFound(_translate(
-                'P2PWebDriver', 'ChromeDriver could not be found!\n\n') +
-                _translate(
-                    'P2PWebDriver', 'In Linux this can usually be fixed by:') +
-                '\n\n\tsudo apt-get install chromium-driver\n\n' +
-                _translate(
-                    'P2PWebDriver', 'In Windows ChromeDriver can be downloaded '
-                    'from:') +
-                '\n\nhttps://sites.google.com/a/chromium.org/chromedriver'
-                '/downloads\n\n' +
-                _translate('P2PWebDriver', 'easyp2p will be aborted now!'))
+            linux_command = '\n\n\tsudo apt-get install chromium-driver\n\n'
+            download_link = '\n\nhttps://sites.google.com/a/chromium.org' \
+                '/chromedriver/downloads\n\n'
+            self.signals.end_easyp2p.emit(_translate(
+                'P2PWebDriver', 'ChromeDriver could not be found!\n\n'
+                'In Linux this can usually be fixed by:\n\n\t{0}\n\n'
+                'In Windows ChromeDriver can be downloaded from:\n\n{1}\n\n'
+                'easyp2p will be aborted now!').format(
+                    linux_command, download_link),
+                _translate('WorkerThread', 'ChromeDriver not found!'))
+            raise RuntimeError('ChromeDriver not found!')
 
         if headless:
             # This is needed to allow downloads in headless mode
@@ -86,17 +96,12 @@ class P2PWebDriver(webdriver.Chrome):
         return WebDriverWait(self, delay).until(wait_until)
 
 
-class WebDriverNotFound(Exception):
-    """Custom exception which will be raised if Chromedriver cannot be found."""
-
-
 class one_of_many_expected_conditions_true:
     """
     An expectation for checking if (at least) one of several provided expected
     conditions for the Selenium webdriver is true.
     """
-    def __init__(self, conditions: List[Callable[[webdriver.Chrome], bool]]) \
-            -> None:
+    def __init__(self, conditions: List[Callable[[Chrome], bool]]) -> None:
         """
         Initialize class.
 
@@ -106,7 +111,7 @@ class one_of_many_expected_conditions_true:
         """
         self.conditions = conditions
 
-    def __call__(self, driver: webdriver.Chrome) -> bool:
+    def __call__(self, driver: Chrome) -> bool:
         """
         Caller for class.
 

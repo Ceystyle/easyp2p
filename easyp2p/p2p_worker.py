@@ -10,12 +10,12 @@ import tempfile
 from typing import Callable, Mapping, Optional, Tuple
 
 import pandas as pd
-from PyQt5.QtCore import pyqtSignal, QThread, QCoreApplication
+from PyQt5.QtCore import QThread, QCoreApplication
 
 from easyp2p.excel_writer import write_results
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_signals import Signals, PlatformFailedError
-from easyp2p.p2p_webdriver import P2PWebDriver, WebDriverNotFound
+from easyp2p.p2p_webdriver import P2PWebDriver
 import easyp2p.platforms as p2p_platforms
 
 _translate = QCoreApplication.translate
@@ -34,7 +34,6 @@ class WorkerThread(QThread):
     """
 
     # Signals for communicating with ProgressWindow
-    abort_easyp2p = pyqtSignal(str, str)
     signals = Signals()
 
     def __init__(
@@ -136,26 +135,19 @@ class WorkerThread(QThread):
             _translate('WorkerThread', 'Starting evaluation of {}...').format(
                 name), False)
 
-        try:
-            if name == 'Iuvo' and self.settings.headless:
-                # Iuvo is currently not supported in headless ChromeDriver mode
-                # because it opens a new window for downloading the statement.
-                # ChromeDriver does not allow that due to security reasons.
-                self.signals.add_progress_text.emit(
-                    _translate(
-                        'WorkerThread',
-                        'Iuvo is not supported with headless ChromeDriver!'),
-                    True)
-                self.signals.add_progress_text.emit(
-                    _translate('WorkerThread', 'Making ChromeDriver visible!'),
-                    True)
-                self._download_statement(name, platform, False)
-            else:
-                self._download_statement(name, platform, self.settings.headless)
-        except WebDriverNotFound as err:
-            self.abort_easyp2p.emit(
-                str(err), _translate('WorkerThread', 'ChromeDriver not found!'))
-            return
+        if name == 'Iuvo' and self.settings.headless:
+            # Iuvo is currently not supported in headless ChromeDriver mode
+            # because it opens a new window for downloading the statement.
+            # ChromeDriver does not allow that due to security reasons.
+            self.signals.add_progress_text.emit(
+                _translate(
+                    'WorkerThread',
+                    'Iuvo is not supported with headless ChromeDriver!'), True)
+            self.signals.add_progress_text.emit(_translate(
+                'WorkerThread', 'Making ChromeDriver visible!'), True)
+            self._download_statement(name, platform, False)
+        else:
+            self._download_statement(name, platform, self.settings.headless)
 
     def _download_statement(
             self, name: str, platform: Callable[[Tuple[date, date]], None],
@@ -170,7 +162,8 @@ class WorkerThread(QThread):
 
         """
         with tempfile.TemporaryDirectory() as download_directory:
-            with P2PWebDriver(download_directory, headless) as driver:
+            with P2PWebDriver(
+                    download_directory, headless, self.signals) as driver:
                 platform.download_statement(driver, self.credentials[name])
 
     @signals.update_progress
