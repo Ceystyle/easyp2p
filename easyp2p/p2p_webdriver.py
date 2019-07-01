@@ -50,7 +50,7 @@ class P2PWebDriver(Chrome):
         if signals:
             self.signals.connect_signals(signals)
 
-        # Ubuntu doesn't put chromedriver in PATH so we need to
+        # Ubuntu doesn't put ChromeDriver in PATH so we need to
         # explicitly specify its location.
         # TODO: Find a better solution that works on all systems.
         try:
@@ -78,6 +78,10 @@ class P2PWebDriver(Chrome):
             params = {
                 'behavior': 'allow', 'downloadPath': self.download_directory}
             self.execute_cdp_cmd('Page.setDownloadBehavior', params)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super().__exit__(self, exc_type, exc_val, exc_tb)
+        self.signals.disconnect_signals()
 
     def wait(
             self, wait_until: Union[bool, WebElement],

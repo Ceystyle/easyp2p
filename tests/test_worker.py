@@ -33,6 +33,7 @@ class WorkerTests(unittest.TestCase):
         for platform in PLATFORMS:
             self.credentials[platform] = ('TestUser', 'TestPass')
         self.worker = WorkerThread(self.settings, self.credentials)
+        self.worker.signals.abort = False
 
     def test_get_platform_instance(self):
         """Test get_platform_instance for all supported platforms."""

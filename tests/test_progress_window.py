@@ -56,7 +56,7 @@ class ProgressWindowTests(unittest.TestCase):
 
     def test_progress_bar(self):
         """Test updating progress_bar to maximum value."""
-        for progress in range(2 * 6 + 1):
+        for progress in range(2 * 7 + 1):
             self.form.worker.signals.update_progress_bar.emit()
             self.assertEqual(self.form.progress_bar.value(), progress + 1)
         # 11 is the maximum value for two platforms so the ok button must be
@@ -65,7 +65,7 @@ class ProgressWindowTests(unittest.TestCase):
             self.form.button_box.button(QDialogButtonBox.Ok).isEnabled())
         # Further increasing the progress_bar should not work
         self.form.worker.signals.update_progress_bar.emit()
-        self.assertEqual(self.form.progress_bar.value(), 13)
+        self.assertEqual(self.form.progress_bar.value(), 15)
 
     @unittest.mock.patch('easyp2p.ui.progress_window.sys')
     @unittest.mock.patch('easyp2p.ui.progress_window.QMessageBox.critical')

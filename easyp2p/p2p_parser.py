@@ -298,6 +298,7 @@ class P2PParser:
         self.df = self.df[[
             col for col in self.TARGET_COLUMNS if col in self.df.columns]]
 
+        self.signals.disconnect_signals()
         return unknown_cf_types
 
 

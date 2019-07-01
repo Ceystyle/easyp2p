@@ -137,6 +137,7 @@ class P2PPlatform:
                     '{}: no method for logout provided!').format(self.name))
 
             self.logged_in = False
+        self.signals.disconnect_signals()
         if exc_type:
             raise exc_type(exc_value)
 
@@ -246,7 +247,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: loading account statement page was not '
                 'successful!').format(self.name))
 
-    @signals.watch_errors
+    @signals.update_progress
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
             wait_until: Union[bool, WebElement],
@@ -286,7 +287,7 @@ class P2PPlatform:
                 'P2PPlatform', '{}: logout was not successful!').format(
                     self.name))
 
-    @signals.watch_errors
+    @signals.update_progress
     def logout_by_url(self, wait_until: Union[bool, WebElement]) -> None:
         """
         P2P platform logout using the provided URL.

@@ -36,6 +36,7 @@ class Signals(QObject):
                 raise PlatformFailedError from err
             except RuntimeWarning as err:
                 self.add_progress_text.emit(str(err), True)
+                result = None
             finally:
                 self.update_progress_bar.emit()
             return result
@@ -68,6 +69,14 @@ class Signals(QObject):
         self.end_easyp2p.connect(other.end_easyp2p)
         other.abort_signal.connect(self.abort_signal)
         self.abort = other.abort
+
+    def disconnect_signals(self) -> None:
+        """
+        Helper method for disconnecting signals if they are no longer needed.
+        """
+        self.update_progress_bar.disconnect()
+        self.add_progress_text.disconnect()
+        self.end_easyp2p.disconnect()
 
     def abort_evaluation(self):
         """Set the abort flag to True."""

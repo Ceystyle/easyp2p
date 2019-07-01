@@ -165,14 +165,12 @@ class WorkerThread(QThread):
                     download_directory, headless, self.signals) as driver:
                 platform.download_statement(driver, self.credentials[name])
 
-    @signals.update_progress
     def run(self) -> None:
         """
         Get and output results from all selected P2P platforms.
 
         Iterates over all selected P2P platforms, downloads the account
-        statements, parses them and writes the results to an Excel file. After
-        each finished platform the progress bar is increased.
+        statements, parses them and writes the results to an Excel file.
 
         """
         for name in self.settings.platforms:
@@ -206,3 +204,4 @@ class WorkerThread(QThread):
                 _translate('WorkerThread', 'No results available!'), True)
 
         self.done = True
+        self.signals.update_progress_bar.emit()

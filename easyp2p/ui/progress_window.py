@@ -38,10 +38,10 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             credentials[platform] = get_credentials(platform)
 
         # Initialize progress bar
-        # Each platform has 5 stages (init ChromeDriver, log in, open statement
-        # page, generate + download + parse statement) plus one common stage for
-        # writing the results to Excel
-        self.progress_bar.setMaximum(len(settings.platforms) * 6 + 1)
+        # Each platform has 7 stages (init ChromeDriver, log in, open statement
+        # page, generate + download statement, log out, parse statement) plus
+        # one common stage for writing the results to Excel
+        self.progress_bar.setMaximum(len(settings.platforms) * 7 + 1)
         self.progress_bar.setValue(0)
 
         # Disable the Ok button
