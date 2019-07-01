@@ -682,7 +682,7 @@ def _download_finished(
             download_time += 1
         else:
             filelist = glob.glob(os.path.join(download_directory, '*'))
-            if len(filelist) == 1:
+            if len(filelist) == 1 and not filelist[0].endswith('crdownload'):
                 shutil.move(filelist[0], statement)
                 return True
 
