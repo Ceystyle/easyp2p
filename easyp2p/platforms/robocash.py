@@ -127,7 +127,7 @@ class Robocash:
         wait = 0
         self.signals.add_progress_text.emit(_translate(
             'P2PPlatform', 'Note: generating the Robocash account '
-            'statement can take up to 30 seconds!'), False)
+            'statement can take up to one minute!'), False)
         while True:
             try:
                 driver.get(url)
@@ -136,7 +136,7 @@ class Robocash:
                 break
             except TimeoutException:
                 wait += 1
-                if wait > 10:  # Roughly 10*delay seconds
+                if wait > 15:  # Roughly 15 * delay seconds
                     self.signals.add_progress_text.emit(_translate(
                         'P2PPlatform',
                         '{}: account statement generation took too '

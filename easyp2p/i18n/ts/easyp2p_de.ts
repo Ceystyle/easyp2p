@@ -147,32 +147,32 @@
         <translation type="obsolete">P2P_Ergebnisse</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="176"/>
+        <location filename="../../ui/main_window.py" line="178"/>
         <source>Choose output file</source>
         <translation>Ausgabedatei wählen</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="176"/>
+        <location filename="../../ui/main_window.py" line="178"/>
         <source>files</source>
         <translation>Dateien</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="215"/>
+        <location filename="../../ui/main_window.py" line="222"/>
         <source>Start date is after end date!</source>
         <translation>Startdatum liegt nach Enddatum!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="215"/>
+        <location filename="../../ui/main_window.py" line="222"/>
         <source>Start date must be before end date!</source>
         <translation>Startdatum muss vor dem Enddatum liegen!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="225"/>
+        <location filename="../../ui/main_window.py" line="232"/>
         <source>No P2P platform selected!</source>
         <translation>Keine P2P-Plattform ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="225"/>
+        <location filename="../../ui/main_window.py" line="232"/>
         <source>Please choose at least one P2P platform!</source>
         <translation>Bitte wähle mindestens eine P2P-Plattform aus!</translation>
     </message>
@@ -192,7 +192,7 @@
         <translation>&amp;Deutsch</translation>
     </message>
     <message>
-        <location filename="../../ui/main_window.py" line="132"/>
+        <location filename="../../ui/main_window.py" line="134"/>
         <source>P2P_Results_{0}-{1}.xlsx</source>
         <translation>P2P_Ergebnisse_{0}-{1}.xlsx</translation>
     </message>
@@ -210,12 +210,12 @@
         <translation>{0}: Spalte {1} ist nicht im Kontoauszug vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_parser.py" line="331"/>
+        <location filename="../../p2p_parser.py" line="332"/>
         <source>Unknown file format during import:</source>
         <translation>Unbekanntes Dateiformat beim Import:</translation>
     </message>
     <message>
-        <location filename="../../p2p_parser.py" line="334"/>
+        <location filename="../../p2p_parser.py" line="335"/>
         <source>{} could not be found!</source>
         <translation>{} konnte nicht gefunden werden!</translation>
     </message>
@@ -313,7 +313,7 @@
         <translation>{}: keine Logout-Methode übergeben!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="190"/>
+        <location filename="../../p2p_platform.py" line="191"/>
         <source>{}: loading the website failed!</source>
         <translation>{}: Laden der Webseite ist fehlgeschlagen!</translation>
     </message>
@@ -323,47 +323,47 @@
         <translation type="obsolete">{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="216"/>
+        <location filename="../../p2p_platform.py" line="217"/>
         <source>{}: login was not successful. Are the credentials correct?</source>
         <translation>{}: Login war nicht erfolgreich. Sind die Zugangsdaten korrekt?</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="245"/>
+        <location filename="../../p2p_platform.py" line="246"/>
         <source>{}: loading account statement page was not successful!</source>
         <translation>{}: Kontoauszugsseite konnte nicht geladen werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="309"/>
+        <location filename="../../p2p_platform.py" line="310"/>
         <source>{}: logout was not successful!</source>
         <translation>{}: Logout war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="595"/>
+        <location filename="../../p2p_platform.py" line="596"/>
         <source>{}: starting account statement generation failed!</source>
         <translation>{}: Generierung des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="599"/>
+        <location filename="../../p2p_platform.py" line="600"/>
         <source>{}: account statement generation took too long!</source>
         <translation>{}: Generierung des Kontoauszugs hat zu lange gedauert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="453"/>
+        <location filename="../../p2p_platform.py" line="454"/>
         <source>{}: invalid locator for calendar provided!</source>
         <translation>{}: ungültiger Locator für Kalender übergeben!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="646"/>
+        <location filename="../../p2p_platform.py" line="647"/>
         <source>{}: starting download of account statement failed!</source>
         <translation>{}: Download des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="212"/>
+        <location filename="../../p2p_platform.py" line="213"/>
         <source>{}: username or password field could not befound on the login site!</source>
         <translation>{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="692"/>
+        <location filename="../../p2p_platform.py" line="693"/>
         <source>Download directory {} is not empty!</source>
         <translation>Downloadverzeichnis {} ist nicht leer!</translation>
     </message>
@@ -375,7 +375,12 @@
     <message>
         <location filename="../../platforms/robocash.py" line="128"/>
         <source>Note: generating the Robocash account statement can take up to 30 seconds!</source>
-        <translation>Hinweis: Erzeugung des Robocash-Kontoauszugs kann bis zu 30 Sekunden dauern!</translation>
+        <translation type="obsolete">Hinweis: Erzeugung des Robocash-Kontoauszugs kann bis zu 30 Sekunden dauern!</translation>
+    </message>
+    <message>
+        <location filename="../../platforms/robocash.py" line="128"/>
+        <source>Note: generating the Robocash account statement can take up to one minute!</source>
+        <translation>Hinweis: Erzeugung des Robocash-Kontoauszugs kann bis zu einer Minute dauern!</translation>
     </message>
 </context>
 <context>
@@ -533,7 +538,7 @@ easyp2p wird jetzt beendet!</translation>
 <context>
     <name>WorkerThread</name>
     <message>
-        <location filename="../../p2p_worker.py" line="81"/>
+        <location filename="../../p2p_worker.py" line="80"/>
         <source>{}.py could not be found!</source>
         <translation>{}.py konnte nicht gefunden werden!</translation>
     </message>
@@ -543,22 +548,22 @@ easyp2p wird jetzt beendet!</translation>
         <translation type="obsolete">{}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert:</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="129"/>
+        <location filename="../../p2p_worker.py" line="128"/>
         <source>Credentials for {} are not available!</source>
         <translation>Zugangsdaten für {} sind nicht vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="134"/>
+        <location filename="../../p2p_worker.py" line="133"/>
         <source>Starting evaluation of {}...</source>
         <translation>Start der Auswertung von {}...</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="142"/>
+        <location filename="../../p2p_worker.py" line="141"/>
         <source>Iuvo is not supported with headless ChromeDriver!</source>
         <translation>Iuvo wird nicht mit unsichtbarem ChromeDriver unterstützt!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="146"/>
+        <location filename="../../p2p_worker.py" line="145"/>
         <source>Making ChromeDriver visible!</source>
         <translation>Mache ChromeDriver sichtbar!</translation>
     </message>
@@ -568,22 +573,22 @@ easyp2p wird jetzt beendet!</translation>
         <translation>ChromeDriver konnte nicht gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="193"/>
+        <location filename="../../p2p_worker.py" line="190"/>
         <source>{} successfully evaluated!</source>
         <translation>{} erfolgreich ausgewertet!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="198"/>
+        <location filename="../../p2p_worker.py" line="195"/>
         <source>{} will be ignored!</source>
         <translation>{} wird ignoriert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="206"/>
+        <location filename="../../p2p_worker.py" line="203"/>
         <source>No results available!</source>
         <translation>Keine Ergebnisse vorhanden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_worker.py" line="108"/>
+        <location filename="../../p2p_worker.py" line="107"/>
         <source>{0}: unknown cash flow type will be ignored in result: {1}</source>
         <translation>{0}: unbekannter Cashflow-Typ wird im Ergebnis ignoriert: {1}</translation>
     </message>
