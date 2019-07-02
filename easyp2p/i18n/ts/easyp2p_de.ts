@@ -338,22 +338,22 @@
         <translation>{}: Logout war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="596"/>
+        <location filename="../../p2p_platform.py" line="578"/>
         <source>{}: starting account statement generation failed!</source>
         <translation>{}: Generierung des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="600"/>
+        <location filename="../../p2p_platform.py" line="582"/>
         <source>{}: account statement generation took too long!</source>
         <translation>{}: Generierung des Kontoauszugs hat zu lange gedauert!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="454"/>
+        <location filename="../../p2p_platform.py" line="451"/>
         <source>{}: invalid locator for calendar provided!</source>
         <translation>{}: ungültiger Locator für Kalender übergeben!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="647"/>
+        <location filename="../../p2p_platform.py" line="629"/>
         <source>{}: starting download of account statement failed!</source>
         <translation>{}: Download des Kontoauszugs konnte nicht gestartet werden!</translation>
     </message>
@@ -363,7 +363,7 @@
         <translation>{}: Benutzername- oder Passwortfeld konnten nicht auf der Login-Seite gefunden werden!</translation>
     </message>
     <message>
-        <location filename="../../p2p_platform.py" line="693"/>
+        <location filename="../../p2p_platform.py" line="675"/>
         <source>Download directory {} is not empty!</source>
         <translation>Downloadverzeichnis {} ist nicht leer!</translation>
     </message>
@@ -381,6 +381,11 @@
         <location filename="../../platforms/robocash.py" line="128"/>
         <source>Note: generating the Robocash account statement can take up to one minute!</source>
         <translation>Hinweis: Erzeugung des Robocash-Kontoauszugs kann bis zu einer Minute dauern!</translation>
+    </message>
+    <message>
+        <location filename="../../p2p_platform.py" line="534"/>
+        <source>{}: could not locate date in calendar!</source>
+        <translation>{}: Datum konnte nicht im Kalender gefunden werden!</translation>
     </message>
 </context>
 <context>

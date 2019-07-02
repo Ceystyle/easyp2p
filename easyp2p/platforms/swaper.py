@@ -74,24 +74,24 @@ class Swaper:
 
             swaper.log_into_page(
                 'email', 'password', credentials,
-                EC.presence_of_element_located((By.ID, 'open-investments')),
-                fill_delay=0.1)
+                EC.presence_of_element_located((By.ID, 'open-investments')))
 
             swaper.open_account_statement_page((By.ID, 'account-statement'))
 
             # calendar_locator must be tuple of locators, thus the , at the end
             calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )
-            arrows = {'arrow_tag': 'div',
-                      'left_arrow_class': 'icon icon icon-left',
-                      'right_arrow_class': 'icon icon icon-right'}
-            days_table = {'class_name': '',
-                          'current_day_id': ' ',
-                          'id_from_calendar': True,
-                          'table_id': 'id'}
+            month_arrows = {
+                'previous': (By.CSS_SELECTOR, '.opened .icon-left'),
+                'next': (By.CSS_SELECTOR, '.opened .icon-right')}
+            days_table = {
+                'current_month_class': (' ', ' selected'),
+                'xpath': (
+                    "//*[@class='datepicker opened']//*[@class='dates']//"
+                    "table//td")}
             default_dates = (date.today().replace(day=1), date.today())
 
             swaper.generate_statement_calendar(
-                self.date_range, default_dates, arrows, days_table,
+                self.date_range, default_dates, month_arrows, days_table,
                 calendar_locator)
 
             swaper.download_statement(

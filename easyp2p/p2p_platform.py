@@ -396,8 +396,8 @@ class P2PPlatform:
     def generate_statement_calendar(
             self, date_range: Tuple[date, date],
             default_dates: Tuple[date, date],
-            arrows: Mapping[str, str],
-            days_table: Mapping[str, object],
+            month_arrows: Mapping[str, Tuple[str, str]],
+            days_table: Mapping[str, Tuple[str]],
             calendar_locator: Tuple[Tuple[str, str], ...],
             wait_until: Optional[Union[bool, WebElement]] = None,
             submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
@@ -415,14 +415,11 @@ class P2PPlatform:
             date_range: Date range (start_date, end_date) for which the
                 account statement must be generated.
             default_dates: Pre-filled default dates of the two date pickers.
-            arrows: Dictionary with three entries: class name of left arrows
-                (left_arrow_class), class name of right arrows
-                (right_arrow_class), tag name of arrows (arrow_tag)
-            days_table: Dictionary with four entries:
-                class name of day table ('class name'),
-                id of day table ('table_id'),
-                id of current day ('current_day_id'),
-                is day contained in id? ('id_from_calendar')
+            month_arrows: Dictionary with locators of the previous and next
+                month arrows (keys 'previous' and 'next' respectively)
+            days_table: Dictionary with two entries:
+                xpath of day table (key 'xpath'), tuple of class names of days
+                in the selected month (key 'current_month_class').
             calendar_locator: Tuple containing locators for the two calendars.
                 It must have either length 1 or 2.
             wait_until: Expected condition in case of successful account
@@ -461,27 +458,17 @@ class P2PPlatform:
             end_calendar_clicks = _get_calendar_clicks(
                 date_range[1], default_dates[1])
 
-            # Identify the arrows for both start and end calendar
-            left_arrows = self.driver.find_elements_by_xpath(
-                "//{0}[@class='{1}']".format(
-                    arrows['arrow_tag'], arrows['left_arrow_class']))
-            right_arrows = self.driver.find_elements_by_xpath(
-                "//{0}[@class='{1}']".format(
-                    arrows['arrow_tag'], arrows['right_arrow_class']))
-
-            # Set start_date
+            # Set start and end date in the calendars
             self._set_date_in_calendar(
                 start_calendar, date_range[0].day, start_calendar_clicks,
-                left_arrows[0], right_arrows[0], days_table)
-
-            # Set end_date
+                month_arrows, days_table)
             self._set_date_in_calendar(
                 end_calendar, date_range[1].day, end_calendar_clicks,
-                left_arrows[1], right_arrows[1], days_table)
+                month_arrows, days_table)
 
             if submit_btn_locator is not None:
-                submit_btn = self.driver.wait(EC.element_to_be_clickable(
-                    submit_btn_locator))
+                submit_btn = self.driver.wait(
+                    EC.element_to_be_clickable(submit_btn_locator))
                 submit_btn.click()
 
             if wait_until is not None:
@@ -497,8 +484,8 @@ class P2PPlatform:
 
     def _set_date_in_calendar(
             self, calendar_: WebElement, day: int, months: int,
-            previous_month: WebElement, next_month: WebElement,
-            days_table: Mapping[str, object]) -> None:
+            month_arrows: Mapping[str, Tuple[str, str]],
+            days_table: Mapping[str, Tuple[str]]) -> None:
         """
         Find and click the given day in the provided calendar.
 
@@ -508,21 +495,23 @@ class P2PPlatform:
             day: day (as int) of the target date
             months: how many months in the past/future (negative/positive) is
                 the target date compared to default date
-            previous_month: web element which needs to be clicked to switch the
-                calendar to the previous month
-            next_month: web element which needs to be clicked to switch the
-                calendar to the next month
-            days_table: Dictionary with four entries:
-                class name of day table ('class name'),
-                id of day table ('table_id'),
-                id of current day ('current_day_id'),
-                is day contained in id? ('id_from_calendar')
+            month_arrows: Dictionary with locators of the previous and next
+                month arrows (keys 'previous' and 'next' respectively)
+            days_table: Dictionary with two entries:
+                xpath of day table (key 'xpath'), tuple of class names of days
+                in the selected month (key 'current_month_class').
+
+        Raises:
+            RuntimeError: If the target day cannot be found in the calendar.
 
         """
         # Open the calendar and wait until the buttons for changing the month
-        # are visible
+        # are clickable
         calendar_.click()
-        self.driver.wait(EC.visibility_of(previous_month))
+        previous_month = self.driver.wait(
+            EC.element_to_be_clickable(month_arrows['previous']))
+        next_month = self.driver.wait(
+            EC.element_to_be_clickable(month_arrows['next']))
 
         # Switch the calendar to the given target month
         if months < 0:
@@ -533,25 +522,18 @@ class P2PPlatform:
                 next_month.click()
 
         # Get table with all days of the selected month
-        # If id_from_calendar is True the day number is contained in the id tag
-        # Otherwise the days will be identified by the provided class name
-        if days_table['id_from_calendar']:
-            days_xpath = "//*[@{0}='{1}']//table//td".format(
-                days_table['table_id'], calendar_.get_attribute('id'))
-        else:
-            days_xpath = "//*[@{0}='{1}']//table//td".format(
-                days_table['table_id'], days_table['class_name'])
-        all_days = self.driver.find_elements_by_xpath(days_xpath)
+        all_days = self.driver.find_elements_by_xpath(days_table['xpath'])
 
         # Find and click the target day
         for elem in all_days:
-            if days_table['current_day_id'] == '':
-                if elem.text == str(day):
-                    elem.click()
-            else:
-                if (elem.text == str(day) and elem.get_attribute('class')
-                        == days_table['current_day_id']):
-                    elem.click()
+            if elem.text == str(day) and elem.get_attribute('class') \
+                    in days_table['current_month_class']:
+                elem.click()
+                return
+
+        raise RuntimeError(_translate(
+            'P2PPlatform',
+            '{}: could not locate date in calendar!').format(self.name))
 
     @signals.update_progress
     def generate_statement_combo_boxes(

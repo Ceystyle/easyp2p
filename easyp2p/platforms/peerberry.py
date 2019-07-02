@@ -97,21 +97,19 @@ class PeerBerry:
 
             # Create account statement for given date range
             default_dates = (date.today(), date.today())
-            arrows = {
-                'arrow_tag': 'th',
-                'left_arrow_class': 'rdtPrev',
-                'right_arrow_class': 'rdtNext',
-            }
+            month_arrows = {
+                'previous': (By.CSS_SELECTOR, '.rdtOpen .rdtPrev'),
+                'next': (By.CSS_SELECTOR, '.rdtOpen .rdtNext')}
             calendar_locator = ((By.NAME, 'startDate'), (By.NAME, 'endDate'))
             days_table = {
-                'class_name': 'rdtDays',
-                'current_day_id': 'rdtDay',
-                'id_from_calendar': False,
-                'table_id': 'class'
-            }
+                'current_month_class': (
+                        'rdtDay', 'rdtDay rdtToday', 'rdtDay rdtActive'),
+                'xpath': (
+                    "//*[@class='rdt rdtOpen']//*[@class='rdtPicker']"
+                    "//*[@class='rdtDays']//table//td")}
 
             peerberry.generate_statement_calendar(
-                self.date_range, default_dates, arrows, days_table,
+                self.date_range, default_dates, month_arrows, days_table,
                 calendar_locator,
                 wait_until=EC.text_to_be_present_in_element(
                     (By.XPATH, xpaths['start_balance']),
