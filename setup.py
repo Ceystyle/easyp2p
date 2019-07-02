@@ -5,9 +5,11 @@ import setuptools
 
 here = os.path.abspath(os.path.dirname(__file__))
 
+
 def read(*parts):
     with codecs.open(os.path.join(here, *parts), 'r') as fp:
         return fp.read()
+
 
 def find_version(*file_paths):
     version_file = read(*file_paths)
@@ -16,6 +18,7 @@ def find_version(*file_paths):
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
+
 
 with open("README_de.md", "r") as fh:
     long_description = fh.read()
@@ -37,7 +40,7 @@ setuptools.setup(
         "Topic :: Office/Business :: Financial :: Investment",
     ],
     python_requires=">=3.5",
-    install_requires=['keyring', 'lxml', 'pandas', 'PyQt5', 'selenium', 'xlrd',
-        'xlsxwriter'],
-    entry_points={'gui_scripts': ['easyp2p=easyp2p.ui.main_window:main'],},
+    install_requires=[
+        'keyring', 'lxml', 'pandas', 'PyQt5', 'selenium', 'xlrd', 'xlsxwriter'],
+    entry_points={'gui_scripts': ['easyp2p=easyp2p.ui.main_window:main']},
 )
