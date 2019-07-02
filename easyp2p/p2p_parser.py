@@ -292,7 +292,7 @@ class P2PParser:
         self._calculate_total_income()
         self.df[self.PLATFORM] = self.name
         self.df.set_index(
-            [self.PLATFORM, self.DATE, self.CURRENCY], inplace=True)
+            [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
 
         # Sort and drop all unnecessary columns
         self.df = self.df[[
