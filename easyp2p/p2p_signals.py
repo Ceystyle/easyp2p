@@ -53,6 +53,7 @@ class Signals(QObject):
                 raise PlatformFailedError from err
             except RuntimeWarning as err:
                 self.add_progress_text.emit(str(err), True)
+                result = None
             return result
         return wrapper
 
