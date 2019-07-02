@@ -108,13 +108,17 @@ class PeerBerry:
                     "//*[@class='rdt rdtOpen']//*[@class='rdtPicker']"
                     "//*[@class='rdtDays']//table//td")}
 
+            # 2019/07/02: PeerBerry currently takes a long time to show the
+            # balances during account statement generation. Disable the balance
+            # check for now.
+            # TODO: re-add check once PeerBerry works again
             peerberry.generate_statement_calendar(
                 self.date_range, default_dates, month_arrows, days_table,
                 calendar_locator,
-                wait_until=EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['start_balance']),
-                    'Opening balance '+str(self.date_range[0]).format(
-                        '%Y-%m-%d')),
+                # wait_until=EC.text_to_be_present_in_element(
+                #     (By.XPATH, xpaths['start_balance']),
+                #     'Opening balance '+str(self.date_range[0]).format(
+                #         '%Y-%m-%d')),
                 submit_btn_locator=(By.XPATH, xpaths['statement_btn']))
 
             peerberry.download_statement(
