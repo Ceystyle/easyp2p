@@ -90,7 +90,7 @@ class Grupeer:
             grupeer.download_statement(self.statement, (By.NAME, 'excel'))
 
     def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, str]:
+            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
         """
         Parser for Grupeer.
 

@@ -98,7 +98,7 @@ class Swaper:
                 self.statement, (By.XPATH, xpaths['download_btn']))
 
     def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, str]:
+            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
         """
         Parser for Swaper.
 

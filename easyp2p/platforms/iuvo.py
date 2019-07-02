@@ -122,7 +122,7 @@ class Iuvo:
                     (By.CLASS_NAME, 'p2p-download-full-list'))
 
     def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, str]:
+            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
         """
         Parser for Iuvo.
 

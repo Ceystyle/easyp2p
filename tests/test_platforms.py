@@ -32,7 +32,7 @@ class BasePlatformTests(unittest.TestCase):
         self.name = None
         self.header = 0
         self.Platform = None
-        self.unknown_cf_types = []
+        self.unknown_cf_types = ()
         self.DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
         self.DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
         self.DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
@@ -76,7 +76,7 @@ class BasePlatformTests(unittest.TestCase):
     def run_parser_test(
             self, result_file: str, date_range: Tuple[date, date],
             input_file: str = None,
-            exp_unknown_cf_types: Optional[Sequence[str]] = None) -> None:
+            exp_unknown_cf_types: Optional[Tuple[str, ...]] = None) -> None:
         """
         Test the parser of the given platform.
 
@@ -124,7 +124,7 @@ class BasePlatformTests(unittest.TestCase):
             raise AssertionError(err)
 
         if exp_unknown_cf_types is None:
-            exp_unknown_cf_types = []
+            exp_unknown_cf_types = ()
         self.assertEqual(unknown_cf_types, exp_unknown_cf_types)
 
     def run_write_results(
@@ -239,7 +239,7 @@ class BondoraTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Bondora'
         self.Platform = p2p_platforms.Bondora
-        self.unknown_cf_types = []
+        self.unknown_cf_types = ()
         self.header = 0
 
     # Below are some tests for write_results which affect more than just one
@@ -288,7 +288,7 @@ class DoFinanceTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'DoFinance'
         self.Platform = p2p_platforms.DoFinance
-        self.unknown_cf_types = ['TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
 
@@ -303,7 +303,7 @@ class EstateguruTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Estateguru'
         self.Platform = p2p_platforms.Estateguru
-        self.unknown_cf_types = ['TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
 
@@ -318,7 +318,7 @@ class GrupeerTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Grupeer'
         self.Platform = p2p_platforms.Grupeer
-        self.unknown_cf_types = ['TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
 
@@ -333,7 +333,7 @@ class IuvoTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Iuvo'
         self.Platform = p2p_platforms.Iuvo
-        self.unknown_cf_types = ['TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 3
 
 
@@ -348,7 +348,7 @@ class MintosTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Mintos'
         self.Platform = p2p_platforms.Mintos
-        self.unknown_cf_types = ['Interestincome', 'TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('Interestincome', 'TestCF1', 'TestCF2')
         self.header = 0
 
     def test_parser_multicurrency(self) -> None:
@@ -376,7 +376,7 @@ class PeerBerryTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'PeerBerry'
         self.Platform = p2p_platforms.PeerBerry
-        self.unknown_cf_types = ['TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
 
@@ -391,7 +391,7 @@ class RobocashTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Robocash'
         self.Platform = p2p_platforms.Robocash
-        self.unknown_cf_types = ['TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
 
@@ -406,7 +406,7 @@ class SwaperTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Swaper'
         self.Platform = p2p_platforms.Swaper
-        self.unknown_cf_types = ['TestCF1', 'TestCF2']
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
 
@@ -421,7 +421,7 @@ class TwinoTests(BasePlatformTests):
     def setUp(self) -> None:
         self.name = 'Twino'
         self.Platform = p2p_platforms.Twino
-        self.unknown_cf_types = ['TestCF1 PRINCIPAL', 'TestCF2 INTEREST']
+        self.unknown_cf_types = ('TestCF1 PRINCIPAL', 'TestCF2 INTEREST')
         self.header = 2
 
 

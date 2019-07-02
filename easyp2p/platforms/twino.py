@@ -99,7 +99,7 @@ class Twino:
                 self.statement, (By.CSS_SELECTOR, '.accStatement__pdf'))
 
     def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, str]:
+            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
         """
         Parser for Twino.
 

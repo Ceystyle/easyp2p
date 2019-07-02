@@ -175,7 +175,7 @@ class P2PParser:
 
     def _map_cashflow_types(
             self, cashflow_types: Optional[Mapping[str, str]],
-            orig_cf_column: Optional[str]) -> List[str]:
+            orig_cf_column: Optional[str]) -> Tuple[str, ...]:
         """
         Map platform cashflow types to easyp2p cashflow types.
 
@@ -186,18 +186,20 @@ class P2PParser:
                 statement which contains the cash flow type
 
         Returns:
-            Sorted list of strings with all unknown cash flow types or an
-            empty list if no unknown cash flow types were found.
+            Sorted tuple of strings with all unknown cash flow types or an
+            empty tuple if no unknown cash flow types were found.
 
         """
         if cashflow_types:
             self.df[self.CF_TYPE] = self.df[orig_cf_column].map(cashflow_types)
-            unknown_cf_types = sorted(list(set(
-                self.df[orig_cf_column].where(
-                    self.df[self.CF_TYPE].isna()).dropna().tolist())))
+            # All unknown cash flow types will be NaN
+            unknown_cf_types = self.df[orig_cf_column].where(
+                    self.df[self.CF_TYPE].isna()).dropna().tolist()
+            # Remove duplicates, sort the entries and make them immutable
+            unknown_cf_types = tuple(sorted(set(unknown_cf_types)))
             return unknown_cf_types
         else:
-            return []
+            return ()
 
     def _add_zero_line(self):
         """Add a single zero cash flow for start date to the DataFrame."""
@@ -218,7 +220,7 @@ class P2PParser:
             cashflow_types: Optional[Mapping[str, str]] = None,
             orig_cf_column: Optional[str] = None,
             value_column: Optional[str] = None,
-            balance_column: Optional[str] = None) -> List[str]:
+            balance_column: Optional[str] = None) -> Tuple[str, ...]:
         """
         Parse the account statement from platform format to easyp2p format.
 
@@ -236,7 +238,7 @@ class P2PParser:
                 balances
 
         Returns:
-            Sorted list of strings with all unknown cash flow types.
+            Sorted tuple of all unknown cash flow types as strings.
 
         Raises:
             RuntimeError: If date or cash flow columns cannot be found in
@@ -246,7 +248,7 @@ class P2PParser:
         # If there were no cash flows in date_range add a single zero line
         if self.df.empty:
             self._add_zero_line()
-            return []
+            return ()
 
         try:
             # Rename columns in DataFrame
@@ -258,7 +260,7 @@ class P2PParser:
                 self._filter_date_range(date_format)
                 if self.df.empty:
                     self._add_zero_line()
-                    return []
+                    return ()
 
             # Convert cash flow types from platform to easyp2p types
             unknown_cf_types = self._map_cashflow_types(
@@ -298,7 +300,12 @@ class P2PParser:
         self.df = self.df[[
             col for col in self.TARGET_COLUMNS if col in self.df.columns]]
 
-        self.signals.disconnect_signals()
+        # Disconnect signals, if no signals were connected ignore TypeError
+        try:
+            self.signals.disconnect_signals()
+        except TypeError:
+            pass
+
         return unknown_cf_types
 
 

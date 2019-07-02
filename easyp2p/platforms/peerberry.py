@@ -122,7 +122,7 @@ class PeerBerry:
                 actions='move_to_element')
 
     def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, str]:
+            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
         """
         Parser for Peerberry.
 

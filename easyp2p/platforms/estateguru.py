@@ -105,7 +105,7 @@ class Estateguru:
                 self.statement, (By.LINK_TEXT, 'CSV'))
 
     def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, str]:
+            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
         """
         Parser for Estateguru.
 

@@ -80,7 +80,7 @@ class DoFinance:
                 self.statement, (By.NAME, 'xls'))
 
     def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, str]:
+            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
         """
         Parser for DoFinance.
 
