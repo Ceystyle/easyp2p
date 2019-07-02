@@ -12,7 +12,7 @@ import gc
 import os
 from pathlib import Path
 import sys
-from typing import Set, Tuple
+from typing import Set
 
 from PyQt5.QtCore import (
     pyqtSlot, QCoreApplication, QLocale, QTranslator, QLibraryInfo)

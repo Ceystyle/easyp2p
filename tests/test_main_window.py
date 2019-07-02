@@ -3,7 +3,6 @@
 
 """Module containing all tests for the main window of easyp2p."""
 
-import calendar
 from datetime import timedelta
 import os
 import sys
