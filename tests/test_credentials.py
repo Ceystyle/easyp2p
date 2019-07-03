@@ -88,7 +88,7 @@ class CredentialsTests(unittest.TestCase):
 
     @unittest.mock.patch('easyp2p.p2p_credentials.CredentialsWindow')
     def test_get_credentials_from_user_no_save_in_keyring(
-            self, mock_cred_window, mock_keyring):
+            self, mock_cred_window, _):
         """Test getting credentials from the user without saving in keyring."""
         mock_cw = mock_cred_window('TestPlatform', True, False)
         mock_cw.username = 'TestUser'
@@ -101,7 +101,7 @@ class CredentialsTests(unittest.TestCase):
     @unittest.mock.patch('easyp2p.p2p_credentials.CredentialsWindow')
     @unittest.mock.patch('easyp2p.p2p_credentials.save_platform_in_keyring')
     def test_get_credentials_from_user_save_in_keyring(
-            self, mock_save_in_keyring, mock_cred_window, mock_keyring):
+            self, mock_save_in_keyring, mock_cred_window, _):
         """Test getting credentials from the user with save in keyring."""
         mock_cw = mock_cred_window('TestPlatform', True, False)
         mock_cw.username = 'TestUser'
@@ -116,7 +116,7 @@ class CredentialsTests(unittest.TestCase):
     @unittest.mock.patch('easyp2p.p2p_credentials.CredentialsWindow')
     @unittest.mock.patch('easyp2p.p2p_credentials.save_platform_in_keyring')
     def test_get_credentials_from_user_save_in_keyring_fails(
-            self, mock_save_in_keyring, mock_cred_window, mock_keyring):
+            self, mock_save_in_keyring, mock_cred_window, _):
         """
         Test getting credentials from the user with failed save in keyring.
         """

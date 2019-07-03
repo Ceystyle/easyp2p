@@ -90,7 +90,7 @@ class Iuvo:
                 self.date_range[1].strftime('%Y-%m-%d'))
 
             # Define conditions if account statement generation is successful:
-            # The first condition will be true if there were cashflows in
+            # The first condition will be true if there were cash flows in
             # date_range, the second condition will be true of there were none
             conditions = [
                 EC.text_to_be_present_in_element(
@@ -118,8 +118,7 @@ class Iuvo:
                 df.to_excel(self.statement)
             else:
                 iuvo.download_statement(
-                    self.statement,
-                    (By.CLASS_NAME, 'p2p-download-full-list'))
+                    self.statement, (By.CLASS_NAME, 'p2p-download-full-list'))
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:

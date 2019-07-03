@@ -3,11 +3,10 @@
 
 """Module implementing WorkerThread."""
 
-from datetime import date
 import os
 from pathlib import Path
 import tempfile
-from typing import Callable, Mapping, Optional, Tuple
+from typing import Mapping, Optional, Tuple
 
 import pandas as pd
 from PyQt5.QtCore import QThread, QCoreApplication
@@ -54,8 +53,8 @@ class WorkerThread(QThread):
         self.done = False
         self.df_result = pd.DataFrame()
 
-    def get_platform_instance(self, name: str, statement_without_suffix: str) \
-            -> Callable[[Tuple[date, date]], None]:
+    def get_platform_instance(
+            self, name: str, statement_without_suffix: str) -> p2p_platforms:
         """
         Helper method to get an instance of the platform class.
 
@@ -83,9 +82,7 @@ class WorkerThread(QThread):
         else:
             return instance
 
-    def parse_statements(
-            self, name: str,
-            platform: Callable[[Tuple[date, date]], None]) -> None:
+    def parse_statements(self, name: str, platform: p2p_platforms) -> None:
         """
         Helper method for calling the parser and appending the dataframe list.
 
@@ -109,9 +106,7 @@ class WorkerThread(QThread):
                 'in result: {1}').format(name, unknown_cf_types)
             self.signals.add_progress_text.emit(warning_msg, True)
 
-    def download_statements(
-            self, name: str,
-            platform: Callable[[Tuple[date, date]], None]) -> None:
+    def download_statements(self, name: str, platform: p2p_platforms) -> None:
         """
         Helper method for calling the download_statement methods.
 
@@ -149,8 +144,7 @@ class WorkerThread(QThread):
             self._download_statement(name, platform, self.settings.headless)
 
     def _download_statement(
-            self, name: str, platform: Callable[[Tuple[date, date]], None],
-            headless: bool) -> None:
+            self, name: str, platform: p2p_platforms, headless: bool) -> None:
         """
         Call platform.download_statement.
 
@@ -176,7 +170,7 @@ class WorkerThread(QThread):
         for name in self.settings.platforms:
             # Set target location of account statement file
             statement_without_suffix = os.path.join(
-                Path.home(), '.easyp2p', name.lower(),
+                str(Path.home()), '.easyp2p', name.lower(),
                 '{0}_statement_{1}-{2}'.format(
                     name.lower(),
                     self.settings.date_range[0].strftime('%Y%m%d'),

@@ -76,7 +76,7 @@ class MainWindowTests(unittest.TestCase):
         # date_range = self.form.get_date_range()
         self.assertEqual(
             self.form.line_edit_output_file.text(), os.path.join(
-                Path.home(), 'P2P_Results_{0}-{1}.xlsx'.format(
+                str(Path.home()), 'P2P_Results_{0}-{1}.xlsx'.format(
                     date_range[0].strftime('%d%m%Y'),
                     date_range[1].strftime('%d%m%Y'))))
 
@@ -148,8 +148,8 @@ class MainWindowTests(unittest.TestCase):
 
         new_output_file = self.form.line_edit_output_file.text()
         self.assertNotEqual(new_output_file, old_output_file)
-        self.assertEqual(
-            os.path.join(Path.home(), 'P2P_Results_01052010-30112015.xlsx'),
+        self.assertEqual(os.path.join(
+                str(Path.home()), 'P2P_Results_01052010-30112015.xlsx'),
             new_output_file)
 
     def test_output_file_on_date_change_after_user_change(self) -> None:

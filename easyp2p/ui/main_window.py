@@ -132,7 +132,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Helper method to set the name of the output file."""
         if not self.output_file_changed:
             output_file = os.path.join(
-                Path.home(),
+                str(Path.home()),
                 _translate('MainWindow', 'P2P_Results_{0}-{1}.xlsx').format(
                     self.date_range[0].strftime('%d%m%Y'),
                     self.date_range[1].strftime('%d%m%Y')))

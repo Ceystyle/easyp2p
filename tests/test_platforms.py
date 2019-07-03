@@ -6,7 +6,7 @@
 from datetime import date
 import os
 import tempfile
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Tuple
 import unittest
 
 import pandas as pd

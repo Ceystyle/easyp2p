@@ -49,7 +49,7 @@ class P2PPlatform:
 
     def __init__(
             self, name: str, driver: P2PWebDriver, urls: Mapping[str, str],
-            logout_wait_until: bool,
+            logout_wait_until: EC,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None,
             signals: Optional[Signals] = None) -> None:
@@ -144,7 +144,7 @@ class P2PPlatform:
     @signals.update_progress
     def log_into_page(
             self, name_field: str, password_field: str,
-            credentials: Tuple[str, str], wait_until: Union[bool, WebElement],
+            credentials: Tuple[str, str], wait_until: EC,
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.2) -> None:
         """
@@ -316,7 +316,7 @@ class P2PPlatform:
             self, date_range: Tuple[date, date],
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
             date_format: str,
-            wait_until: Optional[Union[bool, WebElement]] = None,
+            wait_until: Optional[EC] = None,
             submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         Generate account statement when date fields can be edited directly.
@@ -397,7 +397,7 @@ class P2PPlatform:
             self, date_range: Tuple[date, date],
             default_dates: Tuple[date, date],
             month_arrows: Mapping[str, Tuple[str, str]],
-            days_table: Mapping[str, Tuple[str]],
+            days_table: Mapping[str, Tuple[str, ...]],
             calendar_locator: Tuple[Tuple[str, str], ...],
             wait_until: Optional[Union[bool, WebElement]] = None,
             submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
@@ -539,7 +539,7 @@ class P2PPlatform:
     def generate_statement_combo_boxes(
             self, date_dict: Mapping[Tuple[str, str], str],
             submit_btn_locator: Tuple[str, str],
-            wait_until: Union[bool, WebElement]) -> None:
+            wait_until: EC) -> None:
         """
         Generate account statement by selecting dates in combo boxes.
 

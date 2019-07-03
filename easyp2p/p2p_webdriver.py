@@ -4,12 +4,13 @@
 """Module implementing P2PWebDriver."""
 
 import os
-from typing import Callable, cast, List, Optional, Union
+from typing import Callable, cast, List, Optional
 
 from selenium.common.exceptions import (
     NoSuchElementException, WebDriverException)
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from PyQt5.QtCore import QCoreApplication
 
@@ -84,8 +85,7 @@ class P2PWebDriver(Chrome):
         self.signals.disconnect_signals()
 
     def wait(
-            self, wait_until: Union[bool, WebElement],
-            delay: float = 5.0) -> WebElement:
+            self, wait_until: EC, delay: float = 5.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
 
@@ -100,7 +100,7 @@ class P2PWebDriver(Chrome):
         return WebDriverWait(self, delay).until(wait_until)
 
 
-class one_of_many_expected_conditions_true:
+class one_of_many_expected_conditions_true(EC):
     """
     An expectation for checking if (at least) one of several provided expected
     conditions for the Selenium webdriver is true.

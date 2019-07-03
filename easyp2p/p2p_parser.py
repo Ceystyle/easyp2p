@@ -11,7 +11,7 @@ single output format.
 """
 from datetime import date
 from pathlib import Path
-from typing import List, Mapping, Optional, Tuple
+from typing import Mapping, Optional, Tuple
 
 import numpy as np
 import pandas as pd

@@ -2,7 +2,7 @@
 # Copyright 2018-19 Niko Sandschneider
 
 """Module implementing SettingsWindow, the settings window of easyp2p."""
-from typing import AbstractSet, Set
+from typing import Sequence, Set, Union
 
 from PyQt5.QtCore import pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import QDialog, QInputDialog, QMessageBox
@@ -18,7 +18,9 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
 
     """Adjust easyp2p settings and user credentials for the P2P platforms."""
 
-    def __init__(self, platforms: AbstractSet[str], settings: Settings) -> None:
+    def __init__(
+            self, platforms: Union[Sequence[str], Set[str]],
+            settings: Settings) -> None:
         """
         Constructor of SettingsWindow.
 
