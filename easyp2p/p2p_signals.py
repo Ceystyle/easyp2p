@@ -73,11 +73,14 @@ class Signals(QObject):
 
     def disconnect_signals(self) -> None:
         """
-        Helper method for disconnecting signals if they are no longer needed.
+        Disconnect signals. Ignore error if they were not connected.
         """
-        self.update_progress_bar.disconnect()
-        self.add_progress_text.disconnect()
-        self.end_easyp2p.disconnect()
+        try:
+            self.update_progress_bar.disconnect()
+            self.add_progress_text.disconnect()
+            self.end_easyp2p.disconnect()
+        except TypeError:
+            pass
 
     def abort_evaluation(self):
         """Set the abort flag to True."""

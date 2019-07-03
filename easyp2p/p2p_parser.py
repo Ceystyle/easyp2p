@@ -300,11 +300,8 @@ class P2PParser:
         self.df = self.df[[
             col for col in self.TARGET_COLUMNS if col in self.df.columns]]
 
-        # Disconnect signals, if no signals were connected ignore TypeError
-        try:
-            self.signals.disconnect_signals()
-        except TypeError:
-            pass
+        # Disconnect signals
+        self.signals.disconnect_signals()
 
         return unknown_cf_types
 

@@ -137,7 +137,9 @@ class P2PPlatform:
                     '{}: no method for logout provided!').format(self.name))
 
             self.logged_in = False
+
         self.signals.disconnect_signals()
+
         if exc_type:
             raise exc_type(exc_value)
 
