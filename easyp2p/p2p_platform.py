@@ -29,7 +29,7 @@ from selenium.webdriver.support.ui import Select
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
+from easyp2p.p2p_webdriver import P2PWebDriver, expected_conditions
 
 _translate = QCoreApplication.translate
 
@@ -49,7 +49,7 @@ class P2PPlatform:
 
     def __init__(
             self, name: str, driver: P2PWebDriver, urls: Mapping[str, str],
-            logout_wait_until: EC,
+            logout_wait_until: expected_conditions,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None,
             signals: Optional[Signals] = None) -> None:
@@ -146,7 +146,7 @@ class P2PPlatform:
     @signals.update_progress
     def log_into_page(
             self, name_field: str, password_field: str,
-            credentials: Tuple[str, str], wait_until: EC,
+            credentials: Tuple[str, str], wait_until: expected_conditions,
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.2) -> None:
         """
@@ -252,7 +252,7 @@ class P2PPlatform:
     @signals.update_progress
     def logout_by_button(
             self, logout_locator: Tuple[str, str],
-            wait_until: Union[bool, WebElement],
+            wait_until: expected_conditions,
             hover_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         P2P platform logout using the provided logout button.
@@ -290,7 +290,7 @@ class P2PPlatform:
                     self.name))
 
     @signals.update_progress
-    def logout_by_url(self, wait_until: Union[bool, WebElement]) -> None:
+    def logout_by_url(self, wait_until: expected_conditions) -> None:
         """
         P2P platform logout using the provided URL.
 
@@ -318,7 +318,7 @@ class P2PPlatform:
             self, date_range: Tuple[date, date],
             start_locator: Tuple[str, str], end_locator: Tuple[str, str],
             date_format: str,
-            wait_until: Optional[EC] = None,
+            wait_until: Optional[expected_conditions] = None,
             submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         Generate account statement when date fields can be edited directly.
@@ -401,7 +401,7 @@ class P2PPlatform:
             month_arrows: Mapping[str, Tuple[str, str]],
             days_table: Mapping[str, Tuple[str, ...]],
             calendar_locator: Tuple[Tuple[str, str], ...],
-            wait_until: Optional[Union[bool, WebElement]] = None,
+            wait_until: Optional[expected_conditions] = None,
             submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
         """
         Generate account statement by clicking days in a calendar.
@@ -541,7 +541,7 @@ class P2PPlatform:
     def generate_statement_combo_boxes(
             self, date_dict: Mapping[Tuple[str, str], str],
             submit_btn_locator: Tuple[str, str],
-            wait_until: EC) -> None:
+            wait_until: expected_conditions) -> None:
         """
         Generate account statement by selecting dates in combo boxes.
 

@@ -4,7 +4,7 @@
 """Module implementing P2PWebDriver."""
 
 import os
-from typing import Callable, cast, List, Optional
+from typing import Callable, cast, List, Optional, Union
 
 from selenium.common.exceptions import (
     NoSuchElementException, WebDriverException)
@@ -100,7 +100,7 @@ class P2PWebDriver(Chrome):
         return WebDriverWait(self, delay).until(wait_until)
 
 
-class one_of_many_expected_conditions_true(EC):
+class one_of_many_expected_conditions_true:
     """
     An expectation for checking if (at least) one of several provided expected
     conditions for the Selenium webdriver is true.
@@ -133,3 +133,8 @@ class one_of_many_expected_conditions_true(EC):
             except NoSuchElementException:
                 pass
         return False
+
+
+# Helper for type hints
+expected_conditions = Union[
+    EC.element_to_be_clickable, one_of_many_expected_conditions_true]
