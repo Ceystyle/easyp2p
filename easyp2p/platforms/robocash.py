@@ -86,11 +86,11 @@ class Robocash:
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Account statement')),
                 login_locator=(By.XPATH, xpaths['login_field']))
 
-            robocash.open_account_statement_page((By.ID, 'new_statement'))
+            robocash.open_account_statement_page((By.ID, 'generate_statement_button'))
 
             try:
                 statement_btn = driver.wait(EC.element_to_be_clickable(
-                    (By.ID, 'new_statement')))
+                    (By.ID, 'generate_statement_button')))
                 statement_btn.click()
             except NoSuchElementException:
                 self.signals.add_progress_text.emit(_translate(
