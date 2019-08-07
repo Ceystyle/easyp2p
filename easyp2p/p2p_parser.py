@@ -15,6 +15,7 @@ from typing import Mapping, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from pandas.errors import ParserError
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_signals import Signals
@@ -338,5 +339,8 @@ def get_df_from_file(
     except FileNotFoundError:
         raise RuntimeError(_translate(
             'P2PParser', '{} could not be found!').format(input_file))
+    except ParserError:
+        raise RuntimeError(_translate(
+            'P2PParser', '{} could not be parsed!').format(input_file))
 
     return df

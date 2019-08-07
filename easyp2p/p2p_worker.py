@@ -185,7 +185,8 @@ class WorkerThread(QThread):
                     _translate(
                         'WorkerThread', '{} successfully evaluated!').format(
                             name), False)
-            except PlatformFailedError:
+            except PlatformFailedError as err:
+                self.signals.add_progress_text.emit(str(err), True)
                 self.signals.add_progress_text.emit(
                     _translate('WorkerThread', '{} will be ignored!').format(
                         name), True)
