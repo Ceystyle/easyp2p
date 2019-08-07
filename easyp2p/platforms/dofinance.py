@@ -102,11 +102,13 @@ class DoFinance:
             self.name, self.date_range, self.statement, skipfooter=2,
             signals=self.signals)
 
-        # Define mapping between DoFinance and easyp2p cashflow types and
+        # Define mapping between DoFinance and easyp2p cash flow types and
         # column names
         cashflow_types = {
             'Withdrawal': parser.IN_OUT_PAYMENT,
-            'Profit': parser.INTEREST_PAYMENT}
+            'Profit': parser.INTEREST_PAYMENT,
+            # treat bonus payments as interest payments
+            'Investor Bonus': parser.INTEREST_PAYMENT}
 
         for cf_type in parser.df['Transaction Type'].unique():
             if cf_type.startswith('Repayment'):
