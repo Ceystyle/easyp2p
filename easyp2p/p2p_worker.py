@@ -168,10 +168,21 @@ class WorkerThread(QThread):
 
         """
         for name in self.settings.platforms:
+            # Create target directories if they don't exist yet
+            target_directory = os.path.join(
+                str(Path.home()), '.easyp2p', name.lower())
+            if not os.path.isdir(target_directory):
+                try:
+                    os.makedirs(target_directory, exist_ok=True)
+                except OSError:
+                    self.signals.add_progress_text.emit(
+                        _translate('Could not create directory {}!').format(
+                            target_directory), True)
+                    break
+
             # Set target location of account statement file
             statement_without_suffix = os.path.join(
-                str(Path.home()), '.easyp2p', name.lower(),
-                '{0}_statement_{1}-{2}'.format(
+                target_directory, '{0}_statement_{1}-{2}'.format(
                     name.lower(),
                     self.settings.date_range[0].strftime('%Y%m%d'),
                     self.settings.date_range[1].strftime('%Y%m%d')))
