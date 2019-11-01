@@ -64,14 +64,14 @@ class Estateguru:
                 '/html/body/section/div/div/div/div[2]/section[1]/div/div'
                 '/div[2]/div/form/div[2]/ul/li[5]/a'),
             'filter_btn': (
-                '/html/body/section/div/div/div/div[2]/div/div[1]/div[1]'
-                '/button'),
+                '/html/body/section/div/div/div/div[2]/div/div/div/div/div[1]'
+                '/div[1]/button'),
             'select_btn': (
-                '/html/body/section/div/div/div/div[2]/div/div[1]/div[2]'
-                '/button'),
+                '/html/body/section/div/div/div/div[2]/div/div/div/div/div[1]'
+                '/div[2]/button'),
             'submit_btn': (
-                '/html/body/section/div/div/div/div[2]/div/div[1]/div[3]/form'
-                '/div[6]/div/div[3]/button'),
+                '/html/body/section/div/div/div/div[2]/div/div/div/div/div[1]'
+                '/div[3]/form/div[6]/div/div[3]/button')
         }
 
         with P2PPlatform(
