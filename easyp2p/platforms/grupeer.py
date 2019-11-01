@@ -60,17 +60,12 @@ class Grupeer:
             'statement': ('https://www.grupeer.com/account-statement'
                           '?currency_code=eur'),
         }
-        xpaths = {
-            'logout_hover': (
-                '/html/body/div[4]/header/div/div/div[2]/div[1]/div/div/ul/li'
-                '/a/span'),
-        }
 
         with P2PPlatform(
                 self.name, driver, urls,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In')),
                 logout_locator=(By.LINK_TEXT, 'Logout'),
-                hover_locator=(By.XPATH, xpaths['logout_hover']),
+                hover_locator=(By.CLASS_NAME, 'header-auth-menu-name'),
                 signals=self.signals) as grupeer:
 
             grupeer.log_into_page(
