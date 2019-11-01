@@ -61,7 +61,7 @@ class Iuvo:
         }
         xpaths = {
             'statement_check': (
-                '/html/body/div[5]/main/div/div/div/div[6]/div/div/div'
+                '/html/body/div[3]/main/div/div/div/div[6]/div/div/div'
                 '/strong[3]'),
         }
 
@@ -146,6 +146,7 @@ class Iuvo:
         # Define mapping between Iuvo and easyp2p cashflow types and column
         # names
         cashflow_types = {
+            'deposit': parser.IN_OUT_PAYMENT,
             'late_fee': parser.LATE_FEE_PAYMENT,
             'payment_interest': parser.INTEREST_PAYMENT,
             'payment_interest_early': parser.INTEREST_PAYMENT,
