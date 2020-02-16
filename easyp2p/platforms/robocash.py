@@ -172,7 +172,7 @@ class Robocash:
             'Paying interest': parser.INTEREST_PAYMENT,
             'Purchasing a loan': parser.INVESTMENT_PAYMENT,
             'Returning a loan': parser.REDEMPTION_PAYMENT,
-            'Withdrawal of Funds': parser.IN_OUT_PAYMENT,
+            'Withdrawal of funds': parser.IN_OUT_PAYMENT,
             # We don't report cash transfers within Robocash:
             'Creating a portfolio': parser.IGNORE,
             'Refilling a portfolio': parser.IGNORE,
