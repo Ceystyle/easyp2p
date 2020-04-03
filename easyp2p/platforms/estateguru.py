@@ -6,11 +6,13 @@ Download and parse Estateguru statement.
 """
 
 from datetime import date
+import time
 from typing import Optional, Tuple
 
 import pandas as pd
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
@@ -63,12 +65,12 @@ class Estateguru:
             'account_statement_check': (
                 '/html/body/section/div/div/div/div[2]/section[1]/div/div'
                 '/div[2]/div/form/div[2]/ul/li[5]/a'),
+            'download_btn': (
+                '//*[@id="collapseTransactions"]/div/div/div[1]/div/div[2]'
+                '/button'),
             'filter_btn': (
-                '/html/body/section/div/div/div/div[2]/div/div/div/div/div[1]'
-                '/div[1]/button'),
-            'select_btn': (
-                '/html/body/section/div/div/div/div[2]/div/div/div/div/div[1]'
-                '/div[2]/button'),
+                '//*[@id="collapseTransactions"]/div/div/div[1]/div/div[1]'
+                '/button'),
             'submit_btn': (
                 '/html/body/section/div/div/div/div[2]/div/div/div/div/div[1]'
                 '/div[3]/form/div[6]/div/div[3]/button')
@@ -91,16 +93,29 @@ class Estateguru:
             estateguru.driver.find_element_by_xpath(
                 xpaths['filter_btn']).click()
             estateguru.generate_statement_direct(
-                self.date_range, (By.ID, 'dateApproveFilter'),
-                (By.ID, 'dateApproveFilterTo'), '%d.%m.%Y',
+                self.date_range,
+                (By.ID, 'filter_dateApproveFilterFrom_dataTableTransaction'),
+                (By.ID, 'filter_dateApproveFilterTo_dataTableTransaction'),
+                '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable(
-                    (By.XPATH, xpaths['select_btn'])),
-                submit_btn_locator=(By.XPATH, xpaths['submit_btn']))
+                    (By.ID, 'btnFilterPMTable')),
+                submit_btn_locator=(By.ID, 'btnFilterPMTable'))
+
+            # Clicking the submit button will move the screen to the bottom of
+            # the page. Move back to top again.
+            estateguru.driver.find_element_by_tag_name('body').send_keys(
+                Keys.HOME)
+
+            # Estateguru needs a bit until the download button can be clicked
+            # without closing the drop-down menu at once
+            time.sleep(1)
 
             # Open the download dialog and download the statement
-            estateguru.driver.find_element_by_xpath(
-                xpaths['select_btn']).click()
-            driver.wait(EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+            download_btn = estateguru.driver.wait(EC.element_to_be_clickable(
+                (By.XPATH, xpaths['download_btn'])))
+            download_btn.click()
+            estateguru.driver.wait(
+                EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
             estateguru.download_statement(
                 self.statement, (By.LINK_TEXT, 'CSV'))
 
