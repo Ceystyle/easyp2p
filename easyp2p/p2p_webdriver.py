@@ -45,6 +45,7 @@ class P2PWebDriver(Chrome):
         prefs = {"download.default_directory": self.download_directory}
         options.add_experimental_option("prefs", prefs)
         options.add_argument("start-maximized")
+        options.binary_location = "/usr/bin/chromium"
         if headless:
             options.add_argument("--headless")
             options.add_argument("--window-size=1920,1200")
@@ -85,7 +86,7 @@ class P2PWebDriver(Chrome):
         self.signals.disconnect_signals()
 
     def wait(
-            self, wait_until: EC, delay: float = 5.0) -> WebElement:
+            self, wait_until: EC, delay: float = 15.0) -> WebElement:
         """
         Shorthand for WebDriverWait.
 
