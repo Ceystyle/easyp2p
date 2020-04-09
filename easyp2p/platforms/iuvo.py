@@ -78,8 +78,8 @@ class Iuvo:
 
             # Click away cookie policy, if present
             try:
-                driver.find_element_by_id(
-                    'CybotCookiebotDialogBodyButtonAccept').click()
+                iuvo.driver.wait(EC.element_to_be_clickable(
+                    (By.ID, 'CybotCookiebotDialogBodyButtonAccept'))).click()
             except NoSuchElementException:
                 pass
 
