@@ -62,7 +62,8 @@ class DoFinance:
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Log In')),
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//a[@href="/en/users/login"]')),
                 signals=self.signals) as dofinance:
 
             dofinance.log_into_page(
