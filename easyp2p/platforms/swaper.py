@@ -60,6 +60,10 @@ class Swaper:
             'statement': 'https://www.swaper.com/#/overview/account-statement',
         }
         xpaths = {
+            'day_table': (
+                "//*[@class='datepicker opened']//*[@class='dates']//table"
+                "//td"),
+            'month': "//*[@class='datepicker opened']//*[@class='month']",
             'download_btn': (
                 '//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a'
                 '/div[1]/div/span[2]'),
@@ -80,19 +84,13 @@ class Swaper:
 
             # calendar_locator must be tuple of locators, thus the , at the end
             calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )
-            month_arrows = {
-                'previous': (By.CSS_SELECTOR, '.opened .icon-left'),
-                'next': (By.CSS_SELECTOR, '.opened .icon-right')}
-            days_table = {
-                'current_month_class': (' ', ' selected'),
-                'xpath': (
-                    "//*[@class='datepicker opened']//*[@class='dates']//"
-                    "table//td")}
-            default_dates = (date.today().replace(day=1), date.today())
+            month_locator = (By.XPATH, xpaths['month'])
+            prev_month_locator = (By.CSS_SELECTOR, '.opened .icon-left')
 
             swaper.generate_statement_calendar(
-                self.date_range, default_dates, month_arrows, days_table,
-                calendar_locator)
+                self.date_range, month_locator, prev_month_locator,
+                (By.XPATH, xpaths['day_table']), calendar_locator,
+                day_class_check=(' ', ' selected'))
 
             swaper.download_statement(
                 self.statement, (By.XPATH, xpaths['download_btn']))

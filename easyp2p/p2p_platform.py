@@ -16,10 +16,12 @@ import glob
 import os
 import shutil
 import time
-from typing import Mapping, Optional, Tuple, Union
+from typing import Mapping, Optional, Tuple
 
+import arrow
 from selenium.common.exceptions import (
-    TimeoutException, NoSuchElementException, StaleElementReferenceException)
+    ElementClickInterceptedException, NoSuchElementException,
+    StaleElementReferenceException, TimeoutException)
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -397,12 +399,13 @@ class P2PPlatform:
     @signals.update_progress
     def generate_statement_calendar(
             self, date_range: Tuple[date, date],
-            default_dates: Tuple[date, date],
-            month_arrows: Mapping[str, Tuple[str, str]],
-            days_table: Mapping[str, Tuple[str, ...]],
+            month_locator: Tuple[str, str],
+            prev_month_locator: Tuple[str, str],
+            day_locator: Tuple[str, str],
             calendar_locator: Tuple[Tuple[str, str], ...],
             wait_until: Optional[expected_conditions] = None,
-            submit_btn_locator: Optional[Tuple[str, str]] = None) -> None:
+            submit_btn_locator: Optional[Tuple[str, str]] = None,
+            day_class_check: Tuple[str, ...] = None) -> None:
         """
         Generate account statement by clicking days in a calendar.
 
@@ -416,12 +419,11 @@ class P2PPlatform:
         Args:
             date_range: Date range (start_date, end_date) for which the
                 account statement must be generated.
-            default_dates: Pre-filled default dates of the two date pickers.
-            month_arrows: Dictionary with locators of the previous and next
-                month arrows (keys 'previous' and 'next' respectively)
-            days_table: Dictionary with two entries:
-                xpath of day table (key 'xpath'), tuple of class names of days
-                in the selected month (key 'current_month_class').
+            month_locator: Locator of the web element which contains the name
+                of the currently selected month.
+            prev_month_locator: Locator of the web element which needs to be
+                clicked to switch the calendar to the previous month.
+            day_locator: Locator of the table with the days for the given month.
             calendar_locator: Tuple containing locators for the two calendars.
                 It must have either length 1 or 2.
             wait_until: Expected condition in case of successful account
@@ -429,6 +431,9 @@ class P2PPlatform:
             submit_btn_locator: Locator of button which needs to clicked to
                 start account statement generation. Not all P2P platforms
                 require this. Default is None.
+            day_class_check: For some websites the days identified by
+                day_locator are not unique. They can be further specified by
+                providing a tuple of class names in day_class_check.
 
         Raises:
             RuntimeError: - If a web element cannot be found
@@ -454,19 +459,15 @@ class P2PPlatform:
                     'P2PPlatform', '{}: invalid locator for calendar '
                     'provided!').format(self.name))
 
-            # How many clicks on the arrow buttons are necessary?
-            start_calendar_clicks = _get_calendar_clicks(
-                date_range[0], default_dates[0])
-            end_calendar_clicks = _get_calendar_clicks(
-                date_range[1], default_dates[1])
-
             # Set start and end date in the calendars
             self._set_date_in_calendar(
-                start_calendar, date_range[0].day, start_calendar_clicks,
-                month_arrows, days_table)
+                start_calendar, date_range[0], month_locator,
+                prev_month_locator, day_locator,
+                day_class_check=day_class_check)
             self._set_date_in_calendar(
-                end_calendar, date_range[1].day, end_calendar_clicks,
-                month_arrows, days_table)
+                end_calendar, date_range[1], month_locator,
+                prev_month_locator, day_locator,
+                day_class_check=day_class_check)
 
             if submit_btn_locator is not None:
                 submit_btn = self.driver.wait(
@@ -485,51 +486,60 @@ class P2PPlatform:
                 'long!').format(self.name))
 
     def _set_date_in_calendar(
-            self, calendar_: WebElement, day: int, months: int,
-            month_arrows: Mapping[str, Tuple[str, str]],
-            days_table: Mapping[str, Tuple[str]]) -> None:
+            self, calendar_: WebElement, target_date,
+            month_locator: Tuple[str, str],
+            prev_month_locator: Tuple[str, str],
+            day_locator: Tuple[str, str],
+            day_class_check: Tuple[str, ...] = None) -> None:
         """
         Find and click the given day in the provided calendar.
 
         Args:
             calendar_: web element which needs to be clicked in order to open
                 the calendar
-            day: day (as int) of the target date
-            months: how many months in the past/future (negative/positive) is
-                the target date compared to default date
-            month_arrows: Dictionary with locators of the previous and next
-                month arrows (keys 'previous' and 'next' respectively)
-            days_table: Dictionary with two entries:
-                xpath of day table (key 'xpath'), tuple of class names of days
-                in the selected month (key 'current_month_class').
+            month_locator: Locator of the web element which contains the name
+                of the currently selected month.
+            prev_month_locator: Locator of the web element which needs to be
+                clicked to switch the calendar to the previous month.
+            day_locator: Locator of the table with the days for the given month
+            day_class_check: For some websites the days identified by
+                day_locator are not unique. They can be further specified by
+                providing a tuple of class names in day_class_check.
 
         Raises:
             RuntimeError: If the target day cannot be found in the calendar.
 
         """
-        # Open the calendar and wait until the buttons for changing the month
-        # are clickable
-        calendar_.click()
-        previous_month = self.driver.wait(
-            EC.element_to_be_clickable(month_arrows['previous']))
-        next_month = self.driver.wait(
-            EC.element_to_be_clickable(month_arrows['next']))
+        try:
+            calendar_.click()
+        except ElementClickInterceptedException:
+            # Selenium puts the calender field for some web sites under the
+            # site header. Scroll site by offset to put it into view again.
+            self.driver.execute_script(f'window.scrollBy(0, -250);')
+            calendar_.click()
 
-        # Switch the calendar to the given target month
-        if months < 0:
-            for _ in range(0, abs(months)):
-                previous_month.click()
-        elif months > 0:
-            for _ in range(0, months):
-                next_month.click()
+        prev_month = self.driver.wait(
+            EC.element_to_be_clickable(prev_month_locator))
+
+        screen_date = arrow.get(
+            self.driver.find_element(*month_locator).text,
+            'MMMM YYYY', locale='en_US')
+        while screen_date.month > target_date.month \
+                or screen_date.year > target_date.year:
+            prev_month.click()
+            screen_date = arrow.get(
+                self.driver.find_element(*month_locator).text,
+                'MMMM YYYY', locale='en_US')
 
         # Get table with all days of the selected month
-        all_days = self.driver.find_elements_by_xpath(days_table['xpath'])
+        all_days = self.driver.find_elements(*day_locator)
 
         # Find and click the target day
         for elem in all_days:
-            if elem.text == str(day) and elem.get_attribute('class') \
-                    in days_table['current_month_class']:
+            if elem.text == str(target_date.day):
+                if day_class_check and elem.get_attribute('class') \
+                        not in day_class_check:
+                    continue
                 elem.click()
                 return
 
@@ -687,30 +697,3 @@ def _download_finished(
             waiting_time += 1
 
     return False
-
-
-def _get_calendar_clicks(target_date: date, start_date: date) -> int:
-    """
-    Get number of clicks necessary to get from start to target month.
-
-    This function will determine how many months in the past/future the
-    target date is compared to a given start date. Positive numbers mean
-    months into the future, negative numbers months into the past.
-
-    Args:
-        target_date: Target date.
-        start_date: Start date.
-
-    Returns:
-        Number of calendar clicks to get from start to target date.
-
-    """
-    if target_date.year != start_date.year:
-        clicks = 12 * (target_date.year - start_date.year)
-    else:
-        clicks = 0
-
-    if target_date.month != start_date.month:
-        clicks += target_date.month - start_date.month
-
-    return clicks

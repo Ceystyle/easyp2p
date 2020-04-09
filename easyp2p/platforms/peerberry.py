@@ -60,70 +60,51 @@ class PeerBerry:
             'statement': 'https://peerberry.com/en/statement',
         }
         xpaths = {
-            'cookie_policy': '//*[@id="app"]/div/div/div/div[4]/div/div/div[1]',
-            'download_btn': (
-                '//*[@id="app"]/div/div/div/div[2]/div/div[2]/div[3]/div[2]'
-                '/div'),
-            'login_btn': (
-                '/html/body/div[1]/div/div/div/div[2]/div/div/div/div[1]/div'
-                '/div/form/input'),
-            'logout_btn': (
-                '//*[@id="app"]/div/div/div/div[1]/div[1]/div/div/div[2]/div'),
-            'start_balance': (
-                '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[2]/div'
-                '/div/div[1]'),
             'statement_btn': (
-                '/html/body/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div'
-                '/div[2]/div/div[2]/div/span'),
+                '/html/body/div[1]/div/div/div[2]/div[3]/div[2]/div/form/div'
+                '/div[4]/button'),
+            'start_calendar': (
+                '//*[@id="app"]/div/div/div[2]/div[3]/div[2]/div/form/div'
+                '/div[1]/div/div[1]/div/input'),
+            'end_calendar': (
+                '//*[@id="app"]/div/div/div[2]/div[3]/div[2]/div/form/div'
+                '/div[1]/div/div[2]/div/input'),
         }
 
         with P2PPlatform(
                 self.name, driver, urls,
-                EC.element_to_be_clickable((By.XPATH, xpaths['login_btn'])),
-                logout_locator=(By.XPATH, xpaths['logout_btn']),
+                EC.element_to_be_clickable((By.NAME, 'email')),
+                logout_locator=(By.CLASS_NAME, 'logout'),
                 signals=self.signals) as peerberry:
 
             peerberry.log_into_page(
                 'email', 'password', credentials,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Statement')))
 
-            peerberry.open_account_statement_page((By.NAME, 'startDate'))
-
-            # Close the cookie policy, if present
+            # Close the cookie policy
             try:
-                driver.find_element_by_xpath(xpaths['cookie_policy']).click()
+                peerberry.driver.wait(EC.element_to_be_clickable(
+                    (By.CLASS_NAME, 'close-icon'))).click()
             except NoSuchElementException:
                 pass
 
-            # Create account statement for given date range
-            default_dates = (date.today(), date.today())
-            month_arrows = {
-                'previous': (By.CSS_SELECTOR, '.rdtOpen .rdtPrev'),
-                'next': (By.CSS_SELECTOR, '.rdtOpen .rdtNext')}
-            calendar_locator = ((By.NAME, 'startDate'), (By.NAME, 'endDate'))
-            days_table = {
-                'current_month_class': (
-                        'rdtDay', 'rdtDay rdtToday', 'rdtDay rdtActive'),
-                'xpath': (
-                    "//*[@class='rdt rdtOpen']//*[@class='rdtPicker']"
-                    "//*[@class='rdtDays']//table//td")}
+            peerberry.open_account_statement_page((By.NAME, 'startDate'))
 
-            # 2019/07/02: PeerBerry currently takes a long time to show the
-            # balances during account statement generation. Disable the balance
-            # check for now.
-            # TODO: re-add check once PeerBerry works again
+            # Create account statement for given date range
+            month_locator = (By.CLASS_NAME, 'MuiTypography-body1')
+            prev_month_locator = (
+                By.CLASS_NAME, 'MuiPickersCalendarHeader-iconButton')
+            calendar_locator = (
+                (By.XPATH, xpaths['start_calendar']),
+                (By.XPATH, xpaths['end_calendar']))
             peerberry.generate_statement_calendar(
-                self.date_range, default_dates, month_arrows, days_table,
-                calendar_locator,
-                # wait_until=EC.text_to_be_present_in_element(
-                #     (By.XPATH, xpaths['start_balance']),
-                #     'Opening balance '+str(self.date_range[0]).format(
-                #         '%Y-%m-%d')),
-                submit_btn_locator=(By.XPATH, xpaths['statement_btn']))
+                self.date_range, month_locator, prev_month_locator,
+                (By.CLASS_NAME, 'MuiPickersDay-day'), calendar_locator,
+                submit_btn_locator=(By.XPATH, xpaths['statement_btn']),
+                offset=-250)
 
             peerberry.download_statement(
-                self.statement, (By.XPATH, xpaths['download_btn']),
-                actions='move_to_element')
+                self.statement, (By.CLASS_NAME, 'download'))
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
@@ -152,6 +133,7 @@ class PeerBerry:
         cashflow_types = {
             'Amount of interest payment received': parser.INTEREST_PAYMENT,
             'Amount of principal payment received': parser.REDEMPTION_PAYMENT,
+            'Deposit': parser.IN_OUT_PAYMENT,
             'Investment': parser.INVESTMENT_PAYMENT}
         rename_columns = {'Currency Id': parser.CURRENCY, 'Date': parser.DATE}
 
