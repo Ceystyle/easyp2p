@@ -100,8 +100,7 @@ class PeerBerry:
             peerberry.generate_statement_calendar(
                 self.date_range, month_locator, prev_month_locator,
                 (By.CLASS_NAME, 'MuiPickersDay-day'), calendar_locator,
-                submit_btn_locator=(By.XPATH, xpaths['statement_btn']),
-                offset=-250)
+                submit_btn_locator=(By.XPATH, xpaths['statement_btn']))
 
             peerberry.download_statement(
                 self.statement, (By.CLASS_NAME, 'download'))
