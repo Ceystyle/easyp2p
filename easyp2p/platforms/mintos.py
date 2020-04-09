@@ -99,7 +99,7 @@ class Mintos:
     @signals.update_progress
     def _create_empty_statement(self, driver: P2PWebDriver):
         try:
-            cashflow_table = driver.find_element_by_id('overview-results')
+            cashflow_table = driver.find_element(By.ID, 'overview-results')
             df = pd.read_html(cashflow_table.get_attribute("innerHTML"))[0]
 
             if self._no_cashflows(df):

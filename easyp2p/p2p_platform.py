@@ -207,7 +207,7 @@ class P2PPlatform:
             elem.clear()
             elem.send_keys(credentials[0])
             time.sleep(fill_delay)
-            elem = self.driver.find_element_by_name(password_field)
+            elem = self.driver.find_element(By.NAME, password_field)
             elem.clear()
             elem.send_keys(credentials[1])
             time.sleep(fill_delay)

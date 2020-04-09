@@ -90,8 +90,8 @@ class Estateguru:
                 (By.XPATH, xpaths['filter_btn']))
 
             # Open the filter dialog and generate the statement
-            estateguru.driver.find_element_by_xpath(
-                xpaths['filter_btn']).click()
+            estateguru.driver.find_element(
+                By.XPATH, xpaths['filter_btn']).click()
             estateguru.generate_statement_direct(
                 self.date_range,
                 (By.ID, 'filter_dateApproveFilterFrom_dataTableTransaction'),
@@ -103,7 +103,7 @@ class Estateguru:
 
             # Clicking the submit button will move the screen to the bottom of
             # the page. Move back to top again.
-            estateguru.driver.find_element_by_tag_name('body').send_keys(
+            estateguru.driver.find_element(By.TAG_NAME, 'body').send_keys(
                 Keys.HOME)
 
             # Estateguru needs a bit until the download button can be clicked

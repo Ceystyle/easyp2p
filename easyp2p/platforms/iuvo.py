@@ -107,8 +107,8 @@ class Iuvo:
 
             try:
                 no_cashflows = bool(
-                    iuvo.driver.find_element_by_class_name(
-                        'text-center').text == 'There is no suitable data !')
+                    iuvo.driver.find_element(By.CLASS_NAME, 'text-center').text
+                    == 'There is no suitable data !')
             except NoSuchElementException:
                 no_cashflows = False
 
