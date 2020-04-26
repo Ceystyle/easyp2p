@@ -68,10 +68,11 @@ class P2PWebDriver(Chrome):
                 '/chromedriver/downloads\n\n'
             self.signals.end_easyp2p.emit(_translate(
                 'P2PWebDriver', 'ChromeDriver could not be found!\n\n'
-                'In Linux this can usually be fixed by:\n\n\t{0}\n\n'
-                'In Windows ChromeDriver can be downloaded from:\n\n{1}\n\n'
-                'easyp2p will be aborted now!').format(
-                    linux_command, download_link),
+                'In Linux this can usually be fixed by:'
+                f'\n\n\t{linux_command}\n\n'
+                'In Windows ChromeDriver can be downloaded from:'
+                f'\n\n{download_link}\n\n'
+                'easyp2p will be aborted now!'),
                 _translate('WorkerThread', 'ChromeDriver not found!'))
             raise RuntimeError('ChromeDriver not found!')
 

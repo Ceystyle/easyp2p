@@ -105,9 +105,10 @@ class P2PParser:
 
         # Check if account statement exists
         if self.df is None:
-            raise RuntimeError(_translate(
-                'P2PParser',
-                '{} parser: no account statement available!').format(self.name))
+            pass
+        raise RuntimeError(_translate(
+            'P2PParser',
+            f'{self.name} parser: no account statement available!'))
 
     def _calculate_total_income(self):
         """ Calculate total income for each row of the DataFrame """
@@ -269,8 +270,8 @@ class P2PParser:
         except KeyError as err:
             raise RuntimeError(_translate(
                 'P2PParser',
-                '{0}: column {1} is missing in account statement!').format(
-                    self.name, str(err)))
+                f'{self.name}: column {str(err)} is missing in account '
+                'statement!'))
 
         # If the platform does not explicitly report currencies assume that
         # currency is EUR
@@ -338,9 +339,9 @@ def get_df_from_file(
                 'P2PParser', 'Unknown file format during import:'), input_file)
     except FileNotFoundError:
         raise RuntimeError(_translate(
-            'P2PParser', '{} could not be found!').format(input_file))
+            'P2PParser', f'{input_file} could not be found!'))
     except ParserError:
         raise RuntimeError(_translate(
-            'P2PParser', '{} could not be parsed!').format(input_file))
+            'P2PParser', f'{input_file} could not be parsed!'))
 
     return df

@@ -77,8 +77,9 @@ class WorkerThread(QThread):
                 signals=self.signals)
         except AttributeError:
             raise PlatformFailedError(
-                _translate('WorkerThread', '{}.py could not be found!').format(
-                    name.lower()))
+                _translate(
+                    'WorkerThread',
+                    f'{name.lower()}.py could not be found!'))
         else:
             return instance
 
@@ -102,8 +103,9 @@ class WorkerThread(QThread):
 
         if unknown_cf_types:
             warning_msg = _translate(
-                'WorkerThread', '{0}: unknown cash flow type will be ignored '
-                'in result: {1}').format(name, unknown_cf_types)
+                'WorkerThread',
+                f'{name}: unknown cash flow type will be ignored in result:'
+                f'{unknown_cf_types}')
             self.signals.add_progress_text.emit(warning_msg, True)
 
     def download_statements(self, name: str, platform: p2p_platforms) -> None:
@@ -122,12 +124,14 @@ class WorkerThread(QThread):
         if self.credentials[name] is None:
             raise PlatformFailedError(
                 _translate(
-                    'WorkerThread', 'Credentials for {} are not '
-                    'available!').format(name))
+                    'WorkerThread',
+                    f'Credentials for {name} are not available!'))
 
         self.signals.add_progress_text.emit(
-            _translate('WorkerThread', 'Starting evaluation of {}...').format(
-                name), False)
+            _translate(
+                'WorkerThread',
+                f'Starting evaluation of {name}...'),
+            False)
 
         if name == 'Iuvo' and self.settings.headless:
             # Iuvo is currently not supported in headless ChromeDriver mode
@@ -176,16 +180,17 @@ class WorkerThread(QThread):
                     os.makedirs(target_directory, exist_ok=True)
                 except OSError:
                     self.signals.add_progress_text.emit(
-                        _translate('Could not create directory {}!').format(
-                            target_directory), True)
+                        _translate(
+                            f'Could not create directory {target_directory}!'),
+                        True)
                     break
 
             # Set target location of account statement file
+            start_date = self.settings.date_range[0].strftime('%Y%m%d')
+            end_date = self.settings.date_range[1].strftime('%Y%m%d')
             statement_without_suffix = os.path.join(
-                target_directory, '{0}_statement_{1}-{2}'.format(
-                    name.lower(),
-                    self.settings.date_range[0].strftime('%Y%m%d'),
-                    self.settings.date_range[1].strftime('%Y%m%d')))
+                target_directory,
+                f'{name.lower()}_statement_{start_date}-{end_date}')
 
             try:
                 platform = self.get_platform_instance(
@@ -194,13 +199,13 @@ class WorkerThread(QThread):
                 self.parse_statements(name, platform)
                 self.signals.add_progress_text.emit(
                     _translate(
-                        'WorkerThread', '{} successfully evaluated!').format(
-                            name), False)
+                        'WorkerThread', f'{name} successfully evaluated!'),
+                    False)
             except PlatformFailedError as err:
                 self.signals.add_progress_text.emit(str(err), True)
                 self.signals.add_progress_text.emit(
-                    _translate('WorkerThread', '{} will be ignored!').format(
-                        name), True)
+                    _translate('WorkerThread', f'{name} will be ignored!'),
+                    True)
                 continue
 
         if not write_results(

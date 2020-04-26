@@ -127,8 +127,7 @@ def delete_platform_from_keyring(platform: str) -> bool:
         if not username:
             raise RuntimeError(
                 _translate(
-                    'p2p_credentials', '{} was not found in keyring!').format(
-                        platform))
+                    'p2p_credentials', f'{platform} was not found in keyring!'))
         keyring.delete_password(platform, username)
         keyring.delete_password(platform, 'username')
     except PasswordDeleteError:

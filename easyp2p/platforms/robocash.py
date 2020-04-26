@@ -94,8 +94,9 @@ class Robocash:
                 statement_btn.click()
             except NoSuchElementException:
                 self.signals.add_progress_text.emit(_translate(
-                    'P2PPlatform', '{}: starting account statement generation '
-                    'failed!').format(self.name), True)
+                    'P2PPlatform',
+                    f'{self.name}: starting account statement generation '
+                    'failed!'), True)
                 raise PlatformFailedError
 
             robocash.generate_statement_direct(
@@ -139,8 +140,8 @@ class Robocash:
                 if wait > 15:  # Roughly 15 * delay seconds
                     self.signals.add_progress_text.emit(_translate(
                         'P2PPlatform',
-                        '{}: account statement generation took too '
-                        'long!').format(self.name), True)
+                        f'{self.name}: account statement generation took too '
+                        'long!'), True)
                     raise PlatformFailedError
 
     def parse_statement(self, statement: Optional[str] = None) \

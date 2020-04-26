@@ -89,17 +89,15 @@ class P2PPlatform:
         # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: no login URL found!').format(self.name))
+                'P2PPlatform', f'{self.name}: no login URL found!'))
         if 'statement' not in urls:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: no account statement URL found!').format(
-                    self.name))
+                'P2PPlatform', f'{self.name}: no account statement URL found!'))
 
         # Make sure a logout method was provided
         if 'logout' not in self.urls and self.logout_locator is None:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: no method for logout provided!').format(
-                    self.name))
+                'P2PPlatform', f'{self.name}: no method for logout provided!'))
 
     def __enter__(self) -> 'P2PPlatform':
         """
@@ -136,7 +134,7 @@ class P2PPlatform:
                 # This should never happen since we already check it in __init__
                 raise RuntimeError(_translate(
                     'P2PPlatform',
-                    '{}: no method for logout provided!').format(self.name))
+                    f'{self.name}: no method for logout provided!'))
 
             self.logged_in = False
 
@@ -193,12 +191,11 @@ class P2PPlatform:
             # Make sure that the correct URL was loaded
             if self.driver.current_url != self.urls['login']:
                 raise RuntimeError(_translate(
-                    'P2PPlatform', '{}: loading the website failed!').format(
-                        self.name))
+                    'P2PPlatform', f'{self.name}: loading the website failed!'))
         except TimeoutException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: loading the website took too long!'.format(
-                    self.name)))
+                'P2PPlatform',
+                f'{self.name}: loading the website took too long!'))
 
         # Enter credentials in name and password field
         try:
@@ -248,8 +245,9 @@ class P2PPlatform:
             self.driver.wait(EC.presence_of_element_located(check_locator))
         except TimeoutException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: loading account statement page was not '
-                'successful!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: loading account statement page was not '
+                'successful!'))
 
     @signals.update_progress
     def logout_by_button(
@@ -288,8 +286,7 @@ class P2PPlatform:
             self.driver.wait(wait_until)
         except (NoSuchElementException, TimeoutException):
             raise RuntimeWarning(_translate(
-                'P2PPlatform', '{}: logout was not successful!').format(
-                    self.name))
+                'P2PPlatform', f'{self.name}: logout was not successful!'))
 
     @signals.update_progress
     def logout_by_url(self, wait_until: expected_conditions) -> None:
@@ -312,8 +309,7 @@ class P2PPlatform:
             self.driver.wait(wait_until)
         except TimeoutException:
             raise RuntimeWarning(_translate(
-                'P2PPlatform', '{}: logout was not successful!').format(
-                    self.name))
+                'P2PPlatform', f'{self.name}: logout was not successful!'))
 
     @signals.update_progress
     def generate_statement_direct(
@@ -389,12 +385,12 @@ class P2PPlatform:
                 self.driver.wait(wait_until)
         except NoSuchElementException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: starting account statement generation '
-                'failed!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: starting account statement generation failed!'))
         except TimeoutException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: account statement generation took too '
-                'long!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: account statement generation took too long!'))
 
     @signals.update_progress
     def generate_statement_calendar(
@@ -456,8 +452,8 @@ class P2PPlatform:
             else:
                 # This should never happen
                 raise RuntimeError(_translate(
-                    'P2PPlatform', '{}: invalid locator for calendar '
-                    'provided!').format(self.name))
+                    'P2PPlatform',
+                    f'{self.name}: invalid locator for calendar provided!'))
 
             # Set start and end date in the calendars
             self._set_date_in_calendar(
@@ -478,12 +474,12 @@ class P2PPlatform:
                 self.driver.wait(wait_until)
         except NoSuchElementException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: starting account statement generation '
-                'failed!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: starting account statement generation failed!'))
         except TimeoutException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: account statement generation took too '
-                'long!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: account statement generation took too long!'))
 
     def _set_date_in_calendar(
             self, calendar_: WebElement, target_date,
@@ -545,7 +541,7 @@ class P2PPlatform:
 
         raise RuntimeError(_translate(
             'P2PPlatform',
-            '{}: could not locate date in calendar!').format(self.name))
+            f'{self.name}: could not locate date in calendar!'))
 
     @signals.update_progress
     def generate_statement_combo_boxes(
@@ -588,12 +584,12 @@ class P2PPlatform:
             self.driver.wait(wait_until)
         except NoSuchElementException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: starting account statement generation '
-                'failed!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: starting account statement generation failed!'))
         except TimeoutException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: account statement generation took too '
-                'long!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: account statement generation took too long!'))
 
     @signals.update_progress
     def download_statement(
@@ -639,8 +635,8 @@ class P2PPlatform:
                 raise NoSuchElementException
         except NoSuchElementException:
             raise RuntimeError(_translate(
-                'P2PPlatform', '{}: starting download of account statement '
-                'failed!').format(self.name))
+                'P2PPlatform',
+                f'{self.name}: starting download of account statement failed!'))
 
 
 def _download_finished(
@@ -685,8 +681,8 @@ def _download_finished(
                 # This should never happen since the download directory is a
                 # newly created temporary directory
                 raise RuntimeError(_translate(
-                    'P2PPlatform', 'Download directory {} is not '
-                    'empty!').format(download_directory))
+                    'P2PPlatform',
+                    f'Download directory {download_directory} is not empty!'))
 
             if waiting_time > max_wait_time:
                 # If the download didn't start after more than max_wait_time

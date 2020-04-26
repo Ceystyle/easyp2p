@@ -110,7 +110,7 @@ class Mintos:
         except (NoSuchElementException, ValueError):
             raise RuntimeError(_translate(
                 'P2PPlatform',
-                '{}: account statement generation failed!').format(self.name))
+                f'{self.name}: account statement generation failed!'))
 
     def _no_cashflows(self, df: pd.DataFrame) -> bool:
         """

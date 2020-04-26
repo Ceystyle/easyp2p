@@ -130,12 +130,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def set_output_file(self) -> None:
         """Helper method to set the name of the output file."""
+        start_date = self.date_range[0].strftime('%d%m%Y')
+        end_date = self.date_range[1].strftime('%d%m%Y')
         if not self.output_file_changed:
             output_file = os.path.join(
                 str(Path.home()),
-                _translate('MainWindow', 'P2P_Results_{0}-{1}.xlsx').format(
-                    self.date_range[0].strftime('%d%m%Y'),
-                    self.date_range[1].strftime('%d%m%Y')))
+                _translate(
+                    'MainWindow',
+                    f'P2P_Results_{start_date}-{end_date}.xlsx'))
             QLineEdit.setText(self.line_edit_output_file, output_file)
 
     @pyqtSlot(bool)

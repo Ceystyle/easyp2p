@@ -128,8 +128,8 @@ class Twino:
         except KeyError as err:
             raise RuntimeError(_translate(
                 'P2PParser',
-                '{0}: column {1} is missing in account statement!').format(
-                    self.name, str(err)))
+                f'{self.name}: column {str(err)} is missing in account '
+                'statement!'))
 
         # Define mapping between Twino and easyp2p cash flow types and column
         # names

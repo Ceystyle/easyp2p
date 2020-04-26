@@ -86,8 +86,8 @@ class Bondora:
         no_payments_msg = 'Payments were not found in the selected period.'
         conditions = [
             EC.text_to_be_present_in_element(
-                (By.XPATH, xpaths['start_date']), '{0} {1}'.format(
-                    start_month, self.date_range[0].year)),
+                (By.XPATH, xpaths['start_date']),
+                f'{start_month} {self.date_range[0].year}'),
             EC.text_to_be_present_in_element(
                 (By.XPATH, xpaths['no_payments']), no_payments_msg)]
 

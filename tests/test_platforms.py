@@ -54,13 +54,12 @@ class BasePlatformTests(unittest.TestCase):
 
         if not os.path.isfile(expected_results):
             self.skipTest(
-                'Expected results file {} not found!'.format(
-                    expected_results))
+                f'Expected results file {expected_results} not found!')
 
         credentials = get_credentials(self.name, ask_user=False)
         if credentials is (None, None):
             self.skipTest(
-                'No credentials for {} in the keyring.'.format(self.name))
+                f'No credentials for {self.name} in the keyring.')
 
         platform = self.Platform(date_range, statement_without_suffix)
 
@@ -164,56 +163,55 @@ class BasePlatformTests(unittest.TestCase):
     def test_download_statement(self) -> None:
         """Test downloading account statement for default date_range."""
         self.run_download_test(
-            'download_{}_statement'.format(self.name.lower()), self.DATE_RANGE)
+            f'download_{self.name.lower()}_statement', self.DATE_RANGE)
 
     def test_download_statement_no_cfs(self) -> None:
         """
         Test downloading account statement for date_range without cash flows.
         """
         self.run_download_test(
-            'download_{}_statement_no_cfs'.format(self.name.lower()),
+            f'download_{self.name.lower()}_statement_no_cfs',
             self.DATE_RANGE_NO_CFS)
 
     def test_parse_statement(self):
         """Test parsing platform default statement."""
         self.run_parser_test(
-            '{}_parser'.format(self.name.lower()), self.DATE_RANGE,
-            RESULT_PREFIX+'download_{}_statement'.format(self.name.lower()))
+            f'{self.name.lower()}_parser', self.DATE_RANGE,
+            RESULT_PREFIX+f'download_{self.name.lower()}_statement')
 
     def test_parse_statement_no_cfs(self):
         """Test platform parser if there were no cash flows in date_range."""
         self.run_parser_test(
-            '{}_parser_no_cfs'.format(self.name.lower()),
+            f'{self.name.lower()}_parser_no_cfs',
             self.DATE_RANGE_NO_CFS,
-            input_file=RESULT_PREFIX+'download_{}_statement_no_cfs'.format(
-                self.name.lower()))
+            input_file=RESULT_PREFIX+\
+                       f'download_{self.name.lower()}_statement_no_cfs')
 
     def test_parse_statement_unknown_cf(self) -> None:
         """Test platform parser when unknown cash flow types are present."""
         if not self.unknown_cf_types:
             self.skipTest('No unknown cash flow types for this platform!')
         self.run_parser_test(
-            '{}_parser_unknown_cf'.format(self.name.lower()), self.DATE_RANGE,
+            f'{self.name.lower()}_parser_unknown_cf', self.DATE_RANGE,
             exp_unknown_cf_types=self.unknown_cf_types)
 
     def test_parse_statement_missing_month(self):
         self.run_parser_test(
-            '{}_parser_missing_month'.format(self.name.lower()),
+            f'{self.name.lower()}_parser_missing_month',
             self.DATE_RANGE_MISSING_MONTH)
 
     def test_write_results(self):
         """Test write_results when cash flows are present for all months."""
         self.run_write_results(
-            RESULT_PREFIX + '{}_parser.csv'.format(self.name.lower()),
-            RESULT_PREFIX + 'write_results_{}.xlsx'.format(self.name.lower()),
+            RESULT_PREFIX + f'{self.name.lower()}_parser.csv',
+            RESULT_PREFIX + f'write_results_{self.name.lower()}.xlsx',
             self.DATE_RANGE)
 
     def test_write_results_no_cfs(self):
         """Test write_results when there were no cash flows in date range."""
         self.run_write_results(
-            RESULT_PREFIX + '{}_parser_no_cfs.csv'.format(self.name.lower()),
-            RESULT_PREFIX + 'write_results_{}_no_cfs.xlsx'.format(
-                self.name.lower()),
+            RESULT_PREFIX + f'{self.name.lower()}_parser_no_cfs.csv',
+            RESULT_PREFIX + f'write_results_{self.name.lower()}_no_cfs.xlsx',
             self.DATE_RANGE_NO_CFS)
 
     def test_write_results_missing_month(self):
@@ -221,10 +219,9 @@ class BasePlatformTests(unittest.TestCase):
         Test write_results when there are months without cash flows.
         """
         self.run_write_results(
-            RESULT_PREFIX + '{}_parser_missing_month.csv'.format(
-                self.name.lower()),
-            RESULT_PREFIX + 'write_results_{}_missing_month.xlsx'.format(
-                self.name.lower()),
+            RESULT_PREFIX + f'{self.name.lower()}_parser_missing_month.csv',
+            RESULT_PREFIX \
+                + f'write_results_{self.name.lower()}_missing_month.xlsx',
             self.DATE_RANGE_MISSING_MONTH)
 
 

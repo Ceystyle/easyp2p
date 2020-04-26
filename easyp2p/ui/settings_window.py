@@ -91,8 +91,8 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
         msg = QMessageBox.question(
             self, _translate('SettingsWindow', 'Delete credentials?'),
             _translate(
-                'SettingsWindow', 'Really delete credentials for {}?').format(
-                    platform))
+                'SettingsWindow',
+                f'Really delete credentials for {platform}?'))
         if msg == QMessageBox.Yes:
             if not p2p_cred.delete_platform_from_keyring(platform):
                 QMessageBox.warning(

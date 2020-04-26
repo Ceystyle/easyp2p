@@ -65,7 +65,7 @@ def write_results(
             raise RuntimeError(
                 _translate(
                     'excel_writer', 'Writing results to Excel was not '
-                    'successful! Column {} is missing!').format(column))
+                    f'successful! Column {column} is missing!'))
 
     # Format date column and add month column to DataFrame
     df_result[P2PParser.DATE] = pd.to_datetime(

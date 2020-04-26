@@ -73,12 +73,11 @@ class MainWindowTests(unittest.TestCase):
             self.form.combo_box_end_year.currentText())
 
         # Check if output file name is set correctly
-        # date_range = self.form.get_date_range()
         self.assertEqual(
             self.form.line_edit_output_file.text(), os.path.join(
-                str(Path.home()), 'P2P_Results_{0}-{1}.xlsx'.format(
-                    date_range[0].strftime('%d%m%Y'),
-                    date_range[1].strftime('%d%m%Y'))))
+                str(Path.home()),
+                f'P2P_Results_{date_range[0].strftime("%d%m%Y")}-'
+                f'{date_range[1].strftime("%d%m%Y")}.xlsx'))
 
     def test_select_all_platforms(self) -> None:
         """Test the Select All Platforms checkbox."""

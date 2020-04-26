@@ -62,7 +62,7 @@ class DownloadFinishedTests(unittest.TestCase):
             if os.path.isfile(self.statement):
                 os.remove(self.statement)
         except OSError as err:
-            print('Error: {} - {}.'.format(err.filename, err.strerror))
+            print(f'Error: {err.filename} - {err.strerror}.')
 
     def test_no_crdownload_file(self):
         """Test return value if download does not start."""

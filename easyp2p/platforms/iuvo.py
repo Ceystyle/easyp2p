@@ -85,9 +85,9 @@ class Iuvo:
 
             iuvo.open_account_statement_page((By.ID, 'date_from'))
 
-            check_txt = '{0} - {1}'.format(
-                self.date_range[0].strftime('%Y-%m-%d'),
-                self.date_range[1].strftime('%Y-%m-%d'))
+            start_date = self.date_range[0].strftime('%Y-%m-%d')
+            end_date = self.date_range[1].strftime('%Y-%m-%d')
+            check_txt = f'{start_date} - {end_date}'
 
             # Define conditions if account statement generation is successful:
             # The first condition will be true if there were cash flows in
