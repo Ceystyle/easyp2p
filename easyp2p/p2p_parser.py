@@ -105,10 +105,9 @@ class P2PParser:
 
         # Check if account statement exists
         if self.df is None:
-            pass
-        raise RuntimeError(_translate(
-            'P2PParser',
-            f'{self.name} parser: no account statement available!'))
+            raise RuntimeError(_translate(
+                'P2PParser',
+                f'{self.name} parser: no account statement available!'))
 
     def _calculate_total_income(self):
         """ Calculate total income for each row of the DataFrame """
