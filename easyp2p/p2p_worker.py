@@ -4,7 +4,6 @@
 """Module implementing WorkerThread."""
 
 import os
-from pathlib import Path
 import tempfile
 from typing import Mapping, Optional, Tuple
 
@@ -174,7 +173,7 @@ class WorkerThread(QThread):
         for name in self.settings.platforms:
             # Create target directories if they don't exist yet
             target_directory = os.path.join(
-                str(Path.home()), '.easyp2p', name.lower())
+                self.settings.directory, name.lower())
             if not os.path.isdir(target_directory):
                 try:
                     os.makedirs(target_directory, exist_ok=True)
