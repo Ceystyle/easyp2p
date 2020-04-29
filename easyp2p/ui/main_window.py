@@ -9,6 +9,7 @@ several people-to-people (P2P) lending platforms.
 
 from datetime import date, timedelta
 import gc
+import logging
 import os
 from pathlib import Path
 import sys
@@ -29,6 +30,7 @@ from easyp2p.ui.Ui_main_window import Ui_MainWindow
 _translate = QCoreApplication.translate
 
 name = 'easyp2p'  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -259,6 +261,10 @@ def main():
     """Open the main window of easyp2p."""
     app = QApplication(sys.argv)
     ui = MainWindow(app)  # pylint: disable=invalid-name
+    logging.basicConfig(
+        filename=ui.settings.directory + '/easyp2p.log',
+        filemode='w',
+        level=logging.DEBUG)
     ui.show()
     sys.exit(app.exec_())
 

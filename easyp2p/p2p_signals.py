@@ -4,6 +4,7 @@
 """Module implementing Signals for communicating with the GUI."""
 
 from functools import wraps
+import logging
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -21,6 +22,8 @@ class Signals(QObject):
         super().__init__()
         self.abort = False
         self.abort_signal.connect(self.abort_evaluation)
+        self.logger = logging.getLogger('easyp2p.p2p_signals.Signals')
+        self.logger.debug('Created Signals instance.')
 
     def update_progress(self, func):
         """Decorator for updating progress text and progress bar."""
@@ -32,9 +35,12 @@ class Signals(QObject):
                 else:
                     result = func(*args, **kwargs)
             except RuntimeError as err:
+                self.logger.exception('RuntimeError in update_progress')
                 self.add_progress_text.emit(str(err), True)
                 raise PlatformFailedError from err
             except RuntimeWarning as err:
+                self.logger.warning(
+                    'RuntimeWarning in update_progress', exc_info=True)
                 self.add_progress_text.emit(str(err), True)
                 result = None
             finally:
@@ -49,9 +55,11 @@ class Signals(QObject):
             try:
                 result = func(*args, **kwargs)
             except RuntimeError as err:
+                self.logger.exception('RuntimeError in watch_errors.')
                 self.add_progress_text.emit(str(err), True)
                 raise PlatformFailedError from err
             except RuntimeWarning as err:
+                self.logger.warning(str(err))
                 self.add_progress_text.emit(str(err), True)
                 result = None
             return result
@@ -65,25 +73,30 @@ class Signals(QObject):
             other: Signals instance of another class.
 
         """
+        self.logger.debug('Connecting signals.')
         self.update_progress_bar.connect(other.update_progress_bar)
         self.add_progress_text.connect(other.add_progress_text)
         self.end_easyp2p.connect(other.end_easyp2p)
         other.abort_signal.connect(self.abort_signal)
         self.abort = other.abort
+        self.logger.debug('Connecting signals successful.')
 
     def disconnect_signals(self) -> None:
         """
         Disconnect signals. Ignore error if they were not connected.
         """
         try:
+            self.logger.debug('Disconnecting signals.')
             self.update_progress_bar.disconnect()
             self.add_progress_text.disconnect()
             self.end_easyp2p.disconnect()
+            self.logger.debug('Disconnecting signals successful.')
         except TypeError:
-            pass
+            self.logger.exception('Disconnecting signals failed.')
 
     def abort_evaluation(self):
         """Set the abort flag to True."""
+        self.logger.debug('Aborting evaluation.')
         self.abort = True
 
 

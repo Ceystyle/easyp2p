@@ -12,7 +12,6 @@ from typing import Optional, Tuple
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 from PyQt5.QtCore import QCoreApplication
 
@@ -88,16 +87,14 @@ class Robocash:
 
             robocash.open_account_statement_page((By.ID, 'new_statement'))
 
-            try:
-                statement_btn = driver.wait(EC.element_to_be_clickable(
-                    (By.ID, 'new_statement')))
-                statement_btn.click()
-            except NoSuchElementException:
-                self.signals.add_progress_text.emit(_translate(
+            # Open statement filter dialog
+            robocash.driver.click_button(
+                (By.ID, 'new_statement'),
+                _translate(
                     'P2PPlatform',
                     f'{self.name}: starting account statement generation '
-                    'failed!'), True)
-                raise PlatformFailedError
+                    'failed!'),
+                wait_until=EC.element_to_be_clickable((By.ID, 'date-after')))
 
             robocash.generate_statement_direct(
                 self.date_range, (By.ID, 'date-after'),

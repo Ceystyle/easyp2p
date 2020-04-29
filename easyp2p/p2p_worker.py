@@ -3,6 +3,7 @@
 
 """Module implementing WorkerThread."""
 
+import logging
 import os
 import tempfile
 from typing import Mapping, Optional, Tuple
@@ -51,6 +52,7 @@ class WorkerThread(QThread):
         self.credentials = credentials
         self.done = False
         self.df_result = pd.DataFrame()
+        self.logger = logging.getLogger('easyp2p.p2p_worker.WorkerThread')
 
     def get_platform_instance(
             self, name: str, statement_without_suffix: str) -> p2p_platforms:
@@ -75,6 +77,7 @@ class WorkerThread(QThread):
                 self.settings.date_range, statement_without_suffix,
                 signals=self.signals)
         except AttributeError:
+            self.logger.exception('Platform not found')
             raise PlatformFailedError(
                 _translate(
                     'WorkerThread',
@@ -98,6 +101,7 @@ class WorkerThread(QThread):
             (df, unknown_cf_types) = platform.parse_statement()
             self.df_result = self.df_result.append(df, sort=True)
         except RuntimeError as err:
+            self.logger.error(err)
             raise PlatformFailedError(str(err))
 
         if unknown_cf_types:
@@ -121,23 +125,18 @@ class WorkerThread(QThread):
 
         """
         if self.credentials[name] is None:
-            raise PlatformFailedError(
-                _translate(
-                    'WorkerThread',
-                    f'Credentials for {name} are not available!'))
+            msg = f'Credentials for {name} are not available!'
+            self.logger.warning(msg)
+            raise PlatformFailedError(_translate('WorkerThread', msg))
 
-        self.signals.add_progress_text.emit(
-            _translate(
-                'WorkerThread',
-                f'Starting evaluation of {name}...'),
-            False)
+        self.signals.add_progress_text.emit(_translate(
+            'WorkerThread', f'Starting evaluation of {name}...'), False)
 
         if name == 'Iuvo' and self.settings.headless:
             # Iuvo is currently not supported in headless ChromeDriver mode
             # because it opens a new window for downloading the statement.
             # ChromeDriver does not allow that due to security reasons.
-            self.signals.add_progress_text.emit(
-                _translate(
+            self.signals.add_progress_text.emit(_translate(
                     'WorkerThread',
                     'Iuvo is not supported with headless ChromeDriver!'), True)
             self.signals.add_progress_text.emit(_translate(
@@ -170,6 +169,10 @@ class WorkerThread(QThread):
         statements, parses them and writes the results to an Excel file.
 
         """
+        self.logger.info(f'Starting worker for {self.settings.platforms}')
+        start_date = self.settings.date_range[0].strftime('%Y%m%d')
+        end_date = self.settings.date_range[1].strftime('%Y%m%d')
+
         for name in self.settings.platforms:
             # Create target directories if they don't exist yet
             target_directory = os.path.join(
@@ -178,15 +181,15 @@ class WorkerThread(QThread):
                 try:
                     os.makedirs(target_directory, exist_ok=True)
                 except OSError:
+                    self.logger.exception('Could not create directory!')
                     self.signals.add_progress_text.emit(
                         _translate(
+                            'WorkerThread',
                             f'Could not create directory {target_directory}!'),
                         True)
                     break
 
             # Set target location of account statement file
-            start_date = self.settings.date_range[0].strftime('%Y%m%d')
-            end_date = self.settings.date_range[1].strftime('%Y%m%d')
             statement_without_suffix = os.path.join(
                 target_directory,
                 f'{name.lower()}_statement_{start_date}-{end_date}')
@@ -201,6 +204,7 @@ class WorkerThread(QThread):
                         'WorkerThread', f'{name} successfully evaluated!'),
                     False)
             except PlatformFailedError as err:
+                self.logger.exception('Evaluation of platform failed.')
                 self.signals.add_progress_text.emit(str(err), True)
                 self.signals.add_progress_text.emit(
                     _translate('WorkerThread', f'{name} will be ignored!'),

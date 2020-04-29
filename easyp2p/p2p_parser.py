@@ -10,6 +10,7 @@ single output format.
 
 """
 from datetime import date
+import logging
 from pathlib import Path
 from typing import Mapping, Optional, Tuple
 
@@ -21,6 +22,7 @@ from PyQt5.QtCore import QCoreApplication
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
+logger = logging.getLogger('easyp2p.p2p_parser')
 
 
 class P2PParser:
@@ -100,6 +102,7 @@ class P2PParser:
         self.statement_file_name = statement_file_name
         self.df = get_df_from_file(
             self.statement_file_name, header=header, skipfooter=skipfooter)
+        self.logger = logging.getLogger('easyp2p.p2p_parser.P2PParser')
         if signals:
             self.signals.connect_signals(signals)
 
@@ -108,9 +111,11 @@ class P2PParser:
             raise RuntimeError(_translate(
                 'P2PParser',
                 f'{self.name} parser: no account statement available!'))
+        self.logger.debug(f'Created P2PParser instance for {self.name}.')
 
     def _calculate_total_income(self):
         """ Calculate total income for each row of the DataFrame """
+        self.logger.debug(f'{self.name}: calculating total income.')
         income_columns = [
             self.INTEREST_PAYMENT,
             self.LATE_FEE_PAYMENT,
@@ -119,6 +124,7 @@ class P2PParser:
         self.df[self.TOTAL_INCOME] = 0.
         for col in [col for col in self.df.columns if col in income_columns]:
             self.df[self.TOTAL_INCOME] += self.df[col]
+        self.logger.debug(f'{self.name}: finished calculating total income.')
 
     def _aggregate_results(
             self, value_column: Optional[str],
@@ -132,6 +138,8 @@ class P2PParser:
             balance_column: DataFrame column which contains the balances
 
         """
+        self.logger.debug(
+            f'{self.name}: start aggregating results in column {value_column}.')
         orig_df = self.df
         if value_column:
             self.df = self.df.pivot_table(
@@ -154,6 +162,7 @@ class P2PParser:
             self.df[self.END_BALANCE_NAME] = \
                 orig_df.groupby([self.DATE, self.CURRENCY]).last()[
                     balance_column].reset_index()[balance_column]
+        self.logger.debug(f'{self.name}: finished aggregating results.')
 
     def _filter_date_range(self, date_format: str) -> None:
         """
@@ -163,6 +172,7 @@ class P2PParser:
             date_format: Date format which the platform uses
 
         """
+        self.logger.debug(f'{self.name}: filter date range.')
         start_date = pd.Timestamp(self.date_range[0])
         end_date = pd.Timestamp(self.date_range[1]).replace(
             hour=23, minute=59, second=59)
@@ -173,6 +183,7 @@ class P2PParser:
             & (self.df[self.DATE] <= end_date)]
         # Convert date column from datetime to date:
         self.df[self.DATE] = self.df[self.DATE].dt.date
+        self.logger.debug(f'{self.name}: filter date range finished.')
 
     def _map_cashflow_types(
             self, cashflow_types: Optional[Mapping[str, str]],
@@ -192,18 +203,24 @@ class P2PParser:
 
         """
         if cashflow_types:
+            self.logger.debug(
+                f'{self.name}: mapping cash flow types {cashflow_types} '
+                f'contained in column {orig_cf_column}.')
             self.df[self.CF_TYPE] = self.df[orig_cf_column].map(cashflow_types)
             # All unknown cash flow types will be NaN
             unknown_cf_types = self.df[orig_cf_column].where(
                     self.df[self.CF_TYPE].isna()).dropna().tolist()
             # Remove duplicates, sort the entries and make them immutable
             unknown_cf_types = tuple(sorted(set(unknown_cf_types)))
+            self.logger.debug(f'{self.name}: mapping successful.')
             return unknown_cf_types
         else:
+            self.logger.debug(f'{self.name}: no cash flow types to map.')
             return ()
 
     def _add_zero_line(self):
         """Add a single zero cash flow for start date to the DataFrame."""
+        self.logger.debug(f'{self.name}: adding zero cash flow.')
         data = [
             (self.name, 'EUR', self.date_range[0],
              *[0.] * len(self.TARGET_COLUMNS))]
@@ -213,6 +230,7 @@ class P2PParser:
         self.df = pd.DataFrame(data=data, columns=columns)
         self.df.set_index(
             [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
+        self.logger.debug(f'{self.name}: added zero cash flow.')
 
     @signals.update_progress
     def run(
@@ -246,6 +264,7 @@ class P2PParser:
                 DataFrame
 
         """
+        self.logger.debug(f'{self.name}: starting parser.')
         # If there were no cash flows in date_range add a single zero line
         if self.df.empty:
             self._add_zero_line()
@@ -267,6 +286,8 @@ class P2PParser:
             unknown_cf_types = self._map_cashflow_types(
                 cashflow_types, orig_cf_column)
         except KeyError as err:
+            self.logger.exception(
+                f'{self.name}: column missing in account statement.')
             raise RuntimeError(_translate(
                 'P2PParser',
                 f'{self.name}: column {str(err)} is missing in account '
@@ -304,6 +325,7 @@ class P2PParser:
         # Disconnect signals
         self.signals.disconnect_signals()
 
+        self.logger.debug(f'{self.name}: parser completed succesfully.')
         return unknown_cf_types
 
 
@@ -337,10 +359,12 @@ def get_df_from_file(
             raise RuntimeError(_translate(
                 'P2PParser', 'Unknown file format during import:'), input_file)
     except FileNotFoundError:
+        logger.exception('File not found.')
         raise RuntimeError(_translate(
             'P2PParser', f'{input_file} could not be found!'))
     except ParserError:
-        raise RuntimeError(_translate(
-            'P2PParser', f'{input_file} could not be parsed!'))
+        msg = f'{input_file} could not be parsed!'
+        logger.exception(msg)
+        raise RuntimeError(_translate('P2PParser', msg))
 
     return df

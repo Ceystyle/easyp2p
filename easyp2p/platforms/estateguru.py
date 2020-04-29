@@ -10,14 +10,18 @@ import time
 from typing import Optional, Tuple
 
 import pandas as pd
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
+
+_translate = QCoreApplication.translate
 
 
 class Estateguru:
@@ -90,32 +94,46 @@ class Estateguru:
                 (By.XPATH, xpaths['filter_btn']))
 
             # Open the filter dialog and generate the statement
-            estateguru.driver.find_element(
-                By.XPATH, xpaths['filter_btn']).click()
+            start_date_locator = (
+                By.ID, 'filter_dateApproveFilterFrom_dataTableTransaction')
+            end_date_locator = (
+                By.ID, 'filter_dateApproveFilterTo_dataTableTransaction')
+            estateguru.driver.click_button(
+                (By.XPATH, xpaths['filter_btn']),
+                _translate(
+                    'P2PPlatform',
+                    f'{self.name}: starting download of account statement '
+                    f'failed!'),
+                wait_until=EC.element_to_be_clickable(start_date_locator))
+
             estateguru.generate_statement_direct(
                 self.date_range,
-                (By.ID, 'filter_dateApproveFilterFrom_dataTableTransaction'),
-                (By.ID, 'filter_dateApproveFilterTo_dataTableTransaction'),
-                '%d.%m.%Y',
+                start_date_locator, end_date_locator, '%d.%m.%Y',
                 wait_until=EC.element_to_be_clickable(
                     (By.ID, 'btnFilterPMTable')),
                 submit_btn_locator=(By.ID, 'btnFilterPMTable'))
 
             # Clicking the submit button will move the screen to the bottom of
             # the page. Move back to top again.
-            estateguru.driver.find_element(By.TAG_NAME, 'body').send_keys(
-                Keys.HOME)
+            try:
+                estateguru.driver.find_element(By.TAG_NAME, 'body').send_keys(
+                    Keys.HOME)
+            except NoSuchElementException:
+                pass
 
             # Estateguru needs a bit until the download button can be clicked
             # without closing the drop-down menu at once
             time.sleep(1)
 
             # Open the download dialog and download the statement
-            download_btn = estateguru.driver.wait(EC.element_to_be_clickable(
-                (By.XPATH, xpaths['download_btn'])))
-            download_btn.click()
-            estateguru.driver.wait(
-                EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+            estateguru.driver.click_button(
+                (By.XPATH, xpaths['download_btn']),
+                _translate(
+                    'P2PPlatform',
+                    f'{self.name}: starting download of account statement '
+                    f'failed!'),
+                wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+
             estateguru.download_statement(
                 self.statement, (By.LINK_TEXT, 'CSV'))
 

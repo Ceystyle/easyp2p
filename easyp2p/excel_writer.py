@@ -11,6 +11,7 @@ results for the whole date range.
 """
 import calendar
 from datetime import date, timedelta
+import logging
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
@@ -20,6 +21,7 @@ from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_parser import P2PParser
 
 _translate = QCoreApplication.translate
+logger = logging.getLogger('easyp2p.excel_writer')
 
 DAILY_RESULTS = _translate('excel_writer', 'Daily results')
 MONTHLY_RESULTS = _translate('excel_writer', 'Monthly results')
@@ -53,6 +55,7 @@ def write_results(
     """
     # Check if there were any results
     if df_result.empty:
+        logger.info('df_result is empty.')
         return False
 
     # Make a copy to prevent changing the original DataFrame
