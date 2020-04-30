@@ -21,10 +21,8 @@ from typing import Mapping, Optional, Tuple
 
 import arrow
 from selenium.common.exceptions import (
-    ElementClickInterceptedException, NoSuchElementException,
-    StaleElementReferenceException, TimeoutException)
+    ElementClickInterceptedException, NoSuchElementException, TimeoutException)
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
@@ -209,29 +207,14 @@ class P2PPlatform:
                 wait_until=EC.element_to_be_clickable((By.NAME, name_field)))
 
         # Enter credentials in name and password field
-        try:
-            elem = self.driver.wait(
-                EC.element_to_be_clickable((By.NAME, name_field)))
-            elem.clear()
-            elem.send_keys(credentials[0])
-            time.sleep(fill_delay)
-            elem = self.driver.find_element(By.NAME, password_field)
-            elem.clear()
-            elem.send_keys(credentials[1])
-            time.sleep(fill_delay)
-            elem.send_keys(Keys.RETURN)
-            self.driver.wait(wait_until)
-        except NoSuchElementException:
-            self.logger.exception('Login web element not found.')
-            raise RuntimeError(_translate(
-                'P2PPlatform', '{}: username or password field could not be'
-                'found on the login site!').format(self.name))
-        except TimeoutException:
-            self.logger.exception(
-                f'{self.name}: Timeout while filling log in page.')
-            raise RuntimeError(_translate(
-                'P2PPlatform', '{}: login was not successful. Are the '
-                'credentials correct?').format(self.name))
+        error_msg = _translate(
+            'P2PPlatform', f'{self.name}: login was not successful. Are the '
+            'credentials correct?')
+        self.driver.enter_text((By.NAME, name_field), credentials[0], error_msg)
+        time.sleep(fill_delay)
+        self.driver.enter_text(
+            (By.NAME, password_field), credentials[1], error_msg,
+            hit_return=True, wait_until=wait_until)
 
         self.logged_in = True
         self.logger.debug(f'{self.name}: successfully logged in.')
@@ -360,56 +343,20 @@ class P2PPlatform:
         self.logger.debug(
             f'{self.name}: starting direct account statement generation for '
             f'date range {date_range}.')
-        try:
-            date_from = self.driver.find_element(*start_locator)
-            date_from.send_keys(Keys.CONTROL + 'a')
-            date_from.send_keys(date.strftime(date_range[0], date_format))
-            try:
-                date_to = self.driver.find_element(*end_locator)
-                date_to.click()
-                date_to.send_keys(Keys.CONTROL + 'a')
-                date_to.send_keys(date.strftime(date_range[1], date_format))
 
-                if submit_btn_locator is None:
-                    # If no submit button is provided statement generation can
-                    # be started with a simple Enter key click
-                    date_to.send_keys(Keys.RETURN)
-            except StaleElementReferenceException:
-                # Some P2P sites refresh the page after a change
-                # which leads to this exception
-                # FIXME: treat case when refresh does not work either
-                self.logger.exception(
-                    f'{self.name}: Date web element stale. Trying to refresh.')
-                date_to = self.driver.find_element(*end_locator)
-                date_to.send_keys(Keys.CONTROL + 'a')
-                date_to.send_keys(date.strftime(date_range[1], date_format))
+        error_msg = _translate(
+            'P2PPlatform',
+            f'{self.name}: generating account statement failed!')
+        self.driver.enter_text(
+            start_locator, date.strftime(date_range[0], date_format), error_msg)
+        self.driver.enter_text(
+            end_locator, date.strftime(date_range[1], date_format), error_msg,
+            hit_return=True)
 
-            if submit_btn_locator is not None:
-                submit_btn = self.driver.wait(EC.element_to_be_clickable(
-                    submit_btn_locator))
-                if self.name == 'Mintos':
-                    # Mintos needs some time until the button really works
-                    # TODO: find better fix
-                    time.sleep(1)
-                submit_btn.click()
+        if submit_btn_locator:
+            self.driver.click_button(
+                submit_btn_locator, error_msg, wait_until=wait_until)
 
-            # Iuvo needs some time to update the field if there were cash flows
-            # TODO: find better fix
-            if self.name == 'Iuvo':
-                time.sleep(1)
-
-            if wait_until is not None:
-                self.driver.wait(wait_until)
-        except NoSuchElementException:
-            self.logger.exception(f'{self.name}: failed to locate web element.')
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: starting account statement generation failed!'))
-        except TimeoutException:
-            self.logger.exception(f'{self.name}: Timeout.')
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: account statement generation took too long!'))
         self.logger.debug(
             f'{self.name}: account statement generation successful.')
 

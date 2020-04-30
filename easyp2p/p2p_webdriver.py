@@ -7,10 +7,12 @@ import logging
 import os
 from typing import Callable, cast, List, Optional, Tuple, Union
 
-from selenium.common.exceptions import (
-    NoSuchElementException, TimeoutException, WebDriverException)
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import (
+    NoSuchElementException, StaleElementReferenceException, TimeoutException,
+    WebDriverException)
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -206,3 +208,36 @@ class P2PWebDriver(Chrome):
         except TimeoutException:
             self.logger.exception(f'Could not load URL {url}.')
             raise RuntimeError(error_msg)
+
+    @signals.watch_errors
+    def enter_text(
+            self, locator: Tuple[str, str], text: str, error_msg: str,
+            hit_return: bool = False,
+            wait_until: Optional[expected_conditions] = None) -> None:
+        """
+            Helper method for inserting text into a web element.
+
+            Args:
+                locator: Locator of the text web element.
+                text: Text to be filled in.
+                error_msg: Error message in case the text cannot be inserted.
+                hit_return: If True, push return key after inserting text.
+                wait_until: Expected condition in case of success.
+
+            Raises:
+                RuntimeError: If inserting the text fails.
+
+        """
+        try:
+            elem = self.wait(EC.element_to_be_clickable(locator))
+            elem.send_keys(Keys.CONTROL + 'a')
+            elem.send_keys(text)
+            if hit_return:
+                elem.send_keys(Keys.RETURN)
+            if wait_until:
+                self.wait(wait_until)
+        except (NoSuchElementException, TimeoutException):
+            self.logger.exception(f'Could not fill {text} in field {locator}.')
+            raise RuntimeError(error_msg)
+        except StaleElementReferenceException:
+            self.enter_text(locator, text, error_msg, hit_return, wait_until)
