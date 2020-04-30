@@ -56,19 +56,19 @@ class PeerBerry:
 
         """
         urls = {
-            'login': 'https://peerberry.com/en/login',
-            'statement': 'https://peerberry.com/en/statement',
+            'login': 'https://peerberry.com/en/client/',
+            'statement': 'https://peerberry.com/en/client/statement',
         }
         xpaths = {
             'statement_btn': (
-                '/html/body/div[1]/div/div/div[2]/div[3]/div[2]/div/form/div'
-                '/div[4]/button'),
+                '/html/body/div[1]/div/div/div/div[2]/div[3]/div[2]/div/form'
+                '/div/div[4]/button'),
             'start_calendar': (
-                '//*[@id="app"]/div/div/div[2]/div[3]/div[2]/div/form/div'
-                '/div[1]/div/div[1]/div/input'),
+                '/html/body/div[1]/div/div/div/div[2]/div[3]/div[2]/div/form'
+                '/div/div[1]/div/div[1]/div/input'),
             'end_calendar': (
-                '//*[@id="app"]/div/div/div[2]/div[3]/div[2]/div/form/div'
-                '/div[1]/div/div[2]/div/input'),
+                '/html/body/div[1]/div/div/div/div[2]/div[3]/div[2]/div/form'
+                '/div/div[1]/div/div[2]/div/input'),
         }
 
         with P2PPlatform(
@@ -88,7 +88,8 @@ class PeerBerry:
             except NoSuchElementException:
                 pass
 
-            peerberry.open_account_statement_page((By.NAME, 'startDate'))
+            peerberry.open_account_statement_page(
+                (By.XPATH, xpaths['start_calendar']))
 
             # Create account statement for given date range
             month_locator = (By.CLASS_NAME, 'MuiTypography-body1')
