@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018-19 Niko Sandschneider
+#  Copyright (c) 2018-2020 Niko Sandschneider
 
 """Module implementing SettingsWindow, the settings window of easyp2p."""
 from typing import Sequence, Set, Union

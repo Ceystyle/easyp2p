@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2019 Niko Sandschneider
+#  Copyright (c) 2018-2020 Niko Sandschneider
 
 """
 Module for writing parsed account statements of P2P platforms to Excel.

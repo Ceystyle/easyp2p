@@ -1,3 +1,5 @@
+#  Copyright (c) 2018-2020 Niko Sandschneider
+
 import codecs
 import os
 import re

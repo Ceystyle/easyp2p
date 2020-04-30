@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018-19 Niko Sandschneider
+#  Copyright (c) 2018-2020 Niko Sandschneider
 
 """
 Module for getting and saving credentials in the system keyring / from the user.
