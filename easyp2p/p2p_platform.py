@@ -21,7 +21,8 @@ from typing import Mapping, Optional, Tuple
 
 import arrow
 from selenium.common.exceptions import (
-    ElementClickInterceptedException, NoSuchElementException, TimeoutException)
+    ElementClickInterceptedException, NoSuchElementException,
+    StaleElementReferenceException, TimeoutException)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -495,7 +496,7 @@ class P2PPlatform:
                 of the currently selected month.
             prev_month_locator: Locator of the web element which needs to be
                 clicked to switch the calendar to the previous month.
-            day_locator: Locator of the table with the days for the given month
+            day_locator: Locator of the table with the days for the given month.
             day_class_check: For some websites the days identified by
                 day_locator are not unique. They can be further specified by
                 providing a tuple of class names in day_class_check.
@@ -518,6 +519,35 @@ class P2PPlatform:
             calendar_.click()
 
         try:
+            self._set_month_in_calendar(
+                prev_month_locator, month_locator, target_date)
+            self._set_day_in_calendar(day_locator, target_date, day_class_check)
+            self.logger.debug(
+                f'{self.name}: setting date {target_date} in calendar was '
+                'successful.')
+        except RuntimeError:
+            msg = f'{self.name}: could not locate date in calendar!'
+            self.logger.error(msg)
+            raise RuntimeError(_translate('P2PPlatform', msg))
+
+    def _set_month_in_calendar(
+            self, prev_month_locator, month_locator, target_date):
+        """
+            Switch calendar month to the target month.
+
+            Args:
+                prev_month_locator: Locator of the web element which needs to be
+                    clicked to switch the calendar to the previous month.
+                month_locator: Locator of the web element which contains the
+                    name of the currently selected month.
+                target_date: Target date to which the calendar has to be
+                    switched.
+
+            Raises:
+                RuntimeError: If the month cannot be set in the calendar.
+
+        """
+        try:
             prev_month = self.driver.wait(
                 EC.element_to_be_clickable(prev_month_locator))
 
@@ -530,7 +560,30 @@ class P2PPlatform:
                 screen_date = arrow.get(
                     self.driver.find_element(*month_locator).text,
                     'MMMM YYYY', locale='en_US')
+        except (NoSuchElementException, TimeoutException):
+            self.logger.exception(
+                f'{self.name}: failed to set month in calendar.')
+            raise RuntimeError()
 
+    def _set_day_in_calendar(self, day_locator, target_date, day_class_check):
+        """
+            Find and click day in currently selected calendar month.
+
+            Args:
+                day_locator: Locator of the table with the days for the given
+                    month.
+                target_date: Target date to which the calendar has to be
+                    switched.
+                day_class_check: For some websites the days identified by
+                    day_locator are not unique. They can be further specified by
+                    providing a tuple of class names in day_class_check.
+
+            Raises:
+                RuntimeError: If the day or the day table cannot be found in
+                    the calendar.
+
+        """
+        try:
             # Get table with all days of the selected month
             all_days = self.driver.find_elements(*day_locator)
 
@@ -545,13 +598,15 @@ class P2PPlatform:
                         f'{self.name}: setting date {target_date} in calendar '
                         f'was successful.')
                     return
-        except (NoSuchElementException, TimeoutException):
+        except NoSuchElementException:
             self.logger.exception(
-                f'{self.name}: failed to set date in calendar.')
+                f'{self.name}: failed to set day in calendar.')
+            raise RuntimeError()
+        except StaleElementReferenceException:
+            self._set_day_in_calendar(day_locator, target_date, day_class_check)
 
-        msg = f'{self.name}: could not locate date in calendar!'
-        self.logger.error(msg)
-        raise RuntimeError(_translate('P2PPlatform', msg))
+        # If we reach this point, the day was not found in the all_days table
+        raise RuntimeError()
 
     @signals.update_progress
     def generate_statement_combo_boxes(
