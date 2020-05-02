@@ -54,43 +54,43 @@ class WorkerThread(QThread):
         self.df_result = pd.DataFrame()
         self.logger = logging.getLogger('easyp2p.p2p_worker.WorkerThread')
 
-    def get_platform_instance(
-            self, name: str, statement_without_suffix: str) -> p2p_platforms:
+    def get_platform_instance(self, name: str) -> p2p_platforms:
         """
         Helper method to get an instance of the platform class.
 
         Args:
             name: Name of the P2P platform/module.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
 
         Returns:
             Platform class instance.
 
         Raises:
-            PlatformFailedError: If the platform class cannot be found.
+            PlatformFailedError: If the platform class cannot be found or the
+                download directory cannot be created.
 
         """
         try:
             platform = getattr(p2p_platforms, name)
+            statement_without_suffix = self.get_statement_location(name)
             instance = platform(
                 self.settings.date_range, statement_without_suffix,
                 signals=self.signals)
         except AttributeError:
             self.logger.exception('Platform not found')
-            raise PlatformFailedError(
-                _translate(
+            raise PlatformFailedError(_translate(
                     'WorkerThread',
                     f'{name.lower()}.py could not be found!'))
+        except OSError as err:
+            self.logger.exception('Could not create directory!')
+            raise PlatformFailedError(str(err).strip(), True)
         else:
             return instance
 
-    def parse_statements(self, name: str, platform: p2p_platforms) -> None:
+    def parse_statements(self, platform: p2p_platforms) -> None:
         """
         Helper method for calling the parser and appending the dataframe list.
 
         Args:
-            name: Name of the P2P platform
             platform: Instance of P2PPlatform class
 
         Raises:
@@ -102,21 +102,20 @@ class WorkerThread(QThread):
             self.df_result = self.df_result.append(df, sort=True)
         except RuntimeError as err:
             self.logger.error(err)
-            raise PlatformFailedError(str(err))
+            raise PlatformFailedError(str(err).strip())
 
         if unknown_cf_types:
             warning_msg = _translate(
                 'WorkerThread',
-                f'{name}: unknown cash flow type will be ignored in result:'
-                f'{unknown_cf_types}')
+                f'{platform.name}: unknown cash flow type will be ignored in '
+                f'result: {unknown_cf_types}')
             self.signals.add_progress_text.emit(warning_msg, True)
 
-    def download_statements(self, name: str, platform: p2p_platforms) -> None:
+    def download_statements(self, platform: p2p_platforms) -> None:
         """
         Helper method for calling the download_statement methods.
 
         Args:
-            name: Name of the P2P platform.
             platform: Instance of P2PPlatform class.
 
         Raises:
@@ -124,15 +123,16 @@ class WorkerThread(QThread):
                 or if the download_statement method fails.
 
         """
-        if self.credentials[name] is None:
-            msg = f'Credentials for {name} are not available!'
+        if self.credentials[platform.name] is None:
+            msg = f'Credentials for {platform.name} are not available!'
             self.logger.warning(msg)
             raise PlatformFailedError(_translate('WorkerThread', msg))
 
         self.signals.add_progress_text.emit(_translate(
-            'WorkerThread', f'Starting evaluation of {name}...'), False)
+            'WorkerThread', f'Starting evaluation of {platform.name}...'),
+            False)
 
-        if name == 'Iuvo' and self.settings.headless:
+        if platform.name == 'Iuvo' and self.settings.headless:
             # Iuvo is currently not supported in headless ChromeDriver mode
             # because it opens a new window for downloading the statement.
             # ChromeDriver does not allow that due to security reasons.
@@ -141,17 +141,16 @@ class WorkerThread(QThread):
                     'Iuvo is not supported with headless ChromeDriver!'), True)
             self.signals.add_progress_text.emit(_translate(
                 'WorkerThread', 'Making ChromeDriver visible!'), True)
-            self._download_statement(name, platform, False)
+            self._download_statement(platform, False)
         else:
-            self._download_statement(name, platform, self.settings.headless)
+            self._download_statement(platform, self.settings.headless)
 
     def _download_statement(
-            self, name: str, platform: p2p_platforms, headless: bool) -> None:
+            self, platform: p2p_platforms, headless: bool) -> None:
         """
         Call platform.download_statement.
 
         Args:
-            name: Name of the P2P platform.
             platform: Instance of P2PPlatform class.
             headless: If True use ChromeDriver in headless mode, if False not.
 
@@ -159,7 +158,32 @@ class WorkerThread(QThread):
         with tempfile.TemporaryDirectory() as download_directory:
             with P2PWebDriver(
                     download_directory, headless, self.signals) as driver:
-                platform.download_statement(driver, self.credentials[name])
+                platform.download_statement(
+                    driver, self.credentials[platform.name])
+
+    def get_statement_location(self, name: str) -> Optional[str]:
+        """
+            Create directory for statement download if it does not exist yet and
+            return the absolute path of the target file name.
+
+            Args:
+                name: Name of the P2P platform.
+
+            Returns:
+                Absolute path of the downloaded statement file without suffix.
+
+            Raises:
+                OSError: If creation of the directory fails.
+
+        """
+        dir_ = os.path.join(self.settings.directory, name.lower())
+        if not os.path.isdir(dir_):
+            os.makedirs(dir_, exist_ok=True)
+        start_date = self.settings.date_range[0].strftime('%Y%m%d')
+        end_date = self.settings.date_range[1].strftime('%Y%m%d')
+
+        return os.path.join(
+                dir_, f'{name.lower()}_statement_{start_date}-{end_date}')
 
     def run(self) -> None:
         """
@@ -170,42 +194,19 @@ class WorkerThread(QThread):
 
         """
         self.logger.info(f'Starting worker for {self.settings.platforms}')
-        start_date = self.settings.date_range[0].strftime('%Y%m%d')
-        end_date = self.settings.date_range[1].strftime('%Y%m%d')
 
         for name in self.settings.platforms:
-            # Create target directories if they don't exist yet
-            target_directory = os.path.join(
-                self.settings.directory, name.lower())
-            if not os.path.isdir(target_directory):
-                try:
-                    os.makedirs(target_directory, exist_ok=True)
-                except OSError:
-                    self.logger.exception('Could not create directory!')
-                    self.signals.add_progress_text.emit(
-                        _translate(
-                            'WorkerThread',
-                            f'Could not create directory {target_directory}!'),
-                        True)
-                    break
-
-            # Set target location of account statement file
-            statement_without_suffix = os.path.join(
-                target_directory,
-                f'{name.lower()}_statement_{start_date}-{end_date}')
-
             try:
-                platform = self.get_platform_instance(
-                    name, statement_without_suffix)
-                self.download_statements(name, platform)
-                self.parse_statements(name, platform)
+                platform = self.get_platform_instance(name)
+                self.download_statements(platform)
+                self.parse_statements(platform)
                 self.signals.add_progress_text.emit(
                     _translate(
                         'WorkerThread', f'{name} successfully evaluated!'),
                     False)
             except PlatformFailedError as err:
                 self.logger.exception('Evaluation of platform failed.')
-                self.signals.add_progress_text.emit(str(err), True)
+                self.signals.add_progress_text.emit(str(err).strip(), True)
                 self.signals.add_progress_text.emit(
                     _translate('WorkerThread', f'{name} will be ignored!'),
                     True)
