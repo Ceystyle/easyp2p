@@ -46,13 +46,13 @@ class Swaper:
         self.signals = signals
 
     def download_statement(
-            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
+            self, headless: bool, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Swaper account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class.
-            credentials: (username, password) for Swaper.
+            headless: If True use ChromeDriver in headless mode, if False not.
+            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -71,7 +71,7 @@ class Swaper:
         }
 
         with P2PPlatform(
-                self.name, driver, urls,
+                self.name, headless, urls,
                 EC.presence_of_element_located((By.ID, 'about')),
                 logout_locator=(By.XPATH, xpaths['logout_btn']),
                 signals=self.signals) as swaper:

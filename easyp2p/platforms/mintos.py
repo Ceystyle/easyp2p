@@ -48,17 +48,16 @@ class Mintos:
         self.name = 'Mintos'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xlsx'
-        if signals:
-            self.signals.connect_signals(signals)
+        self.signals = signals
 
     def download_statement(
-            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
+            self, headless: bool, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Mintos account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class.
-            credentials: Tuple (username, password) for Mintos.
+            headless: If True use ChromeDriver in headless mode, if False not.
+            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -68,7 +67,7 @@ class Mintos:
             'logout_btn': "//a[contains(@href,'logout')]"}
 
         with P2PPlatform(
-                self.name, driver, urls,
+                self.name, headless, urls,
                 EC.element_to_be_clickable((By.ID, 'header-login-button')),
                 logout_locator=(By.XPATH, xpaths['logout_btn']),
                 signals=self.signals) as mintos:
@@ -88,10 +87,10 @@ class Mintos:
             # will not appear. In that case test if there really were no cash
             # flows. If true write an empty DataFrame to the file.
             try:
-                driver.wait(
+                mintos.driver.wait(
                     EC.presence_of_element_located((By.ID, 'export-button')))
             except TimeoutException:
-                self._create_empty_statement(driver)
+                self._create_empty_statement(mintos.driver)
             else:
                 mintos.download_statement(
                     self.statement, (By.ID, 'export-button'))

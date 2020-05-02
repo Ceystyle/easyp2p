@@ -51,13 +51,14 @@ class Estateguru:
         self.signals = signals
 
     def download_statement(
-            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
+            self, headless: bool, credentials: Tuple[str, str]) -> None:
         """
-        Generate and download Estateguru account statement for given date range.
+        Generate and download the Estateguru account statement for given date
+        range.
 
         Args:
-            driver: Instance of P2PWebDriver class.
-            credentials: Tuple (username, password) for Estateguru.
+            headless: If True use ChromeDriver in headless mode, if False not.
+            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -81,7 +82,7 @@ class Estateguru:
         }
 
         with P2PPlatform(
-                self.name, driver, urls,
+                self.name, headless, urls,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Log In')),
                 signals=self.signals) as estateguru:
 

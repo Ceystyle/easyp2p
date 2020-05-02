@@ -45,13 +45,13 @@ class Bondora:
         self.signals = signals
 
     def download_statement(
-            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
+            self, headless: bool, credentials: Tuple[str, str]) -> None:
         """
-        Generate and download the Bondora account statement.
+        Generate and download the Bondora account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class.
-            credentials: Tuple (username, password) for Bondora.
+            headless: If True use ChromeDriver in headless mode, if False not.
+            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -92,7 +92,7 @@ class Bondora:
                 (By.XPATH, xpaths['no_payments']), no_payments_msg)]
 
         with P2PPlatform(
-                self.name, driver, urls,
+                self.name, headless, urls,
                 EC.element_to_be_clickable((By.NAME, 'Email')),
                 signals=self.signals) as bondora:
 

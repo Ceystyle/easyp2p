@@ -5,7 +5,6 @@
 
 import logging
 import os
-import tempfile
 from typing import Mapping, Optional, Tuple
 
 import pandas as pd
@@ -14,7 +13,6 @@ from PyQt5.QtCore import QThread, QCoreApplication
 from easyp2p.excel_writer import write_results
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_signals import Signals, PlatformFailedError
-from easyp2p.p2p_webdriver import P2PWebDriver
 import easyp2p.platforms as p2p_platforms
 
 _translate = QCoreApplication.translate
@@ -141,25 +139,10 @@ class WorkerThread(QThread):
                     'Iuvo is not supported with headless ChromeDriver!'), True)
             self.signals.add_progress_text.emit(_translate(
                 'WorkerThread', 'Making ChromeDriver visible!'), True)
-            self._download_statement(platform, False)
+            platform.download_statement(False, self.credentials[platform.name])
         else:
-            self._download_statement(platform, self.settings.headless)
-
-    def _download_statement(
-            self, platform: p2p_platforms, headless: bool) -> None:
-        """
-        Call platform.download_statement.
-
-        Args:
-            platform: Instance of P2PPlatform class.
-            headless: If True use ChromeDriver in headless mode, if False not.
-
-        """
-        with tempfile.TemporaryDirectory() as download_directory:
-            with P2PWebDriver(
-                    download_directory, headless, self.signals) as driver:
-                platform.download_statement(
-                    driver, self.credentials[platform.name])
+            platform.download_statement(
+                self.settings.headless, self.credentials[platform.name])
 
     def get_statement_location(self, name: str) -> Optional[str]:
         """

@@ -53,12 +53,12 @@ class Robocash:
             self.signals.connect_signals(signals)
 
     def download_statement(
-            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
+            self, headless: bool, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Robocash account statement.
 
         Args:
-            driver: Instance of P2PWebDriver class.
+            headless: If True use ChromeDriver in headless mode, if False not.
             credentials: Tuple (username, password) for Robocash.
 
         Raises:
@@ -76,7 +76,7 @@ class Robocash:
         }
 
         with P2PPlatform(
-                self.name, driver, urls,
+                self.name, headless, urls,
                 EC.element_to_be_clickable((By.XPATH, xpaths['login_field'])),
                 signals=self.signals) as robocash:
 
@@ -100,7 +100,7 @@ class Robocash:
                 self.date_range, (By.ID, 'date-after'),
                 (By.ID, 'date-before'), '%Y-%m-%d')
 
-            self._wait_for_statement(driver, urls['statement'])
+            self._wait_for_statement(robocash.driver, urls['statement'])
 
             robocash.download_statement(
                 self.statement, (By.ID, 'download_statement'))

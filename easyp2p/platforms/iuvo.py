@@ -46,13 +46,13 @@ class Iuvo:
         self.signals = signals
 
     def download_statement(
-            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
+            self, headless: bool, credentials: Tuple[str, str]) -> None:
         """
         Generate and download the Iuvo account statement for given date range.
 
         Args:
-            driver: Instance of P2PWebDriver class.
-            credentials: Tuple (username, password) for Iuvo.
+            headless: If True use ChromeDriver in headless mode, if False not.
+            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -66,7 +66,7 @@ class Iuvo:
         }
 
         with P2PPlatform(
-                self.name, driver, urls,
+                self.name, headless, urls,
                 EC.element_to_be_clickable((By.ID, 'login')),
                 logout_locator=(By.ID, 'p2p_logout'),
                 hover_locator=(By.LINK_TEXT, 'User name'),

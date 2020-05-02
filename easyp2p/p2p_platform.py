@@ -16,6 +16,7 @@ import glob
 import logging
 import os
 import shutil
+import tempfile
 import time
 from typing import Mapping, Optional, Tuple
 
@@ -50,7 +51,7 @@ class P2PPlatform:
     signals = Signals()
 
     def __init__(
-            self, name: str, driver: P2PWebDriver, urls: Mapping[str, str],
+            self, name: str, headless: bool, urls: Mapping[str, str],
             logout_wait_until: expected_conditions,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None,
@@ -60,7 +61,7 @@ class P2PPlatform:
 
         Args:
             name: Name of the P2P platform
-            driver: Instance of P2PWebDriver class
+            headless: If True use ChromeDriver in headless mode, if False not.
             urls: Dictionary with URLs for login page
                 (key: 'login'), account statement page (key: 'statement')
                 and optionally logout page (key: 'logout')
@@ -77,7 +78,8 @@ class P2PPlatform:
 
         """
         self.name = name
-        self.driver = driver
+        self.driver = None
+        self.headless = headless
         self.urls = urls
         self.logout_wait_until = logout_wait_until
         self.logout_locator = logout_locator
@@ -109,6 +111,9 @@ class P2PPlatform:
             Instance of P2PPlatform class
 
         """
+        self.download_dir = tempfile.TemporaryDirectory()
+        self.driver = P2PWebDriver(
+            self.download_dir.name, self.headless, self.signals)
         self.logger.debug(f'Created context manager for {self.name}.')
         return self
 
@@ -136,11 +141,13 @@ class P2PPlatform:
             else:
                 # This should never happen since we already check it in __init__
                 msg = f'{self.name}: no method for logout provided!'
-                self.logger.error(msg)
-                raise RuntimeError(_translate('P2PPlatform', msg))
+                self.logger.warning(msg)
+                raise RuntimeWarning(_translate('P2PPlatform', msg))
 
             self.logged_in = False
 
+        self.driver.close()
+        self.download_dir.cleanup()
         self.signals.disconnect_signals()
 
         if exc_type:
@@ -151,7 +158,8 @@ class P2PPlatform:
     @signals.update_progress
     def log_into_page(
             self, name_field: str, password_field: str,
-            credentials: Tuple[str, str], wait_until: expected_conditions,
+            credentials: Tuple[str, str],
+            wait_until: expected_conditions,
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.2) -> None:
         """
@@ -207,7 +215,6 @@ class P2PPlatform:
                     f'{self.name}: loading the website failed!'),
                 wait_until=EC.element_to_be_clickable((By.NAME, name_field)))
 
-        # Enter credentials in name and password field
         error_msg = _translate(
             'P2PPlatform', f'{self.name}: login was not successful. Are the '
             'credentials correct?')

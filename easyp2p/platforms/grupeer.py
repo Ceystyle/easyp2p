@@ -46,13 +46,14 @@ class Grupeer:
         self.signals = signals
 
     def download_statement(
-            self, driver: P2PWebDriver, credentials: Tuple[str, str]) -> None:
+            self, headless: bool, credentials: Tuple[str, str]) -> None:
         """
-        Generate and download the Grupeer account statement.
+        Generate and download the Grupeer account statement for given date
+        range.
 
         Args:
-            driver: Instance of P2PWebDriver class.
-            credentials: Tuple (username, password) for Grupeer.
+            headless: If True use ChromeDriver in headless mode, if False not.
+            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -62,7 +63,7 @@ class Grupeer:
         }
 
         with P2PPlatform(
-                self.name, driver, urls,
+                self.name, headless, urls,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In')),
                 logout_locator=(By.LINK_TEXT, 'Logout'),
                 hover_locator=(By.CLASS_NAME, 'header-auth-menu-name'),
