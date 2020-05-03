@@ -9,6 +9,7 @@ Download and parse Bondora statement.
 from datetime import date
 from typing import Optional, Tuple
 
+import arrow
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -16,8 +17,7 @@ from selenium.webdriver.common.by import By
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import (
-    P2PWebDriver, one_of_many_expected_conditions_true)
+from easyp2p.p2p_webdriver import one_of_many_expected_conditions_true
 
 
 class Bondora:
@@ -70,18 +70,14 @@ class Bondora:
             'download_btn': (
                 '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'),
         }
-        # Use a dict to handle nbr to short name conversion, so we do not
-        # have to rely on English locale to be installed
-        map_nbr_to_short_month = {
-            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May',
-            '06': 'Jun', '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct',
-            '11': 'Nov', '12': 'Dec'}
-        start_month = map_nbr_to_short_month[self.date_range[0].strftime('%m')]
+        start_month = arrow.get(self.date_range[0]).format(
+            'MMM', locale='en_us')
+        end_month = arrow.get(self.date_range[1]).format(
+            'MMM', locale='en_us')
         date_dict = {
             (By.ID, 'StartMonth'): start_month,
             (By.ID, 'StartYear'): str(self.date_range[0].year),
-            (By.ID, 'EndMonth'): map_nbr_to_short_month[
-                self.date_range[1].strftime('%m')],
+            (By.ID, 'EndMonth'): end_month,
             (By.ID, 'EndYear'): str(self.date_range[1].year)}
         no_payments_msg = 'Payments were not found in the selected period.'
         conditions = [
