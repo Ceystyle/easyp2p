@@ -12,13 +12,11 @@ from typing import Optional, Tuple
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import PlatformFailedError, Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
+from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
 
@@ -49,8 +47,7 @@ class Robocash:
         self.name = 'Robocash'
         self.date_range = date_range
         self.statement = statement_without_suffix + '.xls'
-        if signals:
-            self.signals.connect_signals(signals)
+        self.signals = signals
 
     def download_statement(
             self, headless: bool, credentials: Tuple[str, str]) -> None:
@@ -100,46 +97,17 @@ class Robocash:
                 self.date_range, (By.ID, 'date-after'),
                 (By.ID, 'date-before'), '%Y-%m-%d')
 
-            self._wait_for_statement(robocash.driver, urls['statement'])
+            robocash.driver.wait_and_reload(
+                urls['statement'],
+                EC.element_to_be_clickable((By.ID, 'download_statement')),
+                3, 45,
+                _translate(
+                    'P2PPlatform',
+                    f'{self.name}: account statement generation took too '
+                    f'long!'))
 
             robocash.download_statement(
                 self.statement, (By.ID, 'download_statement'))
-
-    def _wait_for_statement(self, driver: P2PWebDriver, url: str) -> None:
-        """
-        Helper method to wait for successful statement generation.
-
-        Robocash does not automatically show download button after
-        statement generation is done. An explicit reload of the page is
-        needed.
-
-        Args:
-            driver:
-            url: URL of the account statement page.
-
-        Raises:
-            PlatformFailedError: If the account statement generation takes
-                too long.
-
-        """
-        wait = 0
-        self.signals.add_progress_text.emit(_translate(
-            'P2PPlatform', 'Note: generating the Robocash account '
-            'statement can take up to one minute!'), False)
-        while True:
-            try:
-                driver.get(url)
-                driver.wait(EC.element_to_be_clickable(
-                    (By.ID, 'download_statement')))
-                break
-            except TimeoutException:
-                wait += 1
-                if wait > 15:  # Roughly 15 * delay seconds
-                    self.signals.add_progress_text.emit(_translate(
-                        'P2PPlatform',
-                        f'{self.name}: account statement generation took too '
-                        'long!'), True)
-                    raise PlatformFailedError
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:

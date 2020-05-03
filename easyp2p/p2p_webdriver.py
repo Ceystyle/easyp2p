@@ -241,3 +241,42 @@ class P2PWebDriver(Chrome):
             raise RuntimeError(error_msg)
         except StaleElementReferenceException:
             self.enter_text(locator, text, error_msg, hit_return, wait_until)
+
+    def wait_and_reload(
+            self, url: str, wait_until: expected_conditions, reload_freq: int,
+            max_wait_time: int, error_msg: str) -> None:
+        """
+            Helper method for waiting for an expected condition to be true.
+            After each unsuccessful waiting period the web page will be
+            reloaded. This method is necessary for some P2P platforms, e.g.
+            Robocash, where certain web elements appear only after a refresh
+            of the page.
+
+            Args:
+                url: URL of the web page.
+                wait_until: Expected condition for which to wait.
+                reload_freq: Frequency in seconds for reloading the page and
+                    checking for wait_until again.
+                max_wait_time: Maximum waiting time. If wait_until is still
+                    not True after max_wait_time, an error is raised.
+                error_msg: Error message if wait is not successful after
+                    max_wait_time.
+
+            Raises:
+                RuntimeError: If wait_until is not True after max_wait_time.
+
+        """
+        wait_time = 0
+
+        while True:
+            try:
+                self.logger.debug(
+                    f'Reloading {url} and wait for {wait_until}. '
+                    f'Total waiting time: {wait_time}.')
+                self.get(url)
+                self.wait(wait_until, delay=reload_freq)
+                break
+            except TimeoutException:
+                wait_time += reload_freq
+                if wait_time > max_wait_time:
+                    raise RuntimeError(error_msg)
