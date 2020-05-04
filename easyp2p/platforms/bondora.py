@@ -44,14 +44,12 @@ class Bondora:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the Bondora account statement for given date range.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -93,7 +91,7 @@ class Bondora:
                 signals=self.signals) as bondora:
 
             bondora.log_into_page(
-                'Email', 'Password', credentials,
+                'Email', 'Password',
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Cash flow')))
 
             bondora.open_account_statement_page((By.ID, 'StartYear'))

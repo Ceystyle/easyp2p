@@ -30,7 +30,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from PyQt5.QtCore import QCoreApplication
 
-from easyp2p.p2p_signals import Signals
+from easyp2p.p2p_credentials import get_credentials_from_keyring
+from easyp2p.p2p_signals import Signals, CredentialReceiver
 from easyp2p.p2p_webdriver import P2PWebDriver, expected_conditions
 
 _translate = QCoreApplication.translate
@@ -158,7 +159,6 @@ class P2PPlatform:
     @signals.update_progress
     def log_into_page(
             self, name_field: str, password_field: str,
-            credentials: Tuple[str, str],
             wait_until: expected_conditions,
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.2) -> None:
@@ -179,8 +179,6 @@ class P2PPlatform:
                 entered
             password_field: Name of web element where the password has to be
                 entered
-            credentials: Tuple (username, password) containing login
-                credentials
             wait_until: Expected condition in case of successful login
             login_locator: Locator of web element which has to be clicked in
                 order to open login form. Default is None.
@@ -193,6 +191,7 @@ class P2PPlatform:
 
         """
         self.logger.debug(f'Logging into {self.name} website.')
+
         # Open the login page
         if login_locator is None:
             self.driver.load_url(
@@ -214,6 +213,16 @@ class P2PPlatform:
                     'P2PPlatform',
                     f'{self.name}: loading the website failed!'),
                 wait_until=EC.element_to_be_clickable((By.NAME, name_field)))
+
+        credentials = get_credentials_from_keyring(self.name)
+        if credentials is None:
+            credential_receiver = CredentialReceiver(self.signals)
+            credentials = credential_receiver.wait_for_credentials(self.name)
+
+        if credentials[0] == '' or credentials[1] == '':
+            raise RuntimeError(_translate(
+                'P2PPlatform',
+                f'No credentials for {self.name} provided! Aborting!'))
 
         error_msg = _translate(
             'P2PPlatform', f'{self.name}: login was not successful. Are the '

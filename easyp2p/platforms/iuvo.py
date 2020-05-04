@@ -16,8 +16,7 @@ from selenium.webdriver.common.by import By
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import (
-    P2PWebDriver, one_of_many_expected_conditions_true)
+from easyp2p.p2p_webdriver import one_of_many_expected_conditions_true
 
 
 class Iuvo:
@@ -45,14 +44,12 @@ class Iuvo:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the Iuvo account statement for given date range.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -73,7 +70,7 @@ class Iuvo:
                 signals=self.signals) as iuvo:
 
             iuvo.log_into_page(
-                'login', 'password', credentials,
+                'login', 'password',
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
 
             # Click away cookie policy, if present

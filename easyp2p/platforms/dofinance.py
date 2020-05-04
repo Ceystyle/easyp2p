@@ -16,7 +16,6 @@ from selenium.webdriver.common.by import By
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class DoFinance:
@@ -44,15 +43,13 @@ class DoFinance:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the DoFinance account statement for given date
         range.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -68,7 +65,7 @@ class DoFinance:
                 signals=self.signals) as dofinance:
 
             dofinance.log_into_page(
-                'email', 'password', credentials,
+                'email', 'password',
                 EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSACTIONS')))
 
             dofinance.open_account_statement_page((By.ID, 'date-from'))

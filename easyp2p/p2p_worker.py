@@ -5,12 +5,13 @@
 
 import logging
 import os
-from typing import Mapping, Optional, Tuple
+from typing import Optional
 
 import pandas as pd
-from PyQt5.QtCore import QThread, QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QThread
 
 from easyp2p.excel_writer import write_results
+from easyp2p.p2p_credentials import get_credentials_from_user
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_signals import Signals, PlatformFailedError
 import easyp2p.platforms as p2p_platforms
@@ -19,7 +20,6 @@ _translate = QCoreApplication.translate
 
 
 class WorkerThread(QThread):
-
     """
     Worker thread to offload calls to p2p_platform and p2p_parser.
 
@@ -33,24 +33,20 @@ class WorkerThread(QThread):
     # Signals for communicating with ProgressWindow
     signals = Signals()
 
-    def __init__(
-            self, settings: Settings,
-            credentials: Mapping[str, Optional[Tuple[str, str]]]) -> None:
+    def __init__(self, settings: Settings) -> None:
         """
         Constructor of WorkerThread.
 
         Args:
-            settings: Settings for easyp2p
-            credentials: Dictionary containing tuples (username, password) for
-                each selected P2P platform
+            settings: Settings for easyp2p.
 
         """
         super().__init__()
+        self.logger = logging.getLogger('easyp2p.p2p_worker.WorkerThread')
         self.settings = settings
-        self.credentials = credentials
+        self.signals.get_credentials.connect(self.get_credentials)
         self.done = False
         self.df_result = pd.DataFrame()
-        self.logger = logging.getLogger('easyp2p.p2p_worker.WorkerThread')
 
     def get_platform_instance(self, name: str) -> p2p_platforms:
         """
@@ -121,11 +117,6 @@ class WorkerThread(QThread):
                 or if the download_statement method fails.
 
         """
-        if self.credentials[platform.name] is None:
-            msg = f'Credentials for {platform.name} are not available!'
-            self.logger.warning(msg)
-            raise PlatformFailedError(_translate('WorkerThread', msg))
-
         self.signals.add_progress_text.emit(_translate(
             'WorkerThread', f'Starting evaluation of {platform.name}...'),
             False)
@@ -139,10 +130,9 @@ class WorkerThread(QThread):
                     'Iuvo is not supported with headless ChromeDriver!'), True)
             self.signals.add_progress_text.emit(_translate(
                 'WorkerThread', 'Making ChromeDriver visible!'), True)
-            platform.download_statement(False, self.credentials[platform.name])
+            platform.download_statement(False)
         else:
-            platform.download_statement(
-                self.settings.headless, self.credentials[platform.name])
+            platform.download_statement(self.settings.headless)
 
     def get_statement_location(self, name: str) -> Optional[str]:
         """
@@ -167,6 +157,18 @@ class WorkerThread(QThread):
 
         return os.path.join(
                 dir_, f'{name.lower()}_statement_{start_date}-{end_date}')
+
+    def get_credentials(self, platform: str) -> None:
+        """
+        Get credentials from user and emit them via a pyqtSignal to the
+        CredentialReceiver object.
+
+        Args:
+            platform: Name of the P2P platform.
+
+        """
+        username, password = get_credentials_from_user(platform)
+        self.signals.send_credentials.emit(username, password)
 
     def run(self) -> None:
         """

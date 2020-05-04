@@ -17,7 +17,6 @@ from PyQt5.QtCore import QCoreApplication
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
 
 _translate = QCoreApplication.translate
 
@@ -48,14 +47,12 @@ class Twino:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the Twino account statement for given date range.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -80,7 +77,7 @@ class Twino:
                 signals=self.signals) as twino:
 
             twino.log_into_page(
-                'email', 'login-password', credentials,
+                'email', 'login-password',
                 EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
                 login_locator=(By.CLASS_NAME, 'js-login-btn'))
 

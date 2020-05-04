@@ -50,14 +50,12 @@ class Mintos:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the Mintos account statement for given date range.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -73,7 +71,7 @@ class Mintos:
                 signals=self.signals) as mintos:
 
             mintos.log_into_page(
-                '_username', '_password', credentials,
+                '_username', '_password',
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
 
             mintos.open_account_statement_page((By.ID, 'period-from'))

@@ -9,7 +9,6 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 
-from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_worker import WorkerThread
 from easyp2p.ui.Ui_progress_window import Ui_ProgressWindow
@@ -32,11 +31,6 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         super().__init__()
         self.setupUi(self)
 
-        # Get credentials for the selected platforms
-        credentials = {}
-        for platform in settings.platforms:
-            credentials[platform] = get_credentials(platform)
-
         # Initialize progress bar
         # Each platform has 7 stages (init ChromeDriver, log in, open statement
         # page, generate + download statement, log out, parse statement) plus
@@ -48,7 +42,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.button_box.button(QDialogButtonBox.Ok).setEnabled(False)
 
         # Initialize and start worker thread
-        self.worker = WorkerThread(settings, credentials)
+        self.worker = WorkerThread(settings)
         self.worker.signals.end_easyp2p.connect(self.end_easyp2p)
         self.worker.signals.update_progress_bar.connect(
             self.update_progress_bar)
@@ -70,6 +64,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.abort.emit()
         self.reject()
 
+    @pyqtSlot()
     def update_progress_bar(self) -> None:
         """Update the progress bar in ProgressWindow to new value."""
         if self.worker.done:
@@ -79,6 +74,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         if self.progress_bar.value() == self.progress_bar.maximum():
             self.button_box.button(QDialogButtonBox.Ok).setEnabled(True)
 
+    @pyqtSlot(str, bool)
     def add_progress_text(self, txt: str, print_red: bool) -> None:
         """
         Append a new line to the progress text in ProgressWindow.
@@ -96,6 +92,7 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
         self.progress_text.setTextColor(color)
         self.progress_text.append(txt)
 
+    @pyqtSlot(str, str)
     def end_easyp2p(self, error_msg: str, header: str) -> None:
         """
         Abort the program in case of critical errors.

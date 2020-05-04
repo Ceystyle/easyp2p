@@ -19,7 +19,6 @@ from PyQt5.QtCore import QCoreApplication
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
 
 _translate = QCoreApplication.translate
 
@@ -50,15 +49,13 @@ class Estateguru:
         self.statement = statement_without_suffix + '.csv'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the Estateguru account statement for given date
         range.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -87,7 +84,7 @@ class Estateguru:
                 signals=self.signals) as estateguru:
 
             estateguru.log_into_page(
-                'username', 'password', credentials,
+                'username', 'password',
                 EC.element_to_be_clickable((By.LINK_TEXT, 'ACCOUNT BALANCE')),
                 login_locator=(By.LINK_TEXT, 'Log In'))
 

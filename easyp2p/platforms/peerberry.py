@@ -16,7 +16,6 @@ from selenium.common.exceptions import NoSuchElementException
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class PeerBerry:
@@ -45,15 +44,13 @@ class PeerBerry:
         self.statement = statement_without_suffix + '.csv'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the PeerBerry account statement for given date
         range.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password).
 
         """
         urls = {
@@ -79,7 +76,7 @@ class PeerBerry:
                 signals=self.signals) as peerberry:
 
             peerberry.log_into_page(
-                'email', 'password', credentials,
+                'email', 'password',
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Statement')))
 
             # Close the cookie policy

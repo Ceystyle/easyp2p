@@ -49,14 +49,12 @@ class Robocash:
         self.statement = statement_without_suffix + '.xls'
         self.signals = signals
 
-    def download_statement(
-            self, headless: bool, credentials: Tuple[str, str]) -> None:
+    def download_statement(self, headless: bool) -> None:
         """
         Generate and download the Robocash account statement.
 
         Args:
             headless: If True use ChromeDriver in headless mode, if False not.
-            credentials: Tuple (username, password) for Robocash.
 
         Raises:
             PlatformFailedError: If the statement button cannot be found
@@ -78,7 +76,7 @@ class Robocash:
                 signals=self.signals) as robocash:
 
             robocash.log_into_page(
-                'email', 'password', credentials,
+                'email', 'password',
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Account statement')),
                 login_locator=(By.XPATH, xpaths['login_field']))
 
