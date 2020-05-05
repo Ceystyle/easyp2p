@@ -8,7 +8,7 @@ import unittest.mock
 from keyring.errors import PasswordDeleteError
 
 from easyp2p.p2p_credentials import (
-    keyring_exists, get_credentials, get_credentials_from_user,
+    keyring_exists, get_credentials_from_keyring, get_credentials_from_user,
     get_password_from_keyring, delete_platform_from_keyring,
     save_platform_in_keyring)
 
@@ -132,17 +132,16 @@ class CredentialsTests(unittest.TestCase):
             'Saving in keyring failed!',
             'Saving password in keyring was not successful!')
 
-    def test_get_credentials_if_in_keyring(self, mock_keyring):
+    def test_get_credentials_from_keyring_if_in_keyring(self, mock_keyring):
         """Get credentials which exist in the keyring."""
         mock_keyring.get_keyring.return_value = True
         mock_keyring.get_password.side_effect = ['TestUser', 'TestPass']
-        credentials = get_credentials('TestPlatform')
+        credentials = get_credentials_from_keyring('TestPlatform')
         self.assertEqual(credentials[0], 'TestUser')
         self.assertEqual(credentials[1], 'TestPass')
 
-    @unittest.mock.patch('easyp2p.p2p_credentials.get_credentials_from_user')
-    def test_get_credentials_if_not_in_keyring(
-            self, mock_user_credentials, mock_keyring):
+    def test_get_credentials_from_keyring_if_not_in_keyring(
+            self, mock_keyring):
         """Get credentials which do not exist in the keyring."""
         mock_keyring.get_keyring.return_value = True
         return_values = {'username': None}
@@ -153,39 +152,7 @@ class CredentialsTests(unittest.TestCase):
             return return_values[arg]
 
         mock_keyring.get_password.side_effect = side_effect
-        mock_user_credentials.return_value = ('TestUser', 'TestPass')
-        credentials = get_credentials('TestPlatform')
-        self.assertEqual(credentials[0], 'TestUser')
-        self.assertEqual(credentials[1], 'TestPass')
-
-    @unittest.mock.patch('easyp2p.p2p_credentials.get_credentials_from_user')
-    def test_get_credentials_if_not_in_keyring_cancel(
-            self, mock_user_credentials, mock_keyring):
-        """Get credentials which are not in the keyring and user cancels."""
-        mock_keyring.get_keyring.return_value = True
-        mock_keyring.get_password.return_value = None
-        mock_user_credentials.return_value = (None, None)
-        credentials = get_credentials('TestPlatform')
-        print(credentials)
-        self.assertEqual(credentials, None)
-
-    @unittest.mock.patch('easyp2p.p2p_credentials.get_credentials_from_user')
-    def test_get_credentials_if_no_keyring_exists(
-            self, mock_user_credentials, mock_keyring):
-        """Get credentials when no keyring exists."""
-        mock_keyring.get_keyring.return_value = False
-        mock_user_credentials.return_value = ('TestUser', 'TestPass')
-        credentials = get_credentials('TestPlatform')
-        self.assertEqual(credentials[0], 'TestUser')
-        self.assertEqual(credentials[1], 'TestPass')
-
-    @unittest.mock.patch('easyp2p.p2p_credentials.get_credentials_from_user')
-    def test_get_credentials_if_no_keyring_exists_user_cancels(
-            self, mock_user_credentials, mock_keyring):
-        """Get credentials when no keyring exists and user cancels dialog."""
-        mock_keyring.get_keyring.return_value = False
-        mock_user_credentials.return_value = (None, None)
-        credentials = get_credentials('TestPlatform')
+        credentials = get_credentials_from_keyring('TestPlatform')
         self.assertEqual(credentials, None)
 
 

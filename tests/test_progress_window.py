@@ -20,20 +20,14 @@ class ProgressWindowTests(unittest.TestCase):
 
     """Test the progress window of easyp2p."""
 
-    @unittest.mock.patch('easyp2p.ui.progress_window.get_credentials')
     @unittest.mock.patch('easyp2p.ui.progress_window.WorkerThread.start')
-    def setUp(self, mock_worker, mock_credentials):
+    def setUp(self, mock_worker):
         """Initialize ProgressWindow."""
         self.settings = Settings(
             (date(2018, 9, 1), date(2018, 12, 31)),
             os.path.join(os.getcwd(), 'test.xlsx'))
         self.settings.platforms = {'test_platform1', 'test_platform2'}
-        mock_credentials.return_value = 'TestUser', 'TestPass'
-        credentials = {
-            'test_platform1': ('TestUser', 'TestPass'),
-            'test_platform2': ('TestUser', 'TestPass')}
         self.form = ProgressWindow(self.settings)
-        self.assertEqual(self.form.worker.credentials, credentials)
         self.assertEqual(
             self.settings.platforms, {'test_platform1', 'test_platform2'})
         mock_worker.assert_called_once_with()

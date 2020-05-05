@@ -13,9 +13,8 @@ import pandas as pd
 
 from easyp2p.excel_writer import (
     write_results, DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS)
-from easyp2p.p2p_credentials import get_credentials
+from easyp2p.p2p_credentials import get_credentials_from_keyring
 from easyp2p.p2p_parser import get_df_from_file, P2PParser
-from easyp2p.p2p_webdriver import P2PWebDriver
 import easyp2p.platforms as p2p_platforms
 from tests import INPUT_PREFIX, PLATFORMS, RESULT_PREFIX, TEST_PREFIX
 
@@ -56,17 +55,15 @@ class BasePlatformTests(unittest.TestCase):
             self.skipTest(
                 f'Expected results file {expected_results} not found!')
 
-        credentials = get_credentials(self.name, ask_user=False)
-        if credentials is (None, None):
+        credentials = get_credentials_from_keyring(self.name)
+        if credentials is None:
             self.skipTest(
                 f'No credentials for {self.name} in the keyring.')
 
         platform = self.Platform(date_range, statement_without_suffix)
 
         # For now we just test in non-headless mode
-        with tempfile.TemporaryDirectory() as download_directory:
-            with P2PWebDriver(download_directory, False) as driver:
-                platform.download_statement(driver, credentials)
+        platform.download_statement(False)
 
         self.assertTrue(
             are_files_equal(
@@ -266,9 +263,6 @@ class BondoraTests(BasePlatformTests):
     def test_write_results_no_results(self):
         """Test write_results if there were no results."""
         df = get_df_from_file(INPUT_PREFIX + 'write_results_no_results.csv')
-        # df.set_index([
-        #     P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
-        #     inplace=True)
         with tempfile.TemporaryDirectory() as temp_dir:
             output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
             self.assertFalse(write_results(df, output_file, self.DATE_RANGE))

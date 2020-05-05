@@ -9,35 +9,11 @@ difficult to test individually. They are tested in test_download instead.
 
 """
 
-from datetime import date
 import os
 import shutil
 import unittest
 
 import easyp2p.p2p_platform as p2p_platform
-
-
-class CalenderClickTests(unittest.TestCase):
-
-    """Tests for the P2PPlatform class."""
-
-    def test_get_calendar_clicks_positive(self):
-        """Test _get_calendar_clicks if target date > start date."""
-        clicks = p2p_platform._get_calendar_clicks(
-            date(2018, 4, 5), date(2017, 9, 27))
-        self.assertEqual(clicks, 7)
-
-    def test_get_calendar_clicks_negative(self):
-        """Test _get_calendar_clicks if target date < start date."""
-        clicks = p2p_platform._get_calendar_clicks(
-            date(2016, 4, 5), date(2017, 9, 27))
-        self.assertEqual(clicks, -17)
-
-    def test_get_calendar_clicks_zero(self):
-        """Test _get_calendar_clicks if target date == start date."""
-        clicks = p2p_platform._get_calendar_clicks(
-            date(2017, 9, 5), date(2017, 9, 27))
-        self.assertEqual(clicks, 0)
 
 
 class DownloadFinishedTests(unittest.TestCase):
@@ -109,6 +85,5 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    suite.addTests(loader.loadTestsFromTestCase(CalenderClickTests))
     suite.addTests(loader.loadTestsFromTestCase(DownloadFinishedTests))
     result = runner.run(suite)
