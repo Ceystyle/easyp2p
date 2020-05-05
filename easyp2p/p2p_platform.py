@@ -131,25 +131,26 @@ class P2PPlatform:
             RuntimeError: If no logout method is provided
 
         """
-        if self.logged_in:
-            if 'logout' in self.urls:
-                self.logout_by_url(self.logout_wait_until)
-            elif self.logout_locator is not None:
-                self.logout_by_button(
-                    self.logout_locator,
-                    self.logout_wait_until,
-                    hover_locator=self.hover_locator)
-            else:
-                # This should never happen since we already check it in __init__
-                msg = f'{self.name}: no method for logout provided!'
-                self.logger.warning(msg)
-                raise RuntimeWarning(_translate('P2PPlatform', msg))
+        try:
+            if self.logged_in:
+                if 'logout' in self.urls:
+                    self.logout_by_url(self.logout_wait_until)
+                elif self.logout_locator is not None:
+                    self.logout_by_button(
+                        self.logout_locator,
+                        self.logout_wait_until,
+                        hover_locator=self.hover_locator)
+                else:
+                    # Should never happen since we already check it in __init__
+                    msg = f'{self.name}: no method for logout provided!'
+                    self.logger.warning(msg)
+                    raise RuntimeWarning(_translate('P2PPlatform', msg))
 
-            self.logged_in = False
-
-        self.driver.close()
-        self.download_dir.cleanup()
-        self.signals.disconnect_signals()
+                self.logged_in = False
+        finally:
+            self.driver.close()
+            self.download_dir.cleanup()
+            self.signals.disconnect_signals()
 
         if exc_type:
             raise exc_type(exc_value)
