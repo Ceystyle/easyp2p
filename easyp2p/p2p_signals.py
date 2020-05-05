@@ -85,16 +85,19 @@ class Signals(QObject):
 
     def disconnect_signals(self) -> None:
         """
-        Disconnect signals. Ignore error if they were not connected.
+        Disconnect signals. Ignore error if they were not connected or if
+        disconnecting fails.
         """
-        try:
-            self.logger.debug('Disconnecting signals.')
-            self.update_progress_bar.disconnect()
-            self.add_progress_text.disconnect()
-            self.get_credentials.disconnect()
-            self.logger.debug('Disconnecting signals successful.')
-        except TypeError:
-            self.logger.exception('Disconnecting signals failed.')
+        self.logger.debug('Disconnecting signals.')
+        for signal in [
+                self.add_progress_text, self.get_credentials,
+                self.update_progress_bar]:
+            try:
+                signal.disconnect()
+            except TypeError:
+                self.logger.exception(f'Disconnecting signal {signal} failed.')
+            else:
+                self.logger.debug(f'Signal {signal} disconnected.')
 
     def abort_evaluation(self):
         """Set the abort flag to True."""
