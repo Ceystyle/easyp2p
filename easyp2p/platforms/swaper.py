@@ -64,13 +64,12 @@ class Swaper:
             'download_btn': (
                 '//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a'
                 '/div[1]/div/span[2]'),
-            'logout_btn': '//*[@id="logout"]/span[1]/span'
         }
 
         with P2PPlatform(
                 self.name, headless, urls,
                 EC.presence_of_element_located((By.ID, 'about')),
-                logout_locator=(By.XPATH, xpaths['logout_btn']),
+                logout_locator=(By.ID, 'logout'),
                 signals=self.signals) as swaper:
 
             swaper.log_into_page(
