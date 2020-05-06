@@ -78,14 +78,15 @@ class Swaper:
 
             swaper.open_account_statement_page((By.ID, 'account-statement'))
 
-            # calendar_locator must be tuple of locators, thus the , at the end
-            calendar_locator = ((By.CLASS_NAME, 'datepicker-container'), )
+            start_calendar = ((By.CLASS_NAME, 'datepicker-container'), 0)
+            end_calendar = ((By.CLASS_NAME, 'datepicker-container'), 1)
             month_locator = (By.XPATH, xpaths['month'])
             prev_month_locator = (By.CSS_SELECTOR, '.opened .icon-left')
 
             swaper.generate_statement_calendar(
                 self.date_range, month_locator, prev_month_locator,
-                (By.XPATH, xpaths['day_table']), calendar_locator,
+                (By.XPATH, xpaths['day_table']),
+                start_calendar, end_calendar,
                 day_class_check=(' ', ' selected'))
 
             swaper.download_statement(
@@ -119,6 +120,7 @@ class Swaper:
             'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
             'BUYBACK_PRINCIPAL': parser.BUYBACK_PAYMENT,
             'EXTENSION_INTEREST': parser.INTEREST_PAYMENT,
+            'FUNDING': parser.IN_OUT_PAYMENT,
             'INVESTMENT': parser.INVESTMENT_PAYMENT,
             'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
             'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT,

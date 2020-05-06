@@ -22,10 +22,8 @@ from typing import Mapping, Optional, Tuple
 
 import arrow
 from selenium.common.exceptions import (
-    ElementClickInterceptedException, NoSuchElementException,
-    StaleElementReferenceException, TimeoutException)
+    NoSuchElementException, StaleElementReferenceException, TimeoutException)
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from PyQt5.QtCore import QCoreApplication
@@ -384,7 +382,8 @@ class P2PPlatform:
             month_locator: Tuple[str, str],
             prev_month_locator: Tuple[str, str],
             day_locator: Tuple[str, str],
-            calendar_locator: Tuple[Tuple[str, str], ...],
+            start_calendar: Tuple[Tuple[str, str], int],
+            end_calendar: Tuple[Tuple[str, str], int],
             wait_until: Optional[expected_conditions] = None,
             submit_btn_locator: Optional[Tuple[str, str]] = None,
             day_class_check: Tuple[str, ...] = None) -> None:
@@ -406,8 +405,11 @@ class P2PPlatform:
             prev_month_locator: Locator of the web element which needs to be
                 clicked to switch the calendar to the previous month.
             day_locator: Locator of the table with the days for the given month.
-            calendar_locator: Tuple containing locators for the two calendars.
-                It must have either length 1 or 2.
+            start_calendar: Tuple with two elements. First element is the
+                locator of the start_calendar which will be fed to
+                find_elements. Second element of the tuple is the position of
+                the calendar in the list returned by find_elements.
+            end_calendar: Like start_calendar, just for the end date.
             wait_until: Expected condition in case of successful account
                 statement generation. Default is None.
             submit_btn_locator: Locator of button which needs to clicked to
@@ -426,7 +428,6 @@ class P2PPlatform:
         self.logger.debug(
             f'{self.name}: starting calendar account statement generation for '
             f'date range {date_range}.')
-        start_calendar, end_calendar = self._locate_calendars(calendar_locator)
 
         # Set start and end date in the calendars
         self._set_date_in_calendar(
@@ -457,48 +458,41 @@ class P2PPlatform:
         self.logger.debug(
             f'{self.name}: account statement generation successful.')
 
-    def _locate_calendars(
-            self, calendar_locator: Tuple[Tuple[str, str], ...]) \
-            -> Tuple[WebElement, WebElement]:
+    def _open_calendar(
+            self, calendar_locator: Tuple[Tuple[str, str], int]) -> None:
         """
-            Helper method for locating the two calendars for setting account
-            statement start and end dates. If calendar_locator contains two
-            elements, those are the locators for each calendar. If it contains
-            only one element, this is the locator of a datepicker list which
-            contains both calendars.
+        Helper method for locating and opening the calendar for setting account
+        statement start or end dates.
 
-            Args:
-                calendar_locator: Tuple containing locators for the two
-                    calendars. It must have either length 1 or 2.
+        Args:
+            calendar_locator: Tuple with two elements. First element is the
+                locator of the start_calendar which will be fed to
+                find_elements. Second element of the tuple is the position
+                of the calendar in the list returned by find_elements.
 
-            Raises:
-                RuntimeError: If the calendars could not be located.
+        Raises:
+            RuntimeError: If the calendars could not be located.
 
         """
+        error_msg = _translate(
+            'P2PPlatform',
+            f'{self.name}: starting account statement generation failed!')
+
         try:
-            if len(calendar_locator) == 2:
-                start_calendar = self.driver.find_element(*calendar_locator[0])
-                end_calendar = self.driver.find_element(*calendar_locator[1])
-            elif len(calendar_locator) == 1:
-                datepicker = self.driver.find_elements(*calendar_locator[0])
-                start_calendar = datepicker[0]
-                end_calendar = datepicker[1]
-            else:
-                # This should never happen
-                self.logger.error(f'Invalid locator: {calendar_locator}.')
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: invalid locator for calendar provided!'))
-        except NoSuchElementException:
+            self.driver.wait(EC.element_to_be_clickable(calendar_locator[0]))
+            calendars = self.driver.find_elements(*calendar_locator[0])
+            calendars[calendar_locator[1]].click()
+        except (NoSuchElementException, TimeoutException):
             self.logger.exception(f'{self.name}: failed to locate web element.')
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: starting account statement generation failed!'))
-
-        return start_calendar, end_calendar
+            raise RuntimeError(error_msg)
+        except IndexError:
+            self.logger.exception(
+                f'{self.name}: calendar not found in calendar list.')
+            raise RuntimeError(error_msg)
 
     def _set_date_in_calendar(
-            self, calendar_: WebElement, target_date,
+            self, calendar_locator: Tuple[Tuple[str, str], int],
+            target_date: date,
             month_locator: Tuple[str, str],
             prev_month_locator: Tuple[str, str],
             day_locator: Tuple[str, str],
@@ -507,8 +501,11 @@ class P2PPlatform:
         Find and click the given day in the provided calendar.
 
         Args:
-            calendar_: web element which needs to be clicked in order to open
-                the calendar
+            calendar_locator: Tuple with two elements. First element is the
+                locator of the start_calendar which will be fed to
+                find_elements. Second element of the tuple is the position
+                of the calendar in the list returned by find_elements.
+            target_date: Date which will be set in the calendar.
             month_locator: Locator of the web element which contains the name
                 of the currently selected month.
             prev_month_locator: Locator of the web element which needs to be
@@ -524,24 +521,14 @@ class P2PPlatform:
         """
         self.logger.debug(
             f'{self.name}: setting date {target_date} in calendar.')
-        try:
-            calendar_.click()
-        except ElementClickInterceptedException:
-            # Selenium puts the calender field for some web sites under the
-            # site header. Scroll site by offset to put it into view again.
-            # FIXME: handle case when scrolling is not working either
-            self.logger.exception(
-                f'{self.name}: trying to recover by scrolling.')
-            self.driver.execute_script(f'window.scrollBy(0, -250);')
-            calendar_.click()
+
+        self._open_calendar(calendar_locator)
 
         try:
             self._set_month_in_calendar(
                 prev_month_locator, month_locator, target_date)
-            self._set_day_in_calendar(day_locator, target_date, day_class_check)
-            self.logger.debug(
-                f'{self.name}: setting date {target_date} in calendar was '
-                'successful.')
+            self._set_day_in_calendar(
+                day_locator, target_date, day_class_check)
         except RuntimeError:
             msg = f'{self.name}: could not locate date in calendar!'
             self.logger.error(msg)

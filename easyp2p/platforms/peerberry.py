@@ -9,6 +9,7 @@ from datetime import date
 from typing import Optional, Tuple
 
 import pandas as pd
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
@@ -60,12 +61,6 @@ class PeerBerry:
             'statement_btn': (
                 '/html/body/div[1]/div/div/div/div[2]/div[3]/div[2]/div/form'
                 '/div/div[4]/button'),
-            'start_calendar': (
-                '/html/body/div[1]/div/div/div/div[2]/div[3]/div[2]/div/form'
-                '/div/div[1]/div/div[1]/div/input'),
-            'end_calendar': (
-                '/html/body/div[1]/div/div/div/div[2]/div[3]/div[2]/div/form'
-                '/div/div[1]/div/div[2]/div/input'),
         }
 
         with P2PPlatform(
@@ -82,19 +77,18 @@ class PeerBerry:
             peerberry.driver.click_button(
                 (By.CLASS_NAME, 'close-icon'), 'Ignored', raise_error=False)
 
-            peerberry.open_account_statement_page(
-                (By.XPATH, xpaths['start_calendar']))
+            peerberry.open_account_statement_page((By.NAME, 'startDate'))
 
             # Create account statement for given date range
             month_locator = (By.CLASS_NAME, 'MuiTypography-body1')
             prev_month_locator = (
                 By.CLASS_NAME, 'MuiPickersCalendarHeader-iconButton')
-            calendar_locator = (
-                (By.XPATH, xpaths['start_calendar']),
-                (By.XPATH, xpaths['end_calendar']))
+            start_calendar = ((By.NAME, 'startDate'), 1)
+            end_calendar = ((By.NAME, 'endDate'), 1)
             peerberry.generate_statement_calendar(
                 self.date_range, month_locator, prev_month_locator,
-                (By.CLASS_NAME, 'MuiPickersDay-day'), calendar_locator,
+                (By.CLASS_NAME, 'MuiPickersDay-day'),
+                start_calendar, end_calendar,
                 submit_btn_locator=(By.XPATH, xpaths['statement_btn']))
 
             peerberry.download_statement(
@@ -125,10 +119,11 @@ class PeerBerry:
         # Define mapping between PeerBerry and easyp2p cash flow types and
         # column names
         cashflow_types = {
-            'Amount of interest payment received': parser.INTEREST_PAYMENT,
-            'Amount of principal payment received': parser.REDEMPTION_PAYMENT,
-            'Deposit': parser.IN_OUT_PAYMENT,
-            'Investment': parser.INVESTMENT_PAYMENT}
+            'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
+            'BUYBACK_PRINCIPAL': parser.BUYBACK_PAYMENT,
+            'INVESTMENT': parser.INVESTMENT_PAYMENT,
+            'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
+            'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT}
         rename_columns = {'Currency Id': parser.CURRENCY, 'Date': parser.DATE}
 
         unknown_cf_types = parser.run(
