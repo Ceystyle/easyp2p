@@ -157,7 +157,8 @@ class P2PWebDriver(Chrome):
     def click_button(
             self, locator: Tuple[str, str], error_msg: str,
             wait_until: Optional[expected_conditions] = None,
-            hover_locator: Tuple[str, str] = None) -> None:
+            hover_locator: Tuple[str, str] = None,
+            raise_error: bool = True) -> None:
         """
         Helper method for clicking a button. The webdriver waits until the
         button specified by locator is clickable. If wait_until is specified
@@ -169,6 +170,8 @@ class P2PWebDriver(Chrome):
             wait_until: Expected condition in case of successful click.
             hover_locator: Locator of a web element where the mouse needs to
                 hover over in order to make the button clickable.
+            raise_error: If True raise RuntimeError if clicking the button
+                fails, if False just continue.
 
         Raises:
             RuntimeError: If the web element cannot be found or if the
@@ -186,7 +189,8 @@ class P2PWebDriver(Chrome):
                 self.wait(wait_until)
         except (NoSuchElementException, TimeoutException):
             self.logger.exception(f'Could not click button {locator}.')
-            raise RuntimeError(error_msg)
+            if raise_error:
+                raise RuntimeError(error_msg)
 
     @signals.watch_errors
     def load_url(self, url: str, wait_until: EC, error_msg: str) -> None:

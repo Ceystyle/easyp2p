@@ -11,7 +11,6 @@ from typing import Optional, Tuple
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
@@ -41,7 +40,7 @@ class PeerBerry:
         """
         self.name = 'PeerBerry'
         self.date_range = date_range
-        self.statement = statement_without_suffix + '.csv'
+        self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
     def download_statement(self, headless: bool) -> None:
@@ -80,11 +79,8 @@ class PeerBerry:
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Statement')))
 
             # Close the cookie policy
-            try:
-                peerberry.driver.wait(EC.element_to_be_clickable(
-                    (By.CLASS_NAME, 'close-icon'))).click()
-            except NoSuchElementException:
-                pass
+            peerberry.driver.click_button(
+                (By.CLASS_NAME, 'close-icon'), 'Ignored', raise_error=False)
 
             peerberry.open_account_statement_page(
                 (By.XPATH, xpaths['start_calendar']))

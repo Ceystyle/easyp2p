@@ -74,11 +74,9 @@ class Iuvo:
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
 
             # Click away cookie policy, if present
-            try:
-                iuvo.driver.wait(EC.element_to_be_clickable(
-                    (By.ID, 'CybotCookiebotDialogBodyButtonAccept'))).click()
-            except NoSuchElementException:
-                pass
+            iuvo.driver.click_button(
+                (By.ID, 'CybotCookiebotDialogBodyButtonAccept'), 'Ignored',
+                raise_error=False)
 
             iuvo.open_account_statement_page((By.ID, 'date_from'))
 
