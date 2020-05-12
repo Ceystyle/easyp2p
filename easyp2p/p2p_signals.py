@@ -35,8 +35,8 @@ class Signals(QObject):
             try:
                 if self.abort:
                     raise RuntimeError('Abort by user')
-                else:
-                    result = func(*args, **kwargs)
+
+                result = func(*args, **kwargs)
             except RuntimeError as err:
                 self.logger.exception('RuntimeError in update_progress')
                 self.add_progress_text.emit(str(err), True)
@@ -114,7 +114,7 @@ class CredentialReceiver(QObject):
     def __init__(self, signals):
         super().__init__()
         self.credentials = None
-        self.eventLoop = QEventLoop()
+        self.event_loop = QEventLoop()
         self.get_credentials.connect(signals.get_credentials)
         signals.send_credentials.connect(self.stop_waiting_for_credentials)
 
@@ -130,7 +130,7 @@ class CredentialReceiver(QObject):
 
         """
         self.credentials = (username, password)
-        self.eventLoop.exit()
+        self.event_loop.exit()
 
     @pyqtSlot(str)
     def wait_for_credentials(self, platform: str) -> Tuple[str, str]:
@@ -145,8 +145,8 @@ class CredentialReceiver(QObject):
 
         """
         self.get_credentials.emit(platform)
-        self.eventLoop = QEventLoop(self)
-        self.eventLoop.exec()
+        self.event_loop = QEventLoop(self)
+        self.event_loop.exec()
         return self.credentials
 
 

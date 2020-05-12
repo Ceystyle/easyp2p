@@ -262,8 +262,7 @@ def _get_balance_for_months_without_cashflows(
         # If month is the first month look up the correct value in the
         # first existing month's row. If no month has cash flows assume
         # that balance=0.
-        next_months = [
-            m for m in [index[2] for index in df.index]]
+        next_months = [index[2] for index in df.index]
         if next_months:
             balance = (
                 df.loc[

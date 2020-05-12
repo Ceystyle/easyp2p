@@ -24,6 +24,7 @@ _translate = QCoreApplication.translate
 
 
 class one_of_many_expected_conditions_true:
+    # pylint: disable=invalid-name,too-few-public-methods
     """
     An expectation for checking if (at least) one of several provided expected
     conditions for the Selenium webdriver is true.
@@ -118,13 +119,15 @@ class P2PWebDriver(Chrome):
             linux_command = '\n\n\tsudo apt-get install chromium-driver\n\n'
             download_link = '\n\nhttps://sites.google.com/a/chromium.org' \
                 '/chromedriver/downloads\n\n'
-            self.signals.end_easyp2p.emit(_translate(
-                'P2PWebDriver', 'ChromeDriver could not be found!\n\n'
-                'In Linux this can usually be fixed by:'
-                f'\n\n\t{linux_command}\n\n'
-                'In Windows ChromeDriver can be downloaded from:'
-                f'\n\n{download_link}\n\n'
-                'easyp2p will be aborted now!'),
+            self.signals.end_easyp2p.emit(
+                _translate(
+                    'P2PWebDriver',
+                    'ChromeDriver could not be found!\n\n'
+                    'In Linux this can usually be fixed by:'
+                    f'\n\n\t{linux_command}\n\n'
+                    'In Windows ChromeDriver can be downloaded from:'
+                    f'\n\n{download_link}\n\n'
+                    'easyp2p will be aborted now!'),
                 _translate('WorkerThread', 'ChromeDriver not found!'))
             raise RuntimeError('ChromeDriver not found!')
 
@@ -134,9 +137,9 @@ class P2PWebDriver(Chrome):
                 'behavior': 'allow', 'downloadPath': self.download_directory}
             self.execute_cdp_cmd('Page.setDownloadBehavior', params)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        super().__exit__(self, exc_type, exc_val, exc_tb)
+    def __exit__(self, *args):
         self.signals.disconnect_signals()
+        super().__exit__(self, *args)
 
     def wait(
             self, wait_until: EC, delay: float = 15.0) -> WebElement:

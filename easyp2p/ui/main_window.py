@@ -237,8 +237,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self, _translate(
                     'MainWindow', 'No P2P platform selected!'),
                 _translate(
-                   'MainWindow',
-                   'Please choose at least one P2P platform!'))
+                    'MainWindow',
+                    'Please choose at least one P2P platform!'))
             return
 
         self.settings.date_range = self.date_range

@@ -85,6 +85,7 @@ class P2PPlatform:
         self.hover_locator = hover_locator
         if signals:
             self.signals.connect_signals(signals)
+        self.download_dir = None
         self.logged_in = False
         self.logger = logging.getLogger('easyp2p.p2p_platform.P2PPlatform')
         self.logger.debug(f'Created P2PPlatform instance for {self.name}.')

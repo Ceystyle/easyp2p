@@ -209,14 +209,14 @@ class P2PParser:
             self.df[self.CF_TYPE] = self.df[orig_cf_column].map(cashflow_types)
             # All unknown cash flow types will be NaN
             unknown_cf_types = self.df[orig_cf_column].where(
-                    self.df[self.CF_TYPE].isna()).dropna().tolist()
+                self.df[self.CF_TYPE].isna()).dropna().tolist()
             # Remove duplicates, sort the entries and make them immutable
             unknown_cf_types = tuple(sorted(set(unknown_cf_types)))
             self.logger.debug(f'{self.name}: mapping successful.')
             return unknown_cf_types
-        else:
-            self.logger.debug(f'{self.name}: no cash flow types to map.')
-            return ()
+
+        self.logger.debug(f'{self.name}: no cash flow types to map.')
+        return ()
 
     def _add_zero_line(self):
         """Add a single zero cash flow for start date to the DataFrame."""
@@ -325,7 +325,7 @@ class P2PParser:
         # Disconnect signals
         self.signals.disconnect_signals()
 
-        self.logger.debug(f'{self.name}: parser completed succesfully.')
+        self.logger.debug(f'{self.name}: parser completed successfully.')
         return unknown_cf_types
 
 

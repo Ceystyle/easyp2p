@@ -72,8 +72,8 @@ class WorkerThread(QThread):
         except AttributeError:
             self.logger.exception('Platform not found')
             raise PlatformFailedError(_translate(
-                    'WorkerThread',
-                    f'{name.lower()}.py could not be found!'))
+                'WorkerThread',
+                f'{name.lower()}.py could not be found!'))
         except OSError as err:
             self.logger.exception('Could not create directory!')
             raise PlatformFailedError(str(err).strip(), True)
@@ -118,16 +118,16 @@ class WorkerThread(QThread):
 
         """
         self.signals.add_progress_text.emit(_translate(
-            'WorkerThread', f'Starting evaluation of {platform.name}...'),
-            False)
+            'WorkerThread',
+            f'Starting evaluation of {platform.name}...'), False)
 
         if platform.name == 'Iuvo' and self.settings.headless:
             # Iuvo is currently not supported in headless ChromeDriver mode
             # because it opens a new window for downloading the statement.
             # ChromeDriver does not allow that due to security reasons.
             self.signals.add_progress_text.emit(_translate(
-                    'WorkerThread',
-                    'Iuvo is not supported with headless ChromeDriver!'), True)
+                'WorkerThread',
+                'Iuvo is not supported with headless ChromeDriver!'), True)
             self.signals.add_progress_text.emit(_translate(
                 'WorkerThread', 'Making ChromeDriver visible!'), True)
             platform.download_statement(False)

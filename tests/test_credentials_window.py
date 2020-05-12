@@ -137,6 +137,7 @@ class CredentialsWindowTests(unittest.TestCase):
 
     @unittest.mock.patch('easyp2p.ui.credentials_window.QMessageBox.warning')
     def test_warn_user(self, mock_warning):
+        """Test that warning messages are displayed to the user."""
         self.form.warn_user('TestWarning', 'This is a test warning!')
         mock_warning.assert_called_once_with(
             self.form, 'TestWarning', 'This is a test warning!')

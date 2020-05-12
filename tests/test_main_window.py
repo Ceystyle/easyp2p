@@ -3,12 +3,11 @@
 
 """Module containing all tests for the main window of easyp2p."""
 
-from datetime import timedelta
+from datetime import date, timedelta
 import os
+from pathlib import Path
 import sys
 import unittest.mock
-from datetime import date
-from pathlib import Path
 
 from PyQt5.QtCore import QLocale
 from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
@@ -147,7 +146,8 @@ class MainWindowTests(unittest.TestCase):
 
         new_output_file = self.form.line_edit_output_file.text()
         self.assertNotEqual(new_output_file, old_output_file)
-        self.assertEqual(os.path.join(
+        self.assertEqual(
+            os.path.join(
                 str(Path.home()), 'P2P_Results_01052010-30112015.xlsx'),
             new_output_file)
 

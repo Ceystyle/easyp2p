@@ -48,8 +48,8 @@ def get_credentials_from_keyring(platform):
 
     if username is None or password is None:
         return None
-    else:
-        return username, password
+
+    return username, password
 
 
 def get_credentials_from_user(

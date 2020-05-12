@@ -140,8 +140,8 @@ class BasePlatformTests(unittest.TestCase):
 
         """
         df = get_df_from_file(input_file)
-        df.set_index([
-            P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
+        df.set_index(
+            [P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
             inplace=True)
         with tempfile.TemporaryDirectory() as temp_dir:
             output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
@@ -178,11 +178,11 @@ class BasePlatformTests(unittest.TestCase):
 
     def test_parse_statement_no_cfs(self):
         """Test platform parser if there were no cash flows in date_range."""
+        input_file = RESULT_PREFIX + \
+            f'download_{self.name.lower()}_statement_no_cfs'
         self.run_parser_test(
             f'{self.name.lower()}_parser_no_cfs',
-            self.DATE_RANGE_NO_CFS,
-            input_file=RESULT_PREFIX+\
-                       f'download_{self.name.lower()}_statement_no_cfs')
+            self.DATE_RANGE_NO_CFS, input_file=input_file)
 
     def test_parse_statement_unknown_cf(self) -> None:
         """Test platform parser when unknown cash flow types are present."""
@@ -215,11 +215,12 @@ class BasePlatformTests(unittest.TestCase):
         """
         Test write_results when there are months without cash flows.
         """
+        input_file = RESULT_PREFIX + \
+            f'{self.name.lower()}_parser_missing_month.csv'
+        exp_result_file = RESULT_PREFIX + \
+            f'write_results_{self.name.lower()}_missing_month.xlsx'
         self.run_write_results(
-            RESULT_PREFIX + f'{self.name.lower()}_parser_missing_month.csv',
-            RESULT_PREFIX \
-                + f'write_results_{self.name.lower()}_missing_month.xlsx',
-            self.DATE_RANGE_MISSING_MONTH)
+            input_file, exp_result_file, self.DATE_RANGE_MISSING_MONTH)
 
 
 class BondoraTests(BasePlatformTests):

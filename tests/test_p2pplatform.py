@@ -17,6 +17,9 @@ import easyp2p.p2p_platform as p2p_platform
 
 
 class DownloadFinishedTests(unittest.TestCase):
+    # pylint: disable=protected-access
+
+    """Test the _download_finished method."""
 
     def setUp(self) -> None:
         """Create download directory."""
