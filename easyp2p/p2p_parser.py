@@ -352,7 +352,13 @@ def get_df_from_file(
 
     try:
         if file_format == '.csv':
-            df = pd.read_csv(input_file, header=header, skipfooter=skipfooter)
+            if skipfooter:
+                # The default 'c' engine does not support skipfooter
+                df = pd.read_csv(
+                    input_file, header=header, skipfooter=skipfooter,
+                    engine='python')
+            else:
+                df = pd.read_csv(input_file, header=header)
         elif file_format in ('.xlsx', '.xls'):
             df = pd.read_excel(input_file, header=header, skipfooter=skipfooter)
         else:
