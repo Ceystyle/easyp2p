@@ -95,9 +95,10 @@ class Signals(QObject):
             try:
                 signal.disconnect()
             except TypeError:
-                self.logger.exception(f'Disconnecting signal {signal} failed.')
+                self.logger.exception(
+                    'Disconnecting signal %s failed.', str(signal))
             else:
-                self.logger.debug(f'Signal {signal} disconnected.')
+                self.logger.debug('Signal %s disconnected.', str(signal))
 
     def abort_evaluation(self):
         """Set the abort flag to True."""

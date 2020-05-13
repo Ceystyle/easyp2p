@@ -191,7 +191,7 @@ class P2PWebDriver(Chrome):
             if wait_until is not None:
                 self.wait(wait_until)
         except (NoSuchElementException, TimeoutException):
-            self.logger.exception(f'Could not click button {locator}.')
+            self.logger.exception('Could not click button %s.', locator)
             if raise_error:
                 raise RuntimeError(error_msg)
 
@@ -213,7 +213,7 @@ class P2PWebDriver(Chrome):
             self.get(url)
             self.wait(wait_until)
         except TimeoutException:
-            self.logger.exception(f'Could not load URL {url}.')
+            self.logger.exception('Could not load URL %s.', url)
             raise RuntimeError(error_msg)
 
     @signals.watch_errors
@@ -244,7 +244,8 @@ class P2PWebDriver(Chrome):
             if wait_until:
                 self.wait(wait_until)
         except (NoSuchElementException, TimeoutException):
-            self.logger.exception(f'Could not fill {text} in field {locator}.')
+            self.logger.exception(
+                'Could not fill %s in field %s.', text, locator)
             raise RuntimeError(error_msg)
         except StaleElementReferenceException:
             self.enter_text(locator, text, error_msg, hit_return, wait_until)
@@ -278,8 +279,8 @@ class P2PWebDriver(Chrome):
         while True:
             try:
                 self.logger.debug(
-                    f'Reloading {url} and wait for {wait_until}. '
-                    f'Total waiting time: {wait_time}.')
+                    'Reloading %s and wait for %s. Total waiting time: %d.',
+                    url, str(wait_until), max_wait_time)
                 self.get(url)
                 self.wait(wait_until, delay=reload_freq)
                 break

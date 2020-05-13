@@ -88,7 +88,7 @@ class P2PPlatform:
         self.download_dir = None
         self.logged_in = False
         self.logger = logging.getLogger('easyp2p.p2p_platform.P2PPlatform')
-        self.logger.debug(f'Created P2PPlatform instance for {self.name}.')
+        self.logger.debug('%s: created P2PPlatform instance.', self.name)
 
         # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
@@ -114,7 +114,7 @@ class P2PPlatform:
         self.download_dir = tempfile.TemporaryDirectory()
         self.driver = P2PWebDriver(
             self.download_dir.name, self.headless, self.signals)
-        self.logger.debug(f'Created context manager for {self.name}.')
+        self.logger.debug('%s: created context manager.', self.name)
         return self
 
     @signals.watch_errors
@@ -154,7 +154,7 @@ class P2PPlatform:
         if exc_type:
             raise exc_type(exc_value)
 
-        self.logger.debug(f'Context manager for {self.name} finished.')
+        self.logger.debug('%s: context manager done.', self.name)
 
     @signals.update_progress
     def log_into_page(
@@ -190,7 +190,7 @@ class P2PPlatform:
                           - If loading the page takes too long
 
         """
-        self.logger.debug(f'Logging into {self.name} website.')
+        self.logger.debug('%s: logging into website.', self.name)
 
         # Open the login page
         if login_locator is None:
@@ -234,7 +234,7 @@ class P2PPlatform:
             hit_return=True, wait_until=wait_until)
 
         self.logged_in = True
-        self.logger.debug(f'{self.name}: successfully logged in.')
+        self.logger.debug('%s: successfully logged in.', self.name)
 
     @signals.update_progress
     def open_account_statement_page(
@@ -255,7 +255,7 @@ class P2PPlatform:
                           - If loading of page takes too long
 
         """
-        self.logger.debug(f'Open {self.name} account statement page.')
+        self.logger.debug('%s: opening account statement page.', self.name)
         self.driver.load_url(
             self.urls['statement'],
             EC.presence_of_element_located(check_locator),
@@ -264,7 +264,7 @@ class P2PPlatform:
                 f'{self.name}: loading account statement page was not '
                 'successful!'))
         self.logger.debug(
-            f'{self.name} account statement page opened successfully.')
+            '%s: account statement page opened successfully.', self.name)
 
     @signals.update_progress
     def logout_by_button(
@@ -291,13 +291,13 @@ class P2PPlatform:
                             - If the download button cannot be found
 
         """
-        self.logger.debug(f'{self.name}: starting log out by button.')
+        self.logger.debug('%s: starting log out by button.', self.name)
         self.driver.click_button(
             logout_locator,
             _translate(
                 'P2PPlatform', f'{self.name}: logout was not successful!'),
             wait_until=wait_until, hover_locator=hover_locator)
-        self.logger.debug(f'{self.name}: log out by button successful.')
+        self.logger.debug('%s: log out by button successful.', self.name)
 
     @signals.update_progress
     def logout_by_url(self, wait_until: expected_conditions) -> None:
@@ -315,12 +315,12 @@ class P2PPlatform:
             RuntimeWarning: If loading of logout page takes too long
 
         """
-        self.logger.debug(f'{self.name}: starting log out by URL.')
+        self.logger.debug('%s: starting log out by URL.', self.name)
         self.driver.load_url(
             self.urls['logout'], wait_until,
             _translate(
                 'P2PPlatform', f'{self.name}: logout was not successful!'))
-        self.logger.debug(f'{self.name}: log out by URL successful.')
+        self.logger.debug('%s: log out by URL successful.', self.name)
 
     @signals.update_progress
     def generate_statement_direct(
@@ -358,8 +358,8 @@ class P2PPlatform:
 
         """
         self.logger.debug(
-            f'{self.name}: starting direct account statement generation for '
-            f'date range {date_range}.')
+            '%s: starting direct account statement generation for '
+            'date range %s.', self.name, str(date_range))
 
         error_msg = _translate(
             'P2PPlatform',
@@ -375,7 +375,7 @@ class P2PPlatform:
                 submit_btn_locator, error_msg, wait_until=wait_until)
 
         self.logger.debug(
-            f'{self.name}: account statement generation successful.')
+            '%s: account statement generation successful.', self.name)
 
     @signals.update_progress
     def generate_statement_calendar(
@@ -427,8 +427,8 @@ class P2PPlatform:
 
         """
         self.logger.debug(
-            f'{self.name}: starting calendar account statement generation for '
-            f'date range {date_range}.')
+            '%s: starting calendar account statement generation for '
+            'date range %s.', self.name, str(date_range))
 
         # Set start and end date in the calendars
         self._set_date_in_calendar(
@@ -451,13 +451,13 @@ class P2PPlatform:
             try:
                 self.driver.wait(wait_until)
             except TimeoutException:
-                self.logger.exception(f'{self.name}: Timeout.')
+                self.logger.exception('%s: Timeout.', self.name)
                 raise RuntimeError(_translate(
                     'P2PPlatform',
                     f'{self.name}: account statement generation failed!'))
 
         self.logger.debug(
-            f'{self.name}: account statement generation successful.')
+            '%s: account statement generation successful.', self.name)
 
     def _open_calendar(
             self, calendar_locator: Tuple[Tuple[str, str], int]) -> None:
@@ -484,11 +484,12 @@ class P2PPlatform:
             calendars = self.driver.find_elements(*calendar_locator[0])
             calendars[calendar_locator[1]].click()
         except (NoSuchElementException, TimeoutException):
-            self.logger.exception(f'{self.name}: failed to locate web element.')
+            self.logger.exception(
+                '%s: failed to locate web element.', self.name)
             raise RuntimeError(error_msg)
         except IndexError:
             self.logger.exception(
-                f'{self.name}: calendar not found in calendar list.')
+                '%s: calendar not found in calendar list.', self.name)
             raise RuntimeError(error_msg)
 
     def _set_date_in_calendar(
@@ -521,7 +522,7 @@ class P2PPlatform:
 
         """
         self.logger.debug(
-            f'{self.name}: setting date {target_date} in calendar.')
+            '%s: setting date %s in calendar.', self.name, str(target_date))
 
         self._open_calendar(calendar_locator)
 
@@ -567,7 +568,7 @@ class P2PPlatform:
                     'MMMM YYYY', locale='en_US')
         except (NoSuchElementException, TimeoutException):
             self.logger.exception(
-                f'{self.name}: failed to set month in calendar.')
+                '%s: failed to set month in calendar.', self.name)
             raise RuntimeError()
 
     def _set_day_in_calendar(self, day_locator, target_date, day_class_check):
@@ -600,12 +601,12 @@ class P2PPlatform:
                         continue
                     elem.click()
                     self.logger.debug(
-                        f'{self.name}: setting date {target_date} in calendar '
-                        f'was successful.')
+                        '%s: setting date %s in calendar was successful.',
+                        self.name, str(target_date))
                     return
         except NoSuchElementException:
             self.logger.exception(
-                f'{self.name}: failed to set day in calendar.')
+                '%s: failed to set day in calendar.', self.name)
             raise RuntimeError()
         except StaleElementReferenceException:
             self._set_day_in_calendar(day_locator, target_date, day_class_check)
@@ -640,15 +641,15 @@ class P2PPlatform:
 
         """
         self.logger.debug(
-            f'{self.name}: starting account statement generation by setting '
-            f'combo boxes.')
+            '%s: starting account statement generation by setting '
+            'combo boxes.', self.name)
         try:
             # Change the date values to the given start and end dates
             for locator in date_dict.keys():
                 select = Select(self.driver.find_element(*locator))
                 select.select_by_visible_text(date_dict[locator])
         except NoSuchElementException:
-            self.logger.exception(f'{self.name}: failed to find combo box.')
+            self.logger.exception('%s: failed to find combo box.', self.name)
             raise RuntimeError(_translate(
                 'P2PPlatform',
                 f'{self.name}: starting account statement generation failed!'))
@@ -661,7 +662,7 @@ class P2PPlatform:
                 f'{self.name}: starting account statement generation failed!'),
             wait_until=wait_until)
         self.logger.debug(
-            f'{self.name}: account statement generation was successful.')
+            '%s: account statement generation was successful.', self.name)
 
     @signals.update_progress
     def download_statement(
@@ -690,7 +691,7 @@ class P2PPlatform:
                 does not finish successfully.
 
         """
-        self.logger.debug(f'{self.name}: starting account statement download.')
+        self.logger.debug('%s: starting account statement download.', self.name)
         if actions == 'move_to_element':
             hover_locator = download_locator
         else:
@@ -710,7 +711,7 @@ class P2PPlatform:
                 'P2PPlatform',
                 f'{self.name}: download of account statement failed!'))
 
-        self.logger.debug(f'{self.name}: account statement download finished.')
+        self.logger.debug('%s: account statement download finished.', self.name)
 
 
 def _download_finished(
@@ -755,7 +756,8 @@ def _download_finished(
             if len(filelist) > 1:
                 # This should never happen since the download directory is a
                 # newly created temporary directory
-                logger.error(f'More than one active download found: {filelist}')
+                logger.error(
+                    'More than one active download found: %s', str(filelist))
                 raise RuntimeError(_translate(
                     'P2PPlatform',
                     f'Download directory {download_directory} is not empty!'))

@@ -178,7 +178,7 @@ class WorkerThread(QThread):
         statements, parses them and writes the results to an Excel file.
 
         """
-        self.logger.info(f'Starting worker for {self.settings.platforms}')
+        self.logger.info('%s: starting worker.', self.settings.platforms)
 
         for name in self.settings.platforms:
             try:
