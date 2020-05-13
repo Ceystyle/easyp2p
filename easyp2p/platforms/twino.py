@@ -86,8 +86,10 @@ class Twino:
             twino.generate_statement_direct(
                 self.date_range, (By.XPATH, xpaths['start_date']),
                 (By.XPATH, xpaths['end_date']), '%d.%m.%Y',
-                wait_until=EC.element_to_be_clickable(
-                    (By.CSS_SELECTOR, '.accStatement__pdf')))
+                wait_until=EC.text_to_be_present_in_element(
+                    (By.CLASS_NAME, 'accStatement__block'),
+                    f'Closing balance {self.date_range[1].strftime("%d.%m.%Y")}'
+                ))
 
             twino.download_statement(
                 self.statement, (By.CSS_SELECTOR, '.accStatement__pdf'))
