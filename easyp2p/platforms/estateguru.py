@@ -6,19 +6,16 @@ Download and parse Estateguru statement.
 """
 
 from datetime import date
-import time
 from typing import Optional, Tuple
 
+from bs4 import BeautifulSoup
 import pandas as pd
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
 from PyQt5.QtCore import QCoreApplication
+import requests
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import Signals
+from easyp2p.p2p_credentials import get_credentials_from_keyring
+from easyp2p.p2p_signals import Signals, CredentialReceiver
 
 _translate = QCoreApplication.translate
 
@@ -49,91 +46,111 @@ class Estateguru:
         self.statement = statement_without_suffix + '.csv'
         self.signals = signals
 
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(self, _) -> None:
         """
-        Generate and download the Estateguru account statement for given date
-        range.
+            Generate and download the Estateguru account statement for given date
+            range.
 
-        Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            Args:
+                _: Ignored. This is needed for consistency with platforms that
+                    use WebDriver to download the statement.
+
+            Raises:
+                RuntimeError:
+                    - If no credentials for Estateguru are provided.
+                    - If login, loading the page, generating or downloading the
+                      account statement is not successful.
+                RuntimeWarning: If logout is not successful.
 
         """
-        urls = {
-            'login': 'https://estateguru.co/?switch=en',
-            'logout': 'https://estateguru.co/portal/logout/index',
-            'statement': 'https://estateguru.co/portal/portfolio/account',
-        }
-        xpaths = {
-            'account_statement_check': (
-                '/html/body/section/div/div/div/div[2]/section[1]/div/div'
-                '/div[2]/div/form/div[2]/ul/li[5]/a'),
-            'download_btn': (
-                '//*[@id="collapseTransactions"]/div/div/div[1]/div/div[2]'
-                '/button'),
-            'filter_btn': (
-                '//*[@id="collapseTransactions"]/div/div/div[1]/div/div[1]'
-                '/button'),
-            'submit_btn': (
-                '/html/body/section/div/div/div/div[2]/div/div/div/div/div[1]'
-                '/div[3]/form/div[6]/div/div[3]/button')
-        }
+        credentials = get_credentials_from_keyring(self.name)
+        if credentials is None:
+            credential_receiver = CredentialReceiver(self.signals)
+            credentials = credential_receiver.wait_for_credentials(self.name)
 
-        with P2PPlatform(
-                self.name, headless, urls,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Log In')),
-                signals=self.signals) as estateguru:
+        if credentials[0] == '' or credentials[1] == '':
+            raise RuntimeError(_translate(
+                'P2PPlatform',
+                f'No credentials for {self.name} provided! Aborting!'))
 
-            estateguru.log_into_page(
-                'username', 'password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'ACCOUNT BALANCE')),
-                login_locator=(By.LINK_TEXT, 'Log In'))
+        with requests.session() as sess:
+            data = {
+                'username': credentials[0],
+                'password': credentials[1],
+            }
+            resp = sess.post(
+                'https://estateguru.co/portal/login/authenticate',
+                data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform', f'{self.name}: login was not successful. '
+                    'Are the credentials correct?'))
+            self.signals.update_progress_bar.emit()
 
-            estateguru.open_account_statement_page(
-                (By.XPATH, xpaths['filter_btn']))
-
-            # Open the filter dialog and generate the statement
-            start_date_locator = (
-                By.ID, 'filter_dateApproveFilterFrom_dataTableTransaction')
-            end_date_locator = (
-                By.ID, 'filter_dateApproveFilterTo_dataTableTransaction')
-            estateguru.driver.click_button(
-                (By.XPATH, xpaths['filter_btn']),
-                _translate(
+            resp = sess.get('https://estateguru.co/portal/portfolio/account')
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: starting download of account statement '
-                    f'failed!'),
-                wait_until=EC.element_to_be_clickable(start_date_locator))
+                    f'{self.name}: loading account statement page was not '
+                    'successful!'))
+            self.signals.update_progress_bar.emit()
 
-            estateguru.generate_statement_direct(
-                self.date_range,
-                start_date_locator, end_date_locator, '%d.%m.%Y',
-                wait_until=EC.element_to_be_clickable(
-                    (By.ID, 'btnFilterPMTable')),
-                submit_btn_locator=(By.ID, 'btnFilterPMTable'))
-
-            # Clicking the submit button will move the screen to the bottom of
-            # the page. Move back to top again.
-            try:
-                estateguru.driver.find_element(By.TAG_NAME, 'body').send_keys(
-                    Keys.HOME)
-            except NoSuchElementException:
-                pass
-
-            # Estateguru needs a bit until the download button can be clicked
-            # without closing the drop-down menu at once
-            time.sleep(1)
-
-            # Open the download dialog and download the statement
-            estateguru.driver.click_button(
-                (By.XPATH, xpaths['download_btn']),
-                _translate(
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            download_url = None
+            for link in soup.find_all('a', href=True):
+                if 'downloadOrderReport.csv' in link['href']:
+                    download_url = link['href']
+            if download_url is None:
+                raise RuntimeError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: starting download of account statement '
-                    f'failed!'),
-                wait_until=EC.element_to_be_clickable((By.LINK_TEXT, 'CSV')))
+                    f'{self.name}: generating the account statement was not '
+                    f'successful!'))
+            user_id = download_url.split('&')[1].split('=')[1]
 
-            estateguru.download_statement(
-                self.statement, (By.LINK_TEXT, 'CSV'))
+            data = {
+                'currentUserId': user_id,
+                'currentCurrency': "EUR",
+                'userDetails': "",
+                'showFutureTransactions': "false",
+                'order': "",
+                'sort': "",
+                'filter_isFilter': "[true]",
+                'filterTableId': "dataTableTransaction",
+                'filter_dateApproveFilterFrom':
+                    f"[{self.date_range[0].strftime('%d.%m.%Y')}]",
+                'filter_dateApproveFilterTo':
+                    f"[{self.date_range[1].strftime('%d.%m.%Y')}]",
+                'filter_loanName': "",
+                'controller': "portfolio",
+                'format': "null",
+                'action': "ajaxFilterTransactions",
+                'max': "20",
+                'offset': "40"
+            }
+            resp = sess.post(
+                'https://estateguru.co/portal/portfolio/ajaxFilterTransactions',
+                data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: account statement generation failed!'))
+            self.signals.update_progress_bar.emit()
+
+            resp = sess.get(f'https://estateguru.co{download_url}')
+            if resp.status_code == 200:
+                with open(self.statement, 'w') as file:
+                    file.write(resp.text)
+            else:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: download of account statement failed!'))
+            self.signals.update_progress_bar.emit()
+
+            resp = sess.get('https://estateguru.co/portal/logoff')
+            if resp.status_code != 200:
+                raise RuntimeWarning(_translate(
+                    'P2PPlatform', f'{self.name}: logout was not successful!'))
+            self.signals.update_progress_bar.emit()
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
