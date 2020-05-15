@@ -6,16 +6,18 @@ Download and parse PeerBerry statement.
 """
 
 from datetime import date
+import json
 from typing import Optional, Tuple
 
 import pandas as pd
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+from PyQt5.QtCore import QCoreApplication
+import requests
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import Signals
+from easyp2p.p2p_credentials import get_credentials_from_keyring
+from easyp2p.p2p_signals import Signals, CredentialReceiver
+
+_translate = QCoreApplication.translate
 
 
 class PeerBerry:
@@ -44,55 +46,79 @@ class PeerBerry:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(self, _) -> None:
         """
         Generate and download the PeerBerry account statement for given date
         range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            _: Ignored. This is needed for consistency with platforms that
+                use WebDriver to download the statement.
+
+        Raises:
+            RuntimeError:
+                - If no credentials for PeerBerry are provided.
+                - If login or downloading the account statement is not
+                successful.
+            RuntimeWarning: If logout is not successful.
 
         """
-        urls = {
-            'login': 'https://peerberry.com/en/client/',
-            'statement': 'https://peerberry.com/en/client/statement',
-        }
-        xpaths = {
-            'statement_btn': (
-                '/html/body/div[1]/div/div/div/div[2]/div[3]/div[2]/div/form'
-                '/div/div[4]/button'),
-        }
+        credentials = get_credentials_from_keyring(self.name)
+        if credentials is None:
+            credential_receiver = CredentialReceiver(self.signals)
+            credentials = credential_receiver.wait_for_credentials(self.name)
 
-        with P2PPlatform(
-                self.name, headless, urls,
-                EC.element_to_be_clickable((By.NAME, 'email')),
-                logout_locator=(By.CLASS_NAME, 'logout'),
-                signals=self.signals) as peerberry:
+        if credentials[0] == '' or credentials[1] == '':
+            raise RuntimeError(_translate(
+                'P2PPlatform',
+                f'No credentials for {self.name} provided! Aborting!'))
 
-            peerberry.log_into_page(
-                'email', 'password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Statement')))
+        with requests.session() as sess:
+            data = {
+                'email': credentials[0],
+                'password': credentials[1],
+                'params': (
+                    "{\"pbLastCookie\":\"https://peerberry.com/\","
+                    "\"pbFirstCookie\":\"/\"}")}
+            resp = sess.post(
+                'https://api.peerberry.com/v1/investor/login', data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform', f'{self.name}: login was not successful. '
+                    'Are the credentials correct?'))
+            self.signals.update_progress_bar.emit()
 
-            # Close the cookie policy
-            peerberry.driver.click_button(
-                (By.CLASS_NAME, 'close-icon'), 'Ignored', raise_error=False)
+            access_token = json.loads(resp.text)['access_token']
+            header = {
+                'Accept': '*/*',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip,deflate,br',
+                'Referer': 'https://peerberry.com/en/client/statement',
+                'Authorization': f'Bearer {access_token}',
+                'Origin': 'https://peerberry.com',
+                'Connection': 'keep-alive'
+            }
 
-            peerberry.open_account_statement_page((By.NAME, 'startDate'))
+            resp = sess.get(
+                f'https://api.peerberry.com/v1/investor/transactions/import?'
+                f'startDate={self.date_range[0].strftime("%Y-%m-%d")}&'
+                f'endDate={self.date_range[1].strftime("%Y-%m-%d")}&'
+                f'transactionType=0&lang=en', headers=header)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: download of account statement failed!'))
 
-            # Create account statement for given date range
-            month_locator = (By.CLASS_NAME, 'MuiTypography-body1')
-            prev_month_locator = (
-                By.CLASS_NAME, 'MuiPickersCalendarHeader-iconButton')
-            start_calendar = ((By.NAME, 'startDate'), 1)
-            end_calendar = ((By.NAME, 'endDate'), 1)
-            peerberry.generate_statement_calendar(
-                self.date_range, month_locator, prev_month_locator,
-                (By.CLASS_NAME, 'MuiPickersDay-day'),
-                start_calendar, end_calendar,
-                submit_btn_locator=(By.XPATH, xpaths['statement_btn']))
+            with open(self.statement, 'bw') as file:
+                file.write(resp.content)
 
-            peerberry.download_statement(
-                self.statement, (By.CLASS_NAME, 'download'))
+            resp = sess.get(
+                'https://api.peerberry.com/v1/investor/logout',
+                headers=header)
+            if resp.status_code != 200:
+                raise RuntimeWarning(_translate(
+                    'P2PPlatform', f'{self.name}: logout was not successful!'))
+            self.signals.update_progress_bar.emit()
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
