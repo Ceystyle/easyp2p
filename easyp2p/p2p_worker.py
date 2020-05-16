@@ -105,35 +105,6 @@ class WorkerThread(QThread):
                 f'result: {unknown_cf_types}')
             self.signals.add_progress_text.emit(warning_msg, True)
 
-    def download_statements(self, platform: p2p_platforms) -> None:
-        """
-        Helper method for calling the download_statement methods.
-
-        Args:
-            platform: Instance of P2PPlatform class.
-
-        Raises:
-            PlatformFailedError: If no credentials for platform are available
-                or if the download_statement method fails.
-
-        """
-        self.signals.add_progress_text.emit(_translate(
-            'WorkerThread',
-            f'Starting evaluation of {platform.name}...'), False)
-
-        if platform.name == 'Iuvo' and self.settings.headless:
-            # Iuvo is currently not supported in headless ChromeDriver mode
-            # because it opens a new window for downloading the statement.
-            # ChromeDriver does not allow that due to security reasons.
-            self.signals.add_progress_text.emit(_translate(
-                'WorkerThread',
-                'Iuvo is not supported with headless ChromeDriver!'), True)
-            self.signals.add_progress_text.emit(_translate(
-                'WorkerThread', 'Making ChromeDriver visible!'), True)
-            platform.download_statement(False)
-        else:
-            platform.download_statement(self.settings.headless)
-
     def get_statement_location(self, name: str) -> Optional[str]:
         """
             Create directory for statement download if it does not exist yet and
@@ -156,7 +127,7 @@ class WorkerThread(QThread):
         end_date = self.settings.date_range[1].strftime('%Y%m%d')
 
         return os.path.join(
-                dir_, f'{name.lower()}_statement_{start_date}-{end_date}')
+            dir_, f'{name.lower()}_statement_{start_date}-{end_date}')
 
     def get_credentials(self, platform: str) -> None:
         """
@@ -183,7 +154,10 @@ class WorkerThread(QThread):
         for name in self.settings.platforms:
             try:
                 platform = self.get_platform_instance(name)
-                self.download_statements(platform)
+                self.signals.add_progress_text.emit(_translate(
+                    'WorkerThread',
+                    f'Starting evaluation of {platform.name}...'), False)
+                platform.download_statement(self.settings.headless)
                 self.parse_statements(platform)
                 self.signals.add_progress_text.emit(
                     _translate(

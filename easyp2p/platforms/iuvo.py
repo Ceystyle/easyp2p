@@ -8,15 +8,17 @@ Download and parse Iuvo statement.
 from datetime import date
 from typing import Optional, Tuple
 
+from bs4 import BeautifulSoup
 import pandas as pd
+from PyQt5.QtCore import QCoreApplication
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_platform import P2PPlatform, _download_finished
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import one_of_many_expected_conditions_true
+
+_translate = QCoreApplication.translate
 
 
 class Iuvo:
@@ -56,11 +58,6 @@ class Iuvo:
             'login': 'https://www.iuvo-group.com/en/login/',
             'statement': 'https://www.iuvo-group.com/en/account-statement/',
         }
-        xpaths = {
-            'statement_check': (
-                '/html/body/div[3]/main/div/div/div/div[6]/div/div/div'
-                '/strong[3]'),
-        }
 
         with P2PPlatform(
                 self.name, headless, urls,
@@ -79,41 +76,31 @@ class Iuvo:
                 raise_error=False)
 
             iuvo.open_account_statement_page((By.ID, 'date_from'))
-
-            start_date = self.date_range[0].strftime('%Y-%m-%d')
-            end_date = self.date_range[1].strftime('%Y-%m-%d')
-            check_txt = f'{start_date} - {end_date}'
-
-            # Define conditions if account statement generation is successful:
-            # The first condition will be true if there were cash flows in
-            # date_range, the second condition will be true of there were none
-            conditions = [
-                EC.text_to_be_present_in_element(
-                    (By.XPATH, xpaths['statement_check']), check_txt),
-                EC.text_to_be_present_in_element(
-                    (By.CLASS_NAME, 'text-center'),
-                    'There is no suitable data !')]
-
-            iuvo.generate_statement_direct(
-                (self.date_range[0], self.date_range[1]), (By.ID, 'date_from'),
-                (By.ID, 'date_to'), '%Y-%m-%d',
-                wait_until=one_of_many_expected_conditions_true(conditions),
-                submit_btn_locator=(By.ID, 'account_statement_filters_btn'))
-
+            soup = BeautifulSoup(iuvo.driver.page_source, 'html.parser')
             try:
-                no_cashflows = bool(
-                    iuvo.driver.find_element(By.CLASS_NAME, 'text-center').text
-                    == 'There is no suitable data !')
-            except NoSuchElementException:
-                no_cashflows = False
+                account_id = soup.input["value"]
+                p2_var = iuvo.driver.current_url.split(';')[1]
+            except (KeyError, IndexError):
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: loading account statement page was not '
+                    'successful!'))
 
-            # If there were no cash flows write an empty DataFrame to the file
-            if no_cashflows:
-                df = pd.DataFrame()
-                df.to_excel(self.statement)
-            else:
-                iuvo.download_statement(
-                    self.statement, (By.CLASS_NAME, 'p2p-download-full-list'))
+            iuvo.driver.get(
+                f'https://tbp2p.iuvo-group.com/p2p-ui/app?p0=export_file;'
+                f'{p2_var};;display_as=export;'
+                f'export_as=xlsx;sid=rep_account_statement_full_list;sr=1;'
+                f'rep_name=AccountStatement;'
+                f'investor_account_id={account_id}&'
+                f'date_from={self.date_range[0].strftime("%Y-%m-%d")}&'
+                f'date_to={self.date_range[1].strftime("%Y-%m-%d")};'
+                f'lang=en_US&screen_width=1920&screen_height=780')
+
+            if not _download_finished(
+                    self.statement, iuvo.driver.download_directory):
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: download of account statement failed!'))
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
