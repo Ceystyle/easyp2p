@@ -5,7 +5,7 @@
 
 import logging
 import os
-from typing import Callable, cast, List, Optional, Tuple, Union
+from typing import cast, Optional, Tuple
 
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
@@ -21,47 +21,6 @@ from PyQt5.QtCore import QCoreApplication
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
-
-
-class one_of_many_expected_conditions_true:
-    # pylint: disable=invalid-name,too-few-public-methods
-    """
-    An expectation for checking if (at least) one of several provided expected
-    conditions for the Selenium webdriver is true.
-    """
-    def __init__(self, conditions: List[Callable[[Chrome], bool]]) -> None:
-        """
-        Initialize class.
-
-        Args:
-            conditions: List of all conditions which should be checked.
-
-        """
-        self.conditions = conditions
-
-    def __call__(self, driver: Chrome) -> bool:
-        """
-        Caller for class.
-
-        Args:
-            driver: Selenium webdriver
-
-        Returns:
-            True if at least one of the conditions is true, False otherwise.
-
-        """
-        for condition in self.conditions:
-            try:
-                if condition(driver):
-                    return True
-            except NoSuchElementException:
-                pass
-        return False
-
-
-# Helper for type hints
-expected_conditions = Union[
-    EC.element_to_be_clickable, one_of_many_expected_conditions_true]
 
 
 class P2PWebDriver(Chrome):
@@ -153,7 +112,7 @@ class P2PWebDriver(Chrome):
     @signals.watch_errors
     def click_button(
             self, locator: Tuple[str, str], error_msg: str,
-            wait_until: Optional[expected_conditions] = None,
+            wait_until: Optional[EC.element_to_be_clickable] = None,
             hover_locator: Tuple[str, str] = None,
             raise_error: bool = True) -> None:
         """
@@ -214,7 +173,7 @@ class P2PWebDriver(Chrome):
     def enter_text(
             self, locator: Tuple[str, str], text: str, error_msg: str,
             hit_return: bool = False,
-            wait_until: Optional[expected_conditions] = None) -> None:
+            wait_until: Optional[EC.element_to_be_clickable] = None) -> None:
         """
             Helper method for inserting text into a web element.
 
@@ -245,8 +204,8 @@ class P2PWebDriver(Chrome):
             self.enter_text(locator, text, error_msg, hit_return, wait_until)
 
     def wait_and_reload(
-            self, url: str, wait_until: expected_conditions, reload_freq: int,
-            max_wait_time: int, error_msg: str) -> None:
+            self, url: str, wait_until: EC.element_to_be_clickable,
+            reload_freq: int, max_wait_time: int, error_msg: str) -> None:
         """
             Helper method for waiting for an expected condition to be true.
             After each unsuccessful waiting period the web page will be
