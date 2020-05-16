@@ -697,7 +697,7 @@ class P2PPlatform:
                 f'failed!'),
             hover_locator=hover_locator)
 
-        if not _download_finished(
+        if not download_finished(
                 statement, self.driver.download_directory):
             raise RuntimeError(_translate(
                 'P2PPlatform',
@@ -706,7 +706,7 @@ class P2PPlatform:
         self.logger.debug('%s: account statement download finished.', self.name)
 
 
-def _download_finished(
+def download_finished(
         statement: str, download_directory: str,
         max_wait_time: float = 4.0) -> bool:
     """

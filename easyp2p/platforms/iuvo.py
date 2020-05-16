@@ -15,7 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform, _download_finished
+from easyp2p.p2p_platform import P2PPlatform, download_finished
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
@@ -96,7 +96,7 @@ class Iuvo:
                 f'date_to={self.date_range[1].strftime("%Y-%m-%d")};'
                 f'lang=en_US&screen_width=1920&screen_height=780')
 
-            if not _download_finished(
+            if not download_finished(
                     self.statement, iuvo.driver.download_directory):
                 raise RuntimeError(_translate(
                     'P2PPlatform',

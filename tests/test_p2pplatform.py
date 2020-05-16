@@ -45,7 +45,7 @@ class DownloadFinishedTests(unittest.TestCase):
 
     def test_no_crdownload_file(self):
         """Test return value if download does not start."""
-        self.assertFalse(p2p_platform._download_finished(
+        self.assertFalse(p2p_platform.download_finished(
             self.statement, self.download_directory))
         self.assertFalse(os.path.isfile(self.statement))
 
@@ -54,7 +54,7 @@ class DownloadFinishedTests(unittest.TestCase):
         # Create a file in the download directory
         file = open(os.path.join(self.download_directory, 'test.xlsx'), 'w+')
         file.close()
-        self.assertTrue(p2p_platform._download_finished(
+        self.assertTrue(p2p_platform.download_finished(
             self.statement, self.download_directory))
         self.assertTrue(os.path.isfile(self.statement))
 
@@ -64,7 +64,7 @@ class DownloadFinishedTests(unittest.TestCase):
         file = open(
             os.path.join(self.download_directory, 'test.crdownload'), 'w+')
         file.close()
-        self.assertFalse(p2p_platform._download_finished(
+        self.assertFalse(p2p_platform.download_finished(
             self.statement, self.download_directory))
         self.assertFalse(os.path.isfile(self.statement))
 
@@ -78,7 +78,7 @@ class DownloadFinishedTests(unittest.TestCase):
             os.path.join(self.download_directory, 'test2.xlsx'), 'w+')
         file.close()
         self.assertRaises(
-            RuntimeError, p2p_platform._download_finished, self.statement,
+            RuntimeError, p2p_platform.download_finished, self.statement,
             self.download_directory)
         self.assertFalse(os.path.isfile(self.statement))
 
