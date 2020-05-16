@@ -14,8 +14,8 @@ from PyQt5.QtCore import QCoreApplication
 import requests
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_credentials import get_credentials_from_keyring
-from easyp2p.p2p_signals import Signals, CredentialReceiver
+from easyp2p.p2p_credentials import get_credentials
+from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
 
@@ -63,15 +63,7 @@ class Estateguru:
                 RuntimeWarning: If logout is not successful.
 
         """
-        credentials = get_credentials_from_keyring(self.name)
-        if credentials is None:
-            credential_receiver = CredentialReceiver(self.signals)
-            credentials = credential_receiver.wait_for_credentials(self.name)
-
-        if credentials[0] == '' or credentials[1] == '':
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'No credentials for {self.name} provided! Aborting!'))
+        credentials = get_credentials(self.name, self.signals)
 
         with requests.session() as sess:
             data = {

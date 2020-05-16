@@ -5,9 +5,8 @@
 
 from functools import wraps
 import logging
-from typing import Tuple
 
-from PyQt5.QtCore import QEventLoop, QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class Signals(QObject):
@@ -104,51 +103,6 @@ class Signals(QObject):
         """Set the abort flag to True."""
         self.logger.debug('Aborting evaluation.')
         self.abort = True
-
-
-class CredentialReceiver(QObject):
-    """Class for getting platform credentials via signals."""
-
-    get_credentials = pyqtSignal(str)
-    send_credentials = pyqtSignal(str, str)
-
-    def __init__(self, signals):
-        super().__init__()
-        self.credentials = None
-        self.event_loop = QEventLoop()
-        self.get_credentials.connect(signals.get_credentials)
-        signals.send_credentials.connect(self.stop_waiting_for_credentials)
-
-    @pyqtSlot(str, str)
-    def stop_waiting_for_credentials(
-            self, username: str, password: str) -> None:
-        """
-        Stop the event loop and return to wait_for_credentials.
-
-        Args:
-            username: Username of the P2P platform.
-            password: Password of the P2P platform.
-
-        """
-        self.credentials = (username, password)
-        self.event_loop.exit()
-
-    @pyqtSlot(str)
-    def wait_for_credentials(self, platform: str) -> Tuple[str, str]:
-        """
-        Start an event loop to wait until the user entered credentials.
-
-        Args:
-            platform: Name of the P2P platform.
-
-        Returns:
-            Tuple (username, password) for the P2P platform.
-
-        """
-        self.get_credentials.emit(platform)
-        self.event_loop = QEventLoop(self)
-        self.event_loop.exec()
-        return self.credentials
 
 
 class PlatformFailedError(Exception):

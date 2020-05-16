@@ -9,8 +9,9 @@ from typing import Optional, Tuple
 
 import keyring
 from keyring.errors import PasswordDeleteError
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QObject, pyqtSignal, QEventLoop, pyqtSlot
 
+from easyp2p.p2p_signals import Signals
 from easyp2p.ui.credentials_window import CredentialsWindow
 
 _translate = QCoreApplication.translate
@@ -81,6 +82,35 @@ def get_credentials_from_user(
                     'successful!'))
 
     return cred_window.username, cred_window.password
+
+
+def get_credentials(platform: str, signals: Signals) -> Tuple[str, str]:
+    """
+    Helper function to get credentials for platform from keyring or from user,
+    if they are not available in the keyring.
+
+    Args:
+        platform: Platform for which to get credentials.
+        signals: Signals for communicating with the GUI.
+
+    Returns:
+        Tuple (username, password) for platform
+
+    Raises:
+        RuntimeError: If no credentials were provided by the user.
+
+    """
+    credentials = get_credentials_from_keyring(platform)
+    if credentials is None:
+        credential_receiver = CredentialReceiver(signals)
+        credentials = credential_receiver.wait_for_credentials(platform)
+
+    if credentials[0] == '' or credentials[1] == '':
+        raise RuntimeError(_translate(
+            'P2PPlatform',
+            f'No credentials for {platform} provided! Aborting!'))
+
+    return credentials
 
 
 def get_password_from_keyring(platform: str, username: str) -> Optional[str]:
@@ -156,3 +186,48 @@ def save_platform_in_keyring(
     except keyring.errors.PasswordSetError:
         return False
     return True
+
+
+class CredentialReceiver(QObject):
+    """Class for getting platform credentials via signals."""
+
+    get_credentials = pyqtSignal(str)
+    send_credentials = pyqtSignal(str, str)
+
+    def __init__(self, signals):
+        super().__init__()
+        self.credentials = None
+        self.event_loop = QEventLoop()
+        self.get_credentials.connect(signals.get_credentials)
+        signals.send_credentials.connect(self.stop_waiting_for_credentials)
+
+    @pyqtSlot(str, str)
+    def stop_waiting_for_credentials(
+            self, username: str, password: str) -> None:
+        """
+        Stop the event loop and return to wait_for_credentials.
+
+        Args:
+            username: Username of the P2P platform.
+            password: Password of the P2P platform.
+
+        """
+        self.credentials = (username, password)
+        self.event_loop.exit()
+
+    @pyqtSlot(str)
+    def wait_for_credentials(self, platform: str) -> Tuple[str, str]:
+        """
+        Start an event loop to wait until the user entered credentials.
+
+        Args:
+            platform: Name of the P2P platform.
+
+        Returns:
+            Tuple (username, password) for the P2P platform.
+
+        """
+        self.get_credentials.emit(platform)
+        self.event_loop = QEventLoop(self)
+        self.event_loop.exec()
+        return self.credentials

@@ -28,8 +28,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from PyQt5.QtCore import QCoreApplication
 
-from easyp2p.p2p_credentials import get_credentials_from_keyring
-from easyp2p.p2p_signals import Signals, CredentialReceiver
+from easyp2p.p2p_credentials import get_credentials
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver, expected_conditions
 
 _translate = QCoreApplication.translate
@@ -214,15 +214,7 @@ class P2PPlatform:
                     f'{self.name}: loading the website failed!'),
                 wait_until=EC.element_to_be_clickable((By.NAME, name_field)))
 
-        credentials = get_credentials_from_keyring(self.name)
-        if credentials is None:
-            credential_receiver = CredentialReceiver(self.signals)
-            credentials = credential_receiver.wait_for_credentials(self.name)
-
-        if credentials[0] == '' or credentials[1] == '':
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'No credentials for {self.name} provided! Aborting!'))
+        credentials = get_credentials(self.name, self.signals)
 
         error_msg = _translate(
             'P2PPlatform', f'{self.name}: login was not successful. Are the '
