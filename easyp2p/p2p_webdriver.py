@@ -91,12 +91,6 @@ class P2PWebDriver(Chrome):
         prefs = {"download.default_directory": self.download_directory}
         options.add_experimental_option("prefs", prefs)
         options.add_argument("--start-maximized")
-        # FIXME: This is a temporary workaround to fix loading the Bondora
-        # website. It fails to load if the webdriver identifies itself as
-        # HeadlessChrome.
-        options.add_argument(
-            "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/81.0.4044.92 Safari/537.36")
         options.binary_location = "/usr/bin/chromium"
         if headless:
             options.add_argument("--headless")
