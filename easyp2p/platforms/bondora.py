@@ -9,15 +9,16 @@ Download and parse Bondora statement.
 from datetime import date
 from typing import Optional, Tuple
 
-import arrow
+from bs4 import BeautifulSoup
 import pandas as pd
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+from PyQt5.QtCore import QCoreApplication
+import requests
 
+from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import one_of_many_expected_conditions_true
+
+_translate = QCoreApplication.translate
 
 
 class Bondora:
@@ -44,64 +45,71 @@ class Bondora:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(self, _) -> None:
         """
-        Generate and download the Bondora account statement for given date range.
+        Generate and download the Bondora account statement for given date
+        range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            _: Ignored. This is needed for consistency with platforms that
+                use WebDriver to download the statement.
+
+        Raises:
+            RuntimeError:
+                - If no credentials for Bondora are provided.
+                - If login or downloading the account statement is not
+                successful.
+            RuntimeWarning: If logout is not successful.
 
         """
-        urls = {
-            'login': 'https://www.bondora.com/en/login',
-            'logout': 'https://www.bondora.com/en/authorize/logout',
-            'statement': 'https://www.bondora.com/en/cashflow',
-        }
-        xpaths = {
-            'no_payments': '/html/body/div[1]/div/div/div/div[3]/div',
-            'search_btn': (
-                '//*[@id="page-content-wrapper"]/div/div/div[1]/form/div[3]'
-                '/button'),
-            'start_date': (
-                '/html/body/div[1]/div/div/div/div[3]/div/table/tbody/tr[2]'
-                '/td[1]/a'),
-            'download_btn': (
-                '/html/body/div[1]/div/div/div/div[1]/form/div[4]/div/a'),
-        }
-        start_month = arrow.get(self.date_range[0]).format(
-            'MMM', locale='en_us')
-        end_month = arrow.get(self.date_range[1]).format(
-            'MMM', locale='en_us')
-        date_dict = {
-            (By.ID, 'StartMonth'): start_month,
-            (By.ID, 'StartYear'): str(self.date_range[0].year),
-            (By.ID, 'EndMonth'): end_month,
-            (By.ID, 'EndYear'): str(self.date_range[1].year)}
-        no_payments_msg = 'Payments were not found in the selected period.'
-        conditions = [
-            EC.text_to_be_present_in_element(
-                (By.XPATH, xpaths['start_date']),
-                f'{start_month} {self.date_range[0].year}'),
-            EC.text_to_be_present_in_element(
-                (By.XPATH, xpaths['no_payments']), no_payments_msg)]
+        credentials = get_credentials(self.name, self.signals)
 
-        with P2PPlatform(
-                self.name, headless, urls,
-                EC.element_to_be_clickable((By.NAME, 'Email')),
-                signals=self.signals) as bondora:
+        with requests.session() as sess:
+            resp = sess.get('https://www.bondora.com/en/login/')
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            try:
+                token = soup.input['value']
+            except KeyError:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: loading login page was not successful!'))
 
-            bondora.log_into_page(
-                'Email', 'Password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Cash flow')))
+            data = {
+                'Email': credentials[0],
+                'Password': credentials[1],
+                '__RequestVerificationToken': token,
+            }
+            resp = sess.post('https://www.bondora.com/en/login/', data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform', f'{self.name}: login was not successful. '
+                    'Are the credentials correct?'))
+            self.signals.update_progress_bar.emit()
 
-            bondora.open_account_statement_page((By.ID, 'StartYear'))
+            data = {
+                'StartYear': self.date_range[0].strftime('%Y'),
+                'StartMonth': self.date_range[0].strftime('%-m'),
+                'EndYear': self.date_range[1].strftime('%Y'),
+                'EndMonth': self.date_range[1].strftime('%-m'),
+            }
+            url = 'https://www.bondora.com/en/cashflow/searchcashflow?'
+            for key, value in data.items():
+                url += str(key) + '=' + str(value) + '&'
+            url += 'downloadExcel=true'
+            resp = sess.get(url)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: download of account statement failed!'))
 
-            bondora.generate_statement_combo_boxes(
-                date_dict, (By.XPATH, xpaths['search_btn']),
-                one_of_many_expected_conditions_true(conditions))
+            with open(self.statement, 'bw') as file:
+                file.write(resp.content)
 
-            bondora.download_statement(
-                self.statement, (By.XPATH, xpaths['download_btn']))
+            resp = sess.get('https://www.bondora.com/en/authorize/logout/')
+            if resp.status_code != 200:
+                raise RuntimeWarning(_translate(
+                    'P2PPlatform', f'{self.name}: logout was not successful!'))
+            self.signals.update_progress_bar.emit()
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
