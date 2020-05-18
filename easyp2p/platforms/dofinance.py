@@ -9,13 +9,16 @@ Download and parse DoFinance statement.
 from datetime import date
 from typing import Optional, Tuple
 
+from bs4 import BeautifulSoup
 import pandas as pd
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+from PyQt5.QtCore import QCoreApplication
+import requests
 
+from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
+
+_translate = QCoreApplication.translate
 
 
 class DoFinance:
@@ -43,40 +46,83 @@ class DoFinance:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(self, _) -> None:
         """
         Generate and download the DoFinance account statement for given date
         range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            _: Ignored. This is needed for consistency with platforms that
+                use WebDriver to download the statement.
+
+        Raises:
+            RuntimeError:
+                - If no credentials for DoFinance are provided.
+                - If login or downloading the account statement is not
+                successful.
+            RuntimeWarning: If logout is not successful.
 
         """
-        urls = {
-            'login': 'https://www.dofinance.eu/en/users/login',
-            'logout': 'https://www.dofinance.eu/en/users/logout',
-            'statement': 'https://www.dofinance.eu/en/users/statement',
-        }
+        credentials = get_credentials(self.name, self.signals)
 
-        with P2PPlatform(
-                self.name, headless, urls,
-                EC.element_to_be_clickable(
-                    (By.XPATH, '//a[@href="/en/users/login"]')),
-                signals=self.signals) as dofinance:
+        with requests.session() as sess:
+            resp = sess.get('https://www.dofinance.eu/en/users/login')
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            data = {
+                '_method': 'POST',
+                'email': credentials[0],
+                'password': credentials[1],
+            }
+            token_names = ['_Token[fields]', '_Token[unlocked]']
+            inputs = soup.find_all('input')
+            for elem in inputs:
+                if elem['name'] in token_names:
+                    data[elem['name']] = elem['value']
 
-            dofinance.log_into_page(
-                'email', 'password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'TRANSACTIONS')))
+            resp = sess.post(
+                'https://www.dofinance.eu/en/users/login', data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform', f'{self.name}: login was not successful. '
+                    'Are the credentials correct?'))
+            self.signals.update_progress_bar.emit()
 
-            dofinance.open_account_statement_page((By.ID, 'date-from'))
+            resp = sess.get('https://www.dofinance.eu/en/users/statement')
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: loading account statement page was not '
+                    f'successful!'))
+            self.signals.update_progress_bar.emit()
 
-            dofinance.generate_statement_direct(
-                self.date_range, (By.ID, 'date-from'), (By.ID, 'date-to'),
-                '%d.%m.%Y',
-                wait_until=EC.element_to_be_clickable((By.NAME, 'xls')))
+            data = {
+                '_method': 'PUT',
+                'date_from': self.date_range[0].strftime('%d.%m.%Y'),
+                'date_to': self.date_range[1].strftime('%d.%m.%Y'),
+                'trans_type': '',
+                'xls': 'Download+XLS',
+            }
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            inputs = soup.find_all('input')
+            for elem in inputs:
+                if elem['name'] in token_names:
+                    data[elem['name']] = elem['value']
 
-            dofinance.download_statement(
-                self.statement, (By.NAME, 'xls'))
+            resp = sess.post(
+                'https://www.dofinance.eu/en/users/statement', data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: download of account statement failed!'))
+
+            with open(self.statement, 'wb') as file:
+                file.write(resp.content)
+
+            resp = sess.get('https://www.dofinance.eu/en/users/logout')
+            if resp.status_code != 200:
+                raise RuntimeWarning(_translate(
+                    'P2PPlatform', f'{self.name}: logout was not successful!'))
+            self.signals.update_progress_bar.emit()
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
