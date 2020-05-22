@@ -7,15 +7,17 @@ Download and parse Robocash statement.
 """
 
 from datetime import date
+import json
+import time
 from typing import Optional, Tuple
 
+from bs4 import BeautifulSoup
 import pandas as pd
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+import requests
 from PyQt5.QtCore import QCoreApplication
 
+from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
@@ -49,63 +51,103 @@ class Robocash:
         self.statement = statement_without_suffix + '.xls'
         self.signals = signals
 
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(self, _) -> None:
         """
-        Generate and download the Robocash account statement.
+        Generate and download the Robocash account statement for given date
+        range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            _: Ignored. This is needed for consistency with platforms that
+                use WebDriver to download the statement.
 
         Raises:
-            PlatformFailedError: If the statement button cannot be found
-                          - If the download of the statement takes too long
+            RuntimeError:
+                - If no credentials for Robocash are provided.
+                - If login, loading the page, generating or downloading the
+                  account statement is not successful.
+            RuntimeWarning: If logout is not successful.
 
         """
-        urls = {
-            'login': 'https://robo.cash/',
-            'logout': 'https://robo.cash/logout',
-            'statement': 'https://robo.cash/cabinet/statement',
-        }
-        xpaths = {
-            'login_field': '/html/body/header/div/div[2]/a',
-        }
+        credentials = get_credentials(self.name, self.signals)
 
-        with P2PPlatform(
-                self.name, headless, urls,
-                EC.element_to_be_clickable((By.XPATH, xpaths['login_field'])),
-                signals=self.signals) as robocash:
-
-            robocash.log_into_page(
-                'email', 'password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Account statement')),
-                login_locator=(By.XPATH, xpaths['login_field']))
-
-            robocash.open_account_statement_page((By.ID, 'new_statement'))
-
-            # Open statement filter dialog
-            robocash.driver.click_button(
-                (By.ID, 'new_statement'),
-                _translate(
+        with requests.session() as sess:
+            resp = sess.get('https://robo.cash')
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            token = soup.input.get('value', None)
+            if resp.status_code != 200 or token is None:
+                raise RuntimeError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: starting account statement generation '
-                    'failed!'),
-                wait_until=EC.element_to_be_clickable((By.ID, 'date-after')))
+                    f'{self.name}: loading website was not successful!'))
 
-            robocash.generate_statement_direct(
-                self.date_range, (By.ID, 'date-after'),
-                (By.ID, 'date-before'), '%Y-%m-%d')
+            data = {
+                'email': credentials[0],
+                'password': credentials[1],
+                '_token': token,
+            }
+            resp = sess.post('https://robo.cash/login', data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform', f'{self.name}: login was not successful. '
+                                   'Are the credentials correct?'))
+            self.signals.update_progress_bar.emit()
 
-            robocash.driver.wait_and_reload(
-                urls['statement'],
-                EC.element_to_be_clickable((By.ID, 'download_statement')),
-                3, 45,
-                _translate(
+            resp = sess.get('https://robo.cash/cabinet/statement')
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            script = BeautifulSoup(
+                soup.find('script', {'id': 'report-template'}).string,
+                'html.parser')
+            token = script.find('input', {'name': '_token'}).get('value', None)
+            if resp.status_code != 200 or token is None:
+                raise RuntimeError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: account statement generation took too '
-                    f'long!'))
+                    f'{self.name}: loading the account statement page was '
+                    f'not successful!'))
+            self.signals.update_progress_bar.emit()
 
-            robocash.download_statement(
-                self.statement, (By.ID, 'download_statement'))
+            data = {
+                '_token': token,
+                'currency_id': '1',
+                'start_date': self.date_range[0].strftime("%Y-%m-%d"),
+                'end_date': self.date_range[1].strftime("%Y-%m-%d"),
+                'statement_type': '1'
+            }
+            resp = sess.post(
+                'https://robo.cash/cabinet/statement/generate', data=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: generating the account statement was not '
+                    f'successful!'))
+
+            wait_time = 0
+            max_wait_time = 30
+            while wait_time <= max_wait_time:
+                resp = sess.get('https://robo.cash/cabinet/statement')
+                soup = BeautifulSoup(resp.text, 'html.parser')
+                report = json.loads(
+                    soup.find('report-component').get(':initial_report'))
+                if report['filename'] is not None:
+                    break
+                time.sleep(2)
+                wait_time += 2
+            self.signals.update_progress_bar.emit()
+
+            resp = sess.get(
+                f'https://robo.cash/cabinet/statement/{report["id"]}/download')
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: download of account statement failed!'))
+            self.signals.update_progress_bar.emit()
+
+            with open(self.statement, 'wb') as file:
+                file.write(resp.content)
+
+            resp = sess.get('https://robo.cash/logout')
+            if resp.status_code != 200:
+                raise RuntimeWarning(_translate(
+                    'P2PPlatform', f'{self.name}: logout was not successful!'))
+            self.signals.update_progress_bar.emit()
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
