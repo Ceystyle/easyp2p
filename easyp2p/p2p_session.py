@@ -157,7 +157,10 @@ class P2PSession:
         with open(location, 'bw') as file:
             file.write(resp.content)
 
-    def get_value_from_tag(self, url, tag, name) -> Optional[str]:
+    @signals.watch_errors
+    def get_value_from_tag(
+            self, url: str, tag: str, name: str,
+            error_msg: str) -> Optional[str]:
         """
         Get the value of a HTML tag from page specified by url.
 
@@ -165,24 +168,26 @@ class P2PSession:
             url: URL of the website.
             tag: Tag of the HTML element.
             name: Name of the tag for which to get the value.
+            error_msg: Error message if extraction of value fails.
 
         Returns:
-            Value of the requested HTML element or None if the element was not
-            found.
+            Value of the requested HTML element.
 
         Raises:
-            RuntimeError: If the website returns an error status code.
+            RuntimeError: If the website returns an error status code or if
+            the HTML element cannot be found.
         """
         resp = self.sess.get(url)
         if resp.status_code != 200:
             self.logger.debug(
                 '%s: returned status code %s', self.name, resp.status_code)
             self.logger.debug(resp.text)
-            raise RuntimeError(_translate(
-                'P2PPlatform', f'{self.name}: loading of {url} failed!'))
+            raise RuntimeError(error_msg)
+
         soup = BeautifulSoup(resp.text, 'html.parser')
         for elem in soup.find_all(tag):
             if elem['name'] == name:
                 return elem['value']
 
-        return None
+        # The HTML element has not been found
+        raise RuntimeError(error_msg)

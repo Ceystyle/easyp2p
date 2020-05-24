@@ -9,13 +9,11 @@ Download and parse Bondora statement.
 from datetime import date
 from typing import Optional, Tuple
 
-from bs4 import BeautifulSoup
 import pandas as pd
 from PyQt5.QtCore import QCoreApplication
-import requests
 
-from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
+from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
@@ -54,62 +52,33 @@ class Bondora:
             _: Ignored. This is needed for consistency with platforms that
                 use WebDriver to download the statement.
 
-        Raises:
-            RuntimeError:
-                - If no credentials for Bondora are provided.
-                - If login or downloading the account statement is not
-                successful.
-            RuntimeWarning: If logout is not successful.
-
         """
-        credentials = get_credentials(self.name, self.signals)
+        with P2PSession(
+                self.name, 'https://www.bondora.com/en/authorize/logout/',
+                self.signals) as sess:
 
-        with requests.session() as sess:
-            resp = sess.get('https://www.bondora.com/en/login/')
-            soup = BeautifulSoup(resp.text, 'html.parser')
-            try:
-                token = soup.input['value']
-            except KeyError:
-                raise RuntimeError(_translate(
+            token_field = '__RequestVerificationToken'
+            token = sess.get_value_from_tag(
+                'https://www.bondora.com/en/login/', 'input', token_field,
+                _translate(
                     'P2PPlatform',
                     f'{self.name}: loading login page was not successful!'))
 
-            data = {
-                'Email': credentials[0],
-                'Password': credentials[1],
-                '__RequestVerificationToken': token,
-            }
-            resp = sess.post('https://www.bondora.com/en/login/', data=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform', f'{self.name}: login was not successful. '
-                    'Are the credentials correct?'))
-            self.signals.update_progress_bar.emit()
+            sess.log_into_page(
+                'https://www.bondora.com/en/login/', 'Email', 'Password',
+                {token_field: token})
 
-            data = {
+            dates = {
                 'StartYear': self.date_range[0].strftime('%Y'),
                 'StartMonth': self.date_range[0].strftime('%-m'),
                 'EndYear': self.date_range[1].strftime('%Y'),
                 'EndMonth': self.date_range[1].strftime('%-m'),
             }
             url = 'https://www.bondora.com/en/cashflow/searchcashflow?'
-            for key, value in data.items():
+            for key, value in dates.items():
                 url += str(key) + '=' + str(value) + '&'
             url += 'downloadExcel=true'
-            resp = sess.get(url)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: download of account statement failed!'))
-
-            with open(self.statement, 'bw') as file:
-                file.write(resp.content)
-
-            resp = sess.get('https://www.bondora.com/en/authorize/logout/')
-            if resp.status_code != 200:
-                raise RuntimeWarning(_translate(
-                    'P2PPlatform', f'{self.name}: logout was not successful!'))
-            self.signals.update_progress_bar.emit()
+            sess.download_statement(url, self.statement)
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
