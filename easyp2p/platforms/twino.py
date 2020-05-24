@@ -7,15 +7,15 @@ Download and parse Twino statement.
 """
 
 from datetime import date
+import time
 from typing import Optional, Tuple
 
 import pandas as pd
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+import requests
 from PyQt5.QtCore import QCoreApplication
 
+from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
@@ -47,52 +47,124 @@ class Twino:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(self, _) -> None:
         """
         Generate and download the Twino account statement for given date range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            _: Ignored. This is needed for consistency with platforms that
+                use WebDriver to download the statement.
+
+        Raises:
+            RuntimeError:
+                - If no credentials for Twino are provided.
+                - If two factor authentication is in use.
+                - If login, generating or downloading the
+                  account statement is not successful.
+            RuntimeWarning: If logout is not successful.
 
         """
-        urls = {
-            'login': 'https://www.twino.eu/en/',
-            'statement': (
-                'https://www.twino.eu/en/profile/investor/my-investments'
-                '/account-transactions'),
-        }
-        xpaths = {
-            'end_date': '//*[@date-picker="filterData.processingDateTo"]',
-            'logout_btn': '//a[@href="/logout"]',
-            'start_date': '//*[@date-picker="filterData.processingDateFrom"]',
-            'statement': (
-                '//a[@href="/en/profile/investor/my-investments/'
-                'individual-investments"]'),
-        }
+        credentials = get_credentials(self.name, self.signals)
 
-        with P2PPlatform(
-                self.name, headless, urls,
-                EC.element_to_be_clickable((By.CLASS_NAME, 'js-login-btn')),
-                logout_locator=(By.XPATH, xpaths['logout_btn']),
-                signals=self.signals) as twino:
+        with requests.session() as sess:
+            resp = sess.get(
+                f'https://www.twino.eu/ws/public/check2fa?'
+                f'email={credentials[0]}')
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: loading login page was not successful!'))
 
-            twino.log_into_page(
-                'email', 'login-password',
-                EC.element_to_be_clickable((By.XPATH, xpaths['statement'])),
-                login_locator=(By.CLASS_NAME, 'js-login-btn'))
+            if resp.json():
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: two factor authorization is not yet '
+                    f'supported in easyp2p!'))
 
-            twino.open_account_statement_page((By.XPATH, xpaths['start_date']))
+            data = {
+                'name': credentials[0],
+                'password': credentials[1],
+            }
+            resp = sess.post(
+                'https://www.twino.eu/ws/public/login2fa', json=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform', f'{self.name}: login was not successful. '
+                    'Are the credentials correct?'))
+            self.signals.update_progress_bar.emit()
 
-            twino.generate_statement_direct(
-                self.date_range, (By.XPATH, xpaths['start_date']),
-                (By.XPATH, xpaths['end_date']), '%d.%m.%Y',
-                wait_until=EC.text_to_be_present_in_element(
-                    (By.CLASS_NAME, 'accStatement__block'),
-                    f'Closing balance {self.date_range[1].strftime("%d.%m.%Y")}'
-                ))
+            start_date = [
+                self.date_range[0].year, self.date_range[0].month,
+                self.date_range[0].day]
+            end_date = [
+                self.date_range[1].year, self.date_range[1].month,
+                self.date_range[1].day]
+            data = {
+                'accountTypeList': [],
+                'page': 1,
+                'pageSize': 20,
+                'processingDateFrom': start_date,
+                'processingDateTo': end_date,
+                'sortDirection': 'DESC',
+                'sortField': 'created',
+                'totalItems': 0,
+                'transactionTypeList': [
+                    {'transactionType': 'REPAYMENT'},
+                    {'transactionType': 'EARLY_FULL_REPAYMENT'},
+                    {'transactionType': 'EARLY_PARTIAL_REPAYMENT'},
+                    {'positive': False, 'transactionType': 'BUY_SHARES'},
+                    {'positive': True, 'transactionType': 'BUY_SHARES'},
+                    {'positive': True, 'transactionType': 'FUNDING'},
+                    {'positive': False, 'transactionType': 'FUNDING'},
+                    {'transactionType': 'EXTENSION'},
+                    {'transactionType': 'ACCRUED_INTEREST'},
+                    {'transactionType': 'BUYBACK'},
+                    {'transactionType': 'SCHEDULE'},
+                    {'transactionType': 'RECOVERY'},
+                    {'transactionType': 'REPURCHASE'},
+                    {'transactionType': 'LOSS_ON_WRITEOFF'},
+                    {'transactionType': 'WRITEOFF'},
+                    {'transactionType': 'CURRENCY_FLUCTUATION'},
+                    {'transactionType': 'CASHBACK'},
+                    {'transactionType': 'REFERRAL'},
+                    {'transactionType': 'CORRECTION'},
+                    {'transactionType': 'BUY_OUT'}]
+            }
+            resp = sess.post(
+                'https://www.twino.eu/ws/web/investor/account-entries/'
+                'init-export-to-excel', json=data)
+            if resp.status_code != 200:
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: account statement generation failed!'))
+            self.signals.update_progress_bar.emit()
 
-            twino.download_statement(
-                self.statement, (By.CSS_SELECTOR, '.accStatement__pdf'))
+            wait_time = 0
+            max_wait_time = 30
+            while wait_time <= max_wait_time:
+                resp = sess.get(
+                    f'https://www.twino.eu/ws/web/export-to-excel/'
+                    f'{credentials[0]}/download')
+                if resp.status_code == 200:
+                    break
+
+                if resp.status_code == 500:
+                    time.sleep(2)
+                    wait_time += 2
+                else:
+                    raise RuntimeError(_translate(
+                        'P2PPlatform',
+                        f'{self.name}: download of account statement failed!'))
+
+            with open(self.statement, 'wb') as file:
+                file.write(resp.content)
+            self.signals.update_progress_bar.emit()
+
+            resp = sess.post('https://www.twino.eu/logout')
+            if resp.status_code != 200:
+                raise RuntimeWarning(_translate(
+                    'P2PPlatform', f'{self.name}: logout was not successful!'))
+            self.signals.update_progress_bar.emit()
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
