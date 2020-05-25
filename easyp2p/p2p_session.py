@@ -10,7 +10,7 @@ on functionality provided by the requests Session object.
 """
 
 import logging
-from typing import Dict, Optional
+from typing import Dict, Mapping, Optional, Sequence
 
 from bs4 import BeautifulSoup
 from PyQt5.QtCore import QCoreApplication
@@ -130,7 +130,9 @@ class P2PSession:
         return resp
 
     @signals.update_progress
-    def download_statement(self, url: str, location: str) -> None:
+    def download_statement(
+            self, url: str, location: str, method: str,
+            data: Optional[Mapping[str, str]] = None) -> None:
         """
         Download account statement file.
 
@@ -140,12 +142,23 @@ class P2PSession:
         Args:
             url: URL for downloading the statement.
             location: Absolute file path where to save the statement.
+            method: HTTP method to be used to request the statement file; must
+                be either 'get' or 'post'.
+            data: Dictionary with data for posting request to the URL.
 
         Raises:
             RuntimeError: If the download page returns an error status code.
 
         """
-        resp = self.sess.get(url)
+        if method == 'get':
+            resp = self.sess.get(url)
+        elif method == 'post':
+            resp = self.sess.post(url, data=data)
+        else:
+            raise RuntimeError(_translate(
+                'P2PPlatform',
+                f'{self.name}: unknown method {method} in download_statement!'))
+
         if resp.status_code != 200:
             self.logger.debug(
                 '%s: returned status code %s', self.name, resp.status_code)
@@ -158,24 +171,25 @@ class P2PSession:
             file.write(resp.content)
 
     @signals.watch_errors
-    def get_value_from_tag(
-            self, url: str, tag: str, name: str,
-            error_msg: str) -> Optional[str]:
+    def get_values_from_tag(
+            self, url: str, tag: str, names: Sequence[str],
+            error_msg: str) -> Dict[str, str]:
         """
-        Get the value of a HTML tag from page specified by url.
+        Get the values of HTML tags given in names from page specified by url.
+        Return them as a dict with key=name and value=value.
 
         Args:
             url: URL of the website.
             tag: Tag of the HTML element.
-            name: Name of the tag for which to get the value.
+            names: List of tag names for which to get the values.
             error_msg: Error message if extraction of value fails.
 
         Returns:
-            Value of the requested HTML element.
+            Dictionary with tag names as key and tag values as value.
 
         Raises:
             RuntimeError: If the website returns an error status code or if
-            the HTML element cannot be found.
+            at least one HTML element cannot be found.
         """
         resp = self.sess.get(url)
         if resp.status_code != 200:
@@ -185,9 +199,13 @@ class P2PSession:
             raise RuntimeError(error_msg)
 
         soup = BeautifulSoup(resp.text, 'html.parser')
+        data = dict()
         for elem in soup.find_all(tag):
-            if elem['name'] == name:
-                return elem['value']
+            if elem['name'] in names:
+                data[elem['name']] = elem['value']
 
-        # The HTML element has not been found
-        raise RuntimeError(error_msg)
+        if len(names) != len(data.keys()):
+            # At least one HTML element has not been found
+            raise RuntimeError(error_msg)
+
+        return data

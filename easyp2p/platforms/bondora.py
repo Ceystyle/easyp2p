@@ -53,20 +53,19 @@ class Bondora:
                 use WebDriver to download the statement.
 
         """
+        login_url = 'https://www.bondora.com/en/login/'
+
         with P2PSession(
                 self.name, 'https://www.bondora.com/en/authorize/logout/',
                 self.signals) as sess:
 
             token_field = '__RequestVerificationToken'
-            token = sess.get_value_from_tag(
-                'https://www.bondora.com/en/login/', 'input', token_field,
-                _translate(
+            data = sess.get_values_from_tag(
+                login_url, 'input', [token_field], _translate(
                     'P2PPlatform',
                     f'{self.name}: loading login page was not successful!'))
 
-            sess.log_into_page(
-                'https://www.bondora.com/en/login/', 'Email', 'Password',
-                {token_field: token})
+            sess.log_into_page(login_url, 'Email', 'Password', data)
 
             dates = {
                 'StartYear': self.date_range[0].strftime('%Y'),
@@ -78,7 +77,7 @@ class Bondora:
             for key, value in dates.items():
                 url += str(key) + '=' + str(value) + '&'
             url += 'downloadExcel=true'
-            sess.download_statement(url, self.statement)
+            sess.download_statement(url, self.statement, 'get')
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:

@@ -9,13 +9,11 @@ Download and parse DoFinance statement.
 from datetime import date
 from typing import Optional, Tuple
 
-from bs4 import BeautifulSoup
 import pandas as pd
 from PyQt5.QtCore import QCoreApplication
-import requests
 
-from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
+from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
@@ -55,74 +53,31 @@ class DoFinance:
             _: Ignored. This is needed for consistency with platforms that
                 use WebDriver to download the statement.
 
-        Raises:
-            RuntimeError:
-                - If no credentials for DoFinance are provided.
-                - If login or downloading the account statement is not
-                successful.
-            RuntimeWarning: If logout is not successful.
-
         """
-        credentials = get_credentials(self.name, self.signals)
+        login_url = 'https://www.dofinance.eu/en/users/login'
+        statement_url = 'https://www.dofinance.eu/en/users/statement'
+        logout_url = 'https://www.dofinance.eu/en/users/logout'
+        token_names = ['_Token[fields]', '_Token[unlocked]']
 
-        with requests.session() as sess:
-            resp = sess.get('https://www.dofinance.eu/en/users/login')
-            soup = BeautifulSoup(resp.text, 'html.parser')
-            data = {
-                '_method': 'POST',
-                'email': credentials[0],
-                'password': credentials[1],
-            }
-            token_names = ['_Token[fields]', '_Token[unlocked]']
-            inputs = soup.find_all('input')
-            for elem in inputs:
-                if elem['name'] in token_names:
-                    data[elem['name']] = elem['value']
+        with P2PSession(self.name, logout_url, self.signals) as sess:
+            data = sess.get_values_from_tag(
+                login_url, 'input', token_names, _translate(
+                    'P2PPlatform',
+                    f'{self.name}: loading login page was not successful!'))
+            data['_method'] = 'POST'
+            sess.log_into_page(login_url, 'email', 'password', data)
 
-            resp = sess.post(
-                'https://www.dofinance.eu/en/users/login', data=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform', f'{self.name}: login was not successful. '
-                    'Are the credentials correct?'))
-            self.signals.update_progress_bar.emit()
-
-            resp = sess.get('https://www.dofinance.eu/en/users/statement')
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
+            data = sess.get_values_from_tag(
+                statement_url, 'input', token_names, _translate(
                     'P2PPlatform',
                     f'{self.name}: loading account statement page was not '
                     f'successful!'))
-            self.signals.update_progress_bar.emit()
-
-            data = {
-                '_method': 'PUT',
-                'date_from': self.date_range[0].strftime('%d.%m.%Y'),
-                'date_to': self.date_range[1].strftime('%d.%m.%Y'),
-                'trans_type': '',
-                'xls': 'Download+XLS',
-            }
-            soup = BeautifulSoup(resp.text, 'html.parser')
-            inputs = soup.find_all('input')
-            for elem in inputs:
-                if elem['name'] in token_names:
-                    data[elem['name']] = elem['value']
-
-            resp = sess.post(
-                'https://www.dofinance.eu/en/users/statement', data=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: download of account statement failed!'))
-
-            with open(self.statement, 'wb') as file:
-                file.write(resp.content)
-
-            resp = sess.get('https://www.dofinance.eu/en/users/logout')
-            if resp.status_code != 200:
-                raise RuntimeWarning(_translate(
-                    'P2PPlatform', f'{self.name}: logout was not successful!'))
-            self.signals.update_progress_bar.emit()
+            data['_method'] = 'PUT'
+            data['date_from'] = self.date_range[0].strftime('%d.%m.%Y')
+            data['date_to'] = self.date_range[1].strftime('%d.%m.%Y')
+            data['trans_type'] = ''
+            data['xls'] = 'Download+XLS'
+            sess.download_statement(statement_url, self.statement, 'post', data)
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
