@@ -90,7 +90,7 @@ class P2PSession:
     @signals.update_progress
     def log_into_page(
             self, url: str, name_field: str, password_field: str,
-            data: Optional[Dict[str, str]]) -> requests.Response:
+            data: Optional[Dict[str, str]] = None) -> requests.Response:
         """
         Log into the P2P platform.
 
@@ -111,6 +111,9 @@ class P2PSession:
         self.logger.debug('%s: logging into website.', self.name)
 
         credentials = get_credentials(self.name, self.signals)
+
+        if data is None:
+            data = dict()
         data[name_field] = credentials[0]
         data[password_field] = credentials[1]
 
@@ -206,6 +209,9 @@ class P2PSession:
 
         if len(names) != len(data.keys()):
             # At least one HTML element has not been found
+            self.logger.debug('Elements not found in get_values_from_tag!')
+            self.logger.debug('Names: %s', str(names))
+            self.logger.debug('Keys: %s', str(data.keys()))
             raise RuntimeError(error_msg)
 
         return data

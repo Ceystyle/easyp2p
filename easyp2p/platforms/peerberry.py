@@ -11,10 +11,9 @@ from typing import Optional, Tuple
 
 import pandas as pd
 from PyQt5.QtCore import QCoreApplication
-import requests
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_credentials import get_credentials
+from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
@@ -55,33 +54,19 @@ class PeerBerry:
             _: Ignored. This is needed for consistency with platforms that
                 use WebDriver to download the statement.
 
-        Raises:
-            RuntimeError:
-                - If no credentials for PeerBerry are provided.
-                - If login or downloading the account statement is not
-                successful.
-            RuntimeWarning: If logout is not successful.
-
         """
-        credentials = get_credentials(self.name, self.signals)
+        login_url = 'https://api.peerberry.com/v1/investor/login'
+        logout_url = 'https://api.peerberry.com/v1/investor/logout'
+        statement_url = (
+            f'https://api.peerberry.com/v1/investor/transactions/import?'
+            f'startDate={self.date_range[0].strftime("%Y-%m-%d")}&'
+            f'endDate={self.date_range[1].strftime("%Y-%m-%d")}&'
+            f'transactionType=0&lang=en')
 
-        with requests.session() as sess:
-            data = {
-                'email': credentials[0],
-                'password': credentials[1],
-                'params': (
-                    "{\"pbLastCookie\":\"https://peerberry.com/\","
-                    "\"pbFirstCookie\":\"/\"}")}
-            resp = sess.post(
-                'https://api.peerberry.com/v1/investor/login', data=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform', f'{self.name}: login was not successful. '
-                    'Are the credentials correct?'))
-            self.signals.update_progress_bar.emit()
-
+        with P2PSession(self.name, logout_url, self.signals) as sess:
+            resp = sess.log_into_page(login_url, 'email', 'password')
             access_token = json.loads(resp.text)['access_token']
-            header = {
+            sess.sess.headers = {
                 'Accept': '*/*',
                 'Accept-Language': 'en-US,en;q=0.5',
                 'Accept-Encoding': 'gzip,deflate,br',
@@ -90,27 +75,7 @@ class PeerBerry:
                 'Origin': 'https://peerberry.com',
                 'Connection': 'keep-alive'
             }
-
-            resp = sess.get(
-                f'https://api.peerberry.com/v1/investor/transactions/import?'
-                f'startDate={self.date_range[0].strftime("%Y-%m-%d")}&'
-                f'endDate={self.date_range[1].strftime("%Y-%m-%d")}&'
-                f'transactionType=0&lang=en', headers=header)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: download of account statement failed!'))
-
-            with open(self.statement, 'bw') as file:
-                file.write(resp.content)
-
-            resp = sess.get(
-                'https://api.peerberry.com/v1/investor/logout',
-                headers=header)
-            if resp.status_code != 200:
-                raise RuntimeWarning(_translate(
-                    'P2PPlatform', f'{self.name}: logout was not successful!'))
-            self.signals.update_progress_bar.emit()
+            sess.download_statement(statement_url, self.statement, 'get')
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
