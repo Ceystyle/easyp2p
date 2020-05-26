@@ -153,6 +153,31 @@ class P2PSession:
             RuntimeError: If the download page returns an error status code.
 
         """
+        resp = self._request(url, method, _translate(
+            'P2PPlatform',
+            f'{self.name}: download of account statement failed!'), data)
+
+        with open(location, 'bw') as file:
+            file.write(resp.content)
+
+    def _request(
+            self, url: str, method: str, error_msg: str,
+            data: Optional[Mapping[str, str]] = None) -> requests.Response:
+        """
+        Helper method to send post or get request to an URL.
+
+        Args:
+            url: URL to which to send the request.
+            method: HTTP method to be used to request the statement file; must
+                be either 'get' or 'post'.
+            data: Dictionary with data for posting request to the URL.
+            error_msg: Error message which will be shown to the user if the
+                request fails.
+
+        Returns:
+            Response returned by the URL.
+
+        """
         if method == 'get':
             resp = self.sess.get(url)
         elif method == 'post':
@@ -166,12 +191,9 @@ class P2PSession:
             self.logger.debug(
                 '%s: returned status code %s', self.name, resp.status_code)
             self.logger.debug(resp.text)
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: download of account statement failed!'))
+            raise RuntimeError(error_msg)
 
-        with open(location, 'bw') as file:
-            file.write(resp.content)
+        return resp
 
     @signals.watch_errors
     def get_values_from_tag(
@@ -215,3 +237,22 @@ class P2PSession:
             raise RuntimeError(error_msg)
 
         return data
+
+    def get_href_from_tag(self, url: str, partial: str, error_msg: str):
+        resp = self.sess.get(url)
+        if resp.status_code != 200:
+            self.logger.debug(
+                '%s: returned status code %s', self.name, resp.status_code)
+            self.logger.debug(resp.text)
+            raise RuntimeError(error_msg)
+
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        href = None
+        for link in soup.find_all('a', href=True):
+            if partial in link['href']:
+                href = link['href']
+        if href is None:
+            self.logger.debug('href not found in get_href_from_tag!')
+            raise RuntimeError(error_msg)
+
+        return href
