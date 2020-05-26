@@ -117,15 +117,10 @@ class P2PSession:
         data[name_field] = credentials[0]
         data[password_field] = credentials[1]
 
-        resp = self.sess.post(url, data=data)
-        if resp.status_code != 200:
-            self.logger.debug(
-                '%s: returned status code %s', self.name, resp.status_code)
-            self.logger.debug(resp.text)
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: login was not successful. Are the credentials '
-                f'correct?'))
+        resp = self._request(url, 'post', _translate(
+            'P2PPlatform',
+            f'{self.name}: login was not successful. Are the credentials '
+            f'correct?'), data)
 
         self.logged_in = True
         self.logger.debug('%s: successfully logged in.', self.name)
@@ -230,23 +225,15 @@ class P2PSession:
             Dictionary with tag names as key and tag values as value.
 
         Raises:
-            RuntimeError: If the website returns an error status code or if
-            at least one HTML element cannot be found.
+            RuntimeError: If at least one HTML element cannot be found.
         """
-        resp = self.sess.get(url)
-        if resp.status_code != 200:
-            self.logger.debug(
-                '%s: returned status code %s', self.name, resp.status_code)
-            self.logger.debug(resp.text)
-            raise RuntimeError(error_msg)
-
+        resp = self._request(url, 'get', error_msg)
         soup = BeautifulSoup(resp.text, 'html.parser')
         data = dict()
-        for elem in soup.find_all(tag):
-            if elem['name'] in names:
-                data[elem['name']] = elem['value']
+        for name in names:
+            data[name] = soup.find(tag, {'name': name}).get('value', None)
 
-        if len(names) != len(data.keys()):
+        if None in data.values():
             # At least one HTML element has not been found
             self.logger.debug('Elements not found in get_values_from_tag!')
             self.logger.debug('Names: %s', str(names))
