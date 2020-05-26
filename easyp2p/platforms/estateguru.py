@@ -8,13 +8,11 @@ Download and parse Estateguru statement.
 from datetime import date
 from typing import Optional, Tuple
 
-from bs4 import BeautifulSoup
 import pandas as pd
 from PyQt5.QtCore import QCoreApplication
-import requests
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_credentials import get_credentials
+from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import Signals
 
 _translate = QCoreApplication.translate
@@ -48,55 +46,34 @@ class Estateguru:
 
     def download_statement(self, _) -> None:
         """
-            Generate and download the Estateguru account statement for given date
-            range.
+        Generate and download the Estateguru account statement for given date
+        range.
 
-            Args:
-                _: Ignored. This is needed for consistency with platforms that
-                    use WebDriver to download the statement.
+        Args:
+            _: Ignored. This is needed for consistency with platforms that
+                use WebDriver to download the statement.
 
-            Raises:
-                RuntimeError:
-                    - If no credentials for Estateguru are provided.
-                    - If login, loading the page, generating or downloading the
-                      account statement is not successful.
-                RuntimeWarning: If logout is not successful.
+        Raises:
+            RuntimeError:
+                - If no credentials for Estateguru are provided.
+                - If login, loading the page, generating or downloading the
+                  account statement is not successful.
+            RuntimeWarning: If logout is not successful.
 
         """
-        credentials = get_credentials(self.name, self.signals)
+        login_url = 'https://estateguru.co/portal/login/authenticate'
+        logout_url = 'https://estateguru.co/portal/logoff'
+        statement_url = 'https://estateguru.co/portal/portfolio/account'
+        gen_statement_url = (
+            'https://estateguru.co/portal/portfolio/ajaxFilterTransactions')
 
-        with requests.session() as sess:
-            data = {
-                'username': credentials[0],
-                'password': credentials[1],
-            }
-            resp = sess.post(
-                'https://estateguru.co/portal/login/authenticate',
-                data=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform', f'{self.name}: login was not successful. '
-                    'Are the credentials correct?'))
-            self.signals.update_progress_bar.emit()
+        with P2PSession(self.name, logout_url, self.signals) as sess:
+            sess.log_into_page(login_url, 'username', 'password')
 
-            resp = sess.get('https://estateguru.co/portal/portfolio/account')
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
+            download_url = sess.get_url_from_partial_link(
+                statement_url, 'downloadOrderReport.csv', _translate(
                     'P2PPlatform',
-                    f'{self.name}: loading account statement page was not '
-                    'successful!'))
-            self.signals.update_progress_bar.emit()
-
-            soup = BeautifulSoup(resp.text, 'html.parser')
-            download_url = None
-            for link in soup.find_all('a', href=True):
-                if 'downloadOrderReport.csv' in link['href']:
-                    download_url = link['href']
-            if download_url is None:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: generating the account statement was not '
-                    f'successful!'))
+                    f'{self.name}: loading account statement page failed!'))
             user_id = download_url.split('&')[1].split('=')[1]
 
             data = {
@@ -119,30 +96,10 @@ class Estateguru:
                 'max': "20",
                 'offset': "40"
             }
-            resp = sess.post(
-                'https://estateguru.co/portal/portfolio/ajaxFilterTransactions',
-                data=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: account statement generation failed!'))
-            self.signals.update_progress_bar.emit()
+            sess.generate_account_statement(gen_statement_url, 'post', data)
 
-            resp = sess.get(f'https://estateguru.co{download_url}')
-            if resp.status_code == 200:
-                with open(self.statement, 'w') as file:
-                    file.write(resp.text)
-            else:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: download of account statement failed!'))
-            self.signals.update_progress_bar.emit()
-
-            resp = sess.get('https://estateguru.co/portal/logoff')
-            if resp.status_code != 200:
-                raise RuntimeWarning(_translate(
-                    'P2PPlatform', f'{self.name}: logout was not successful!'))
-            self.signals.update_progress_bar.emit()
+            sess.download_statement(
+                f'https://estateguru.co{download_url}', self.statement, 'get')
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:

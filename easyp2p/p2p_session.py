@@ -160,6 +160,23 @@ class P2PSession:
         with open(location, 'bw') as file:
             file.write(resp.content)
 
+    def generate_account_statement(
+            self, url: str, method: str,
+            data: Optional[Mapping[str, str]] = None) -> None:
+        """
+        Generate account statement.
+
+        Args:
+            url: URL for generating the statement.
+            method: HTTP method to be used to send the request; must be either
+                'get' or 'post'.
+            data: Dictionary with data for posting request to the URL.
+
+        """
+        self._request(url, method, _translate(
+            'P2PPlatform',
+            f'{self.name}: account statement generation failed!'), data)
+
     def _request(
             self, url: str, method: str, error_msg: str,
             data: Optional[Mapping[str, str]] = None) -> requests.Response:
@@ -238,21 +255,32 @@ class P2PSession:
 
         return data
 
-    def get_href_from_tag(self, url: str, partial: str, error_msg: str):
-        resp = self.sess.get(url)
-        if resp.status_code != 200:
-            self.logger.debug(
-                '%s: returned status code %s', self.name, resp.status_code)
-            self.logger.debug(resp.text)
-            raise RuntimeError(error_msg)
+    def get_url_from_partial_link(
+            self, url: str, partial_link: str, error_msg: str) -> str:
+        """
+        Load HTML source code of web page with URL url and find and return href
+        link which contains text partial_link.
 
+        Args:
+            url: URL of website which contains the link.
+            partial_link: Partial text for identifying the link.
+            error_msg: Error message which should be shown to the user in case
+                the page cannot be loaded or the link is not found.
+
+        Returns:
+            URL of the link.
+
+        Raises:
+            RuntimeError: If the link cannot be found on the page.
+
+        """
+        resp = self._request(url, 'get', error_msg)
         soup = BeautifulSoup(resp.text, 'html.parser')
-        href = None
+        target = None
         for link in soup.find_all('a', href=True):
-            if partial in link['href']:
-                href = link['href']
-        if href is None:
-            self.logger.debug('href not found in get_href_from_tag!')
+            if partial_link in link['href']:
+                target = link['href']
+        if target is None:
             raise RuntimeError(error_msg)
 
-        return href
+        return target
