@@ -10,6 +10,7 @@ on functionality provided by the requests Session object.
 """
 
 import logging
+import time
 from typing import Dict, Mapping, Optional, Sequence
 
 from bs4 import BeautifulSoup
@@ -209,10 +210,39 @@ class P2PSession:
 
         return resp
 
+    @signals.update_progress
+    def wait(
+            self, func, timeout_msg, time_delta: int = 2,
+            max_wait_time: int = 30) -> None:
+        """
+        Wait until func returns True and raise an error if that does not happen
+        after at most max_wait_time seconds.
+
+        Args:
+            func: Function or method which returns True if the condition to
+                wait for is fulfilled.
+            timeout_msg: Error message which should be printed if max_wait_time
+                is reached.
+            time_delta: Time in seconds to wait before trying func again.
+            max_wait_time: Maximal waiting time before giving up.
+
+        Raises:
+            RuntimeError: If max_waiting_time is reached and func did not
+                return True.
+        """
+        wait_time = 0
+        while wait_time <= max_wait_time:
+            if func():
+                return
+            time.sleep(time_delta)
+            wait_time += time_delta
+
+        raise RuntimeError(timeout_msg)
+
     @signals.watch_errors
-    def get_values_from_tag(
+    def get_values_from_tag_by_name(
             self, url: str, tag: str, names: Sequence[str],
-            error_msg: str) -> Dict[str, str]:
+            error_msg: str, field: str = 'value') -> Dict[str, str]:
         """
         Get the values of HTML tags given in names from page specified by url.
         Return them as a dict with key=name and value=value.
@@ -222,6 +252,7 @@ class P2PSession:
             tag: Tag of the HTML element.
             names: List of tag names for which to get the values.
             error_msg: Error message if extraction of value fails.
+            field: Name of the field for which to return the value.
 
         Returns:
             Dictionary with tag names as key and tag values as value.
@@ -233,16 +264,46 @@ class P2PSession:
         soup = BeautifulSoup(resp.text, 'html.parser')
         data = dict()
         for name in names:
-            data[name] = soup.find(tag, {'name': name}).get('value', None)
+            data[name] = soup.find(tag, {'name': name}).get(field, None)
 
         if None in data.values():
             # At least one HTML element has not been found
-            self.logger.debug('Elements not found in get_values_from_tag!')
+            self.logger.debug(
+                'Elements not found in get_values_from_tag_by_name!')
             self.logger.debug('Names: %s', str(names))
             self.logger.debug('Keys: %s', str(data.keys()))
             raise RuntimeError(error_msg)
 
         return data
+
+    @signals.watch_errors
+    def get_value_from_tag(
+            self, url: str, tag: str, field: str, error_msg: str) -> str:
+        """
+        Get the string value of a single HTML tag from page specified by url.
+
+        Args:
+            url: URL of the website.
+            tag: Tag of the HTML element.
+            field: Name of the tag field for which to return the value.
+            error_msg: Error message if extraction of value fails.
+
+        Returns:
+            Field value of the tag.
+
+        Raises:
+            RuntimeError: If the HTML element cannot be found.
+
+        """
+        resp = self._request(url, 'get', error_msg)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        value = soup.find(tag).get(field, None)
+
+        if value is None:
+            self.logger.debug('Element not found in get_value_from_tag!')
+            raise RuntimeError(error_msg)
+
+        return value
 
     @signals.watch_errors
     def get_url_from_partial_link(
@@ -274,3 +335,34 @@ class P2PSession:
             raise RuntimeError(error_msg)
 
         return target
+
+    @signals.watch_errors
+    def get_value_from_script(
+            self, url: str, script_id: Mapping[str, str], tag: str, name: str,
+            error_msg: str) -> str:
+        """
+        Get a value from a tag contained in script from page specified by url.
+
+        Args:
+            url: URL of the website.
+            script_id: Dictionary with identifiers for the script.
+            tag: Tag type of the HTML element contained in the script.
+            name: Tag name.
+            error_msg: Error message if extraction of value fails.
+
+        Returns:
+            Tag value in 'value' field.
+
+        Raises:
+            RuntimeError: If value cannot be found.
+
+        """
+        resp = self._request(url, 'get', error_msg)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        script = BeautifulSoup(
+            soup.find('script', script_id).string, 'html.parser')
+        value = script.find(tag, {'name': name}).get('value', None)
+        if value is None:
+            raise RuntimeError(error_msg)
+
+        return value

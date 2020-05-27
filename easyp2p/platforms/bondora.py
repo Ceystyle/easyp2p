@@ -60,7 +60,7 @@ class Bondora:
                 self.signals) as sess:
 
             token_field = '__RequestVerificationToken'
-            data = sess.get_values_from_tag(
+            data = sess.get_values_from_tag_by_name(
                 login_url, 'input', [token_field], _translate(
                     'P2PPlatform',
                     f'{self.name}: loading login page was not successful!'))
