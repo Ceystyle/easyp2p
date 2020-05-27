@@ -11,7 +11,7 @@ on functionality provided by the requests Session object.
 
 import logging
 import time
-from typing import Dict, Mapping, Optional, Sequence
+from typing import Dict, Mapping, Optional, Sequence, Tuple
 
 from bs4 import BeautifulSoup
 from PyQt5.QtCore import QCoreApplication
@@ -37,7 +37,7 @@ class P2PSession:
 
     def __init__(
             self, name: str, logout_url: str,
-            signals: Optional[Signals]) -> None:
+            signals: Optional[Signals], json: bool = False) -> None:
         """
         Constructor of P2PSession class.
 
@@ -45,10 +45,12 @@ class P2PSession:
             name: Name of the P2P platform.
             logout_url: URL of the logout page.
             signals: Signals instance for communicating with the calling class.
+            json: If True post data in requests in JSON format.
 
         """
         self.name = name
         self.logout_url = logout_url
+        self.json = json
         self.sess = None
         self.logged_in = False
         if signals:
@@ -118,7 +120,7 @@ class P2PSession:
         data[name_field] = credentials[0]
         data[password_field] = credentials[1]
 
-        resp = self._request(url, 'post', _translate(
+        resp = self.request(url, 'post', _translate(
             'P2PPlatform',
             f'{self.name}: login was not successful. Are the credentials '
             f'correct?'), data)
@@ -149,7 +151,7 @@ class P2PSession:
             RuntimeError: If the download page returns an error status code.
 
         """
-        resp = self._request(url, method, _translate(
+        resp = self.request(url, method, _translate(
             'P2PPlatform',
             f'{self.name}: download of account statement failed!'), data)
 
@@ -170,14 +172,16 @@ class P2PSession:
             data: Dictionary with data for posting request to the URL.
 
         """
-        self._request(url, method, _translate(
+        self.request(url, method, _translate(
             'P2PPlatform',
             f'{self.name}: account statement generation failed!'), data)
 
     @signals.watch_errors
-    def _request(
+    def request(
             self, url: str, method: str, error_msg: str,
-            data: Optional[Mapping[str, str]] = None) -> requests.Response:
+            data: Optional[Mapping[str, str]] = None,
+            success_codes: Optional[Tuple[int, ...]] = None) \
+            -> requests.Response:
         """
         Helper method to send post or get request to an URL.
 
@@ -185,35 +189,43 @@ class P2PSession:
             url: URL to which to send the request.
             method: HTTP method to be used to request the statement file; must
                 be either 'get' or 'post'.
-            data: Dictionary with data for posting request to the URL.
             error_msg: Error message which will be shown to the user if the
                 request fails.
+            success_codes: Tuple of HTTP status codes for successful requests.
+                If none is provided, we assume 200 to be the success status
+                code.
+            data: Dictionary with data for posting request to the URL.
 
         Returns:
             Response returned by the URL.
 
         """
+        if success_codes is None:
+            success_codes = (200,)
+
         if method == 'get':
             resp = self.sess.get(url)
         elif method == 'post':
-            resp = self.sess.post(url, data=data)
+            if self.json:
+                resp = self.sess.post(url, json=data)
+            else:
+                resp = self.sess.post(url, data=data)
         else:
             raise RuntimeError(_translate(
                 'P2PPlatform',
                 f'{self.name}: unknown method {method} in download_statement!'))
 
-        if resp.status_code != 200:
-            self.logger.debug(
-                '%s: returned status code %s', self.name, resp.status_code)
-            self.logger.debug(resp.text)
-            raise RuntimeError(error_msg)
+        if resp.status_code in success_codes:
+            return resp
 
-        return resp
+        self.logger.debug(
+            '%s: returned status code %s', self.name, resp.status_code)
+        self.logger.debug(resp.text)
+        raise RuntimeError(error_msg)
 
     @signals.update_progress
     def wait(
-            self, func, timeout_msg, time_delta: int = 2,
-            max_wait_time: int = 30) -> None:
+            self, func, time_delta: int = 2, max_wait_time: int = 30) -> None:
         """
         Wait until func returns True and raise an error if that does not happen
         after at most max_wait_time seconds.
@@ -221,8 +233,6 @@ class P2PSession:
         Args:
             func: Function or method which returns True if the condition to
                 wait for is fulfilled.
-            timeout_msg: Error message which should be printed if max_wait_time
-                is reached.
             time_delta: Time in seconds to wait before trying func again.
             max_wait_time: Maximal waiting time before giving up.
 
@@ -237,7 +247,10 @@ class P2PSession:
             time.sleep(time_delta)
             wait_time += time_delta
 
-        raise RuntimeError(timeout_msg)
+        raise RuntimeError(_translate(
+            'P2PPlatform',
+            f'{self.name}: generating the account statement page took too '
+            f'long!'))
 
     @signals.watch_errors
     def get_values_from_tag_by_name(
@@ -260,7 +273,7 @@ class P2PSession:
         Raises:
             RuntimeError: If at least one HTML element cannot be found.
         """
-        resp = self._request(url, 'get', error_msg)
+        resp = self.request(url, 'get', error_msg)
         soup = BeautifulSoup(resp.text, 'html.parser')
         data = dict()
         for name in names:
@@ -295,7 +308,7 @@ class P2PSession:
             RuntimeError: If the HTML element cannot be found.
 
         """
-        resp = self._request(url, 'get', error_msg)
+        resp = self.request(url, 'get', error_msg)
         soup = BeautifulSoup(resp.text, 'html.parser')
         value = soup.find(tag).get(field, None)
 
@@ -325,7 +338,7 @@ class P2PSession:
             RuntimeError: If the link cannot be found on the page.
 
         """
-        resp = self._request(url, 'get', error_msg)
+        resp = self.request(url, 'get', error_msg)
         soup = BeautifulSoup(resp.text, 'html.parser')
         target = None
         for link in soup.find_all('a', href=True):
@@ -357,7 +370,7 @@ class P2PSession:
             RuntimeError: If value cannot be found.
 
         """
-        resp = self._request(url, 'get', error_msg)
+        resp = self.request(url, 'get', error_msg)
         soup = BeautifulSoup(resp.text, 'html.parser')
         script = BeautifulSoup(
             soup.find('script', script_id).string, 'html.parser')

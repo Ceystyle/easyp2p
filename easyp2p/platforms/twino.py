@@ -7,16 +7,15 @@ Download and parse Twino statement.
 """
 
 from datetime import date
-import time
 from typing import Optional, Tuple
 
 import pandas as pd
-import requests
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_signals import Signals
+from easyp2p.p2p_session import P2PSession
+from easyp2p.p2p_signals import Signals, PlatformFailedError
 
 _translate = QCoreApplication.translate
 
@@ -56,42 +55,35 @@ class Twino:
                 use WebDriver to download the statement.
 
         Raises:
-            RuntimeError:
-                - If no credentials for Twino are provided.
-                - If two factor authentication is in use.
-                - If login, generating or downloading the
-                  account statement is not successful.
-            RuntimeWarning: If logout is not successful.
+            PlatformFailedError: If two factor authorization is enabled.
 
         """
-        credentials = get_credentials(self.name, self.signals)
+        # FIXME: do not ask user twice for credentials if they are not in the
+        # keyring
+        username = get_credentials(self.name, self.signals)[0]
+        check2fa_url = (
+            f'https://www.twino.eu/ws/public/check2fa?email={username}')
+        login_url = 'https://www.twino.eu/ws/public/login2fa'
+        logout_url = 'https://www.twino.eu/logout'
+        gen_statement_url = (
+            'https://www.twino.eu/ws/web/investor/account-entries/'
+            'init-export-to-excel')
+        download_url = (
+            f'https://www.twino.eu/ws/web/export-to-excel/{username}/'
+            f'download')
 
-        with requests.session() as sess:
-            resp = sess.get(
-                f'https://www.twino.eu/ws/public/check2fa?'
-                f'email={credentials[0]}')
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: loading login page was not successful!'))
+        with P2PSession(self.name, logout_url, self.signals, json=True) as sess:
+            resp = sess.request(
+                check2fa_url, 'get', _translate(
+                    'P2PPlatform', f'{self.name}: loading login page failed!'))
 
             if resp.json():
-                raise RuntimeError(_translate(
+                raise PlatformFailedError(_translate(
                     'P2PPlatform',
                     f'{self.name}: two factor authorization is not yet '
                     f'supported in easyp2p!'))
 
-            data = {
-                'name': credentials[0],
-                'password': credentials[1],
-            }
-            resp = sess.post(
-                'https://www.twino.eu/ws/public/login2fa', json=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform', f'{self.name}: login was not successful. '
-                    'Are the credentials correct?'))
-            self.signals.update_progress_bar.emit()
+            sess.log_into_page(login_url, 'name', 'password')
 
             start_date = [
                 self.date_range[0].year, self.date_range[0].month,
@@ -130,41 +122,27 @@ class Twino:
                     {'transactionType': 'CORRECTION'},
                     {'transactionType': 'BUY_OUT'}]
             }
-            resp = sess.post(
-                'https://www.twino.eu/ws/web/investor/account-entries/'
-                'init-export-to-excel', json=data)
-            if resp.status_code != 200:
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: account statement generation failed!'))
-            self.signals.update_progress_bar.emit()
+            sess.generate_account_statement(gen_statement_url, 'post', data)
 
-            wait_time = 0
-            max_wait_time = 30
-            while wait_time <= max_wait_time:
-                resp = sess.get(
-                    f'https://www.twino.eu/ws/web/export-to-excel/'
-                    f'{credentials[0]}/download')
+            def download_ready():
+                resp = sess.request(
+                    download_url, 'get', _translate(
+                        'P2PPlatform',
+                        f'{self.name}: download of account statement failed!'),
+                    success_codes=(200, 500))
                 if resp.status_code == 200:
-                    break
+                    with open(self.statement, 'wb') as file:
+                        file.write(resp.content)
+                    return True
 
                 if resp.status_code == 500:
-                    time.sleep(2)
-                    wait_time += 2
-                else:
-                    raise RuntimeError(_translate(
-                        'P2PPlatform',
-                        f'{self.name}: download of account statement failed!'))
+                    return False
 
-            with open(self.statement, 'wb') as file:
-                file.write(resp.content)
-            self.signals.update_progress_bar.emit()
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: download of account statement failed!'))
 
-            resp = sess.post('https://www.twino.eu/logout')
-            if resp.status_code != 200:
-                raise RuntimeWarning(_translate(
-                    'P2PPlatform', f'{self.name}: logout was not successful!'))
-            self.signals.update_progress_bar.emit()
+            sess.wait(download_ready)
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:

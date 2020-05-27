@@ -96,10 +96,7 @@ class Robocash:
                     return True
                 return False
 
-            sess.wait(download_ready, _translate(
-                'P2PPlatform',
-                f'{self.name}: generating the account statement page took too '
-                f'long!'))
+            sess.wait(download_ready)
 
             sess.download_statement(
                 f'https://robo.cash/cabinet/statement/{self.report_id}'
