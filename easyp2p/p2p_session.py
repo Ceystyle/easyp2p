@@ -155,6 +155,7 @@ class P2PSession:
         with open(location, 'bw') as file:
             file.write(resp.content)
 
+    @signals.update_progress
     def generate_account_statement(
             self, url: str, method: str,
             data: Optional[Mapping[str, str]] = None) -> None:
@@ -172,6 +173,7 @@ class P2PSession:
             'P2PPlatform',
             f'{self.name}: account statement generation failed!'), data)
 
+    @signals.watch_errors
     def _request(
             self, url: str, method: str, error_msg: str,
             data: Optional[Mapping[str, str]] = None) -> requests.Response:
@@ -242,6 +244,7 @@ class P2PSession:
 
         return data
 
+    @signals.watch_errors
     def get_url_from_partial_link(
             self, url: str, partial_link: str, error_msg: str) -> str:
         """
