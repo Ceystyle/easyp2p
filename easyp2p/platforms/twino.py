@@ -46,13 +46,9 @@ class Twino:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(self, _) -> None:
+    def download_statement(self) -> None:
         """
         Generate and download the Twino account statement for given date range.
-
-        Args:
-            _: Ignored. This is needed for consistency with platforms that
-                use WebDriver to download the statement.
 
         Raises:
             PlatformFailedError: If two factor authorization is enabled.

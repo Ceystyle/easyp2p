@@ -43,22 +43,16 @@ class Bondora:
         self.statement = statement_without_suffix + '.xlsx'
         self.signals = signals
 
-    def download_statement(self, _) -> None:
+    def download_statement(self) -> None:
         """
         Generate and download the Bondora account statement for given date
         range.
 
-        Args:
-            _: Ignored. This is needed for consistency with platforms that
-                use WebDriver to download the statement.
-
         """
         login_url = 'https://www.bondora.com/en/login/'
+        logout_url = 'https://www.bondora.com/en/authorize/logout/'
 
-        with P2PSession(
-                self.name, 'https://www.bondora.com/en/authorize/logout/',
-                self.signals) as sess:
-
+        with P2PSession(self.name, logout_url, self.signals) as sess:
             token_field = '__RequestVerificationToken'
             data = sess.get_values_from_tag_by_name(
                 login_url, 'input', [token_field], _translate(

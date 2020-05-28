@@ -103,6 +103,7 @@ class P2PPlatform:
             raise RuntimeError(_translate(
                 'P2PPlatform', f'{self.name}: no method for logout provided!'))
 
+    @signals.watch_errors
     def __enter__(self) -> 'P2PPlatform':
         """
         Start of context management protocol.

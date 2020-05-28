@@ -74,6 +74,7 @@ class P2PParser:
         DEFAULTS,
         TOTAL_INCOME]
 
+    @signals.watch_errors
     def __init__(
             self, name: str, date_range: Tuple[date, date],
             statement_file_name: str, header: int = 0,

@@ -26,7 +26,7 @@ class WorkerThread(QThread):
     This class is responsible for accessing the P2P platform methods in
     p2p_platform and to prepare the results. The main reason for separating
     the calls from the main thread is to keep the GUI responsive while the
-    webdriver is working.
+    platform is being evaluated.
 
     """
 
@@ -80,30 +80,42 @@ class WorkerThread(QThread):
         else:
             return instance
 
-    def parse_statements(self, platform: p2p_platforms) -> None:
+    def evaluate_platform(self, name: str) -> pd.DataFrame:
         """
-        Helper method for calling the parser and appending the dataframe list.
+        Download and parse the account statement for given platform. Warn the
+        user if there were unknown cash flow types.
 
         Args:
-            platform: Instance of P2PPlatform class
+            name: Name of the P2P platform to evaluate.
 
-        Raises:
-            PlatformFailedError: If parse_statement method fails.
+        Returns:
+            Parsed account statement as a data frame.
 
         """
-        try:
-            (df, unknown_cf_types) = platform.parse_statement()
-            self.df_result = self.df_result.append(df, sort=True)
-        except RuntimeError as err:
-            self.logger.error(err)
-            raise PlatformFailedError(str(err).strip())
+        platform = self.get_platform_instance(name)
+        self.signals.add_progress_text.emit(_translate(
+            'WorkerThread',
+            f'Starting evaluation of {platform.name}...'), False)
+
+        # Distinguish platforms that use Selenium for evaluation
+        if name in ['Iuvo', 'Mintos', 'Grupeer', 'Swaper']:
+            platform.download_statement(self.settings.headless)
+        else:
+            platform.download_statement()
+        (df, unknown_cf_types) = platform.parse_statement()
 
         if unknown_cf_types:
             warning_msg = _translate(
                 'WorkerThread',
-                f'{platform.name}: unknown cash flow type will be ignored in '
+                f'{name}: unknown cash flow type will be ignored in '
                 f'result: {unknown_cf_types}')
             self.signals.add_progress_text.emit(warning_msg, True)
+
+        self.signals.add_progress_text.emit(
+            _translate(
+                'WorkerThread', f'{name} successfully evaluated!'), False)
+
+        return df
 
     def get_statement_location(self, name: str) -> Optional[str]:
         """
@@ -153,16 +165,8 @@ class WorkerThread(QThread):
 
         for name in self.settings.platforms:
             try:
-                platform = self.get_platform_instance(name)
-                self.signals.add_progress_text.emit(_translate(
-                    'WorkerThread',
-                    f'Starting evaluation of {platform.name}...'), False)
-                platform.download_statement(self.settings.headless)
-                self.parse_statements(platform)
-                self.signals.add_progress_text.emit(
-                    _translate(
-                        'WorkerThread', f'{name} successfully evaluated!'),
-                    False)
+                df = self.evaluate_platform(name)
+                self.df_result = self.df_result.append(df, sort=True)
             except PlatformFailedError as err:
                 self.logger.exception('Evaluation of platform failed.')
                 self.signals.add_progress_text.emit(str(err).strip(), True)

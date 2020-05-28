@@ -49,14 +49,10 @@ class Robocash:
         self.report_id = None
         self.signals = signals
 
-    def download_statement(self, _) -> None:
+    def download_statement(self) -> None:
         """
         Generate and download the Robocash account statement for given date
         range.
-
-        Args:
-            _: Ignored. This is needed for consistency with platforms that
-                use WebDriver to download the statement.
 
         """
         login_url = 'https://robo.cash/login'

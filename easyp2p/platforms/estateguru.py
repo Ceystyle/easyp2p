@@ -44,21 +44,10 @@ class Estateguru:
         self.statement = statement_without_suffix + '.csv'
         self.signals = signals
 
-    def download_statement(self, _) -> None:
+    def download_statement(self) -> None:
         """
         Generate and download the Estateguru account statement for given date
         range.
-
-        Args:
-            _: Ignored. This is needed for consistency with platforms that
-                use WebDriver to download the statement.
-
-        Raises:
-            RuntimeError:
-                - If no credentials for Estateguru are provided.
-                - If login, loading the page, generating or downloading the
-                  account statement is not successful.
-            RuntimeWarning: If logout is not successful.
 
         """
         login_url = 'https://estateguru.co/portal/login/authenticate'
