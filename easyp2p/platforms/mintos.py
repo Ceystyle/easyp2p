@@ -17,7 +17,7 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import Signals
+from easyp2p.p2p_signals import Signals, PlatformFailedError
 from easyp2p.p2p_webdriver import P2PWebDriver
 
 _translate = QCoreApplication.translate
@@ -70,9 +70,21 @@ class Mintos:
                 logout_locator=(By.XPATH, xpaths['logout_btn']),
                 signals=self.signals) as mintos:
 
-            mintos.log_into_page(
-                '_username', '_password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
+            mintos.log_into_page('_username', '_password', None)
+            mintos.logged_in = False
+
+            # Wait for user to solve recaptcha
+            while EC.url_to_be(urls['login'])(mintos.driver):
+                try:
+                    mintos.driver.wait(EC.text_to_be_present_in_element(
+                        (By.CLASS_NAME, 'account-login-error'),
+                        'Invalid username or password'), delay=1)
+                    raise PlatformFailedError(_translate(
+                        'P2PPlatform',
+                        f'{self.name}: invalid username or password!'))
+                except TimeoutException:
+                    pass
+            mintos.logged_in = True
 
             mintos.open_account_statement_page((By.ID, 'period-from'))
 
@@ -158,31 +170,57 @@ class Mintos:
         parser = P2PParser(
             self.name, self.date_range, self.statement, signals=self.signals)
 
-        try:
-            # Create new columns for identifying cash flow types
-            parser.df['Cash Flow Type'], parser.df['Loan ID'] = \
-                parser.df['Details'].str.split(' Loan ID: ').str
-            parser.df['Cash Flow Type'] = \
-                parser.df['Cash Flow Type'].str.split(
-                    ' Rebuy purpose').str[0]
-        except (KeyError, ValueError):
-            pass
+        detail_col = 'Details'
+        if detail_col not in parser.df.columns:
+            raise PlatformFailedError(_translate(
+                'P2PParser',
+                f'{self.name}: column {detail_col} is missing in account '
+                'statement!'))
+        new_col = parser.df[detail_col].str.split(' - ').str
+        if len(new_col) != 2:
+            raise PlatformFailedError(_translate(
+                'P2PParser', f'{self.name}: parsing account statement failed!'))
+        parser.df['Loan ID'] = new_col[0]
+        parser.df['Cash Flow Type'] = new_col[1]
 
         # Define mapping between Mintos and easyp2p cash flow types and column
-        # names
         cashflow_types = {
-            # Treat bonus/cashback payments as normal interest payments:
-            'Cashback bonus': parser.INTEREST_PAYMENT,
-            'Delayed interest income on rebuy': parser.BUYBACK_INTEREST_PAYMENT,
-            'Interest income': parser.INTEREST_PAYMENT,
-            'Interest income on rebuy': parser.BUYBACK_INTEREST_PAYMENT,
-            'Investment principal rebuy': parser.BUYBACK_PAYMENT,
-            'Investment principal increase': parser.INVESTMENT_PAYMENT,
-            'Investment principal repayment': parser.REDEMPTION_PAYMENT,
-            'Incoming client payment': parser.IN_OUT_PAYMENT,
-            'Outgoing client payment': parser.IN_OUT_PAYMENT,
-            'Late payment fee income': parser.LATE_FEE_PAYMENT,
-            'Reversed incoming client payment': parser.IN_OUT_PAYMENT}
+            'interest received': parser.INTEREST_PAYMENT,
+            'principal received': parser.REDEMPTION_PAYMENT,
+            'buyback: Principal received': parser.BUYBACK_PAYMENT,
+            'buyback: late payment interest received':
+                parser.BUYBACK_INTEREST_PAYMENT,
+            'buyback: interest received': parser.BUYBACK_INTEREST_PAYMENT,
+            'loan agreement amended: Principal received':
+                parser.REDEMPTION_PAYMENT,
+            'loan agreement amended: interest received':
+                parser.INTEREST_PAYMENT,
+            'loan agreement extended: Principal received':
+                parser.REDEMPTION_PAYMENT,
+            'loan agreement extended: interest received':
+                parser.INTEREST_PAYMENT,
+            'investment in loan': parser.INVESTMENT_PAYMENT,
+            'early repayment of a loan: Principal received':
+                parser.REDEMPTION_PAYMENT,
+            'early repayment of a loan: interest received':
+                parser.INTEREST_PAYMENT,
+            'loan agreement extended: late payment interest received':
+                parser.INTEREST_PAYMENT,
+            'late fees received': parser.LATE_FEE_PAYMENT,
+            'loan agreement amended: late payment interest received':
+                parser.INTEREST_PAYMENT,
+            'early repayment of a loan: late payment interest received':
+                parser.INTEREST_PAYMENT,
+            'other: Principal received': parser.REDEMPTION_PAYMENT,
+            'other: interest received': parser.INTEREST_PAYMENT,
+            'loan agreement terminated: Principal received':
+                parser.REDEMPTION_PAYMENT,
+            'loan agreement terminated: interest received':
+                parser.INTEREST_PAYMENT,
+            'loan agreement terminated: late payment interest received':
+                parser.INTEREST_PAYMENT,
+            'other: late payment interest received': parser.INTEREST_PAYMENT,
+        }
         rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
         unknown_cf_types = parser.run(

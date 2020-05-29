@@ -160,7 +160,7 @@ class P2PPlatform:
     @signals.update_progress
     def log_into_page(
             self, name_field: str, password_field: str,
-            wait_until: EC.element_to_be_clickable,
+            wait_until: Optional[EC.element_to_be_clickable],
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.2) -> None:
         """

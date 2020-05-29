@@ -325,7 +325,9 @@ class P2PParser:
             col for col in self.TARGET_COLUMNS if col in self.df.columns]]
 
         # Disconnect signals
-        self.signals.disconnect_signals()
+        if self.signals:
+            print('Disconnecting signals')
+            self.signals.disconnect_signals()
 
         self.logger.debug('%s: parser completed successfully.', self.name)
         return unknown_cf_types
