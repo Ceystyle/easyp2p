@@ -229,6 +229,32 @@ class P2PPlatform:
         self.logged_in = True
         self.logger.debug('%s: successfully logged in.', self.name)
 
+    @signals.watch_errors
+    def wait_for_captcha(self, locator: Tuple[str, str], text: str) -> None:
+        """
+        Wait for user to manually fill in recaptcha on login page.
+
+        Args:
+            locator: Locator of web element indicating invalid credentials.
+            text: Text in web element indicating invalid credentials.
+
+        Raises:
+            RuntimeError: If wrong user credentials were provided.
+
+        """
+        self.logged_in = False
+
+        while EC.url_to_be(self.urls['login'])(self.driver):
+            try:
+                self.driver.wait(EC.text_to_be_present_in_element(
+                    locator, text), delay=1)
+                raise RuntimeError(_translate(
+                    'P2PPlatform',
+                    f'{self.name}: invalid username or password!'))
+            except TimeoutException:
+                pass
+        self.logged_in = True
+
     @signals.update_progress
     def open_account_statement_page(
             self, check_locator: Tuple[str, str]) -> None:

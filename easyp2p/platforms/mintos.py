@@ -71,20 +71,9 @@ class Mintos:
                 signals=self.signals) as mintos:
 
             mintos.log_into_page('_username', '_password', None)
-            mintos.logged_in = False
-
-            # Wait for user to solve recaptcha
-            while EC.url_to_be(urls['login'])(mintos.driver):
-                try:
-                    mintos.driver.wait(EC.text_to_be_present_in_element(
-                        (By.CLASS_NAME, 'account-login-error'),
-                        'Invalid username or password'), delay=1)
-                    raise PlatformFailedError(_translate(
-                        'P2PPlatform',
-                        f'{self.name}: invalid username or password!'))
-                except TimeoutException:
-                    pass
-            mintos.logged_in = True
+            mintos.wait_for_captcha(
+                (By.CLASS_NAME, 'account-login-error'),
+                'Invalid username or password')
 
             mintos.open_account_statement_page((By.ID, 'period-from'))
 

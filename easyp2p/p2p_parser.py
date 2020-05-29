@@ -326,7 +326,6 @@ class P2PParser:
 
         # Disconnect signals
         if self.signals:
-            print('Disconnecting signals')
             self.signals.disconnect_signals()
 
         self.logger.debug('%s: parser completed successfully.', self.name)

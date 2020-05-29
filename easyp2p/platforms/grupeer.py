@@ -66,9 +66,10 @@ class Grupeer:
                 hover_locator=(By.CLASS_NAME, 'header-auth-menu-name'),
                 signals=self.signals) as grupeer:
 
-            grupeer.log_into_page(
-                'email', 'password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'My Investments')))
+            grupeer.log_into_page('email', 'password', None)
+            grupeer.wait_for_captcha(
+                (By.CLASS_NAME, 'text-danger'),
+                'These credentials do not match our records.')
 
             grupeer.open_account_statement_page((By.ID, 'from'))
 
