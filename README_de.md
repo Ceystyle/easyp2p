@@ -59,7 +59,7 @@ zuzugreifen:
 
 Anschließend kann easyp2p durch den folgenden Befehl installiert werden:
 
-    python3 setup.py install
+    sudo python3 setup.py install
 
 ### Windows & Mac
 

@@ -43,6 +43,7 @@ setuptools.setup(
     ],
     python_requires=">=3.5",
     install_requires=[
-        'keyring', 'lxml', 'pandas', 'PyQt5', 'selenium', 'xlrd', 'xlsxwriter'],
+        'arrow', 'bs4', 'keyring', 'lxml', 'pandas', 'PyQt5', 'requests',
+        'selenium', 'xlrd', 'xlsxwriter'],
     entry_points={'gui_scripts': ['easyp2p=easyp2p.ui.main_window:main']},
 )
