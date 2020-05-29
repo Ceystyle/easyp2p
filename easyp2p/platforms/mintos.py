@@ -212,7 +212,7 @@ class Mintos:
         }
         rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
-        unknown_cf_types = parser.run(
+        unknown_cf_types = parser.parse(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Cash Flow Type', 'Turnover', 'Balance')
 

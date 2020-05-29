@@ -127,7 +127,7 @@ class Swaper:
             'WITHDRAWAL': parser.IN_OUT_PAYMENT}
         rename_columns = {'Booking date': parser.DATE}
 
-        unknown_cf_types = parser.run(
+        unknown_cf_types = parser.parse(
             '%d.%m.%Y', rename_columns, cashflow_types,
             'Transaction type', 'Amount')
 

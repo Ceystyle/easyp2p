@@ -135,7 +135,7 @@ class Robocash:
         }
         rename_columns = {'Date and time': parser.DATE}
 
-        unknown_cf_types = parser.run(
+        unknown_cf_types = parser.parse(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Operation', 'Amount', "Portfolio's balance")
 

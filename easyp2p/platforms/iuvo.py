@@ -138,7 +138,7 @@ class Iuvo:
             'payment_principal_early': parser.REDEMPTION_PAYMENT}
         rename_columns = {'Date': parser.DATE}
 
-        unknown_cf_types = parser.run(
+        unknown_cf_types = parser.parse(
             '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
             'Transaction Type', 'Turnover', 'Balance')
 

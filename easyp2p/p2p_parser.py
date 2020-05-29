@@ -100,9 +100,8 @@ class P2PParser:
         """
         self.name = name
         self.date_range = date_range
-        self.statement_file_name = statement_file_name
         self.df = get_df_from_file(
-            self.statement_file_name, header=header, skipfooter=skipfooter)
+            statement_file_name, header=header, skipfooter=skipfooter)
         self.logger = logging.getLogger('easyp2p.p2p_parser.P2PParser')
         if signals:
             self.signals.connect_signals(signals)
@@ -235,7 +234,7 @@ class P2PParser:
         self.logger.debug('%s: added zero cash flow.', self.name)
 
     @signals.update_progress
-    def run(
+    def parse(
             self, date_format: str = None,
             rename_columns: Mapping[str, str] = None,
             cashflow_types: Optional[Mapping[str, str]] = None,
@@ -315,7 +314,10 @@ class P2PParser:
         # Sum up the results per date and currency
         self._aggregate_results(value_column, balance_column)
 
+        # Add total income column
         self._calculate_total_income()
+
+        # Set the index
         self.df[self.PLATFORM] = self.name
         self.df.set_index(
             [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)

@@ -30,8 +30,8 @@ setuptools.setup(
     version=find_version("easyp2p", "__init__.py"),
     author="Niko Sandschneider",
     author_email="info@ceystyle.de",
-    description="Application for downloading and presenting investment results \
-        for people-to-people (P2P) lending platforms.",
+    description="Application for downloading and aggregating account \
+        statements from people-to-people (P2P) lending platforms.",
     long_description=long_description,
     url="https://github.com/ceystyle/easyp2p",
     packages=setuptools.find_packages(),

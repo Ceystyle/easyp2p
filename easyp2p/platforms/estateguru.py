@@ -132,7 +132,7 @@ class Estateguru:
             'Cash Flow Type': 'EG Cash Flow Type',
             'Confirmation Date': parser.DATE}
 
-        unknown_cf_types = parser.run(
+        unknown_cf_types = parser.parse(
             '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
             'EG Cash Flow Type', 'Amount', 'Available to invest')
 

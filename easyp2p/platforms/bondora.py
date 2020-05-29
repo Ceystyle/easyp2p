@@ -110,6 +110,6 @@ class Bondora:
             'Opening balance': parser.START_BALANCE_NAME,
             'Period': parser.DATE}
 
-        unknown_cf_types = parser.run('%d.%m.%Y', rename_columns=rename_columns)
+        unknown_cf_types = parser.parse('%d.%m.%Y', rename_columns=rename_columns)
 
         return parser.df, unknown_cf_types
