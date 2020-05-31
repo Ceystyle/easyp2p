@@ -94,8 +94,7 @@ class WorkerThread(QThread):
         """
         platform = self.get_platform_instance(name)
         self.signals.add_progress_text.emit(_translate(
-            'WorkerThread',
-            f'Starting evaluation of {platform.name}...'), False)
+            'WorkerThread', f'Starting evaluation of {name}...'), False)
 
         # Distinguish platforms that use Selenium for evaluation
         if name in ['Iuvo', 'Swaper']:
@@ -118,10 +117,10 @@ class WorkerThread(QThread):
                 f'{name}: unknown cash flow type will be ignored in '
                 f'result: {unknown_cf_types}')
             self.signals.add_progress_text.emit(warning_msg, True)
-
-        self.signals.add_progress_text.emit(
-            _translate(
-                'WorkerThread', f'{name} successfully evaluated!'), False)
+        else:
+            self.signals.add_progress_text.emit(
+                _translate(
+                    'WorkerThread', f'{name} successfully evaluated!'), False)
 
         return df
 

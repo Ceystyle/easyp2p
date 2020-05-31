@@ -41,72 +41,109 @@ class WorkerTests(unittest.TestCase):
             PlatformFailedError, self.worker.get_platform_instance,
             'TestPlatform')
 
-    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora')
-    def test_download_statements(self, mock_bondora):
-        """Test download_statements with Bondora."""
-        bondora = mock_bondora(self.settings.date_range, 'test')
-        self.worker.download_statements(bondora)
-        bondora.download_statement.assert_called_once_with(True)
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.download_statement')
+    def test_evaluate_requests_platform(self, mock_download, mock_parse):
+        """Test evaluate_platform with a platform based P2PSession."""
+        mock_parse.return_value = (pd.DataFrame(), '')
+        self.worker.evaluate_platform('Bondora')
+        mock_download.assert_called_once()
+        mock_parse.assert_called_once()
 
-    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora')
-    def test_download_statements_download_fails(self, mock_bondora):
-        """Test download_statements if platform download fails."""
-        bondora = mock_bondora(self.settings.date_range, 'test')
-        bondora.download_statement.side_effect = PlatformFailedError(
-            'Test error')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.download_statement')
+    def test_evaluate_headless_selenium_platform(
+            self, mock_download, mock_parse):
+        """
+        Test evaluate_platform with a platform based on P2PPlatform in
+        headless mode.
+        """
+        mock_parse.return_value = (pd.DataFrame(), '')
+        self.worker.evaluate_platform('Iuvo')
+        self.settings.headless = True
+        mock_download.assert_called_once_with(True)
+        mock_parse.assert_called_once()
+
+    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.download_statement')
+    def test_evaluate_non_headless_selenium_platform(
+            self, mock_download, mock_parse):
+        """
+        Test evaluate_platform with a platform based on P2PPlatform in
+        non-headless mode.
+        """
+        mock_parse.return_value = (pd.DataFrame(), '')
+        self.worker.settings.headless = False
+        self.worker.evaluate_platform('Iuvo')
+        mock_download.assert_called_once_with(False)
+        mock_parse.assert_called_once()
+
+    @patch('easyp2p.p2p_worker.p2p_platforms.Mintos.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Mintos.download_statement')
+    def test_evaluate_captcha_platform(self, mock_download, mock_parse):
+        """Test evaluate_platform with a platform which uses captchas."""
+        mock_parse.return_value = (pd.DataFrame(), '')
+        self.worker.evaluate_platform('Mintos')
+        self.settings.headless = True
+        mock_download.assert_called_once_with(False)
+        mock_parse.assert_called_once()
+
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.download_statement')
+    def test_evaluate_platform_download_fails(self, mock_download, mock_parse):
+        """Test evaluate_platform if statement download fails."""
+        self.settings.platforms = {'Bondora'}
+        mock_download.side_effect = PlatformFailedError('Test error')
         self.assertRaisesRegex(
-            PlatformFailedError, 'Test error', self.worker.download_statements,
-            bondora)
-        bondora.download_statement.assert_called_once_with(True)
+            PlatformFailedError, 'Test error', self.worker.evaluate_platform,
+            'Bondora')
+        mock_download.assert_called_once()
+        assert not mock_parse.called
 
-    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo')
-    def test_download_statements_iuvo(self, mock_iuvo):
-        """Test download_statements with Iuvo."""
-        iuvo = mock_iuvo(self.settings.date_range, 'test')
-        iuvo.name = 'Iuvo'
-        self.worker.download_statements(iuvo)
-        iuvo.download_statement.assert_called_once_with(False)
-
-    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora')
-    def test_parse_statements(self, mock_bondora):
-        """Test parse_statements for Bondora."""
+    @patch('easyp2p.p2p_worker.write_results')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.download_statement')
+    def test_appending_parser_results(
+            self, mock_download, mock_parse, mock_writer):
+        """Test appending parser results from an additional platform."""
         self.worker.df_result = pd.DataFrame([1, 2, 3])
-        bondora = mock_bondora(self.settings.date_range, 'test')
-        bondora.parse_statement.return_value = (pd.DataFrame([4, 5, 6]), '')
-        self.worker.parse_statements(bondora)
-        bondora.parse_statement.assert_called_once_with()
+        mock_parse.return_value = (pd.DataFrame([4, 5, 6]), '')
+        mock_writer.return_value = True
+        self.worker.settings.platforms = {'Bondora'}
+        self.worker.run()
+        mock_download.assert_called_once()
+        mock_parse.assert_called_once()
         self.assertTrue(
             self.worker.df_result.equals(
                 pd.DataFrame(
                     data=[1, 2, 3, 4, 5, 6], index=[0, 1, 2, 0, 1, 2])))
 
-    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora')
-    def test_parse_statements_parser_error(self, mock_bondora):
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.download_statement')
+    def test_parse_statements_parser_error(self, mock_download, mock_parse):
         """Test parse_statements if the parser raises an error."""
-        bondora = mock_bondora(self.settings.date_range, 'test')
-        bondora.parse_statement.side_effect = RuntimeError('Test error')
+        mock_parse.side_effect = PlatformFailedError('Test error')
         self.assertRaisesRegex(
-            PlatformFailedError, 'Test error', self.worker.parse_statements,
-            bondora)
+            PlatformFailedError, 'Test error', self.worker.evaluate_platform,
+            'Bondora')
+        mock_download.assert_called_once()
+        mock_parse.assert_called_once()
 
-    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.download_statement')
     @patch('easyp2p.p2p_worker.WorkerThread.signals.add_progress_text')
-    def test_parse_statements_unknown_cf_type(self, mock_text, mock_bondora):
-        """Test parse_statements if there are unknown cash flow types."""
-        self.worker.df_result = pd.DataFrame([1, 2, 3])
-        bondora = mock_bondora(self.settings.date_range, 'test')
-        bondora.name = 'Bondora'
-        bondora.parse_statement.return_value = (
-            pd.DataFrame([4, 5, 6]), ['TestCF1', 'TestCF2'])
-        self.worker.parse_statements(bondora)
-        bondora.parse_statement.assert_called_once_with()
-        self.assertTrue(
-            self.worker.df_result.equals(
-                pd.DataFrame(
-                    data=[1, 2, 3, 4, 5, 6], index=[0, 1, 2, 0, 1, 2])))
+    def test_evaluate_platform_unknown_cf_type(
+            self, mock_text, mock_download, mock_parse):
+        """Test evaluate_platform if there are unknown cash flow types."""
+        df_in = pd.DataFrame([1, 2, 3])
+        mock_parse.return_value = (df_in, ('TestCF1', 'TestCF2'))
+        df_out = self.worker.evaluate_platform('Bondora')
+        mock_download.assert_called_once()
+        mock_parse.assert_called_once()
+        self.assertTrue(df_out.equals(df_in))
         mock_text.emit.assert_called_with(
             "Bondora: unknown cash flow type will be ignored in result: "
-            "['TestCF1', 'TestCF2']", True)
+            "('TestCF1', 'TestCF2')", True)
 
     @patch('os.makedirs')
     def test_get_statement_location(self, mock_makedirs):
@@ -120,11 +157,11 @@ class WorkerTests(unittest.TestCase):
 
     @patch('easyp2p.p2p_worker.WorkerThread.signals.add_progress_text')
     @patch('easyp2p.p2p_worker.write_results')
-    @patch('easyp2p.p2p_worker.WorkerThread.download_statements')
+    @patch('easyp2p.p2p_worker.WorkerThread.evaluate_platform')
     def test_run_no_results(
-            self, mock_download, mock_write_results, mock_text):
+            self, mock_eval, mock_write_results, mock_text):
         """Test writing results when there were none."""
-        mock_download.side_effect = PlatformFailedError
+        mock_eval.side_effect = PlatformFailedError
         mock_write_results.return_value = False
         self.worker.run()
         mock_write_results.assert_called_once_with(
