@@ -61,9 +61,6 @@ class Swaper:
                 "//*[@class='datepicker opened']//*[@class='dates']//table"
                 "//td"),
             'month': "//*[@class='datepicker opened']//*[@class='month']",
-            'download_btn': (
-                '//*[@id="account-statement"]/div[3]/div[4]/div/div[1]/a'
-                '/div[1]/div/span[2]'),
         }
 
         with P2PPlatform(
@@ -90,7 +87,7 @@ class Swaper:
                 day_class_check=(' ', ' selected'))
 
             swaper.download_statement(
-                self.statement, (By.XPATH, xpaths['download_btn']))
+                self.statement, (By.CLASS_NAME, 'download-excel'))
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:
