@@ -21,12 +21,13 @@ class SettingsWindowTests(unittest.TestCase):
     """Test the settings window of easyp2p."""
 
     @unittest.mock.patch('easyp2p.ui.settings_window.p2p_cred')
-    def setUp(self, mock_cred) -> None:
+    def setUp(self, _) -> None:  # pylint: disable=arguments-differ
         """Initialize common parameters."""
         self.settings = Settings(
             (date(2018, 9, 1), date(2018, 12, 31)),
             os.path.join(os.getcwd(), 'test.xlsx'))
         self.platforms = ['TestPlatform1', 'TestPlatform2', 'TestPlatform3']
+        self.form = None
 
     def test_no_keyring(self, mock_cred):
         """Test when keyring is not available."""

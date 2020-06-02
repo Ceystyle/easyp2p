@@ -21,7 +21,7 @@ class ProgressWindowTests(unittest.TestCase):
     """Test the progress window of easyp2p."""
 
     @unittest.mock.patch('easyp2p.ui.progress_window.WorkerThread.start')
-    def setUp(self, mock_worker):
+    def setUp(self, mock_worker):  # pylint: disable=arguments-differ
         """Initialize ProgressWindow."""
         self.settings = Settings(
             (date(2018, 9, 1), date(2018, 12, 31)),

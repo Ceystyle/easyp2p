@@ -25,7 +25,7 @@ _translate = QCoreApplication.translate
 logger = logging.getLogger('easyp2p.p2p_parser')
 
 
-class P2PParser:
+class P2PParser:  # pylint: disable=too-few-public-methods
     """
     Parser class to transform P2P account statements into easyp2p format.
 
