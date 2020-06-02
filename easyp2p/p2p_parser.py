@@ -203,21 +203,25 @@ class P2PParser:
             empty tuple if no unknown cash flow types were found.
 
         """
-        if cashflow_types:
-            self.logger.debug(
-                '%s: mapping cash flow types %s contained in column %s.',
-                self.name, str(cashflow_types.keys()), orig_cf_column)
-            self.df[self.CF_TYPE] = self.df[orig_cf_column].map(cashflow_types)
-            # All unknown cash flow types will be NaN
-            unknown_cf_types = self.df[orig_cf_column].where(
-                self.df[self.CF_TYPE].isna()).dropna().tolist()
-            # Remove duplicates, sort the entries and make them immutable
-            unknown_cf_types = tuple(sorted(set(unknown_cf_types)))
-            self.logger.debug('%s: mapping successful.', self.name)
-            return unknown_cf_types
+        if cashflow_types is None:
+            self.logger.debug('%s: no cash flow types to map.', self.name)
+            return ()
 
-        self.logger.debug('%s: no cash flow types to map.', self.name)
-        return ()
+        self.logger.debug(
+            '%s: mapping cash flow types %s contained in column %s.',
+            self.name, str(cashflow_types.keys()), orig_cf_column)
+
+        self.df[orig_cf_column] = self.df[orig_cf_column].str.strip()
+        self.df[self.CF_TYPE] = self.df[orig_cf_column].map(cashflow_types)
+
+        # All unknown cash flow types will be NaN
+        unknown_cf_types = self.df[orig_cf_column].where(
+            self.df[self.CF_TYPE].isna()).dropna().tolist()
+
+        # Remove duplicates, sort the entries and make them immutable
+        unknown_cf_types = tuple(sorted(set(unknown_cf_types)))
+        self.logger.debug('%s: mapping successful.', self.name)
+        return unknown_cf_types
 
     def _add_zero_line(self):
         """Add a single zero cash flow for start date to the DataFrame."""
@@ -232,6 +236,44 @@ class P2PParser:
         self.df.set_index(
             [self.PLATFORM, self.CURRENCY, self.DATE], inplace=True)
         self.logger.debug('%s: added zero cash flow.', self.name)
+
+    @signals.watch_errors
+    def _check_investment_col(self, value_column: str) -> None:
+        """
+        Make sure outgoing investments have a negative sign.
+
+        Args:
+            value_column: Column name of investment amounts.
+
+        """
+        self._check_columns(value_column)
+        investment_col = self.df.loc[
+            self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column]
+        if investment_col.min() > 0.:
+            investment_col *= -1
+        self.df.loc[
+            self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column] \
+            = investment_col
+
+    @signals.watch_errors
+    def _check_columns(self, *columns) -> None:
+        """
+        Check if column names exist in the data frame.
+
+        Args:
+            *columns: Names of the columns which should be present in the data
+                frame.
+
+        Raises:
+            RuntimeError: if at least one column is not present.
+
+        """
+        missing = [col for col in columns if col not in self.df.columns]
+        if len(missing) > 0:
+            raise RuntimeError(_translate(
+                'P2PParser',
+                f'{self.name}: columns {missing} missing in account '
+                'statement!'))
 
     @signals.update_progress
     def parse(
@@ -266,33 +308,31 @@ class P2PParser:
 
         """
         self.logger.debug('%s: starting parser.', self.name)
+
         # If there were no cash flows in date_range add a single zero line
         if self.df.empty:
             self._add_zero_line()
             return ()
 
-        try:
-            # Rename columns in DataFrame
-            if rename_columns:
-                self.df.rename(columns=rename_columns, inplace=True)
+        # Rename columns in DataFrame
+        if rename_columns:
+            self._check_columns(*rename_columns.keys())
+            self.df.rename(columns=rename_columns, inplace=True)
 
-            # Make sure we only show results between start and end date
-            if date_format:
-                self._filter_date_range(date_format)
-                if self.df.empty:
-                    self._add_zero_line()
-                    return ()
+        # Make sure we only show results between start and end date
+        if date_format:
+            self._check_columns(self.DATE)
+            self._filter_date_range(date_format)
+            if self.df.empty:
+                self._add_zero_line()
+                return ()
 
-            # Convert cash flow types from platform to easyp2p types
+        if cashflow_types:
+            self._check_columns(orig_cf_column)
             unknown_cf_types = self._map_cashflow_types(
                 cashflow_types, orig_cf_column)
-        except KeyError as err:
-            self.logger.exception(
-                '%s: column missing in account statement.', self.name)
-            raise RuntimeError(_translate(
-                'P2PParser',
-                f'{self.name}: column {str(err)} is missing in account '
-                'statement!'))
+        else:
+            unknown_cf_types = ()
 
         # If the platform does not explicitly report currencies assume that
         # currency is EUR
@@ -300,16 +340,8 @@ class P2PParser:
             self.df[self.CURRENCY] = 'EUR'
 
         # Ensure that investment cash flows have a negative sign
-        try:
-            investment_col = self.df.loc[
-                self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column]
-            if investment_col.min() > 0.:
-                investment_col *= -1
-            self.df.loc[
-                self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column]\
-                = investment_col
-        except KeyError:
-            pass
+        if value_column:
+            self._check_investment_col(value_column)
 
         # Sum up the results per date and currency
         self._aggregate_results(value_column, balance_column)
@@ -325,6 +357,9 @@ class P2PParser:
         # Sort and drop all unnecessary columns
         self.df = self.df[[
             col for col in self.TARGET_COLUMNS if col in self.df.columns]]
+
+        # Round all values to 4 digits
+        self.df = self.df.round(4)
 
         # Disconnect signals
         if self.signals:
