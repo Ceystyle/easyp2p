@@ -165,12 +165,9 @@ class Mintos:
                 'P2PParser',
                 f'{self.name}: column {detail_col} is missing in account '
                 'statement!'))
-        new_col = parser.df[detail_col].str.split(' - ').str
-        if len(new_col) != 2:
-            raise PlatformFailedError(_translate(
-                'P2PParser', f'{self.name}: parsing account statement failed!'))
-        parser.df['Loan ID'] = new_col[0]
-        parser.df['Cash Flow Type'] = new_col[1]
+        if parser.df.shape[0] > 0:
+            parser.df['Loan ID'], parser.df['Cash Flow Type'] = \
+                parser.df[detail_col].str.split(' - ').str
 
         # Define mapping between Mintos and easyp2p cash flow types and column
         cashflow_types = {
