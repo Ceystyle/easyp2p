@@ -103,7 +103,7 @@ class PeerBerry:
             'INVESTMENT': parser.INVESTMENT_PAYMENT,
             'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
             'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT}
-        rename_columns = {'Currency Id': parser.CURRENCY, 'Date': parser.DATE}
+        rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
 
         unknown_cf_types = parser.parse(
             '%Y-%m-%d', rename_columns, cashflow_types, 'Type', 'Amount')
