@@ -1,2 +1,3 @@
-UniqueId,Payment Date,Confirmation Date,Cash Flow Type,Cash Flow Status,Project Name,Currency,Amount,Available to invest
-Funds available at the end of the period,,,,,,,,
+"UniqueId","Payment Date","Confirmation Date","Cash Flow Type","Cash Flow Status","Project Name","Currency","Amount","Available to invest"
+"Funds available at the end of the period","","","","","",,,""
+"Pending Investments","","","","","",,,"0.0"

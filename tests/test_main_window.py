@@ -98,7 +98,7 @@ class MainWindowTests(unittest.TestCase):
         """
         self.form.check_box_select_all.setChecked(True)
         platforms = self.form.get_platforms(True)
-        self.assertEqual(platforms, set(PLATFORMS))
+        self.assertEqual(platforms, PLATFORMS)
 
     def test_get_platforms_three_platforms_selected_checked_true(self) -> None:
         """
@@ -118,12 +118,12 @@ class MainWindowTests(unittest.TestCase):
         self.form.check_box_mintos.setChecked(True)
         self.form.check_box_twino.setChecked(True)
         platforms = self.form.get_platforms(False)
-        self.assertEqual(platforms, set(PLATFORMS))
+        self.assertEqual(platforms, PLATFORMS)
 
     def test_get_platforms_checked_false(self) -> None:
         """Test get_platforms if checked==False."""
         platforms = self.form.get_platforms(False)
-        self.assertEqual(platforms, set(PLATFORMS))
+        self.assertEqual(platforms, PLATFORMS)
 
     def test_select_all_platforms_twice(self) -> None:
         """Test the Select All Platforms checkbox."""

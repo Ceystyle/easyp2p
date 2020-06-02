@@ -25,7 +25,7 @@ class WorkerTests(unittest.TestCase):
         self.settings = Settings(
             (date(2018, 9, 1), date(2018, 12, 31)),
             os.path.join(os.getcwd(), 'test.xlsx'))
-        self.settings.platforms = set(PLATFORMS)
+        self.settings.platforms = PLATFORMS
         self.worker = WorkerThread(self.settings)
         self.worker.signals.abort = False
 

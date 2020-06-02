@@ -16,25 +16,28 @@ from easyp2p.excel_writer import (
 from easyp2p.p2p_credentials import get_credentials_from_keyring
 from easyp2p.p2p_parser import get_df_from_file, P2PParser
 import easyp2p.platforms as p2p_platforms
-from tests import INPUT_PREFIX, PLATFORMS, RESULT_PREFIX, TEST_PREFIX
+from tests import INPUT_PREFIX, RESULT_PREFIX, TEST_PREFIX
 
 SKIP_DL_TESTS = input('Run download tests (y/n)?: ').lower() != 'y'
+
+DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
 
 
 class BasePlatformTests(unittest.TestCase):
 
     """Class providing base tests for all supported P2P platforms."""
 
-    @unittest.skip('Skip tests for BasePlatformTests!')
     def setUp(self) -> None:
         """Dummy setUp, needs to be overridden by child classes."""
         self.name = None
         self.header = 0
-        self.Platform = None
+        self.platform = None
         self.unknown_cf_types = ()
-        self.DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-        self.DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-        self.DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
+        self.date_range = DATE_RANGE
+        self.date_range_no_cfs = DATE_RANGE_NO_CFS
+        self.date_range_missing_month = DATE_RANGE_MISSING_MONTH
 
     @unittest.skipIf(SKIP_DL_TESTS, 'Skipping download tests!')
     def run_download_test(
@@ -47,23 +50,27 @@ class BasePlatformTests(unittest.TestCase):
             date_range: Date range for which to generate the account statement.
 
         """
-        expected_results = \
-            RESULT_PREFIX + result_file + '.' + PLATFORMS[self.name]
         statement_without_suffix = TEST_PREFIX + result_file
-
-        if not os.path.isfile(expected_results):
-            self.skipTest(
-                f'Expected results file {expected_results} not found!')
-
         credentials = get_credentials_from_keyring(self.name)
         if credentials is None:
             self.skipTest(
                 f'No credentials for {self.name} in the keyring.')
 
-        platform = self.Platform(date_range, statement_without_suffix)
+        platform = self.platform(date_range, statement_without_suffix)
 
-        # For now we just test in non-headless mode
-        platform.download_statement(False)
+        expected_results = (
+            RESULT_PREFIX + result_file + '.' +
+            platform.statement.split('.')[-1])
+
+        if not os.path.isfile(expected_results):
+            self.skipTest(
+                f'Expected results file {expected_results} not found!')
+
+        if self.name in ['Grupeer', 'Iuvo', 'Mintos', 'Swaper']:
+            # For now we just test in non-headless mode
+            platform.download_statement(False)
+        else:
+            platform.download_statement()
 
         self.assertTrue(
             are_files_equal(
@@ -96,7 +103,7 @@ class BasePlatformTests(unittest.TestCase):
         else:
             statement_without_suffix = input_file
 
-        platform = self.Platform(date_range, statement_without_suffix)
+        platform = self.platform(date_range, statement_without_suffix)
         (df, unknown_cf_types) = platform.parse_statement()
         df.to_csv('tests/test_results/test_' + result_file + '.csv')
 
@@ -135,7 +142,7 @@ class BasePlatformTests(unittest.TestCase):
         Args:
             input_file: Input file which contains the parsed results of all
                 selected P2P platforms.
-            exp_result_file: File with expected results.
+            exp_result_file: File with expected results without prefix.
             date_range: Date range for which to generate the results file.
 
         """
@@ -143,97 +150,124 @@ class BasePlatformTests(unittest.TestCase):
         df.set_index(
             [P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
             inplace=True)
-        with tempfile.TemporaryDirectory() as temp_dir:
-            output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
-            write_results(df, output_file, date_range)
+        # with tempfile.TemporaryDirectory() as temp_dir:
+            # output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
+        output_file = TEST_PREFIX + exp_result_file
+        write_results(df, output_file, date_range)
 
-            for worksheet in [DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS]:
-                df = pd.read_excel(output_file, worksheet, index_col=[0, 1, 2])
-                df_exp = pd.read_excel(
-                    exp_result_file, worksheet, index_col=[0, 1, 2])
-                try:
-                    self.assertTrue(df.equals(df_exp))
-                except AssertionError:
-                    show_diffs(df, df_exp)
-                    raise AssertionError
+        for worksheet in [DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS]:
+            df = pd.read_excel(output_file, worksheet, index_col=[0, 1, 2])
+            df_exp = pd.read_excel(
+                RESULT_PREFIX + exp_result_file, worksheet,
+                index_col=[0, 1, 2])
+            try:
+                self.assertTrue(df.equals(df_exp))
+            except AssertionError:
+                show_diffs(df, df_exp)
+                raise AssertionError
 
     def test_download_statement(self) -> None:
         """Test downloading account statement for default date_range."""
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         self.run_download_test(
-            f'download_{self.name.lower()}_statement', self.DATE_RANGE)
+            f'download_{self.name.lower()}_statement', self.date_range)
 
     def test_download_statement_no_cfs(self) -> None:
         """
         Test downloading account statement for date_range without cash flows.
         """
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         self.run_download_test(
             f'download_{self.name.lower()}_statement_no_cfs',
-            self.DATE_RANGE_NO_CFS)
+            self.date_range_no_cfs)
 
     def test_parse_statement(self):
         """Test parsing platform default statement."""
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         self.run_parser_test(
-            f'{self.name.lower()}_parser', self.DATE_RANGE,
+            f'{self.name.lower()}_parser', self.date_range,
             RESULT_PREFIX+f'download_{self.name.lower()}_statement')
 
     def test_parse_statement_no_cfs(self):
         """Test platform parser if there were no cash flows in date_range."""
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         input_file = RESULT_PREFIX + \
             f'download_{self.name.lower()}_statement_no_cfs'
         self.run_parser_test(
             f'{self.name.lower()}_parser_no_cfs',
-            self.DATE_RANGE_NO_CFS, input_file=input_file)
+            self.date_range_no_cfs, input_file=input_file)
 
     def test_parse_statement_unknown_cf(self) -> None:
         """Test platform parser when unknown cash flow types are present."""
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         if not self.unknown_cf_types:
             self.skipTest('No unknown cash flow types for this platform!')
         self.run_parser_test(
-            f'{self.name.lower()}_parser_unknown_cf', self.DATE_RANGE,
+            f'{self.name.lower()}_parser_unknown_cf', self.date_range,
             exp_unknown_cf_types=self.unknown_cf_types)
 
     def test_parse_statement_missing_month(self):
+        """Test platform parser if a month without cash flows is present."""
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         self.run_parser_test(
             f'{self.name.lower()}_parser_missing_month',
-            self.DATE_RANGE_MISSING_MONTH)
+            self.date_range_missing_month)
 
     def test_write_results(self):
         """Test write_results when cash flows are present for all months."""
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         self.run_write_results(
             RESULT_PREFIX + f'{self.name.lower()}_parser.csv',
-            RESULT_PREFIX + f'write_results_{self.name.lower()}.xlsx',
-            self.DATE_RANGE)
+            f'write_results_{self.name.lower()}.xlsx',
+            self.date_range)
 
     def test_write_results_no_cfs(self):
         """Test write_results when there were no cash flows in date range."""
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         self.run_write_results(
             RESULT_PREFIX + f'{self.name.lower()}_parser_no_cfs.csv',
-            RESULT_PREFIX + f'write_results_{self.name.lower()}_no_cfs.xlsx',
-            self.DATE_RANGE_NO_CFS)
+            f'write_results_{self.name.lower()}_no_cfs.xlsx',
+            self.date_range_no_cfs)
 
     def test_write_results_missing_month(self):
         """
         Test write_results when there are months without cash flows.
         """
+        if self.name is None:
+            self.skipTest('Skip tests for BaseplatformTests!')
+
         input_file = RESULT_PREFIX + \
             f'{self.name.lower()}_parser_missing_month.csv'
-        exp_result_file = RESULT_PREFIX + \
+        exp_result_file = \
             f'write_results_{self.name.lower()}_missing_month.xlsx'
         self.run_write_results(
-            input_file, exp_result_file, self.DATE_RANGE_MISSING_MONTH)
+            input_file, exp_result_file, self.date_range_missing_month)
 
 
 class BondoraTests(BasePlatformTests):
 
     """Class containing all tests for Bondora."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Bondora'
-        self.Platform = p2p_platforms.Bondora
+        self.platform = p2p_platforms.Bondora
         self.unknown_cf_types = ()
         self.header = 0
 
@@ -245,41 +279,40 @@ class BondoraTests(BasePlatformTests):
         """
         self.run_write_results(
             INPUT_PREFIX + 'write_results_mixed_no_cfs.csv',
-            RESULT_PREFIX + 'write_results_mixed_no_cfs.xlsx',
-            self.DATE_RANGE)
+            'write_results_mixed_no_cfs.xlsx', self.date_range)
 
     def test_write_results_all(self):
         """Test write_results for all supported platforms."""
         self.run_write_results(
             INPUT_PREFIX + 'write_results_all.csv',
-            RESULT_PREFIX + 'write_results_all.xlsx', self.DATE_RANGE)
+            'write_results_all.xlsx', self.date_range)
 
     def test_write_results_all_missing_month(self):
         """Test write_results for all supported platforms."""
         self.run_write_results(
             INPUT_PREFIX + 'write_results_all_missing_month.csv',
-            RESULT_PREFIX + 'write_results_all_missing_month.xlsx',
-            self.DATE_RANGE_MISSING_MONTH)
+            'write_results_all_missing_month.xlsx',
+            self.date_range_missing_month)
 
     def test_write_results_no_results(self):
         """Test write_results if there were no results."""
         df = get_df_from_file(INPUT_PREFIX + 'write_results_no_results.csv')
         with tempfile.TemporaryDirectory() as temp_dir:
             output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
-            self.assertFalse(write_results(df, output_file, self.DATE_RANGE))
+            self.assertFalse(write_results(df, output_file, self.date_range))
 
 
 class DoFinanceTests(BasePlatformTests):
 
     """Class containing all tests for DoFinance."""
 
-    DATE_RANGE = (date(2018, 1, 1), date(2018, 8, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 4, 1), date(2018, 9, 30))
+    date_range = (date(2018, 1, 1), date(2018, 8, 31))
+    date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
+    date_range_missing_month = (date(2018, 4, 1), date(2018, 9, 30))
 
     def setUp(self) -> None:
         self.name = 'DoFinance'
-        self.Platform = p2p_platforms.DoFinance
+        self.platform = p2p_platforms.DoFinance
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
@@ -288,13 +321,10 @@ class EstateguruTests(BasePlatformTests):
 
     """Class containing all tests for Estateguru."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Estateguru'
-        self.Platform = p2p_platforms.Estateguru
+        self.platform = p2p_platforms.Estateguru
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
@@ -303,13 +333,10 @@ class GrupeerTests(BasePlatformTests):
 
     """Class containing all tests for Grupeer."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Grupeer'
-        self.Platform = p2p_platforms.Grupeer
+        self.platform = p2p_platforms.Grupeer
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
@@ -318,13 +345,10 @@ class IuvoTests(BasePlatformTests):
 
     """Class containing all tests for Iuvo."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Iuvo'
-        self.Platform = p2p_platforms.Iuvo
+        self.platform = p2p_platforms.Iuvo
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 3
 
@@ -333,41 +357,22 @@ class MintosTests(BasePlatformTests):
 
     """Class containing all tests for Mintos."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Mintos'
-        self.Platform = p2p_platforms.Mintos
-        self.unknown_cf_types = ('Interestincome', 'TestCF1', 'TestCF2')
+        self.platform = p2p_platforms.Mintos
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
-
-    def test_parser_multicurrency(self) -> None:
-        """Test parser if more than one currency is present."""
-        self.run_parser_test(
-            'mintos_parser_multicurrency',
-            self.DATE_RANGE, INPUT_PREFIX + 'mintos_parser_multicurrency')
-
-    def test_write_results_multicurrency(self) -> None:
-        """Test write_results if more than one currency is present."""
-        self.run_write_results(
-            INPUT_PREFIX + 'write_results_multicurrency.csv',
-            RESULT_PREFIX + 'write_results_multicurrency.xlsx',
-            self.DATE_RANGE)
 
 
 class PeerBerryTests(BasePlatformTests):
 
     """Class containing all tests for PeerBerry."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'PeerBerry'
-        self.Platform = p2p_platforms.PeerBerry
+        self.platform = p2p_platforms.PeerBerry
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
@@ -376,13 +381,10 @@ class RobocashTests(BasePlatformTests):
 
     """Class containing all tests for Robocash."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Robocash'
-        self.Platform = p2p_platforms.Robocash
+        self.platform = p2p_platforms.Robocash
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
@@ -391,13 +393,10 @@ class SwaperTests(BasePlatformTests):
 
     """Class containing all tests for Swaper."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Swaper'
-        self.Platform = p2p_platforms.Swaper
+        self.platform = p2p_platforms.Swaper
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
         self.header = 0
 
@@ -406,13 +405,10 @@ class TwinoTests(BasePlatformTests):
 
     """Class containing all tests for Twino."""
 
-    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
     def setUp(self) -> None:
+        super().setUp()
         self.name = 'Twino'
-        self.Platform = p2p_platforms.Twino
+        self.platform = p2p_platforms.Twino
         self.unknown_cf_types = ('TestCF1 PRINCIPAL', 'TestCF2 INTEREST')
         self.header = 2
 
@@ -439,7 +435,11 @@ def are_files_equal(
         print('File not found: ', err)
         return False
 
-    return df1.equals(df2)
+    if df1.equals(df2):
+        return True
+
+    show_diffs(df1, df2)
+    return False
 
 
 def _get_expected_df(exp_result_file: str) -> pd.DataFrame:
