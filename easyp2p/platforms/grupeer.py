@@ -5,9 +5,6 @@ Download and parse Grupeer statement.
 
 """
 
-from typing import Optional, Tuple
-
-import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
@@ -83,36 +80,15 @@ class Grupeer(BasePlatform):
 
             grupeer.download_statement(self.statement, (By.NAME, 'excel'))
 
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
+    def _transform_df(self, parser: P2PParser) -> None:
         """
-        Parser for Grupeer.
+        Transform amount columns into floats.
 
         Args:
-            statement: File name including path of the account statement which
-                should be parsed. If None, the file at self.statement will be
-                parsed. Default is None.
-
-        Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
+            parser: P2PParser instance.
 
         """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.NAME, self.date_range, self.statement, signals=self.signals)
-
-        # Convert amount and balance to float64
-        parser.df['Amount'] = parser.df['Amount'].apply(
+        parser.df[self.VALUE_COLUMN] = parser.df[self.VALUE_COLUMN].apply(
             lambda x: x.replace(',', '.')).astype('float64')
-        parser.df['Balance'] = parser.df['Balance'].apply(
+        parser.df[self.BALANCE_COLUMN] = parser.df[self.BALANCE_COLUMN].apply(
             lambda x: x.replace(',', '.')).astype('float64')
-
-        unknown_cf_types = parser.parse(
-            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
-            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
-
-        return parser.df, unknown_cf_types

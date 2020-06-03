@@ -6,9 +6,6 @@ Download and parse DoFinance statement.
 
 """
 
-from typing import Optional, Tuple
-
-import pandas as pd
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
@@ -63,47 +60,27 @@ class DoFinance(BasePlatform):
             data['xls'] = 'Download+XLS'
             sess.download_statement(statement_url, self.statement, 'post', data)
 
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
+    def _transform_df(self, parser: P2PParser) -> None:
         """
-        Parser for DoFinance.
+        Dynamically generate the DoFinance cash flow types.
 
         Args:
-            statement: File name including path of the account
-                statement which should be parsed. If None, the file at
-                self.statement will be parsed. Default is None.
-
-        Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
+            parser: P2PParser instance.
 
         """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.NAME, self.date_range, self.statement,
-            skipfooter=self.SKIP_FOOTER, signals=self.signals)
-
-        # Define mapping between DoFinance and easyp2p cash flow types and
-        # column names
-        cashflow_types = {
+        cash_flow_types = {
             'Withdrawal': parser.IN_OUT_PAYMENT,
             'Profit': parser.INTEREST_PAYMENT,
             # treat bonus payments as interest payments
-            'Investor Bonus': parser.INTEREST_PAYMENT}
+            'Investor Bonus': parser.INTEREST_PAYMENT,
+        }
 
         for cf_type in parser.df[self.ORIG_CF_COLUMN].unique():
             if cf_type.startswith('Repayment'):
-                cashflow_types[cf_type] = parser.REDEMPTION_PAYMENT
+                cash_flow_types[cf_type] = parser.REDEMPTION_PAYMENT
             elif cf_type.startswith('Investment'):
-                cashflow_types[cf_type] = parser.INVESTMENT_PAYMENT
+                cash_flow_types[cf_type] = parser.INVESTMENT_PAYMENT
             elif cf_type.startswith('Funding'):
-                cashflow_types[cf_type] = parser.IN_OUT_PAYMENT
+                cash_flow_types[cf_type] = parser.IN_OUT_PAYMENT
 
-        unknown_cf_types = parser.parse(
-            self.DATE_FORMAT, self.RENAME_COLUMNS, cashflow_types,
-            self.ORIG_CF_COLUMN, self.VALUE_COLUMN)
-
-        return parser.df, unknown_cf_types
+        self.CASH_FLOW_TYPES = cash_flow_types  # pylint: disable=invalid-name

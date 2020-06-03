@@ -88,8 +88,21 @@ class BasePlatform:
             self.NAME, self.date_range, self.statement, header=self.HEADER,
             skipfooter=self.SKIP_FOOTER, signals=self.signals)
 
+        self._transform_df(parser)
+
         unknown_cf_types = parser.parse(
             self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
             self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
 
         return parser.df, unknown_cf_types
+
+    def _transform_df(self, parser: P2PParser) -> None:
+        """
+        Overriding this method allows to include additional transformation of
+        the parser data frame which are necessary for some platforms. By default
+        this method does nothing.
+
+        Args:
+            parser: P2PParser instance.
+
+        """

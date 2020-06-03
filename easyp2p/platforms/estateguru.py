@@ -5,9 +5,6 @@ Download and parse Estateguru statement.
 
 """
 
-from typing import Optional, Tuple
-
-import pandas as pd
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
@@ -91,34 +88,14 @@ class Estateguru(BasePlatform):
             sess.download_statement(
                 f'https://estateguru.co{download_url}', self.statement, 'get')
 
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
+    def _transform_df(self, parser: P2PParser) -> None:
         """
-        Parser for Estateguru.
+        Only consider cash flows in status "Approved".
 
         Args:
-            statement: File name including path of the account
-                statement which should be parsed. If None, the file at
-                self.statement will be parsed. Default is None.
+            parser: P2PParser instance
 
         Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
 
         """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.NAME, self.date_range, self.statement,
-            skipfooter=self.SKIP_FOOTER, signals=self.signals)
-
-        # Only consider valid cash flows
         parser.df = parser.df[parser.df['Cash Flow Status'] == 'Approved']
-
-        unknown_cf_types = parser.parse(
-            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
-            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
-
-        return parser.df, unknown_cf_types

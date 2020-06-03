@@ -6,8 +6,6 @@ Download and parse Mintos statement.
 
 """
 
-from typing import Optional, Tuple
-
 import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -16,7 +14,7 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import Signals, PlatformFailedError
+from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_webdriver import P2PWebDriver
 from easyp2p.platforms.base_platform import BasePlatform
 
@@ -166,40 +164,16 @@ class Mintos(BasePlatform):
 
         return True
 
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
+    def _transform_df(self, parser: P2PParser) -> None:
         """
-        Parser for Mintos.
+        Split the Details column into Loan ID and Cash Flow Type columns.
 
         Args:
-            statement: File name including path of the account
-                statement which should be parsed. If None, the file at
-                self.statement will be parsed. Default is None.
-
-        Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
+            parser: P2PParser instance
 
         """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.NAME, self.date_range, self.statement, signals=self.signals)
-
         detail_col = 'Details'
-        if detail_col not in parser.df.columns:
-            raise PlatformFailedError(_translate(
-                'P2PParser',
-                f'{self.NAME}: column {detail_col} is missing in account '
-                'statement!'))
+        parser.check_columns(detail_col)
         if parser.df.shape[0] > 0:
             parser.df['Loan ID'], parser.df['Cash Flow Type'] = \
                 parser.df[detail_col].str.split(' - ').str
-
-        unknown_cf_types = parser.parse(
-            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
-            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
-
-        return parser.df, unknown_cf_types

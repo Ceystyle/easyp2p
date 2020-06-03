@@ -25,7 +25,7 @@ _translate = QCoreApplication.translate
 logger = logging.getLogger('easyp2p.p2p_parser')
 
 
-class P2PParser:  # pylint: disable=too-few-public-methods
+class P2PParser:
     """
     Parser class to transform P2P account statements into easyp2p format.
 
@@ -246,7 +246,7 @@ class P2PParser:  # pylint: disable=too-few-public-methods
             value_column: Column name of investment amounts.
 
         """
-        self._check_columns(value_column)
+        self.check_columns(value_column)
         investment_col = self.df.loc[
             self.df[self.CF_TYPE] == self.INVESTMENT_PAYMENT, value_column]
         if investment_col.min() > 0.:
@@ -256,7 +256,7 @@ class P2PParser:  # pylint: disable=too-few-public-methods
             = investment_col
 
     @signals.watch_errors
-    def _check_columns(self, *columns) -> None:
+    def check_columns(self, *columns) -> None:
         """
         Check if column names exist in the data frame.
 
@@ -316,19 +316,19 @@ class P2PParser:  # pylint: disable=too-few-public-methods
 
         # Rename columns in DataFrame
         if rename_columns:
-            self._check_columns(*rename_columns.keys())
+            self.check_columns(*rename_columns.keys())
             self.df.rename(columns=rename_columns, inplace=True)
 
         # Make sure we only show results between start and end date
         if date_format:
-            self._check_columns(self.DATE)
+            self.check_columns(self.DATE)
             self._filter_date_range(date_format)
             if self.df.empty:
                 self._add_zero_line()
                 return ()
 
         if cashflow_types:
-            self._check_columns(orig_cf_column)
+            self.check_columns(orig_cf_column)
             unknown_cf_types = self._map_cashflow_types(
                 cashflow_types, orig_cf_column)
         else:

@@ -6,9 +6,6 @@ Download and parse Twino statement.
 
 """
 
-from typing import Optional, Tuple
-
-import pandas as pd
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_credentials import get_credentials
@@ -141,41 +138,14 @@ class Twino(BasePlatform):
 
             sess.wait(download_ready)
 
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
+    def _transform_df(self, parser: P2PParser) -> None:
         """
-        Parser for Twino.
+        Merge Type and Description columns to identify the cash flow types.
 
         Args:
-            statement: File name including path of the account
-                statement which should be parsed. If None, the file at
-                self.statement will be parsed. Default is None.
-
-        Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
+            parser: P2PParser instance
 
         """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.NAME, self.date_range, self.statement, header=self.HEADER,
-            skipfooter=self.SKIP_FOOTER, signals=self.signals)
-
-        # Create a new column for identifying cash flow types
-        try:
-            parser.df['Cash Flow Type'] = parser.df['Type'] + ' ' \
-                + parser.df['Description']
-        except KeyError as err:
-            raise RuntimeError(_translate(
-                'P2PParser',
-                f'{self.NAME}: column {str(err)} is missing in account '
-                'statement!'))
-
-        unknown_cf_types = parser.parse(
-            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
-            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
-
-        return parser.df, unknown_cf_types
+        parser.check_columns('Type', 'Description')
+        parser.df['Cash Flow Type'] = parser.df['Type'] + ' ' \
+            + parser.df['Description']

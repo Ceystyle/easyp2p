@@ -6,9 +6,6 @@ Download and parse Bondora statement.
 
 """
 
-from typing import Optional, Tuple
-
-import pandas as pd
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
@@ -65,34 +62,14 @@ class Bondora(BasePlatform):
             url += 'downloadExcel=true'
             sess.download_statement(url, self.statement, 'get')
 
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
+    def _transform_df(self, parser: P2PParser) -> None:
         """
-        Parser for Bondora.
+        Include column with the defaulted payments.
 
         Args:
-            statement: File name including path of the account
-                statement which should be parsed. If None, the file at
-                self.statement will be parsed. Default is None.
-
-        Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
+            parser: P2PParser instance.
 
         """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.NAME, self.date_range, self.statement, signals=self.signals)
-
-        # Calculate defaulted payments
         parser.df[parser.DEFAULTS] = (
             parser.df['Principal received - total']
             - parser.df['Principal planned - total'])
-
-        unknown_cf_types = parser.parse(
-            self.DATE_FORMAT, rename_columns=self.RENAME_COLUMNS)
-
-        return parser.df, unknown_cf_types
