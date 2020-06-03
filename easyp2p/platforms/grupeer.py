@@ -5,7 +5,6 @@ Download and parse Grupeer statement.
 
 """
 
-from datetime import date
 from typing import Optional, Tuple
 
 import pandas as pd
@@ -14,37 +13,38 @@ from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import Signals
+from easyp2p.platforms.base_platform import BasePlatform
 
 
-class Grupeer:
+class Grupeer(BasePlatform):
 
     """
     Contains methods for downloading/parsing Grupeer account statements.
 
     """
 
-    def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str,
-            signals: Optional[Signals] = None) -> None:
-        """
-        Constructor of Grupeer class.
+    NAME = 'Grupeer'
+    SUFFIX = 'xlsx'
+    DATE_FORMAT = '%d.%m.%Y'
+    RENAME_COLUMNS = {
+        'Date': P2PParser.DATE,
+        'Currency': P2PParser.CURRENCY,
+    }
+    CASH_FLOW_TYPES = {
+        # Treat cashback as interest payment:
+        'Cashback': P2PParser.INTEREST_PAYMENT,
+        'Deposit': P2PParser.IN_OUT_PAYMENT,
+        'Withdrawal': P2PParser.IN_OUT_PAYMENT,
+        'Interest': P2PParser.INTEREST_PAYMENT,
+        'Investment': P2PParser.INVESTMENT_PAYMENT,
+        'Principal': P2PParser.REDEMPTION_PAYMENT,
+    }
+    ORIG_CF_COLUMN = 'Type'
+    VALUE_COLUMN = 'Amount'
+    BALANCE_COLUMN = 'Balance'
 
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statements must be generated.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
-            signals: Signals instance for communicating with the calling class.
-
-        """
-        self.name = 'Grupeer'
-        self.date_range = date_range
-        self.statement = statement_without_suffix + '.xlsx'
-        self.signals = signals
-
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(  # pylint: disable=arguments-differ
+            self, headless: bool) -> None:
         """
         Generate and download the Grupeer account statement for given date
         range.
@@ -60,7 +60,7 @@ class Grupeer:
         }
 
         with P2PPlatform(
-                self.name, headless, urls,
+                self.NAME, headless, urls,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In')),
                 logout_locator=(By.LINK_TEXT, 'Logout'),
                 hover_locator=(By.CLASS_NAME, 'header-auth-menu-name'),
@@ -103,7 +103,7 @@ class Grupeer:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, signals=self.signals)
+            self.NAME, self.date_range, self.statement, signals=self.signals)
 
         # Convert amount and balance to float64
         parser.df['Amount'] = parser.df['Amount'].apply(
@@ -111,20 +111,8 @@ class Grupeer:
         parser.df['Balance'] = parser.df['Balance'].apply(
             lambda x: x.replace(',', '.')).astype('float64')
 
-        # Define mapping between Grupeer and easyp2p cash flow types and column
-        # names
-        cashflow_types = {
-            # Treat cashback as interest payment:
-            'Cashback': parser.INTEREST_PAYMENT,
-            'Deposit': parser.IN_OUT_PAYMENT,
-            'Withdrawal': parser.IN_OUT_PAYMENT,
-            'Interest': parser.INTEREST_PAYMENT,
-            'Investment': parser.INVESTMENT_PAYMENT,
-            'Principal': parser.REDEMPTION_PAYMENT}
-        rename_columns = {'Date': parser.DATE, 'Currency': parser.CURRENCY}
-
         unknown_cf_types = parser.parse(
-            '%d.%m.%Y', rename_columns, cashflow_types, 'Type', 'Amount',
-            'Balance')
+            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
+            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
 
         return parser.df, unknown_cf_types

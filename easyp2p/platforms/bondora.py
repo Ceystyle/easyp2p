@@ -6,7 +6,6 @@ Download and parse Bondora statement.
 
 """
 
-from datetime import date
 from typing import Optional, Tuple
 
 import pandas as pd
@@ -14,36 +13,29 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
-from easyp2p.p2p_signals import Signals
+from easyp2p.platforms.base_platform import BasePlatform
 
 _translate = QCoreApplication.translate
 
 
-class Bondora:
+class Bondora(BasePlatform):
 
     """Contains methods for downloading/parsing Bondora account statements."""
 
-    def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str,
-            signals: Optional[Signals] = None) -> None:
-        """
-        Constructor of Bondora class.
+    NAME = 'Bondora'
+    SUFFIX = 'xlsx'
+    DATE_FORMAT = '%d.%m.%Y'
+    RENAME_COLUMNS = {
+        'Closing balance': P2PParser.END_BALANCE_NAME,
+        'Interest received - total': P2PParser.INTEREST_PAYMENT,
+        'Net capital deployed': P2PParser.IN_OUT_PAYMENT,
+        'Net loan investments': P2PParser.INVESTMENT_PAYMENT,
+        'Period': P2PParser.DATE,
+        'Principal received - total': P2PParser.REDEMPTION_PAYMENT,
+        'Opening balance': P2PParser.START_BALANCE_NAME,
+    }
 
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statements must be generated.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
-            signals: Signals instance for communicating with the calling class.
-
-        """
-        self.name = 'Bondora'
-        self.date_range = date_range
-        self.statement = statement_without_suffix + '.xlsx'
-        self.signals = signals
-
-    def download_statement(self) -> None:
+    def download_statement(self) -> None:  # pylint: disable=arguments-differ
         """
         Generate and download the Bondora account statement for given date
         range.
@@ -52,12 +44,12 @@ class Bondora:
         login_url = 'https://www.bondora.com/en/login/'
         logout_url = 'https://www.bondora.com/en/authorize/logout/'
 
-        with P2PSession(self.name, logout_url, self.signals) as sess:
+        with P2PSession(self.NAME, logout_url, self.signals) as sess:
             token_field = '__RequestVerificationToken'
             data = sess.get_values_from_tag_by_name(
                 login_url, 'input', [token_field], _translate(
                     'P2PPlatform',
-                    f'{self.name}: loading login page was not successful!'))
+                    f'{self.NAME}: loading login page was not successful!'))
 
             sess.log_into_page(login_url, 'Email', 'Password', data)
 
@@ -93,23 +85,14 @@ class Bondora:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, signals=self.signals)
+            self.NAME, self.date_range, self.statement, signals=self.signals)
 
         # Calculate defaulted payments
         parser.df[parser.DEFAULTS] = (
             parser.df['Principal received - total']
             - parser.df['Principal planned - total'])
 
-        # Define mapping between Bondora and easyp2p column names
-        rename_columns = {
-            'Net capital deployed': parser.IN_OUT_PAYMENT,
-            'Closing balance': parser.END_BALANCE_NAME,
-            'Principal received - total': parser.REDEMPTION_PAYMENT,
-            'Interest received - total': parser.INTEREST_PAYMENT,
-            'Net loan investments': parser.INVESTMENT_PAYMENT,
-            'Opening balance': parser.START_BALANCE_NAME,
-            'Period': parser.DATE}
-
-        unknown_cf_types = parser.parse('%d.%m.%Y', rename_columns=rename_columns)
+        unknown_cf_types = parser.parse(
+            self.DATE_FORMAT, rename_columns=self.RENAME_COLUMNS)
 
         return parser.df, unknown_cf_types

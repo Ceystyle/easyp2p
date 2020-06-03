@@ -6,7 +6,6 @@ Download and parse Twino statement.
 
 """
 
-from datetime import date
 from typing import Optional, Tuple
 
 import pandas as pd
@@ -15,38 +14,40 @@ from PyQt5.QtCore import QCoreApplication
 from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
-from easyp2p.p2p_signals import Signals, PlatformFailedError
+from easyp2p.p2p_signals import PlatformFailedError
+from easyp2p.platforms.base_platform import BasePlatform
 
 _translate = QCoreApplication.translate
 
 
-class Twino:
+class Twino(BasePlatform):
 
     """
     Contains methods for downloading/parsing Twino account statements.
     """
 
-    def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str,
-            signals: Optional[Signals] = None) -> None:
-        """
-        Constructor of Twino class.
+    NAME = 'Twino'
+    SUFFIX = 'xlsx'
+    DATE_FORMAT = '%d.%m.%Y %H:%M'
+    RENAME_COLUMNS = {'Processing Date': P2PParser.DATE}
+    CASH_FLOW_TYPES = {
+        'BUYBACK INTEREST': P2PParser.BUYBACK_INTEREST_PAYMENT,
+        'BUYBACK PRINCIPAL': P2PParser.BUYBACK_PAYMENT,
+        'BUY_SHARES PRINCIPAL': P2PParser.INVESTMENT_PAYMENT,
+        'CURRENCY_FLUCTUATION INTEREST': P2PParser.INTEREST_PAYMENT,
+        'EXTENSION INTEREST': P2PParser.INTEREST_PAYMENT,
+        'EXTENSION PRINCIPAL': P2PParser.REDEMPTION_PAYMENT,
+        'REPAYMENT INTEREST': P2PParser.INTEREST_PAYMENT,
+        'REPAYMENT PRINCIPAL': P2PParser.REDEMPTION_PAYMENT,
+        'REPURCHASE INTEREST': P2PParser.BUYBACK_INTEREST_PAYMENT,
+        'REPURCHASE PRINCIPAL': P2PParser.BUYBACK_PAYMENT,
+        'SCHEDULE INTEREST': P2PParser.INTEREST_PAYMENT,
+    }
+    ORIG_CF_COLUMN = 'Cash Flow Type'
+    VALUE_COLUMN = 'Amount, EUR'
+    HEADER = 2
 
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statements must be generated.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
-            signals: Signals instance for communicating with the calling class.
-
-        """
-        self.name = 'Twino'
-        self.date_range = date_range
-        self.statement = statement_without_suffix + '.xlsx'
-        self.signals = signals
-
-    def download_statement(self) -> None:
+    def download_statement(self) -> None:  # pylint: disable=arguments-differ
         """
         Generate and download the Twino account statement for given date range.
 
@@ -56,7 +57,7 @@ class Twino:
         """
         # FIXME: do not ask user twice for credentials if they are not in the
         # keyring
-        username = get_credentials(self.name, self.signals)[0]
+        username = get_credentials(self.NAME, self.signals)[0]
         check2fa_url = (
             f'https://www.twino.eu/ws/public/check2fa?email={username}')
         login_url = 'https://www.twino.eu/ws/public/login2fa'
@@ -68,15 +69,15 @@ class Twino:
             f'https://www.twino.eu/ws/web/export-to-excel/{username}/'
             f'download')
 
-        with P2PSession(self.name, logout_url, self.signals, json=True) as sess:
+        with P2PSession(self.NAME, logout_url, self.signals, json=True) as sess:
             resp = sess.request(
                 check2fa_url, 'get', _translate(
-                    'P2PPlatform', f'{self.name}: loading login page failed!'))
+                    'P2PPlatform', f'{self.NAME}: loading login page failed!'))
 
             if resp.json():
                 raise PlatformFailedError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: two factor authorization is not yet '
+                    f'{self.NAME}: two factor authorization is not yet '
                     f'supported in easyp2p!'))
 
             sess.log_into_page(login_url, 'name', 'password')
@@ -121,22 +122,22 @@ class Twino:
             sess.generate_account_statement(gen_statement_url, 'post', data)
 
             def download_ready():
-                resp = sess.request(
+                res = sess.request(
                     download_url, 'get', _translate(
                         'P2PPlatform',
-                        f'{self.name}: download of account statement failed!'),
+                        f'{self.NAME}: download of account statement failed!'),
                     success_codes=(200, 500))
-                if resp.status_code == 200:
+                if res.status_code == 200:
                     with open(self.statement, 'wb') as file:
-                        file.write(resp.content)
+                        file.write(res.content)
                     return True
 
-                if resp.status_code == 500:
+                if res.status_code == 500:
                     return False
 
                 raise RuntimeError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: download of account statement failed!'))
+                    f'{self.NAME}: download of account statement failed!'))
 
             sess.wait(download_ready)
 
@@ -160,8 +161,8 @@ class Twino:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, header=2,
-            signals=self.signals)
+            self.NAME, self.date_range, self.statement, header=self.HEADER,
+            skipfooter=self.SKIP_FOOTER, signals=self.signals)
 
         # Create a new column for identifying cash flow types
         try:
@@ -170,28 +171,11 @@ class Twino:
         except KeyError as err:
             raise RuntimeError(_translate(
                 'P2PParser',
-                f'{self.name}: column {str(err)} is missing in account '
+                f'{self.NAME}: column {str(err)} is missing in account '
                 'statement!'))
 
-        # Define mapping between Twino and easyp2p cash flow types and column
-        # names
-        cashflow_types = {
-            'BUYBACK INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
-            'BUYBACK PRINCIPAL': parser.BUYBACK_PAYMENT,
-            'BUY_SHARES PRINCIPAL': parser.INVESTMENT_PAYMENT,
-            'CURRENCY_FLUCTUATION INTEREST': parser.INTEREST_PAYMENT,
-            'EXTENSION INTEREST': parser.INTEREST_PAYMENT,
-            'EXTENSION PRINCIPAL': parser.REDEMPTION_PAYMENT,
-            'REPAYMENT INTEREST': parser.INTEREST_PAYMENT,
-            'REPAYMENT PRINCIPAL': parser.REDEMPTION_PAYMENT,
-            'REPURCHASE INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
-            'REPURCHASE PRINCIPAL': parser.BUYBACK_PAYMENT,
-            'SCHEDULE INTEREST': parser.INTEREST_PAYMENT
-            }
-        rename_columns = {'Processing Date': parser.DATE}
-
         unknown_cf_types = parser.parse(
-            '%d.%m.%Y %H:%M', rename_columns, cashflow_types,
-            'Cash Flow Type', 'Amount, EUR')
+            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
+            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
 
         return parser.df, unknown_cf_types

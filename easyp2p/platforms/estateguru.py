@@ -5,7 +5,6 @@ Download and parse Estateguru statement.
 
 """
 
-from datetime import date
 from typing import Optional, Tuple
 
 import pandas as pd
@@ -13,38 +12,40 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
-from easyp2p.p2p_signals import Signals
+from easyp2p.platforms.base_platform import BasePlatform
 
 _translate = QCoreApplication.translate
 
 
-class Estateguru:
+class Estateguru(BasePlatform):
 
     """
     Contains methods for downloading/parsing Estateguru account statements.
     """
 
-    def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str,
-            signals: Optional[Signals] = None) -> None:
-        """
-        Constructor of Estateguru class.
+    NAME = 'Estateguru'
+    SUFFIX = 'csv'
+    DATE_FORMAT = '%d/%m/%Y %H:%M'
+    RENAME_COLUMNS = {
+        'Cash Flow Type': 'EG Cash Flow Type',
+        'Confirmation Date': P2PParser.DATE}
+    CASH_FLOW_TYPES = {
+        # Treat bonus payments as normal interest payments
+        'Bonus': P2PParser.INTEREST_PAYMENT,
+        'Deposit': P2PParser.IN_OUT_PAYMENT,
+        'Withdrawal': P2PParser.IN_OUT_PAYMENT,
+        'Indemnity': P2PParser.LATE_FEE_PAYMENT,
+        'Principal': P2PParser.REDEMPTION_PAYMENT,
+        'Investment(Auto Invest)': P2PParser.INVESTMENT_PAYMENT,
+        'Penalty': P2PParser.LATE_FEE_PAYMENT,
+        'Interest': P2PParser.INTEREST_PAYMENT,
+    }
+    ORIG_CF_COLUMN = 'EG Cash Flow Type'
+    VALUE_COLUMN = 'Amount'
+    BALANCE_COLUMN = 'Available to invest'
+    SKIP_FOOTER = 1
 
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statements must be generated.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
-            signals: Signals instance for communicating with the calling class.
-
-        """
-        self.name = 'Estateguru'
-        self.date_range = date_range
-        self.statement = statement_without_suffix + '.csv'
-        self.signals = signals
-
-    def download_statement(self) -> None:
+    def download_statement(self) -> None:  # pylint: disable=arguments-differ
         """
         Generate and download the Estateguru account statement for given date
         range.
@@ -56,13 +57,13 @@ class Estateguru:
         gen_statement_url = (
             'https://estateguru.co/portal/portfolio/ajaxFilterTransactions')
 
-        with P2PSession(self.name, logout_url, self.signals) as sess:
+        with P2PSession(self.NAME, logout_url, self.signals) as sess:
             sess.log_into_page(login_url, 'username', 'password')
 
             download_url = sess.get_url_from_partial_link(
                 statement_url, 'downloadOrderReport.csv', _translate(
                     'P2PPlatform',
-                    f'{self.name}: loading account statement page failed!'))
+                    f'{self.NAME}: loading account statement page failed!'))
             user_id = download_url.split('&')[1].split('=')[1]
 
             data = {
@@ -110,30 +111,14 @@ class Estateguru:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, skipfooter=1,
-            signals=self.signals)
+            self.NAME, self.date_range, self.statement,
+            skipfooter=self.SKIP_FOOTER, signals=self.signals)
 
         # Only consider valid cash flows
         parser.df = parser.df[parser.df['Cash Flow Status'] == 'Approved']
 
-        # Define mapping between Estateguru and easyp2p cash flow types and
-        # column names
-        cashflow_types = {
-            # Treat bonus payments as normal interest payments
-            'Bonus': parser.INTEREST_PAYMENT,
-            'Deposit': parser.IN_OUT_PAYMENT,
-            'Withdrawal': parser.IN_OUT_PAYMENT,
-            'Indemnity': parser.LATE_FEE_PAYMENT,
-            'Principal': parser.REDEMPTION_PAYMENT,
-            'Investment(Auto Invest)': parser.INVESTMENT_PAYMENT,
-            'Penalty': parser.LATE_FEE_PAYMENT,
-            'Interest': parser.INTEREST_PAYMENT}
-        rename_columns = {
-            'Cash Flow Type': 'EG Cash Flow Type',
-            'Confirmation Date': parser.DATE}
-
         unknown_cf_types = parser.parse(
-            '%d/%m/%Y %H:%M', rename_columns, cashflow_types,
-            'EG Cash Flow Type', 'Amount', 'Available to invest')
+            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
+            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
 
         return parser.df, unknown_cf_types

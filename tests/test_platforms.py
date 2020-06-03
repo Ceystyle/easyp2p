@@ -150,8 +150,6 @@ class BasePlatformTests(unittest.TestCase):
         df.set_index(
             [P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
             inplace=True)
-        # with tempfile.TemporaryDirectory() as temp_dir:
-            # output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
         output_file = TEST_PREFIX + exp_result_file
         write_results(df, output_file, date_range)
 

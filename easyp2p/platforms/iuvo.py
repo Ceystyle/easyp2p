@@ -5,48 +5,45 @@ Download and parse Iuvo statement.
 
 """
 
-from datetime import date
-from typing import Optional, Tuple
-
 from bs4 import BeautifulSoup
-import pandas as pd
 from PyQt5.QtCore import QCoreApplication
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform, download_finished
-from easyp2p.p2p_signals import Signals
+from easyp2p.platforms.base_platform import BasePlatform
 
 _translate = QCoreApplication.translate
 
 
-class Iuvo:
+class Iuvo(BasePlatform):
     """
     Contains methods for downloading/parsing Iuvo account statements.
     """
 
-    def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str,
-            signals: Optional[Signals] = None) -> None:
-        """
-        Constructor of Iuvo class.
+    NAME = 'Iuvo'
+    SUFFIX = 'xlsx'
+    DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+    RENAME_COLUMNS = {'Date': P2PParser.DATE}
+    CASH_FLOW_TYPES = {
+        'deposit': P2PParser.IN_OUT_PAYMENT,
+        'late_fee': P2PParser.LATE_FEE_PAYMENT,
+        'payment_interest': P2PParser.INTEREST_PAYMENT,
+        'payment_interest_early': P2PParser.INTEREST_PAYMENT,
+        'primary_market_auto_invest': P2PParser.INVESTMENT_PAYMENT,
+        'payment_principal_buyback': P2PParser.BUYBACK_PAYMENT,
+        'payment_principal': P2PParser.REDEMPTION_PAYMENT,
+        'payment_principal_early': P2PParser.REDEMPTION_PAYMENT,
+    }
+    ORIG_CF_COLUMN = 'Transaction Type'
+    VALUE_COLUMN = 'Turnover'
+    BALANCE_COLUMN = 'Balance'
+    HEADER = 3
+    SKIP_FOOTER = 3
 
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statements must be generated.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
-            signals: Signals instance for communicating with the calling class.
-
-        """
-        self.name = 'Iuvo'
-        self.date_range = date_range
-        self.statement = statement_without_suffix + '.xlsx'
-        self.signals = signals
-
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(  # pylint: disable=arguments-differ
+            self, headless: bool) -> None:
         """
         Generate and download the Iuvo account statement for given date range.
 
@@ -60,7 +57,7 @@ class Iuvo:
         }
 
         with P2PPlatform(
-                self.name, headless, urls,
+                self.NAME, headless, urls,
                 EC.element_to_be_clickable((By.ID, 'login')),
                 logout_locator=(By.ID, 'p2p_logout'),
                 hover_locator=(By.LINK_TEXT, 'User name'),
@@ -83,7 +80,7 @@ class Iuvo:
             except (KeyError, IndexError):
                 raise RuntimeError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: loading account statement page was not '
+                    f'{self.NAME}: loading account statement page was not '
                     'successful!'))
 
             iuvo.driver.get(
@@ -100,46 +97,4 @@ class Iuvo:
                     self.statement, iuvo.driver.download_directory):
                 raise RuntimeError(_translate(
                     'P2PPlatform',
-                    f'{self.name}: download of account statement failed!'))
-
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
-        """
-        Parser for Iuvo.
-
-        Args:
-            statement: File name including path of the account
-                statement which should be parsed. If None, the file at
-                self.statement will be parsed. Default is None.
-
-        Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
-
-        """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.name, self.date_range, self.statement, header=3, skipfooter=3,
-            signals=self.signals)
-
-        # Define mapping between Iuvo and easyp2p cashflow types and column
-        # names
-        cashflow_types = {
-            'deposit': parser.IN_OUT_PAYMENT,
-            'late_fee': parser.LATE_FEE_PAYMENT,
-            'payment_interest': parser.INTEREST_PAYMENT,
-            'payment_interest_early': parser.INTEREST_PAYMENT,
-            'primary_market_auto_invest': parser.INVESTMENT_PAYMENT,
-            'payment_principal_buyback': parser.BUYBACK_PAYMENT,
-            'payment_principal': parser.REDEMPTION_PAYMENT,
-            'payment_principal_early': parser.REDEMPTION_PAYMENT}
-        rename_columns = {'Date': parser.DATE}
-
-        unknown_cf_types = parser.parse(
-            '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-            'Transaction Type', 'Turnover', 'Balance')
-
-        return parser.df, unknown_cf_types
+                    f'{self.NAME}: download of account statement failed!'))

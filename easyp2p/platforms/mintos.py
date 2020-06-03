@@ -6,7 +6,6 @@ Download and parse Mintos statement.
 
 """
 
-from datetime import date
 from typing import Optional, Tuple
 
 import pandas as pd
@@ -19,38 +18,68 @@ from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals, PlatformFailedError
 from easyp2p.p2p_webdriver import P2PWebDriver
+from easyp2p.platforms.base_platform import BasePlatform
 
 _translate = QCoreApplication.translate
 
 
-class Mintos:
+class Mintos(BasePlatform):
     """
     Contains methods for downloading/parsing Mintos account statements.
     """
 
+    NAME = 'Mintos'
+    SUFFIX = 'xlsx'
+    DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+    RENAME_COLUMNS = {
+        'Currency': P2PParser.CURRENCY,
+        'Date': P2PParser.DATE,
+    }
+    CASH_FLOW_TYPES = {
+        'interest received': P2PParser.INTEREST_PAYMENT,
+        'principal received': P2PParser.REDEMPTION_PAYMENT,
+        'buyback: Principal received': P2PParser.BUYBACK_PAYMENT,
+        'buyback: late payment interest received':
+            P2PParser.BUYBACK_INTEREST_PAYMENT,
+        'buyback: interest received': P2PParser.BUYBACK_INTEREST_PAYMENT,
+        'loan agreement amended: Principal received':
+            P2PParser.REDEMPTION_PAYMENT,
+        'loan agreement amended: interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'loan agreement extended: Principal received':
+            P2PParser.REDEMPTION_PAYMENT,
+        'loan agreement extended: interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'investment in loan': P2PParser.INVESTMENT_PAYMENT,
+        'early repayment of a loan: Principal received':
+            P2PParser.REDEMPTION_PAYMENT,
+        'early repayment of a loan: interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'loan agreement extended: late payment interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'late fees received': P2PParser.LATE_FEE_PAYMENT,
+        'loan agreement amended: late payment interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'early repayment of a loan: late payment interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'other: Principal received': P2PParser.REDEMPTION_PAYMENT,
+        'other: interest received': P2PParser.INTEREST_PAYMENT,
+        'loan agreement terminated: Principal received':
+            P2PParser.REDEMPTION_PAYMENT,
+        'loan agreement terminated: interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'loan agreement terminated: late payment interest received':
+            P2PParser.INTEREST_PAYMENT,
+        'other: late payment interest received': P2PParser.INTEREST_PAYMENT,
+    }
+    ORIG_CF_COLUMN = 'Cash Flow Type'
+    VALUE_COLUMN = 'Turnover'
+    BALANCE_COLUMN = 'Balance'
+
     signals = Signals()
 
-    def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str,
-            signals: Optional[Signals] = None) -> None:
-        """
-        Constructor of Mintos class.
-
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statements must be generated.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
-            signals: Signals instance for communicating with the calling class.
-
-        """
-        self.name = 'Mintos'
-        self.date_range = date_range
-        self.statement = statement_without_suffix + '.xlsx'
-        self.signals = signals
-
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(  # pylint: disable=arguments-differ
+            self, headless: bool) -> None:
         """
         Generate and download the Mintos account statement for given date range.
 
@@ -65,7 +94,7 @@ class Mintos:
             'logout_btn': "//a[contains(@href,'logout')]"}
 
         with P2PPlatform(
-                self.name, headless, urls,
+                self.NAME, headless, urls,
                 EC.element_to_be_clickable((By.ID, 'header-login-button')),
                 logout_locator=(By.XPATH, xpaths['logout_btn']),
                 signals=self.signals) as mintos:
@@ -108,7 +137,7 @@ class Mintos:
         except (NoSuchElementException, ValueError):
             raise RuntimeError(_translate(
                 'P2PPlatform',
-                f'{self.name}: account statement generation failed!'))
+                f'{self.NAME}: account statement generation failed!'))
 
     def _no_cashflows(self, df: pd.DataFrame) -> bool:
         """
@@ -157,60 +186,20 @@ class Mintos:
             self.statement = statement
 
         parser = P2PParser(
-            self.name, self.date_range, self.statement, signals=self.signals)
+            self.NAME, self.date_range, self.statement, signals=self.signals)
 
         detail_col = 'Details'
         if detail_col not in parser.df.columns:
             raise PlatformFailedError(_translate(
                 'P2PParser',
-                f'{self.name}: column {detail_col} is missing in account '
+                f'{self.NAME}: column {detail_col} is missing in account '
                 'statement!'))
         if parser.df.shape[0] > 0:
             parser.df['Loan ID'], parser.df['Cash Flow Type'] = \
                 parser.df[detail_col].str.split(' - ').str
 
-        # Define mapping between Mintos and easyp2p cash flow types and column
-        cashflow_types = {
-            'interest received': parser.INTEREST_PAYMENT,
-            'principal received': parser.REDEMPTION_PAYMENT,
-            'buyback: Principal received': parser.BUYBACK_PAYMENT,
-            'buyback: late payment interest received':
-                parser.BUYBACK_INTEREST_PAYMENT,
-            'buyback: interest received': parser.BUYBACK_INTEREST_PAYMENT,
-            'loan agreement amended: Principal received':
-                parser.REDEMPTION_PAYMENT,
-            'loan agreement amended: interest received':
-                parser.INTEREST_PAYMENT,
-            'loan agreement extended: Principal received':
-                parser.REDEMPTION_PAYMENT,
-            'loan agreement extended: interest received':
-                parser.INTEREST_PAYMENT,
-            'investment in loan': parser.INVESTMENT_PAYMENT,
-            'early repayment of a loan: Principal received':
-                parser.REDEMPTION_PAYMENT,
-            'early repayment of a loan: interest received':
-                parser.INTEREST_PAYMENT,
-            'loan agreement extended: late payment interest received':
-                parser.INTEREST_PAYMENT,
-            'late fees received': parser.LATE_FEE_PAYMENT,
-            'loan agreement amended: late payment interest received':
-                parser.INTEREST_PAYMENT,
-            'early repayment of a loan: late payment interest received':
-                parser.INTEREST_PAYMENT,
-            'other: Principal received': parser.REDEMPTION_PAYMENT,
-            'other: interest received': parser.INTEREST_PAYMENT,
-            'loan agreement terminated: Principal received':
-                parser.REDEMPTION_PAYMENT,
-            'loan agreement terminated: interest received':
-                parser.INTEREST_PAYMENT,
-            'loan agreement terminated: late payment interest received':
-                parser.INTEREST_PAYMENT,
-            'other: late payment interest received': parser.INTEREST_PAYMENT,
-        }
-        rename_columns = {'Currency': parser.CURRENCY, 'Date': parser.DATE}
-
         unknown_cf_types = parser.parse(
-            '%Y-%m-%d %H:%M:%S', rename_columns, cashflow_types,
-            'Cash Flow Type', 'Turnover', 'Balance')
+            self.DATE_FORMAT, self.RENAME_COLUMNS, self.CASH_FLOW_TYPES,
+            self.ORIG_CF_COLUMN, self.VALUE_COLUMN, self.BALANCE_COLUMN)
 
         return parser.df, unknown_cf_types

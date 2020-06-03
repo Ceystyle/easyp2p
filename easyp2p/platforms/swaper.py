@@ -6,45 +6,39 @@ Download and parse Swaper statement.
 
 """
 
-from datetime import date
-from typing import Optional, Tuple
-
-import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
-from easyp2p.p2p_signals import Signals
+from easyp2p.platforms.base_platform import BasePlatform
 
 
-class Swaper:
+class Swaper(BasePlatform):
 
     """
     Contains methods for downloading/parsing Swaper account statements.
     """
 
-    def __init__(
-            self, date_range: Tuple[date, date],
-            statement_without_suffix: str,
-            signals: Optional[Signals] = None) -> None:
-        """
-        Constructor of Swaper class.
+    NAME = 'Swaper'
+    SUFFIX = 'xlsx'
+    DATE_FORMAT = '%d.%m.%Y'
+    RENAME_COLUMNS = {'Booking date': P2PParser.DATE}
+    CASH_FLOW_TYPES = {
+        'BUYBACK_INTEREST': P2PParser.BUYBACK_INTEREST_PAYMENT,
+        'BUYBACK_PRINCIPAL': P2PParser.BUYBACK_PAYMENT,
+        'EXTENSION_INTEREST': P2PParser.INTEREST_PAYMENT,
+        'FUNDING': P2PParser.IN_OUT_PAYMENT,
+        'INVESTMENT': P2PParser.INVESTMENT_PAYMENT,
+        'REPAYMENT_INTEREST': P2PParser.INTEREST_PAYMENT,
+        'REPAYMENT_PRINCIPAL': P2PParser.REDEMPTION_PAYMENT,
+        'WITHDRAWAL': P2PParser.IN_OUT_PAYMENT,
+    }
+    ORIG_CF_COLUMN = 'Transaction type'
+    VALUE_COLUMN = 'Amount'
 
-        Args:
-            date_range: Date range (start_date, end_date) for which the account
-                statements must be generated.
-            statement_without_suffix: File name including path but without
-                suffix where the account statement should be saved.
-            signals: Signals instance for communicating with the calling class.
-
-        """
-        self.name = 'Swaper'
-        self.date_range = date_range
-        self.statement = statement_without_suffix + '.xlsx'
-        self.signals = signals
-
-    def download_statement(self, headless: bool) -> None:
+    def download_statement(  # pylint: disable=arguments-differ
+            self, headless: bool) -> None:
         """
         Generate and download the Swaper account statement for given date range.
 
@@ -64,7 +58,7 @@ class Swaper:
         }
 
         with P2PPlatform(
-                self.name, headless, urls,
+                self.NAME, headless, urls,
                 EC.presence_of_element_located((By.ID, 'about')),
                 logout_locator=(By.ID, 'logout'),
                 signals=self.signals) as swaper:
@@ -88,44 +82,3 @@ class Swaper:
 
             swaper.download_statement(
                 self.statement, (By.CLASS_NAME, 'download-excel'))
-
-    def parse_statement(self, statement: Optional[str] = None) \
-            -> Tuple[pd.DataFrame, Tuple[str, ...]]:
-        """
-        Parser for Swaper.
-
-        Args:
-            statement: File name including path of the account
-                statement which should be parsed. If None, the file at
-                self.statement will be parsed. Default is None.
-
-        Returns:
-            Tuple with two elements. The first element is the data frame
-            containing the parsed results. The second element is a set
-            containing all unknown cash flow types.
-
-        """
-        if statement:
-            self.statement = statement
-
-        parser = P2PParser(
-            self.name, self.date_range, self.statement, signals=self.signals)
-
-        # Define mapping between Swaper and easyp2p cash flow types and column
-        # names
-        cashflow_types = {
-            'BUYBACK_INTEREST': parser.BUYBACK_INTEREST_PAYMENT,
-            'BUYBACK_PRINCIPAL': parser.BUYBACK_PAYMENT,
-            'EXTENSION_INTEREST': parser.INTEREST_PAYMENT,
-            'FUNDING': parser.IN_OUT_PAYMENT,
-            'INVESTMENT': parser.INVESTMENT_PAYMENT,
-            'REPAYMENT_INTEREST': parser.INTEREST_PAYMENT,
-            'REPAYMENT_PRINCIPAL': parser.REDEMPTION_PAYMENT,
-            'WITHDRAWAL': parser.IN_OUT_PAYMENT}
-        rename_columns = {'Booking date': parser.DATE}
-
-        unknown_cf_types = parser.parse(
-            '%d.%m.%Y', rename_columns, cashflow_types,
-            'Transaction type', 'Amount')
-
-        return parser.df, unknown_cf_types
