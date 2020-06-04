@@ -24,6 +24,11 @@ class Iuvo(BasePlatform):
 
     NAME = 'Iuvo'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'webdriver'
+
+    # Parser settings
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     RENAME_COLUMNS = {'Date': P2PParser.DATE}
     CASH_FLOW_TYPES = {
@@ -42,8 +47,7 @@ class Iuvo(BasePlatform):
     HEADER = 3
     SKIP_FOOTER = 3
 
-    def download_statement(  # pylint: disable=arguments-differ
-            self, headless: bool) -> None:
+    def _webdriver_download(self, headless: bool) -> None:
         """
         Generate and download the Iuvo account statement for given date range.
 

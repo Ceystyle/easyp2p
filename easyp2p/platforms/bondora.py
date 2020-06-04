@@ -21,6 +21,11 @@ class Bondora(BasePlatform):
 
     NAME = 'Bondora'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'session'
+
+    # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
     RENAME_COLUMNS = {
         'Closing balance': P2PParser.END_BALANCE_NAME,
@@ -32,7 +37,7 @@ class Bondora(BasePlatform):
         'Opening balance': P2PParser.START_BALANCE_NAME,
     }
 
-    def download_statement(self) -> None:  # pylint: disable=arguments-differ
+    def _session_download(self) -> None:
         """
         Generate and download the Bondora account statement for given date
         range.

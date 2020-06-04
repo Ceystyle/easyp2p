@@ -25,6 +25,11 @@ class Robocash(BasePlatform):
 
     NAME = 'Robocash'
     SUFFIX = 'xls'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'session'
+
+    # Parser settings
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     RENAME_COLUMNS = {'Date and time': P2PParser.DATE}
     CASH_FLOW_TYPES = {
@@ -42,7 +47,7 @@ class Robocash(BasePlatform):
     VALUE_COLUMN = 'Amount'
     BALANCE_COLUMN = "Portfolio's balance"
 
-    def download_statement(self) -> None:  # pylint: disable=arguments-differ
+    def _session_download(self) -> None:
         """
         Generate and download the Robocash account statement for given date
         range.

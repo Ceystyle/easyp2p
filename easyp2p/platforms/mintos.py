@@ -28,6 +28,11 @@ class Mintos(BasePlatform):
 
     NAME = 'Mintos'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'recaptcha'
+
+    # Parser settings
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     RENAME_COLUMNS = {
         'Currency': P2PParser.CURRENCY,
@@ -76,8 +81,7 @@ class Mintos(BasePlatform):
 
     signals = Signals()
 
-    def download_statement(  # pylint: disable=arguments-differ
-            self, headless: bool) -> None:
+    def _webdriver_download(self, headless: bool) -> None:
         """
         Generate and download the Mintos account statement for given date range.
 

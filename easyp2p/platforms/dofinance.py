@@ -23,13 +23,18 @@ class DoFinance(BasePlatform):
 
     NAME = 'DoFinance'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'session'
+
+    # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
     RENAME_COLUMNS = {'Processing Date': P2PParser.DATE}
     ORIG_CF_COLUMN = 'Transaction Type'
     VALUE_COLUMN = 'Amount, €'
     SKIP_FOOTER = 2
 
-    def download_statement(self) -> None:  # pylint: disable=arguments-differ
+    def _session_download(self) -> None:
         """
         Generate and download the DoFinance account statement for given date
         range.

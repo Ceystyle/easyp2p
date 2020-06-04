@@ -22,6 +22,11 @@ class Grupeer(BasePlatform):
 
     NAME = 'Grupeer'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'recaptcha'
+
+    # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
     RENAME_COLUMNS = {
         'Date': P2PParser.DATE,
@@ -40,8 +45,7 @@ class Grupeer(BasePlatform):
     VALUE_COLUMN = 'Amount'
     BALANCE_COLUMN = 'Balance'
 
-    def download_statement(  # pylint: disable=arguments-differ
-            self, headless: bool) -> None:
+    def _webdriver_download(self, headless: bool) -> None:
         """
         Generate and download the Grupeer account statement for given date
         range.

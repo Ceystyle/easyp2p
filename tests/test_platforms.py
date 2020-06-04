@@ -66,11 +66,8 @@ class BasePlatformTests(unittest.TestCase):
             self.skipTest(
                 f'Expected results file {expected_results} not found!')
 
-        if self.platform.NAME in ['Grupeer', 'Iuvo', 'Mintos', 'Swaper']:
-            # For now we just test in non-headless mode
-            platform.download_statement(False)
-        else:
-            platform.download_statement()
+        # For now we just test in non-headless mode
+        platform.download_statement(False)
 
         self.assertTrue(
             are_files_equal(

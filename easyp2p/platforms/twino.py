@@ -25,6 +25,11 @@ class Twino(BasePlatform):
 
     NAME = 'Twino'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'session'
+
+    # Parser settings
     DATE_FORMAT = '%d.%m.%Y %H:%M'
     RENAME_COLUMNS = {'Processing Date': P2PParser.DATE}
     CASH_FLOW_TYPES = {
@@ -44,7 +49,7 @@ class Twino(BasePlatform):
     VALUE_COLUMN = 'Amount, EUR'
     HEADER = 2
 
-    def download_statement(self) -> None:  # pylint: disable=arguments-differ
+    def _session_download(self) -> None:
         """
         Generate and download the Twino account statement for given date range.
 

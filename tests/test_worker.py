@@ -43,7 +43,7 @@ class WorkerTests(unittest.TestCase):
             'TestPlatform')
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')
-    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.download_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora._session_download')
     def test_evaluate_requests_platform(self, mock_download, mock_parse):
         """Test evaluate_platform with a platform based P2PSession."""
         mock_parse.return_value = (pd.DataFrame(), '')
@@ -52,7 +52,7 @@ class WorkerTests(unittest.TestCase):
         mock_parse.assert_called_once()
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.parse_statement')
-    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.download_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo._webdriver_download')
     def test_evaluate_headless_selenium_platform(
             self, mock_download, mock_parse):
         """
@@ -66,7 +66,7 @@ class WorkerTests(unittest.TestCase):
         mock_parse.assert_called_once()
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.parse_statement')
-    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.download_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo._webdriver_download')
     def test_evaluate_non_headless_selenium_platform(
             self, mock_download, mock_parse):
         """
@@ -80,7 +80,7 @@ class WorkerTests(unittest.TestCase):
         mock_parse.assert_called_once()
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Mintos.parse_statement')
-    @patch('easyp2p.p2p_worker.p2p_platforms.Mintos.download_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Mintos._webdriver_download')
     def test_evaluate_captcha_platform(self, mock_download, mock_parse):
         """Test evaluate_platform with a platform which uses captchas."""
         mock_parse.return_value = (pd.DataFrame(), '')
@@ -90,7 +90,7 @@ class WorkerTests(unittest.TestCase):
         mock_parse.assert_called_once()
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')
-    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.download_statement')
+    @patch('easyp2p.p2p_worker.p2p_platforms.Bondora._session_download')
     def test_evaluate_platform_download_fails(self, mock_download, mock_parse):
         """Test evaluate_platform if statement download fails."""
         self.settings.platforms = {'Bondora'}

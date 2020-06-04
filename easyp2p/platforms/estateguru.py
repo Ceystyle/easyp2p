@@ -22,6 +22,11 @@ class Estateguru(BasePlatform):
 
     NAME = 'Estateguru'
     SUFFIX = 'csv'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'session'
+
+    # Parser settings
     DATE_FORMAT = '%d/%m/%Y %H:%M'
     RENAME_COLUMNS = {
         'Cash Flow Type': 'EG Cash Flow Type',
@@ -42,7 +47,7 @@ class Estateguru(BasePlatform):
     BALANCE_COLUMN = 'Available to invest'
     SKIP_FOOTER = 1
 
-    def download_statement(self) -> None:  # pylint: disable=arguments-differ
+    def _session_download(self) -> None:
         """
         Generate and download the Estateguru account statement for given date
         range.

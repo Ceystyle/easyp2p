@@ -27,6 +27,11 @@ class BasePlatform:
 
     NAME = None
     SUFFIX = None
+
+    # Downloader settings
+    DOWNLOAD_METHOD = None  # Possible values are: webdriver, recaptcha, session
+
+    # Parser settings
     DATE_FORMAT = None
     RENAME_COLUMNS = None
     CASH_FLOW_TYPES = None
@@ -56,14 +61,47 @@ class BasePlatform:
         self.statement = '.'.join([statement_without_suffix, self.SUFFIX])
         self.signals = signals
 
-    def download_statement(self, *args) -> None:
+    def download_statement(self, headless: bool = True) -> None:
         """
-        Every child class needs to override download_statement for downloading
-        the account statement.
+        Common download method for all platforms. Depending on the chosen
+        DOWNLOAD_METHOD it calls the correct download method.
+
+        Args:
+            headless: If True use Chromedriver in headless mode. Only relevant
+                for platforms that use P2PWebDriver.
+
+        """
+        if self.DOWNLOAD_METHOD == 'webdriver':
+            self._webdriver_download(headless)
+        elif self.DOWNLOAD_METHOD == 'recaptcha':
+            self._webdriver_download(False)
+        elif self.DOWNLOAD_METHOD == 'session':
+            self._session_download()
+        else:
+            raise PlatformFailedError(
+                f'{self.NAME}: invalid download method provided: '
+                f'{self.DOWNLOAD_METHOD}!')
+
+    def _webdriver_download(self, headless: bool) -> None:
+        """
+        Every child class using P2PWebdriver needs to override this method for
+        downloading the account statement.
+
+        Args:
+            headless: If True use Chromedriver in headless mode.
 
         """
         raise PlatformFailedError(
-            f'{self.NAME}: download_statement needs an override!')
+            f'{self.NAME}: no override of _webdriver_download!')
+
+    def _session_download(self) -> None:
+        """
+        Every child class using P2PSession needs to override this method for
+        downloading the account statement.
+
+        """
+        raise PlatformFailedError(
+            f'{self.NAME}: no override of _session_download!')
 
     def parse_statement(self, statement: Optional[str] = None) \
             -> Tuple[pd.DataFrame, Tuple[str, ...]]:

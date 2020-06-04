@@ -22,6 +22,11 @@ class Swaper(BasePlatform):
 
     NAME = 'Swaper'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'webdriver'
+
+    # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
     RENAME_COLUMNS = {'Booking date': P2PParser.DATE}
     CASH_FLOW_TYPES = {
@@ -37,8 +42,7 @@ class Swaper(BasePlatform):
     ORIG_CF_COLUMN = 'Transaction type'
     VALUE_COLUMN = 'Amount'
 
-    def download_statement(  # pylint: disable=arguments-differ
-            self, headless: bool) -> None:
+    def _webdriver_download(self, headless: bool) -> None:
         """
         Generate and download the Swaper account statement for given date range.
 

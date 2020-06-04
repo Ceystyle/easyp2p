@@ -96,19 +96,12 @@ class WorkerThread(QThread):
         self.signals.add_progress_text.emit(_translate(
             'WorkerThread', f'Starting evaluation of {name}...'), False)
 
-        # Distinguish platforms that use Selenium for evaluation
-        if name in ['Iuvo', 'Swaper']:
-            # Platforms that use Selenium and no recaptchas
-            platform.download_statement(self.settings.headless)
-        elif name in ['Grupeer', 'Mintos']:
-            # Platforms that require solving a recaptcha are not supported in
-            # headless mode
+        if platform.DOWNLOAD_METHOD == 'recaptcha':
             self.signals.add_progress_text.emit(_translate(
                 'WorkerThread',
                 'Please manually solve the captcha on the website!'), True)
-            platform.download_statement(False)
-        else:
-            platform.download_statement()
+
+        platform.download_statement(self.settings.headless)
         (df, unknown_cf_types) = platform.parse_statement()
 
         if unknown_cf_types:

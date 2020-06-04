@@ -20,6 +20,11 @@ class PeerBerry(BasePlatform):
 
     NAME = 'PeerBerry'
     SUFFIX = 'xlsx'
+
+    # Downloader settings
+    DOWNLOAD_METHOD = 'session'
+
+    # Parser settings
     DATE_FORMAT = '%Y-%m-%d'
     RENAME_COLUMNS = {
         'Currency': P2PParser.CURRENCY,
@@ -35,7 +40,7 @@ class PeerBerry(BasePlatform):
     ORIG_CF_COLUMN = 'Type'
     VALUE_COLUMN = 'Amount'
 
-    def download_statement(self) -> None:  # pylint: disable=arguments-differ
+    def _session_download(self) -> None:
         """
         Generate and download the PeerBerry account statement for given date
         range.
