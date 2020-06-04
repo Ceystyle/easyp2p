@@ -30,7 +30,7 @@ from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
+from easyp2p.p2p_chrome import P2PChrome
 
 _translate = QCoreApplication.translate
 logger = logging.getLogger('easyp2p.p2p_platform')
@@ -113,7 +113,7 @@ class P2PPlatform:
 
         """
         self.download_dir = tempfile.TemporaryDirectory()
-        self.driver = P2PWebDriver(
+        self.driver = P2PChrome(
             self.download_dir.name, self.headless, self.signals)
         self.logger.debug('%s: created context manager.', self.name)
         return self

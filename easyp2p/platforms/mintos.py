@@ -15,7 +15,7 @@ from PyQt5.QtCore import QCoreApplication
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_platform import P2PPlatform
 from easyp2p.p2p_signals import Signals
-from easyp2p.p2p_webdriver import P2PWebDriver
+from easyp2p.p2p_chrome import P2PChrome
 from easyp2p.platforms.base_platform import BasePlatform
 
 _translate = QCoreApplication.translate
@@ -122,7 +122,7 @@ class Mintos(BasePlatform):
                     self.statement, (By.ID, 'export-button'))
 
     @signals.update_progress
-    def _create_empty_statement(self, driver: P2PWebDriver):
+    def _create_empty_statement(self, driver: P2PChrome):
         try:
             cashflow_table = driver.find_element(By.ID, 'overview-results')
             df = pd.read_html(cashflow_table.get_attribute("innerHTML"))[0]

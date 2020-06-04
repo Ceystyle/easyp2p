@@ -23,7 +23,7 @@ from easyp2p.p2p_signals import Signals
 _translate = QCoreApplication.translate
 
 
-class P2PWebDriver(Chrome):
+class P2PChrome(Chrome):
 
     """A class for providing webdriver support to easyp2p."""
 
