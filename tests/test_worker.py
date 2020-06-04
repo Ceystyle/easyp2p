@@ -13,7 +13,7 @@ import pandas as pd
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_signals import PlatformFailedError
 from easyp2p.p2p_worker import WorkerThread
-from tests import PLATFORMS
+import easyp2p.platforms
 
 
 class WorkerTests(unittest.TestCase):
@@ -25,13 +25,14 @@ class WorkerTests(unittest.TestCase):
         self.settings = Settings(
             (date(2018, 9, 1), date(2018, 12, 31)),
             os.path.join(os.getcwd(), 'test.xlsx'))
-        self.settings.platforms = PLATFORMS
+        self.settings.platforms = {
+            pl for pl in dir(easyp2p.platforms) if pl[0].isupper()}
         self.worker = WorkerThread(self.settings)
         self.worker.signals.abort = False
 
     def test_get_platform_instance(self):
         """Test get_platform_instance for all supported platforms."""
-        for platform in PLATFORMS:
+        for platform in self.settings.platforms:
             platform_instance = self.worker.get_platform_instance(platform)
             self.assertEqual(type(platform_instance).__name__, platform)
 

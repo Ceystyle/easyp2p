@@ -16,6 +16,7 @@ from easyp2p.excel_writer import (
 from easyp2p.p2p_credentials import get_credentials_from_keyring
 from easyp2p.p2p_parser import get_df_from_file, P2PParser
 import easyp2p.platforms as p2p_platforms
+
 from tests import INPUT_PREFIX, RESULT_PREFIX, TEST_PREFIX
 
 SKIP_DL_TESTS = input('Run download tests (y/n)?: ').lower() != 'y'
@@ -31,8 +32,6 @@ class BasePlatformTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Dummy setUp, needs to be overridden by child classes."""
-        self.name = None
-        self.header = 0
         self.platform = None
         self.unknown_cf_types = ()
         self.date_range = DATE_RANGE
@@ -51,12 +50,13 @@ class BasePlatformTests(unittest.TestCase):
 
         """
         statement_without_suffix = TEST_PREFIX + result_file
-        credentials = get_credentials_from_keyring(self.name)
+        credentials = get_credentials_from_keyring(self.platform.NAME)
         if credentials is None:
             self.skipTest(
-                f'No credentials for {self.name} in the keyring.')
+                f'No credentials for {self.platform.NAME} in the keyring.')
 
-        platform = self.platform(date_range, statement_without_suffix)
+        platform = self.platform(  # pylint: disable=not-callable
+            date_range, statement_without_suffix)
 
         expected_results = (
             RESULT_PREFIX + result_file + '.' +
@@ -66,7 +66,7 @@ class BasePlatformTests(unittest.TestCase):
             self.skipTest(
                 f'Expected results file {expected_results} not found!')
 
-        if self.name in ['Grupeer', 'Iuvo', 'Mintos', 'Swaper']:
+        if self.platform.NAME in ['Grupeer', 'Iuvo', 'Mintos', 'Swaper']:
             # For now we just test in non-headless mode
             platform.download_statement(False)
         else:
@@ -74,7 +74,8 @@ class BasePlatformTests(unittest.TestCase):
 
         self.assertTrue(
             are_files_equal(
-                platform.statement, expected_results, header=self.header))
+                platform.statement, expected_results,
+                header=self.platform.HEADER))
 
     def run_parser_test(
             self, result_file: str, date_range: Tuple[date, date],
@@ -103,7 +104,8 @@ class BasePlatformTests(unittest.TestCase):
         else:
             statement_without_suffix = input_file
 
-        platform = self.platform(date_range, statement_without_suffix)
+        platform = self.platform(  # pylint: disable=not-callable
+            date_range, statement_without_suffix)
         (df, unknown_cf_types) = platform.parse_statement()
         df.to_csv('tests/test_results/test_' + result_file + '.csv')
 
@@ -166,94 +168,94 @@ class BasePlatformTests(unittest.TestCase):
 
     def test_download_statement(self) -> None:
         """Test downloading account statement for default date_range."""
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_download_test(
-            f'download_{self.name.lower()}_statement', self.date_range)
+            f'download_{self.platform.NAME.lower()}_statement', self.date_range)
 
     def test_download_statement_no_cfs(self) -> None:
         """
         Test downloading account statement for date_range without cash flows.
         """
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_download_test(
-            f'download_{self.name.lower()}_statement_no_cfs',
+            f'download_{self.platform.NAME.lower()}_statement_no_cfs',
             self.date_range_no_cfs)
 
     def test_parse_statement(self):
         """Test parsing platform default statement."""
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_parser_test(
-            f'{self.name.lower()}_parser', self.date_range,
-            RESULT_PREFIX+f'download_{self.name.lower()}_statement')
+            f'{self.platform.NAME.lower()}_parser', self.date_range,
+            RESULT_PREFIX+f'download_{self.platform.NAME.lower()}_statement')
 
     def test_parse_statement_no_cfs(self):
         """Test platform parser if there were no cash flows in date_range."""
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         input_file = RESULT_PREFIX + \
-            f'download_{self.name.lower()}_statement_no_cfs'
+            f'download_{self.platform.NAME.lower()}_statement_no_cfs'
         self.run_parser_test(
-            f'{self.name.lower()}_parser_no_cfs',
+            f'{self.platform.NAME.lower()}_parser_no_cfs',
             self.date_range_no_cfs, input_file=input_file)
 
     def test_parse_statement_unknown_cf(self) -> None:
         """Test platform parser when unknown cash flow types are present."""
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         if not self.unknown_cf_types:
             self.skipTest('No unknown cash flow types for this platform!')
         self.run_parser_test(
-            f'{self.name.lower()}_parser_unknown_cf', self.date_range,
+            f'{self.platform.NAME.lower()}_parser_unknown_cf', self.date_range,
             exp_unknown_cf_types=self.unknown_cf_types)
 
     def test_parse_statement_missing_month(self):
         """Test platform parser if a month without cash flows is present."""
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_parser_test(
-            f'{self.name.lower()}_parser_missing_month',
+            f'{self.platform.NAME.lower()}_parser_missing_month',
             self.date_range_missing_month)
 
     def test_write_results(self):
         """Test write_results when cash flows are present for all months."""
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_write_results(
-            RESULT_PREFIX + f'{self.name.lower()}_parser.csv',
-            f'write_results_{self.name.lower()}.xlsx',
+            RESULT_PREFIX + f'{self.platform.NAME.lower()}_parser.csv',
+            f'write_results_{self.platform.NAME.lower()}.xlsx',
             self.date_range)
 
     def test_write_results_no_cfs(self):
         """Test write_results when there were no cash flows in date range."""
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_write_results(
-            RESULT_PREFIX + f'{self.name.lower()}_parser_no_cfs.csv',
-            f'write_results_{self.name.lower()}_no_cfs.xlsx',
+            RESULT_PREFIX + f'{self.platform.NAME.lower()}_parser_no_cfs.csv',
+            f'write_results_{self.platform.NAME.lower()}_no_cfs.xlsx',
             self.date_range_no_cfs)
 
     def test_write_results_missing_month(self):
         """
         Test write_results when there are months without cash flows.
         """
-        if self.name is None:
+        if self.platform is None:
             self.skipTest('Skip tests for BaseplatformTests!')
 
         input_file = RESULT_PREFIX + \
-            f'{self.name.lower()}_parser_missing_month.csv'
+            f'{self.platform.NAME.lower()}_parser_missing_month.csv'
         exp_result_file = \
-            f'write_results_{self.name.lower()}_missing_month.xlsx'
+            f'write_results_{self.platform.NAME.lower()}_missing_month.xlsx'
         self.run_write_results(
             input_file, exp_result_file, self.date_range_missing_month)
 
@@ -264,10 +266,8 @@ class BondoraTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Bondora'
         self.platform = p2p_platforms.Bondora
         self.unknown_cf_types = ()
-        self.header = 0
 
     # Below are some tests for write_results which affect more than just one
     # platform.
@@ -309,10 +309,8 @@ class DoFinanceTests(BasePlatformTests):
     date_range_missing_month = (date(2018, 4, 1), date(2018, 9, 30))
 
     def setUp(self) -> None:
-        self.name = 'DoFinance'
         self.platform = p2p_platforms.DoFinance
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 0
 
 
 class EstateguruTests(BasePlatformTests):
@@ -321,10 +319,8 @@ class EstateguruTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Estateguru'
         self.platform = p2p_platforms.Estateguru
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 0
 
 
 class GrupeerTests(BasePlatformTests):
@@ -333,10 +329,8 @@ class GrupeerTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Grupeer'
         self.platform = p2p_platforms.Grupeer
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 0
 
 
 class IuvoTests(BasePlatformTests):
@@ -345,10 +339,8 @@ class IuvoTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Iuvo'
         self.platform = p2p_platforms.Iuvo
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 3
 
 
 class MintosTests(BasePlatformTests):
@@ -357,10 +349,8 @@ class MintosTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Mintos'
         self.platform = p2p_platforms.Mintos
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 0
 
 
 class PeerBerryTests(BasePlatformTests):
@@ -369,10 +359,8 @@ class PeerBerryTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'PeerBerry'
         self.platform = p2p_platforms.PeerBerry
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 0
 
 
 class RobocashTests(BasePlatformTests):
@@ -381,10 +369,8 @@ class RobocashTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Robocash'
         self.platform = p2p_platforms.Robocash
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 0
 
 
 class SwaperTests(BasePlatformTests):
@@ -393,10 +379,8 @@ class SwaperTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Swaper'
         self.platform = p2p_platforms.Swaper
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
-        self.header = 0
 
 
 class TwinoTests(BasePlatformTests):
@@ -405,10 +389,8 @@ class TwinoTests(BasePlatformTests):
 
     def setUp(self) -> None:
         super().setUp()
-        self.name = 'Twino'
         self.platform = p2p_platforms.Twino
         self.unknown_cf_types = ('TestCF1 PRINCIPAL', 'TestCF2 INTEREST')
-        self.header = 2
 
 
 def are_files_equal(
