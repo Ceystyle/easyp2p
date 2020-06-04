@@ -11,7 +11,7 @@ on functionality provided by the requests Session object.
 
 import logging
 import time
-from typing import Dict, Mapping, Optional, Sequence, Tuple
+from typing import Dict, Mapping, Optional, Sequence, Tuple, Union
 
 from bs4 import BeautifulSoup
 from PyQt5.QtCore import QCoreApplication
@@ -161,7 +161,8 @@ class P2PSession:
     @signals.update_progress
     def generate_account_statement(
             self, url: str, method: str,
-            data: Optional[Mapping[str, str]] = None) -> None:
+            data: Optional[
+                Mapping[str, Union[str, Sequence[int]]]] = None) -> None:
         """
         Generate account statement.
 

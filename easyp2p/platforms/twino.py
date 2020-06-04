@@ -91,35 +91,8 @@ class Twino(BasePlatform):
                 self.date_range[1].year, self.date_range[1].month,
                 self.date_range[1].day]
             data = {
-                'accountTypeList': [],
-                'page': 1,
-                'pageSize': 20,
                 'processingDateFrom': start_date,
                 'processingDateTo': end_date,
-                'sortDirection': 'DESC',
-                'sortField': 'created',
-                'totalItems': 0,
-                'transactionTypeList': [
-                    {'transactionType': 'REPAYMENT'},
-                    {'transactionType': 'EARLY_FULL_REPAYMENT'},
-                    {'transactionType': 'EARLY_PARTIAL_REPAYMENT'},
-                    {'positive': False, 'transactionType': 'BUY_SHARES'},
-                    {'positive': True, 'transactionType': 'BUY_SHARES'},
-                    {'positive': True, 'transactionType': 'FUNDING'},
-                    {'positive': False, 'transactionType': 'FUNDING'},
-                    {'transactionType': 'EXTENSION'},
-                    {'transactionType': 'ACCRUED_INTEREST'},
-                    {'transactionType': 'BUYBACK'},
-                    {'transactionType': 'SCHEDULE'},
-                    {'transactionType': 'RECOVERY'},
-                    {'transactionType': 'REPURCHASE'},
-                    {'transactionType': 'LOSS_ON_WRITEOFF'},
-                    {'transactionType': 'WRITEOFF'},
-                    {'transactionType': 'CURRENCY_FLUCTUATION'},
-                    {'transactionType': 'CASHBACK'},
-                    {'transactionType': 'REFERRAL'},
-                    {'transactionType': 'CORRECTION'},
-                    {'transactionType': 'BUY_OUT'}]
             }
             sess.generate_account_statement(gen_statement_url, 'post', data)
 
