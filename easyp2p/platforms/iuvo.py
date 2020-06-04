@@ -11,7 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform, download_finished
+from easyp2p.p2p_webdriver import P2PWebDriver, download_finished
 from easyp2p.platforms.base_platform import BasePlatform
 
 _translate = QCoreApplication.translate
@@ -56,7 +56,7 @@ class Iuvo(BasePlatform):
             'statement': 'https://www.iuvo-group.com/en/account-statement/',
         }
 
-        with P2PPlatform(
+        with P2PWebDriver(
                 self.NAME, headless, urls,
                 EC.element_to_be_clickable((By.ID, 'login')),
                 logout_locator=(By.ID, 'p2p_logout'),

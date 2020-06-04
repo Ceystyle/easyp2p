@@ -2,9 +2,9 @@
 #  Copyright (c) 2018-2020 Niko Sandschneider
 
 """
-Module containing tests for P2PPlatform class.
+Module containing tests for P2PWebDriver class.
 
-Most methods of the P2PPlatform class rely on Selenium functionality and are
+Most methods of the P2PWebDriver class rely on Selenium functionality and are
 difficult to test individually. They are tested in test_download instead.
 
 """
@@ -13,7 +13,7 @@ import os
 import shutil
 import unittest
 
-import easyp2p.p2p_platform as p2p_platform
+import easyp2p.p2p_webdriver as p2p_webdriver
 
 
 class DownloadFinishedTests(unittest.TestCase):
@@ -45,7 +45,7 @@ class DownloadFinishedTests(unittest.TestCase):
 
     def test_no_crdownload_file(self):
         """Test return value if download does not start."""
-        self.assertFalse(p2p_platform.download_finished(
+        self.assertFalse(p2p_webdriver.download_finished(
             self.statement, self.download_directory))
         self.assertFalse(os.path.isfile(self.statement))
 
@@ -54,7 +54,7 @@ class DownloadFinishedTests(unittest.TestCase):
         # Create a file in the download directory
         file = open(os.path.join(self.download_directory, 'test.xlsx'), 'w+')
         file.close()
-        self.assertTrue(p2p_platform.download_finished(
+        self.assertTrue(p2p_webdriver.download_finished(
             self.statement, self.download_directory))
         self.assertTrue(os.path.isfile(self.statement))
 
@@ -64,7 +64,7 @@ class DownloadFinishedTests(unittest.TestCase):
         file = open(
             os.path.join(self.download_directory, 'test.crdownload'), 'w+')
         file.close()
-        self.assertFalse(p2p_platform.download_finished(
+        self.assertFalse(p2p_webdriver.download_finished(
             self.statement, self.download_directory))
         self.assertFalse(os.path.isfile(self.statement))
 
@@ -78,7 +78,7 @@ class DownloadFinishedTests(unittest.TestCase):
             os.path.join(self.download_directory, 'test2.xlsx'), 'w+')
         file.close()
         self.assertRaises(
-            RuntimeError, p2p_platform.download_finished, self.statement,
+            RuntimeError, p2p_webdriver.download_finished, self.statement,
             self.download_directory)
         self.assertFalse(os.path.isfile(self.statement))
 

@@ -56,7 +56,7 @@ class WorkerTests(unittest.TestCase):
     def test_evaluate_headless_selenium_platform(
             self, mock_download, mock_parse):
         """
-        Test evaluate_platform with a platform based on P2PPlatform in
+        Test evaluate_platform with a platform based on P2PWebDriver in
         headless mode.
         """
         mock_parse.return_value = (pd.DataFrame(), '')
@@ -70,7 +70,7 @@ class WorkerTests(unittest.TestCase):
     def test_evaluate_non_headless_selenium_platform(
             self, mock_download, mock_parse):
         """
-        Test evaluate_platform with a platform based on P2PPlatform in
+        Test evaluate_platform with a platform based on P2PWebDriver in
         non-headless mode.
         """
         mock_parse.return_value = (pd.DataFrame(), '')

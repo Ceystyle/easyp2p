@@ -107,7 +107,7 @@ def get_credentials(platform: str, signals: Signals) -> Tuple[str, str]:
 
     if credentials[0] == '' or credentials[1] == '':
         raise RuntimeError(_translate(
-            'P2PPlatform',
+            'p2p_credentials',
             f'No credentials for {platform} provided! Aborting!'))
 
     return credentials

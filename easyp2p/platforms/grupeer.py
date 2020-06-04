@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 from easyp2p.platforms.base_platform import BasePlatform
 
 
@@ -56,7 +56,7 @@ class Grupeer(BasePlatform):
                           '?currency_code=eur'),
         }
 
-        with P2PPlatform(
+        with P2PWebDriver(
                 self.NAME, headless, urls,
                 EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In')),
                 logout_locator=(By.LINK_TEXT, 'Logout'),

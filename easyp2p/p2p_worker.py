@@ -21,10 +21,10 @@ _translate = QCoreApplication.translate
 
 class WorkerThread(QThread):
     """
-    Worker thread to offload calls to p2p_platform and p2p_parser.
+    Worker thread to offload calls to p2p_webdriver and p2p_parser.
 
     This class is responsible for accessing the P2P platform methods in
-    p2p_platform and to prepare the results. The main reason for separating
+    p2p_webdriver and to prepare the results. The main reason for separating
     the calls from the main thread is to keep the GUI responsive while the
     platform is being evaluated.
 

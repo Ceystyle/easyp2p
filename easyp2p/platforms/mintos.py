@@ -13,7 +13,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_platform import P2PPlatform
+from easyp2p.p2p_webdriver import P2PWebDriver
 from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_chrome import P2PChrome
 from easyp2p.platforms.base_platform import BasePlatform
@@ -91,7 +91,7 @@ class Mintos(BasePlatform):
         xpaths = {
             'logout_btn': "//a[contains(@href,'logout')]"}
 
-        with P2PPlatform(
+        with P2PWebDriver(
                 self.NAME, headless, urls,
                 EC.element_to_be_clickable((By.ID, 'header-login-button')),
                 logout_locator=(By.XPATH, xpaths['logout_btn']),

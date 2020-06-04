@@ -2,9 +2,9 @@
 #  Copyright (c) 2018-2020 Niko Sandschneider
 
 """
-Module implementing P2PPlatform, a class representing a P2P platform.
+Module implementing P2PWebDriver, a class representing a P2P platform.
 
-This module defines the P2PPlatform class. It contains code for performing log
+This module defines the P2PWebDriver class. It contains code for performing log
 in, log out, opening the account statement page and generating and downloading
 the account statement. It relies mainly on functionality provided by the
 Selenium webdriver. easyp2p uses Chromedriver as webdriver.
@@ -33,10 +33,10 @@ from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_chrome import P2PChrome
 
 _translate = QCoreApplication.translate
-logger = logging.getLogger('easyp2p.p2p_platform')
+logger = logging.getLogger('easyp2p.p2p_webdriver')
 
 
-class P2PPlatform:
+class P2PWebDriver:
 
     """
     Representation of P2P platform including required methods for interaction.
@@ -87,8 +87,8 @@ class P2PPlatform:
             self.signals.connect_signals(signals)
         self.download_dir = None
         self.logged_in = False
-        self.logger = logging.getLogger('easyp2p.p2p_platform.P2PPlatform')
-        self.logger.debug('%s: created P2PPlatform instance.', self.name)
+        self.logger = logging.getLogger('easyp2p.p2p_webdriver.P2PWebDriver')
+        self.logger.debug('%s: created P2PWebDriver instance.', self.name)
 
         # Make sure URLs for login and statement page are provided
         if 'login' not in urls:
@@ -104,12 +104,12 @@ class P2PPlatform:
                 'P2PPlatform', f'{self.name}: no method for logout provided!'))
 
     @signals.watch_errors
-    def __enter__(self) -> 'P2PPlatform':
+    def __enter__(self) -> 'P2PWebDriver':
         """
         Start of context management protocol.
 
         Returns:
-            Instance of P2PPlatform class
+            Instance of P2PWebDriver class
 
         """
         self.download_dir = tempfile.TemporaryDirectory()
