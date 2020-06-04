@@ -26,6 +26,9 @@ class DoFinance(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'session'
+    LOGIN_URL = 'https://www.dofinance.eu/en/users/login'
+    LOGOUT_URL = 'https://www.dofinance.eu/en/users/logout'
+    STATEMENT_URL = 'https://www.dofinance.eu/en/users/statement'
 
     # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
@@ -34,36 +37,35 @@ class DoFinance(BasePlatform):
     VALUE_COLUMN = 'Amount, €'
     SKIP_FOOTER = 2
 
-    def _session_download(self) -> None:
+    def _session_download(self, sess: P2PSession) -> None:
         """
         Generate and download the DoFinance account statement for given date
         range.
 
+        Args:
+            sess: P2PSession instance.
+
         """
-        login_url = 'https://www.dofinance.eu/en/users/login'
-        statement_url = 'https://www.dofinance.eu/en/users/statement'
-        logout_url = 'https://www.dofinance.eu/en/users/logout'
         token_names = ['_Token[fields]', '_Token[unlocked]']
+        data = sess.get_values_from_tag_by_name(
+            self.LOGIN_URL, 'input', token_names, _translate(
+                'P2PPlatform',
+                f'{self.NAME}: loading login page was not successful!'))
+        data['_method'] = 'POST'
+        sess.log_into_page(self.LOGIN_URL, 'email', 'password', data)
 
-        with P2PSession(self.NAME, logout_url, self.signals) as sess:
-            data = sess.get_values_from_tag_by_name(
-                login_url, 'input', token_names, _translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: loading login page was not successful!'))
-            data['_method'] = 'POST'
-            sess.log_into_page(login_url, 'email', 'password', data)
-
-            data = sess.get_values_from_tag_by_name(
-                statement_url, 'input', token_names, _translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: loading account statement page was not '
-                    f'successful!'))
-            data['_method'] = 'PUT'
-            data['date_from'] = self.date_range[0].strftime('%d.%m.%Y')
-            data['date_to'] = self.date_range[1].strftime('%d.%m.%Y')
-            data['trans_type'] = ''
-            data['xls'] = 'Download+XLS'
-            sess.download_statement(statement_url, self.statement, 'post', data)
+        data = sess.get_values_from_tag_by_name(
+            self.STATEMENT_URL, 'input', token_names, _translate(
+                'P2PPlatform',
+                f'{self.NAME}: loading account statement page was not '
+                f'successful!'))
+        data['_method'] = 'PUT'
+        data['date_from'] = self.date_range[0].strftime('%d.%m.%Y')
+        data['date_to'] = self.date_range[1].strftime('%d.%m.%Y')
+        data['trans_type'] = ''
+        data['xls'] = 'Download+XLS'
+        sess.download_statement(
+            self.STATEMENT_URL, self.statement, 'post', data)
 
     def _transform_df(self, parser: P2PParser) -> None:
         """

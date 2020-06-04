@@ -28,6 +28,10 @@ class Robocash(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'session'
+    LOGIN_URL = 'https://robo.cash/login'
+    LOGOUT_URL = 'https://robo.cash/logout'
+    GEN_STATEMENT_URL = 'https://robo.cash/cabinet/statement/generate'
+    STATEMENT_URL = 'https://robo.cash/cabinet/statement'
 
     # Parser settings
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -47,49 +51,47 @@ class Robocash(BasePlatform):
     VALUE_COLUMN = 'Amount'
     BALANCE_COLUMN = "Portfolio's balance"
 
-    def _session_download(self) -> None:
+    def _session_download(self, sess: P2PSession) -> None:
         """
         Generate and download the Robocash account statement for given date
         range.
 
+        Args:
+            sess: P2PSession instance.
+
         """
-        login_url = 'https://robo.cash/login'
-        logout_url = 'https://robo.cash/logout'
-        gen_statement_url = 'https://robo.cash/cabinet/statement/generate'
-        statement_url = 'https://robo.cash/cabinet/statement'
-
-        with P2PSession(self.NAME, logout_url, self.signals) as sess:
-            data = sess.get_values_from_tag_by_name(
-                login_url, 'input', ['_token'], _translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: loading website was not successful!'))
-            sess.log_into_page(login_url, 'email', 'password', data=data)
-
-            statement_err_msg = _translate(
+        data = sess.get_values_from_tag_by_name(
+            self.LOGIN_URL, 'input', ['_token'], _translate(
                 'P2PPlatform',
-                f'{self.NAME}: loading the account statement page failed!')
-            token = sess.get_value_from_script(
-                statement_url, {'id': 'report-template'}, 'input', '_token',
-                statement_err_msg)
+                f'{self.NAME}: loading website was not successful!'))
+        sess.log_into_page(self.LOGIN_URL, 'email', 'password', data=data)
 
-            data = {
-                '_token': token,
-                'currency_id': '1',
-                'start_date': self.date_range[0].strftime("%Y-%m-%d"),
-                'end_date': self.date_range[1].strftime("%Y-%m-%d"),
-                'statement_type': '1'
-            }
-            sess.generate_account_statement(gen_statement_url, 'post', data)
+        statement_err_msg = _translate(
+            'P2PPlatform',
+            f'{self.NAME}: loading the account statement page failed!')
+        token = sess.get_value_from_script(
+            self.STATEMENT_URL, {'id': 'report-template'}, 'input',
+            '_token', statement_err_msg)
 
-            def download_ready():
-                report = json.loads(sess.get_value_from_tag(
-                    statement_url, 'report-component', ':initial_report',
-                    statement_err_msg))
-                if report['filename'] is not None:
-                    sess.download_statement(
-                        f'https://robo.cash/cabinet/statement/{report["id"]}'
-                        f'/download', self.statement, 'get')
-                    return True
-                return False
+        data = {
+            '_token': token,
+            'currency_id': '1',
+            'start_date': self.date_range[0].strftime("%Y-%m-%d"),
+            'end_date': self.date_range[1].strftime("%Y-%m-%d"),
+            'statement_type': '1'
+        }
+        sess.generate_account_statement(
+            self.GEN_STATEMENT_URL, 'post', data)
 
-            sess.wait(download_ready)
+        def download_ready():
+            report = json.loads(sess.get_value_from_tag(
+                self.STATEMENT_URL, 'report-component', ':initial_report',
+                statement_err_msg))
+            if report['filename'] is not None:
+                sess.download_statement(
+                    f'https://robo.cash/cabinet/statement/{report["id"]}'
+                    f'/download', self.statement, 'get')
+                return True
+            return False
+
+        sess.wait(download_ready)

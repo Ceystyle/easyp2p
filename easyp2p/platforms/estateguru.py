@@ -25,6 +25,11 @@ class Estateguru(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'session'
+    LOGIN_URL = 'https://estateguru.co/portal/login/authenticate'
+    LOGOUT_URL = 'https://estateguru.co/portal/logoff'
+    STATEMENT_URL = 'https://estateguru.co/portal/portfolio/account'
+    GEN_STATEMENT_URL = \
+        'https://estateguru.co/portal/portfolio/ajaxFilterTransactions'
 
     # Parser settings
     DATE_FORMAT = '%d/%m/%Y %H:%M'
@@ -47,51 +52,40 @@ class Estateguru(BasePlatform):
     BALANCE_COLUMN = 'Available to invest'
     SKIP_FOOTER = 1
 
-    def _session_download(self) -> None:
+    def _session_download(self, sess: P2PSession) -> None:
         """
         Generate and download the Estateguru account statement for given date
         range.
 
+        Args:
+            sess: P2PSession instance.
+
         """
-        login_url = 'https://estateguru.co/portal/login/authenticate'
-        logout_url = 'https://estateguru.co/portal/logoff'
-        statement_url = 'https://estateguru.co/portal/portfolio/account'
-        gen_statement_url = (
-            'https://estateguru.co/portal/portfolio/ajaxFilterTransactions')
+        sess.log_into_page(self.LOGIN_URL, 'username', 'password')
 
-        with P2PSession(self.NAME, logout_url, self.signals) as sess:
-            sess.log_into_page(login_url, 'username', 'password')
+        download_url = sess.get_url_from_partial_link(
+            self.STATEMENT_URL, 'downloadOrderReport.csv', _translate(
+                'P2PPlatform',
+                f'{self.NAME}: loading account statement page failed!'))
+        user_id = download_url.split('&')[1].split('=')[1]
 
-            download_url = sess.get_url_from_partial_link(
-                statement_url, 'downloadOrderReport.csv', _translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: loading account statement page failed!'))
-            user_id = download_url.split('&')[1].split('=')[1]
+        data = {
+            'currentUserId': user_id,
+            'currentCurrency': "EUR",
+            'filter_isFilter': "[true]",
+            'filterTableId': "dataTableTransaction",
+            'filter_dateApproveFilterFrom':
+                f"[{self.date_range[0].strftime('%d.%m.%Y')}]",
+            'filter_dateApproveFilterTo':
+                f"[{self.date_range[1].strftime('%d.%m.%Y')}]",
+            'controller': "portfolio",
+            'action': "ajaxFilterTransactions",
+        }
+        sess.generate_account_statement(
+            self.GEN_STATEMENT_URL, 'post', data)
 
-            data = {
-                'currentUserId': user_id,
-                'currentCurrency': "EUR",
-                'userDetails': "",
-                'showFutureTransactions': "false",
-                'order': "",
-                'sort': "",
-                'filter_isFilter': "[true]",
-                'filterTableId': "dataTableTransaction",
-                'filter_dateApproveFilterFrom':
-                    f"[{self.date_range[0].strftime('%d.%m.%Y')}]",
-                'filter_dateApproveFilterTo':
-                    f"[{self.date_range[1].strftime('%d.%m.%Y')}]",
-                'filter_loanName': "",
-                'controller': "portfolio",
-                'format': "null",
-                'action': "ajaxFilterTransactions",
-                'max': "20",
-                'offset': "40"
-            }
-            sess.generate_account_statement(gen_statement_url, 'post', data)
-
-            sess.download_statement(
-                f'https://estateguru.co{download_url}', self.statement, 'get')
+        sess.download_statement(
+            f'https://estateguru.co{download_url}', self.statement, 'get')
 
     def _transform_df(self, parser: P2PParser) -> None:
         """

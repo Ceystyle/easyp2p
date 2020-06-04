@@ -23,6 +23,8 @@ class PeerBerry(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'session'
+    LOGIN_URL = 'https://api.peerberry.com/v1/investor/login'
+    LOGOUT_URL = 'https://api.peerberry.com/v1/investor/logout'
 
     # Parser settings
     DATE_FORMAT = '%Y-%m-%d'
@@ -40,23 +42,22 @@ class PeerBerry(BasePlatform):
     ORIG_CF_COLUMN = 'Type'
     VALUE_COLUMN = 'Amount'
 
-    def _session_download(self) -> None:
+    def _session_download(self, sess: P2PSession) -> None:
         """
         Generate and download the PeerBerry account statement for given date
         range.
 
+        Args:
+            sess: P2PSession instance.
+
         """
-        login_url = 'https://api.peerberry.com/v1/investor/login'
-        logout_url = 'https://api.peerberry.com/v1/investor/logout'
+        resp = sess.log_into_page(self.LOGIN_URL, 'email', 'password')
+        access_token = json.loads(resp.text)['access_token']
+        sess.sess.headers.update(
+            {'Authorization': f'Bearer {access_token}'})
         statement_url = (
             f'https://api.peerberry.com/v1/investor/transactions/import?'
             f'startDate={self.date_range[0].strftime("%Y-%m-%d")}&'
             f'endDate={self.date_range[1].strftime("%Y-%m-%d")}&'
             f'transactionType=0&lang=en')
-
-        with P2PSession(self.NAME, logout_url, self.signals) as sess:
-            resp = sess.log_into_page(login_url, 'email', 'password')
-            access_token = json.loads(resp.text)['access_token']
-            sess.sess.headers.update(
-                {'Authorization': f'Bearer {access_token}'})
-            sess.download_statement(statement_url, self.statement, 'get')
+        sess.download_statement(statement_url, self.statement, 'get')

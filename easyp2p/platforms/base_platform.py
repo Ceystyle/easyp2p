@@ -18,6 +18,7 @@ from typing import Optional, Tuple
 import pandas as pd
 
 from easyp2p.p2p_parser import P2PParser
+from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import Signals, PlatformFailedError
 
 
@@ -30,6 +31,11 @@ class BasePlatform:
 
     # Downloader settings
     DOWNLOAD_METHOD = None  # Possible values are: webdriver, recaptcha, session
+    JSON = False
+    LOGIN_URL = None
+    LOGOUT_URL = None
+    GEN_STATEMENT_URL = None
+    STATEMENT_URL = None
 
     # Parser settings
     DATE_FORMAT = None
@@ -76,7 +82,10 @@ class BasePlatform:
         elif self.DOWNLOAD_METHOD == 'recaptcha':
             self._webdriver_download(False)
         elif self.DOWNLOAD_METHOD == 'session':
-            self._session_download()
+            with P2PSession(
+                    self.NAME, self.LOGOUT_URL, self.signals,
+                    json=self.JSON) as sess:
+                self._session_download(sess)
         else:
             raise PlatformFailedError(
                 f'{self.NAME}: invalid download method provided: '
@@ -94,10 +103,13 @@ class BasePlatform:
         raise PlatformFailedError(
             f'{self.NAME}: no override of _webdriver_download!')
 
-    def _session_download(self) -> None:
+    def _session_download(self, sess: P2PSession) -> None:
         """
         Every child class using P2PSession needs to override this method for
         downloading the account statement.
+
+        Args:
+            sess: P2PSession instance.
 
         """
         raise PlatformFailedError(

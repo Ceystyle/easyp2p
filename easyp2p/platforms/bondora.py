@@ -24,6 +24,8 @@ class Bondora(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'session'
+    LOGIN_URL = 'https://www.bondora.com/en/login/'
+    LOGOUT_URL = 'https://www.bondora.com/en/authorize/logout/'
 
     # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
@@ -37,35 +39,34 @@ class Bondora(BasePlatform):
         'Opening balance': P2PParser.START_BALANCE_NAME,
     }
 
-    def _session_download(self) -> None:
+    def _session_download(self, sess: P2PSession) -> None:
         """
         Generate and download the Bondora account statement for given date
         range.
 
+        Args:
+            sess: P2PSession instance.
+
         """
-        login_url = 'https://www.bondora.com/en/login/'
-        logout_url = 'https://www.bondora.com/en/authorize/logout/'
+        token_field = '__RequestVerificationToken'
+        data = sess.get_values_from_tag_by_name(
+            self.LOGIN_URL, 'input', [token_field], _translate(
+                'P2PPlatform',
+                f'{self.NAME}: loading login page was not successful!'))
 
-        with P2PSession(self.NAME, logout_url, self.signals) as sess:
-            token_field = '__RequestVerificationToken'
-            data = sess.get_values_from_tag_by_name(
-                login_url, 'input', [token_field], _translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: loading login page was not successful!'))
+        sess.log_into_page(self.LOGIN_URL, 'Email', 'Password', data)
 
-            sess.log_into_page(login_url, 'Email', 'Password', data)
-
-            dates = {
-                'StartYear': self.date_range[0].strftime('%Y'),
-                'StartMonth': self.date_range[0].strftime('%-m'),
-                'EndYear': self.date_range[1].strftime('%Y'),
-                'EndMonth': self.date_range[1].strftime('%-m'),
-            }
-            url = 'https://www.bondora.com/en/cashflow/searchcashflow?'
-            for key, value in dates.items():
-                url += str(key) + '=' + str(value) + '&'
-            url += 'downloadExcel=true'
-            sess.download_statement(url, self.statement, 'get')
+        dates = {
+            'StartYear': self.date_range[0].strftime('%Y'),
+            'StartMonth': self.date_range[0].strftime('%-m'),
+            'EndYear': self.date_range[1].strftime('%Y'),
+            'EndMonth': self.date_range[1].strftime('%-m'),
+        }
+        url = 'https://www.bondora.com/en/cashflow/searchcashflow?'
+        for key, value in dates.items():
+            url += str(key) + '=' + str(value) + '&'
+        url += 'downloadExcel=true'
+        sess.download_statement(url, self.statement, 'get')
 
     def _transform_df(self, parser: P2PParser) -> None:
         """
