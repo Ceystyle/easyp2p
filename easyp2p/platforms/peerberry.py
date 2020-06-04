@@ -57,13 +57,6 @@ class PeerBerry(BasePlatform):
         with P2PSession(self.NAME, logout_url, self.signals) as sess:
             resp = sess.log_into_page(login_url, 'email', 'password')
             access_token = json.loads(resp.text)['access_token']
-            sess.sess.headers = {
-                'Accept': '*/*',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Accept-Encoding': 'gzip,deflate,br',
-                'Referer': 'https://peerberry.com/en/client/statement',
-                'Authorization': f'Bearer {access_token}',
-                'Origin': 'https://peerberry.com',
-                'Connection': 'keep-alive'
-            }
+            sess.sess.headers.update(
+                {'Authorization': f'Bearer {access_token}'})
             sess.download_statement(statement_url, self.statement, 'get')
