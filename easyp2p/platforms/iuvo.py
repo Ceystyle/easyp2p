@@ -27,6 +27,11 @@ class Iuvo(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'webdriver'
+    LOGIN_URL = 'https://www.iuvo-group.com/en/login/'
+    STATEMENT_URL = 'https://www.iuvo-group.com/en/account-statement/'
+    LOGOUT_WAIT_UNTIL = EC.element_to_be_clickable((By.ID, 'login'))
+    LOGOUT_LOCATOR = (By.ID, 'p2p_logout')
+    HOVER_LOCATOR = (By.LINK_TEXT, 'User name')
 
     # Parser settings
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -47,58 +52,47 @@ class Iuvo(BasePlatform):
     HEADER = 3
     SKIP_FOOTER = 3
 
-    def _webdriver_download(self, headless: bool) -> None:
+    def _webdriver_download(self, webdriver: P2PWebDriver) -> None:
         """
         Generate and download the Iuvo account statement for given date range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            webdriver: P2PWebDriver instance.
 
         """
-        urls = {
-            'login': 'https://www.iuvo-group.com/en/login/',
-            'statement': 'https://www.iuvo-group.com/en/account-statement/',
-        }
+        webdriver.log_into_page(
+            self.LOGIN_URL, 'login', 'password',
+            EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
 
-        with P2PWebDriver(
-                self.NAME, headless, urls,
-                EC.element_to_be_clickable((By.ID, 'login')),
-                logout_locator=(By.ID, 'p2p_logout'),
-                hover_locator=(By.LINK_TEXT, 'User name'),
-                signals=self.signals) as iuvo:
+        # Click away cookie policy, if present
+        webdriver.driver.click_button(
+            (By.ID, 'CybotCookiebotDialogBodyButtonAccept'), 'Ignored',
+            raise_error=False)
 
-            iuvo.log_into_page(
-                'login', 'password',
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
+        webdriver.open_account_statement_page(
+            self.STATEMENT_URL, (By.ID, 'date_from'))
+        soup = BeautifulSoup(webdriver.driver.page_source, 'html.parser')
+        try:
+            account_id = soup.input["value"]
+            p2_var = webdriver.driver.current_url.split(';')[1]
+        except (KeyError, IndexError):
+            raise RuntimeError(_translate(
+                'P2PPlatform',
+                f'{self.NAME}: loading account statement page was not '
+                'successful!'))
 
-            # Click away cookie policy, if present
-            iuvo.driver.click_button(
-                (By.ID, 'CybotCookiebotDialogBodyButtonAccept'), 'Ignored',
-                raise_error=False)
+        webdriver.driver.get(
+            f'https://tbp2p.iuvo-group.com/p2p-ui/app?p0=export_file;'
+            f'{p2_var};;display_as=export;'
+            f'export_as=xlsx;sid=rep_account_statement_full_list;sr=1;'
+            f'rep_name=AccountStatement;'
+            f'investor_account_id={account_id}&'
+            f'date_from={self.date_range[0].strftime("%Y-%m-%d")}&'
+            f'date_to={self.date_range[1].strftime("%Y-%m-%d")};'
+            f'lang=en_US&screen_width=1920&screen_height=780')
 
-            iuvo.open_account_statement_page((By.ID, 'date_from'))
-            soup = BeautifulSoup(iuvo.driver.page_source, 'html.parser')
-            try:
-                account_id = soup.input["value"]
-                p2_var = iuvo.driver.current_url.split(';')[1]
-            except (KeyError, IndexError):
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: loading account statement page was not '
-                    'successful!'))
-
-            iuvo.driver.get(
-                f'https://tbp2p.iuvo-group.com/p2p-ui/app?p0=export_file;'
-                f'{p2_var};;display_as=export;'
-                f'export_as=xlsx;sid=rep_account_statement_full_list;sr=1;'
-                f'rep_name=AccountStatement;'
-                f'investor_account_id={account_id}&'
-                f'date_from={self.date_range[0].strftime("%Y-%m-%d")}&'
-                f'date_to={self.date_range[1].strftime("%Y-%m-%d")};'
-                f'lang=en_US&screen_width=1920&screen_height=780')
-
-            if not download_finished(
-                    self.statement, iuvo.driver.download_directory):
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: download of account statement failed!'))
+        if not download_finished(
+                self.statement, webdriver.driver.download_directory):
+            raise RuntimeError(_translate(
+                'P2PPlatform',
+                f'{self.NAME}: download of account statement failed!'))

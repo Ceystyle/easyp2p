@@ -25,6 +25,12 @@ class Grupeer(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'recaptcha'
+    LOGIN_URL = 'https://www.grupeer.com/login'
+    STATEMENT_URL = \
+        'https://www.grupeer.com/account-statement?currency_code=eur'
+    LOGOUT_WAIT_UNTIL = EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In'))
+    LOGOUT_LOCATOR = (By.LINK_TEXT, 'Logout')
+    HOVER_LOCATOR = (By.CLASS_NAME, 'header-auth-menu-name')
 
     # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
@@ -45,44 +51,32 @@ class Grupeer(BasePlatform):
     VALUE_COLUMN = 'Amount'
     BALANCE_COLUMN = 'Balance'
 
-    def _webdriver_download(self, headless: bool) -> None:
+    def _webdriver_download(self, webdriver: P2PWebDriver) -> None:
         """
         Generate and download the Grupeer account statement for given date
         range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            webdriver: P2PWebDriver instance.
 
         """
-        urls = {
-            'login': 'https://www.grupeer.com/login',
-            'statement': ('https://www.grupeer.com/account-statement'
-                          '?currency_code=eur'),
-        }
+        webdriver.log_into_page(self.LOGIN_URL, 'email', 'password', None)
+        webdriver.wait_for_captcha(
+            self.LOGIN_URL, (By.CLASS_NAME, 'text-danger'),
+            'These credentials do not match our records.')
 
-        with P2PWebDriver(
-                self.NAME, headless, urls,
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In')),
-                logout_locator=(By.LINK_TEXT, 'Logout'),
-                hover_locator=(By.CLASS_NAME, 'header-auth-menu-name'),
-                signals=self.signals) as grupeer:
+        webdriver.open_account_statement_page(
+            self.STATEMENT_URL, (By.ID, 'from'))
 
-            grupeer.log_into_page('email', 'password', None)
-            grupeer.wait_for_captcha(
-                (By.CLASS_NAME, 'text-danger'),
-                'These credentials do not match our records.')
+        webdriver.generate_statement_direct(
+            self.date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
+            wait_until=EC.text_to_be_present_in_element(
+                (By.CLASS_NAME, 'balance-block'),
+                'Starting balance on '
+                + str(self.date_range[0].strftime('%d.%m.%Y'))),
+            submit_btn_locator=(By.NAME, 'submit'))
 
-            grupeer.open_account_statement_page((By.ID, 'from'))
-
-            grupeer.generate_statement_direct(
-                self.date_range, (By.ID, 'from'), (By.ID, 'to'), '%d.%m.%Y',
-                wait_until=EC.text_to_be_present_in_element(
-                    (By.CLASS_NAME, 'balance-block'),
-                    'Starting balance on '
-                    + str(self.date_range[0].strftime('%d.%m.%Y'))),
-                submit_btn_locator=(By.NAME, 'submit'))
-
-            grupeer.download_statement(self.statement, (By.NAME, 'excel'))
+        webdriver.download_statement(self.statement, (By.NAME, 'excel'))
 
     def _transform_df(self, parser: P2PParser) -> None:
         """

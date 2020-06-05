@@ -31,6 +31,11 @@ class Mintos(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'recaptcha'
+    LOGIN_URL = 'https://www.mintos.com/en/login'
+    STATEMENT_URL = 'https://www.mintos.com/en/account-statement/'
+    LOGOUT_WAIT_UNTIL = EC.element_to_be_clickable(
+        (By.ID, 'header-login-button'))
+    LOGOUT_LOCATOR = (By.XPATH, "//a[contains(@href,'logout')]")
 
     # Parser settings
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -81,49 +86,38 @@ class Mintos(BasePlatform):
 
     signals = Signals()
 
-    def _webdriver_download(self, headless: bool) -> None:
+    def _webdriver_download(self, webdriver: P2PWebDriver) -> None:
         """
         Generate and download the Mintos account statement for given date range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            webdriver: P2PWebDriver instance.
 
         """
-        urls = {
-            'login': 'https://www.mintos.com/en/login',
-            'statement': 'https://www.mintos.com/en/account-statement/'}
-        xpaths = {
-            'logout_btn': "//a[contains(@href,'logout')]"}
+        webdriver.log_into_page(self.LOGIN_URL, '_username', '_password', None)
+        webdriver.wait_for_captcha(
+            self.LOGIN_URL, (By.CLASS_NAME, 'account-login-error'),
+            'Invalid username or password')
 
-        with P2PWebDriver(
-                self.NAME, headless, urls,
-                EC.element_to_be_clickable((By.ID, 'header-login-button')),
-                logout_locator=(By.XPATH, xpaths['logout_btn']),
-                signals=self.signals) as mintos:
+        webdriver.open_account_statement_page(
+            self.STATEMENT_URL, (By.ID, 'period-from'))
 
-            mintos.log_into_page('_username', '_password', None)
-            mintos.wait_for_captcha(
-                (By.CLASS_NAME, 'account-login-error'),
-                'Invalid username or password')
+        webdriver.generate_statement_direct(
+            self.date_range, (By.ID, 'period-from'),
+            (By.ID, 'period-to'), '%d.%m.%Y',
+            submit_btn_locator=(By.ID, 'filter-button'))
 
-            mintos.open_account_statement_page((By.ID, 'period-from'))
-
-            mintos.generate_statement_direct(
-                self.date_range, (By.ID, 'period-from'),
-                (By.ID, 'period-to'), '%d.%m.%Y',
-                submit_btn_locator=(By.ID, 'filter-button'))
-
-            # If there were no cash flows in date_range, the download button
-            # will not appear. In that case test if there really were no cash
-            # flows. If true write an empty DataFrame to the file.
-            try:
-                mintos.driver.wait(
-                    EC.presence_of_element_located((By.ID, 'export-button')))
-            except TimeoutException:
-                self._create_empty_statement(mintos.driver)
-            else:
-                mintos.download_statement(
-                    self.statement, (By.ID, 'export-button'))
+        # If there were no cash flows in date_range, the download button
+        # will not appear. In that case test if there really were no cash
+        # flows. If true write an empty DataFrame to the file.
+        try:
+            webdriver.driver.wait(
+                EC.presence_of_element_located((By.ID, 'export-button')))
+        except TimeoutException:
+            self._create_empty_statement(webdriver.driver)
+        else:
+            webdriver.download_statement(
+                self.statement, (By.ID, 'export-button'))
 
     @signals.update_progress
     def _create_empty_statement(self, driver: P2PChrome):

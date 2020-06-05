@@ -25,6 +25,10 @@ class Swaper(BasePlatform):
 
     # Downloader settings
     DOWNLOAD_METHOD = 'webdriver'
+    LOGIN_URL = 'https://www.swaper.com/#/dashboard'
+    STATEMENT_URL = 'https://www.swaper.com/#/overview/account-statement'
+    LOGOUT_WAIT_UNTIL = EC.presence_of_element_located((By.ID, 'about'))
+    LOGOUT_LOCATOR = (By.ID, 'logout')
 
     # Parser settings
     DATE_FORMAT = '%d.%m.%Y'
@@ -42,18 +46,14 @@ class Swaper(BasePlatform):
     ORIG_CF_COLUMN = 'Transaction type'
     VALUE_COLUMN = 'Amount'
 
-    def _webdriver_download(self, headless: bool) -> None:
+    def _webdriver_download(self, webdriver: P2PWebDriver) -> None:
         """
         Generate and download the Swaper account statement for given date range.
 
         Args:
-            headless: If True use ChromeDriver in headless mode, if False not.
+            webdriver: P2PWebDriver instance.
 
         """
-        urls = {
-            'login': 'https://www.swaper.com/#/dashboard',
-            'statement': 'https://www.swaper.com/#/overview/account-statement',
-        }
         xpaths = {
             'day_table': (
                 "//*[@class='datepicker opened']//*[@class='dates']//table"
@@ -61,28 +61,23 @@ class Swaper(BasePlatform):
             'month': "//*[@class='datepicker opened']//*[@class='month']",
         }
 
-        with P2PWebDriver(
-                self.NAME, headless, urls,
-                EC.presence_of_element_located((By.ID, 'about')),
-                logout_locator=(By.ID, 'logout'),
-                signals=self.signals) as swaper:
+        webdriver.log_into_page(
+            self.LOGIN_URL, 'email', 'password',
+            EC.presence_of_element_located((By.ID, 'open-investments')))
 
-            swaper.log_into_page(
-                'email', 'password',
-                EC.presence_of_element_located((By.ID, 'open-investments')))
+        webdriver.open_account_statement_page(
+            self.STATEMENT_URL, (By.ID, 'account-statement'))
 
-            swaper.open_account_statement_page((By.ID, 'account-statement'))
+        start_calendar = ((By.CLASS_NAME, 'datepicker-container'), 0)
+        end_calendar = ((By.CLASS_NAME, 'datepicker-container'), 1)
+        month_locator = (By.XPATH, xpaths['month'])
+        prev_month_locator = (By.CSS_SELECTOR, '.opened .icon-left')
 
-            start_calendar = ((By.CLASS_NAME, 'datepicker-container'), 0)
-            end_calendar = ((By.CLASS_NAME, 'datepicker-container'), 1)
-            month_locator = (By.XPATH, xpaths['month'])
-            prev_month_locator = (By.CSS_SELECTOR, '.opened .icon-left')
+        webdriver.generate_statement_calendar(
+            self.date_range, month_locator, prev_month_locator,
+            (By.XPATH, xpaths['day_table']),
+            start_calendar, end_calendar,
+            day_class_check=(' ', ' selected'))
 
-            swaper.generate_statement_calendar(
-                self.date_range, month_locator, prev_month_locator,
-                (By.XPATH, xpaths['day_table']),
-                start_calendar, end_calendar,
-                day_class_check=(' ', ' selected'))
-
-            swaper.download_statement(
-                self.statement, (By.CLASS_NAME, 'download-excel'))
+        webdriver.download_statement(
+            self.statement, (By.CLASS_NAME, 'download-excel'))

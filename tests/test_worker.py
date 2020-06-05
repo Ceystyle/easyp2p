@@ -62,7 +62,8 @@ class WorkerTests(unittest.TestCase):
         mock_parse.return_value = (pd.DataFrame(), '')
         self.worker.evaluate_platform('Iuvo')
         self.settings.headless = True
-        mock_download.assert_called_once_with(True)
+        mock_download.assert_called_once()
+        self.assertTrue(mock_download.call_args[0][0].headless)
         mock_parse.assert_called_once()
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Iuvo.parse_statement')
@@ -76,7 +77,8 @@ class WorkerTests(unittest.TestCase):
         mock_parse.return_value = (pd.DataFrame(), '')
         self.worker.settings.headless = False
         self.worker.evaluate_platform('Iuvo')
-        mock_download.assert_called_once_with(False)
+        mock_download.assert_called_once()
+        self.assertFalse(mock_download.call_args[0][0].headless)
         mock_parse.assert_called_once()
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Mintos.parse_statement')
@@ -86,7 +88,8 @@ class WorkerTests(unittest.TestCase):
         mock_parse.return_value = (pd.DataFrame(), '')
         self.worker.evaluate_platform('Mintos')
         self.settings.headless = True
-        mock_download.assert_called_once_with(False)
+        mock_download.assert_called_once()
+        self.assertFalse(mock_download.call_args[0][0].headless)
         mock_parse.assert_called_once()
 
     @patch('easyp2p.p2p_worker.p2p_platforms.Bondora.parse_statement')

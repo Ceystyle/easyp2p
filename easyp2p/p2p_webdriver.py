@@ -50,8 +50,9 @@ class P2PWebDriver:
     signals = Signals()
 
     def __init__(
-            self, name: str, headless: bool, urls: Mapping[str, str],
+            self, name: str, headless: bool,
             logout_wait_until: EC.element_to_be_clickable,
+            logout_url: Optional[str] = None,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None,
             signals: Optional[Signals] = None) -> None:
@@ -59,16 +60,15 @@ class P2PWebDriver:
         Constructor of P2P class.
 
         Args:
-            name: Name of the P2P platform
+            name: Name of the P2P platform.
             headless: If True use ChromeDriver in headless mode, if False not.
-            urls: Dictionary with URLs for login page
-                (key: 'login'), account statement page (key: 'statement')
-                and optionally logout page (key: 'logout')
             logout_wait_until: Expected condition in case
-                of successful logout
-            logout_locator: Locator of logout web element
+                of successful logout.
+            logout_url: URL of the logout page. Default is None.
+            logout_locator: Locator of logout web element. Default is None.
             hover_locator: Locator of web element where the
-                mouse needs to hover in order to make logout button visible
+                mouse needs to hover in order to make logout button visible.
+                Default is None.
             signals: Signals instance for communicating with the calling class.
 
        Raises:
@@ -76,32 +76,26 @@ class P2PWebDriver:
                 method is provided
 
         """
+        self.logger = logging.getLogger('easyp2p.p2p_webdriver.P2PWebDriver')
+
+        if signals:
+            self.signals.connect_signals(signals)
+
+        if logout_url is None and logout_locator is None:
+            raise RuntimeError(_translate(
+                'P2PPlatform', f'{name}: no method for logout provided!'))
+
         self.name = name
         self.driver = None
         self.headless = headless
-        self.urls = urls
         self.logout_wait_until = logout_wait_until
+        self.logout_url = None
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
-        if signals:
-            self.signals.connect_signals(signals)
         self.download_dir = None
         self.logged_in = False
-        self.logger = logging.getLogger('easyp2p.p2p_webdriver.P2PWebDriver')
+
         self.logger.debug('%s: created P2PWebDriver instance.', self.name)
-
-        # Make sure URLs for login and statement page are provided
-        if 'login' not in urls:
-            raise RuntimeError(_translate(
-                'P2PPlatform', f'{self.name}: no login URL found!'))
-        if 'statement' not in urls:
-            raise RuntimeError(_translate(
-                'P2PPlatform', f'{self.name}: no account statement URL found!'))
-
-        # Make sure a logout method was provided
-        if 'logout' not in self.urls and self.logout_locator is None:
-            raise RuntimeError(_translate(
-                'P2PPlatform', f'{self.name}: no method for logout provided!'))
 
     @signals.watch_errors
     def __enter__(self) -> 'P2PWebDriver':
@@ -133,7 +127,7 @@ class P2PWebDriver:
         """
         try:
             if self.logged_in:
-                if 'logout' in self.urls:
+                if self.logout_url is not None:
                     self.logout_by_url(self.logout_wait_until)
                 elif self.logout_locator is not None:
                     self.logout_by_button(
@@ -142,9 +136,9 @@ class P2PWebDriver:
                         hover_locator=self.hover_locator)
                 else:
                     # Should never happen since we already check it in __init__
-                    msg = f'{self.name}: no method for logout provided!'
-                    self.logger.warning(msg)
-                    raise RuntimeWarning(_translate('P2PPlatform', msg))
+                    raise RuntimeWarning(_translate(
+                        'P2PPlatform',
+                        f'{self.name}: no method for logout provided!'))
 
                 self.logged_in = False
         finally:
@@ -159,7 +153,7 @@ class P2PWebDriver:
 
     @signals.update_progress
     def log_into_page(
-            self, name_field: str, password_field: str,
+            self, login_url: str, name_field: str, password_field: str,
             wait_until: Optional[EC.element_to_be_clickable],
             login_locator: Tuple[str, str] = None,
             fill_delay: float = 0.2) -> None:
@@ -176,6 +170,7 @@ class P2PWebDriver:
         to the name field, too.
 
         Args:
+            login_url: URL of login page.
             name_field: Name of web element where the user name has to be
                 entered
             password_field: Name of web element where the password has to be
@@ -196,14 +191,14 @@ class P2PWebDriver:
         # Open the login page
         if login_locator is None:
             self.driver.load_url(
-                self.urls['login'],
+                login_url,
                 EC.element_to_be_clickable((By.NAME, name_field)),
                 _translate(
                     'P2PPlatform',
                     f'{self.name}: loading the website took too long!'))
         else:
             self.driver.load_url(
-                self.urls['login'],
+                login_url,
                 EC.element_to_be_clickable(login_locator),
                 _translate(
                     'P2PPlatform',
@@ -230,11 +225,13 @@ class P2PWebDriver:
         self.logger.debug('%s: successfully logged in.', self.name)
 
     @signals.watch_errors
-    def wait_for_captcha(self, locator: Tuple[str, str], text: str) -> None:
+    def wait_for_captcha(
+            self, login_url: str, locator: Tuple[str, str], text: str) -> None:
         """
         Wait for user to manually fill in recaptcha on login page.
 
         Args:
+            login_url: URL of login page.
             locator: Locator of web element indicating invalid credentials.
             text: Text in web element indicating invalid credentials.
 
@@ -244,7 +241,7 @@ class P2PWebDriver:
         """
         self.logged_in = False
 
-        while EC.url_to_be(self.urls['login'])(self.driver):
+        while EC.url_to_be(login_url)(self.driver):
             try:
                 self.driver.wait(EC.text_to_be_present_in_element(
                     locator, text), delay=1)
@@ -257,7 +254,7 @@ class P2PWebDriver:
 
     @signals.update_progress
     def open_account_statement_page(
-            self, check_locator: Tuple[str, str]) -> None:
+            self, statement_url: str, check_locator: Tuple[str, str]) -> None:
         """
         Open account statement page of the P2P platform.
 
@@ -266,6 +263,7 @@ class P2PWebDriver:
         attribute of the P2P class.
 
         Args:
+            statement_url: URL of the account statement page.
             check_locator: Locator of a web element which must be present if
                 the account statement page loaded successfully
 
@@ -276,7 +274,7 @@ class P2PWebDriver:
         """
         self.logger.debug('%s: opening account statement page.', self.name)
         self.driver.load_url(
-            self.urls['statement'],
+            statement_url,
             EC.presence_of_element_located(check_locator),
             _translate(
                 'P2PPlatform',
@@ -336,7 +334,7 @@ class P2PWebDriver:
         """
         self.logger.debug('%s: starting log out by URL.', self.name)
         self.driver.load_url(
-            self.urls['logout'], wait_until,
+            self.logout_url, wait_until,
             _translate(
                 'P2PPlatform', f'{self.name}: logout was not successful!'))
         self.logger.debug('%s: log out by URL successful.', self.name)

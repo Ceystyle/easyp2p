@@ -20,6 +20,7 @@ import pandas as pd
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import Signals, PlatformFailedError
+from easyp2p.p2p_webdriver import P2PWebDriver
 
 
 class BasePlatform:
@@ -36,6 +37,9 @@ class BasePlatform:
     LOGOUT_URL = None
     GEN_STATEMENT_URL = None
     STATEMENT_URL = None
+    LOGOUT_WAIT_UNTIL = None
+    LOGOUT_LOCATOR = None
+    HOVER_LOCATOR = None
 
     # Parser settings
     DATE_FORMAT = None
@@ -77,10 +81,17 @@ class BasePlatform:
                 for platforms that use P2PWebDriver.
 
         """
-        if self.DOWNLOAD_METHOD == 'webdriver':
-            self._webdriver_download(headless)
-        elif self.DOWNLOAD_METHOD == 'recaptcha':
-            self._webdriver_download(False)
+        if self.DOWNLOAD_METHOD in ('webdriver', 'recaptcha'):
+            if self.DOWNLOAD_METHOD == 'recaptcha':
+                headless = False
+
+            with P2PWebDriver(
+                    self.NAME, headless, self.LOGOUT_WAIT_UNTIL,
+                    logout_url=self.LOGOUT_URL,
+                    logout_locator=self.LOGOUT_LOCATOR,
+                    hover_locator=self.HOVER_LOCATOR,
+                    signals=self.signals) as webdriver:
+                self._webdriver_download(webdriver)
         elif self.DOWNLOAD_METHOD == 'session':
             with P2PSession(
                     self.NAME, self.LOGOUT_URL, self.signals,
@@ -91,13 +102,13 @@ class BasePlatform:
                 f'{self.NAME}: invalid download method provided: '
                 f'{self.DOWNLOAD_METHOD}!')
 
-    def _webdriver_download(self, headless: bool) -> None:
+    def _webdriver_download(self, webdriver: P2PWebDriver) -> None:
         """
         Every child class using P2PWebdriver needs to override this method for
         downloading the account statement.
 
         Args:
-            headless: If True use Chromedriver in headless mode.
+            webdriver: P2PWebDriver instance.
 
         """
         raise PlatformFailedError(
