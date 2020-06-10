@@ -3,11 +3,9 @@
 
 """Module implementing ProgressWindow."""
 
-import sys
-
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 
 from easyp2p.p2p_settings import Settings
 from easyp2p.p2p_worker import WorkerThread
@@ -43,7 +41,6 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
 
         # Initialize and start worker thread
         self.worker = WorkerThread(settings)
-        self.worker.signals.end_easyp2p.connect(self.end_easyp2p)
         self.worker.signals.update_progress_bar.connect(
             self.update_progress_bar)
         self.worker.signals.add_progress_text.connect(
@@ -91,18 +88,3 @@ class ProgressWindow(QDialog, Ui_ProgressWindow):
             color = QColor(0, 0, 0)  # black
         self.progress_text.setTextColor(color)
         self.progress_text.append(txt)
-
-    @pyqtSlot(str, str)
-    def end_easyp2p(self, error_msg: str, header: str) -> None:
-        """
-        Abort the program in case of critical errors.
-
-        Args:
-            error_msg: Message to display to the user before aborting.
-            header: Header text of the error message window.
-
-        """
-        QMessageBox.critical(self, header, error_msg, QMessageBox.Close)
-        self.abort.emit()
-        self.reject()
-        sys.exit()

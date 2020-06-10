@@ -16,11 +16,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from PyQt5.QtCore import QCoreApplication
 
+from easyp2p.errors import CHROME_DRIVER_NOT_FOUND
 from easyp2p.p2p_signals import Signals
-
-_translate = QCoreApplication.translate
 
 
 class P2PChrome(Chrome):
@@ -69,13 +67,7 @@ class P2PChrome(Chrome):
                 super().__init__(options=options)
         except WebDriverException:
             self.logger.exception('Error opening ChromeDriver.')
-            self.signals.end_easyp2p.emit(
-                _translate(
-                    'P2PWebDriver',
-                    'ChromeDriver could not be found!\n'
-                    'easyp2p will be aborted now!'),
-                _translate('WorkerThread', 'ChromeDriver not found!'))
-            raise RuntimeError('ChromeDriver not found!')
+            raise RuntimeError(CHROME_DRIVER_NOT_FOUND)
 
         if headless:
             # This is needed to allow downloads in headless mode

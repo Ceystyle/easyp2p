@@ -8,7 +8,7 @@ import sys
 import unittest.mock
 from datetime import date
 
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QMessageBox
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox
 
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
@@ -60,16 +60,6 @@ class ProgressWindowTests(unittest.TestCase):
         # Further increasing the progress_bar should not work
         self.form.worker.signals.update_progress_bar.emit()
         self.assertEqual(self.form.progress_bar.value(), 15)
-
-    @unittest.mock.patch('easyp2p.ui.progress_window.sys')
-    @unittest.mock.patch('easyp2p.ui.progress_window.QMessageBox.critical')
-    def test_end_easyp2p(self, mock_msg_box, mock_sys):
-        """Test emitting the end_easyp2p signal."""
-        self.form.worker.signals.end_easyp2p.emit(
-            'Test end_easyp2p!', 'Test header')
-        mock_msg_box.assert_called_once_with(
-            self.form, 'Test header', 'Test end_easyp2p!', QMessageBox.Close)
-        mock_sys.exit.assert_called_once_with()
 
     def test_push_button_abort(self):
         """Test that the worker thread is aborted if user clicks cancel."""

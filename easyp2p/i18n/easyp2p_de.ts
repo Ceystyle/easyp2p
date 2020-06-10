@@ -128,6 +128,14 @@
     </message>
 </context>
 <context>
+    <name>P2PChrome</name>
+    <message>
+        <location filename="../errors.py" line="11"/>
+        <source>ChromeDriver was not found!</source>
+        <translation>ChromeDriver konnte nicht gefunden werden!</translation>
+    </message>
+</context>
+<context>
     <name>P2PParser</name>
     <message>
         <location filename="../p2p_parser.py" line="41"/>
@@ -228,72 +236,72 @@
 <context>
     <name>P2PPlatform</name>
     <message>
-        <location filename="../platforms/errors.py" line="41"/>
+        <location filename="../errors.py" line="29"/>
         <source>{name}: no method for logout provided!</source>
         <translation>{name}: keine Logout-Methode angegeben!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="12"/>
+        <location filename="../errors.py" line="31"/>
         <source>{name}: loading login page failed!</source>
         <translation>{name}: Laden der Login-Seite fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="14"/>
+        <location filename="../errors.py" line="35"/>
         <source>{name}: loading account statement page failed!</source>
         <translation>{name}: Laden der Kontoauszugsseite fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="17"/>
+        <location filename="../errors.py" line="43"/>
         <source>{name}: downloading account statement failed!</source>
         <translation>{name}: Download des Kontoauszugs fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="20"/>
+        <location filename="../errors.py" line="46"/>
         <source>{name}: generating account statement failed!</source>
         <translation>{name}: Generierung des Kontoauszugs fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="23"/>
+        <location filename="../errors.py" line="52"/>
         <source>{name}: two factor authorization is not yet supported in easyp2p!</source>
         <translation>{name}: Zwei-Faktor-Authentifizierung wird noch nicht von easyp2p unterstützt!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="27"/>
+        <location filename="../errors.py" line="41"/>
         <source>{name}: logout failed!</source>
         <translation>{name}: Logout fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="29"/>
+        <location filename="../errors.py" line="38"/>
         <source>{name}: login was not successful. Are the credentials correct?</source>
         <translation>{name}: Login war nicht erfolgreich. Sind die Zugangsdaten korrekt?</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="32"/>
+        <location filename="../errors.py" line="49"/>
         <source>{name}: generating account statement took too long!</source>
         <translation>{name}: Generierung des Kontoauszugs hat zu lange gedauert!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="35"/>
+        <location filename="../errors.py" line="33"/>
         <source>{name}: loading login page took too long!</source>
         <translation>{name}: Laden der Login-Seite hat zu lange gedauert!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="37"/>
+        <location filename="../errors.py" line="27"/>
         <source>{name}: invalid username or password!</source>
         <translation>{name}: ungültiger Benutzername oder Passwort!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="39"/>
+        <location filename="../errors.py" line="25"/>
         <source>{name}: could not locate date in calendar!</source>
         <translation>{name}: konnte Datum nicht in Kalender finden!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="46"/>
+        <location filename="../errors.py" line="70"/>
         <source>Download directory {directory} is not empty!</source>
         <translation>Download-Verzeichnis {directory} ist nicht leer!</translation>
     </message>
     <message>
-        <location filename="../platforms/errors.py" line="50"/>
+        <location filename="../errors.py" line="85"/>
         <source>{self.name}: unknown request method {method}!</source>
         <translation>{self.name}: unbekannte request-Methode {method}!</translation>
     </message>
@@ -304,7 +312,7 @@
         <location filename="../p2p_chrome.py" line="76"/>
         <source>ChromeDriver could not be found!
 easyp2p will be aborted now!</source>
-        <translation>ChromeDriver konnte nicht gefunden werden!
+        <translation type="obsolete">ChromeDriver konnte nicht gefunden werden!
 easyp2p wird jetzt abgebrochen!</translation>
     </message>
 </context>
@@ -404,7 +412,7 @@ easyp2p wird jetzt abgebrochen!</translation>
     <message>
         <location filename="../p2p_chrome.py" line="76"/>
         <source>ChromeDriver not found!</source>
-        <translation>ChromeDriver nicht gefunden!</translation>
+        <translation type="obsolete">ChromeDriver nicht gefunden!</translation>
     </message>
     <message>
         <location filename="../p2p_worker.py" line="74"/>

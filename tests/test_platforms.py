@@ -7,15 +7,17 @@ from datetime import date
 import os
 import tempfile
 from typing import Optional, Tuple
-import unittest
+import unittest.mock
 
 import pandas as pd
+from selenium.common.exceptions import WebDriverException
 
 from easyp2p.excel_writer import (
     write_results, DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS)
 from easyp2p.p2p_credentials import get_credentials_from_keyring
 from easyp2p.p2p_parser import get_df_from_file, P2PParser
 import easyp2p.platforms as p2p_platforms
+from easyp2p.p2p_signals import PlatformFailedError
 
 from tests import INPUT_PREFIX, RESULT_PREFIX, TEST_PREFIX
 
@@ -338,6 +340,18 @@ class IuvoTests(BasePlatformTests):
         super().setUp()
         self.platform = p2p_platforms.Iuvo
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
+
+    @unittest.mock.patch('easyp2p.p2p_chrome.Chrome.__init__')
+    def test_no_chrome_driver(self, mock_chrome) -> None:
+        """
+        Test that a PlatformFailedError is raised if ChromeDriver cannot be
+        found.
+        """
+        platform = self.platform(  # pylint: disable=not-callable
+            DATE_RANGE, 'dummy_statement')
+        mock_chrome.side_effect = WebDriverException()
+        self.assertRaises(
+            PlatformFailedError, platform.download_statement, False)
 
 
 class MintosTests(BasePlatformTests):

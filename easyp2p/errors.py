@@ -8,6 +8,8 @@ from PyQt5.QtCore import QCoreApplication
 
 _translate = QCoreApplication.translate
 
+CHROME_DRIVER_NOT_FOUND = _translate('P2PChrome', 'ChromeDriver was not found!')
+
 
 class PlatformErrors:  # pylint: disable=too-many-instance-attributes
 

@@ -16,7 +16,6 @@ class Signals(QObject):
     update_progress_bar = pyqtSignal()
     add_progress_text = pyqtSignal(str, bool)
     abort_signal = pyqtSignal()
-    end_easyp2p = pyqtSignal(str, str)
     get_credentials = pyqtSignal(str)
     send_credentials = pyqtSignal(str, str)
 

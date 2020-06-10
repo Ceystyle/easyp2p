@@ -22,10 +22,10 @@ from easyp2p.p2p_webdriver import P2PWebDriver
 
 class DownloadFinishedTests(unittest.TestCase):
 
-    """Test the _download_finished method."""
+    """Test the download_finished method of P2PWebDriver."""
 
     @unittest.mock.patch('easyp2p.p2p_chrome.Chrome.__init__')
-    def setUp(self, _) -> None:
+    def setUp(self, _) -> None:  # pylint: disable=arguments-differ
         """Create download directory."""
         self.platform = P2PWebDriver(
             'Test', False, EC.element_to_be_clickable((By.XPATH, 'xxx')),
