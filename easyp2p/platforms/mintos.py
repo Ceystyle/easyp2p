@@ -10,15 +10,12 @@ import pandas as pd
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_webdriver import P2PWebDriver
 from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_chrome import P2PChrome
 from easyp2p.platforms.base_platform import BasePlatform
-
-_translate = QCoreApplication.translate
 
 
 class Mintos(BasePlatform):
@@ -131,9 +128,7 @@ class Mintos(BasePlatform):
             else:
                 raise ValueError
         except (NoSuchElementException, ValueError):
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.NAME}: account statement generation failed!'))
+            raise RuntimeError(self.errors.statement_generation_failed)
 
     def _no_cashflows(self, df: pd.DataFrame) -> bool:
         """

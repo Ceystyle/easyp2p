@@ -14,13 +14,11 @@ import time
 from typing import Dict, Mapping, Optional, Sequence, Tuple, Union
 
 from bs4 import BeautifulSoup
-from PyQt5.QtCore import QCoreApplication
 import requests
 
 from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_signals import Signals
-
-_translate = QCoreApplication.translate
+from easyp2p.errors import PlatformErrors
 
 
 class P2PSession:
@@ -53,6 +51,7 @@ class P2PSession:
         self.json = json
         self.sess = None
         self.logged_in = False
+        self.errors = PlatformErrors(name)
         if signals:
             self.signals.connect_signals(signals)
         self.logger = logging.getLogger('easyp2p.p2p_session.P2PSession')
@@ -87,8 +86,7 @@ class P2PSession:
         if self.logged_in:
             resp = self.sess.get(self.logout_url)
             if resp.status_code != 200:
-                raise RuntimeWarning(_translate(
-                    'P2PPlatform', f'{self.name}: logout was not successful!'))
+                raise RuntimeWarning(self.errors.logout_failed)
 
     @signals.update_progress
     def log_into_page(
@@ -120,10 +118,7 @@ class P2PSession:
         data[name_field] = credentials[0]
         data[password_field] = credentials[1]
 
-        resp = self.request(url, 'post', _translate(
-            'P2PPlatform',
-            f'{self.name}: login was not successful. Are the credentials '
-            f'correct?'), data)
+        resp = self.request(url, 'post', self.errors.login_failed, data)
 
         self.logged_in = True
         self.logger.debug('%s: successfully logged in.', self.name)
@@ -151,36 +146,17 @@ class P2PSession:
             RuntimeError: If the download page returns an error status code.
 
         """
-        resp = self.request(url, method, _translate(
-            'P2PPlatform',
-            f'{self.name}: download of account statement failed!'), data)
+        resp = self.request(
+            url, method, self.errors.statement_download_failed, data)
 
         with open(location, 'bw') as file:
             file.write(resp.content)
 
-    @signals.update_progress
-    def generate_account_statement(
-            self, url: str, method: str,
-            data: Optional[
-                Mapping[str, Union[str, Sequence[int]]]] = None) -> None:
-        """
-        Generate account statement.
-
-        Args:
-            url: URL for generating the statement.
-            method: HTTP method to be used to send the request; must be either
-                'get' or 'post'.
-            data: Dictionary with data for posting request to the URL.
-
-        """
-        self.request(url, method, _translate(
-            'P2PPlatform',
-            f'{self.name}: account statement generation failed!'), data)
-
     @signals.watch_errors
     def request(
             self, url: str, method: str, error_msg: str,
-            data: Optional[Mapping[str, str]] = None,
+            data: Optional[
+                Mapping[str, Union[str, Sequence[int]]]] = None,
             success_codes: Optional[Tuple[int, ...]] = None) \
             -> requests.Response:
         """
@@ -212,9 +188,8 @@ class P2PSession:
             else:
                 resp = self.sess.post(url, data=data)
         else:
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: unknown method {method} in download_statement!'))
+            # This should never happen
+            raise RuntimeError(self.errors.unknown_request_method(method))
 
         if resp.status_code in success_codes:
             return resp
@@ -248,10 +223,7 @@ class P2PSession:
             time.sleep(time_delta)
             wait_time += time_delta
 
-        raise RuntimeError(_translate(
-            'P2PPlatform',
-            f'{self.name}: generating the account statement page took too '
-            f'long!'))
+        raise RuntimeError(self.errors.statement_generation_timeout)
 
     @signals.watch_errors
     def get_values_from_tag_by_name(

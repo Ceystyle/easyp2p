@@ -6,15 +6,12 @@ Download and parse Iuvo statement.
 """
 
 from bs4 import BeautifulSoup
-from PyQt5.QtCore import QCoreApplication
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
-from easyp2p.p2p_webdriver import P2PWebDriver, download_finished
+from easyp2p.p2p_webdriver import P2PWebDriver
 from easyp2p.platforms.base_platform import BasePlatform
-
-_translate = QCoreApplication.translate
 
 
 class Iuvo(BasePlatform):
@@ -76,10 +73,7 @@ class Iuvo(BasePlatform):
             account_id = soup.input["value"]
             p2_var = webdriver.driver.current_url.split(';')[1]
         except (KeyError, IndexError):
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.NAME}: loading account statement page was not '
-                'successful!'))
+            raise RuntimeError(self.errors.load_statement_page_failed)
 
         webdriver.driver.get(
             f'https://tbp2p.iuvo-group.com/p2p-ui/app?p0=export_file;'
@@ -91,8 +85,5 @@ class Iuvo(BasePlatform):
             f'date_to={self.date_range[1].strftime("%Y-%m-%d")};'
             f'lang=en_US&screen_width=1920&screen_height=780')
 
-        if not download_finished(
-                self.statement, webdriver.driver.download_directory):
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.NAME}: download of account statement failed!'))
+        if not webdriver.download_finished(self.statement):
+            raise RuntimeError(self.errors.statement_download_failed)

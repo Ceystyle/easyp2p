@@ -88,7 +88,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.action_english.setChecked(True)
             self.action_german.setChecked(False)
         self._translator.load('easyp2p_' + locale, os.path.join(
-            easyp2p.__path__[0], 'i18n', 'ts'))
+            easyp2p.__path__[0], 'i18n'))
         self._app.installTranslator(self._translator)
         self._qttranslator.load(
             'qtbase_' + locale, QLibraryInfo.location(

@@ -5,13 +5,9 @@ Download and parse Estateguru statement.
 
 """
 
-from PyQt5.QtCore import QCoreApplication
-
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
 from easyp2p.platforms.base_platform import BasePlatform
-
-_translate = QCoreApplication.translate
 
 
 class Estateguru(BasePlatform):
@@ -64,9 +60,8 @@ class Estateguru(BasePlatform):
         sess.log_into_page(self.LOGIN_URL, 'username', 'password')
 
         download_url = sess.get_url_from_partial_link(
-            self.STATEMENT_URL, 'downloadOrderReport.csv', _translate(
-                'P2PPlatform',
-                f'{self.NAME}: loading account statement page failed!'))
+            self.STATEMENT_URL, 'downloadOrderReport.csv',
+            self.errors.load_statement_page_failed)
         user_id = download_url.split('&')[1].split('=')[1]
 
         data = {
@@ -81,8 +76,9 @@ class Estateguru(BasePlatform):
             'controller': "portfolio",
             'action': "ajaxFilterTransactions",
         }
-        sess.generate_account_statement(
-            self.GEN_STATEMENT_URL, 'post', data)
+        sess.request(
+            self.GEN_STATEMENT_URL, 'post',
+            self.errors.statement_generation_failed, data)
 
         sess.download_statement(
             f'https://estateguru.co{download_url}', self.statement, 'get')

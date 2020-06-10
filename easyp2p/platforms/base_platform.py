@@ -21,6 +21,7 @@ from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import Signals, PlatformFailedError
 from easyp2p.p2p_webdriver import P2PWebDriver
+from easyp2p.errors import PlatformErrors
 
 
 class BasePlatform:
@@ -70,6 +71,7 @@ class BasePlatform:
         self.date_range = date_range
         self.statement = '.'.join([statement_without_suffix, self.SUFFIX])
         self.signals = signals
+        self.errors = PlatformErrors(self.NAME)
 
     def download_statement(self, headless: bool = True) -> None:
         """

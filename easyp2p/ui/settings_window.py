@@ -98,9 +98,9 @@ class SettingsWindow(QDialog, Ui_SettingsWindow):
                 QMessageBox.warning(
                     self, _translate(
                         'SettingsWindow', 'Delete not successful!'),
-                    platform + _translate(
-                        'SettingsWindow', ' credentials could not be '
-                        'deleted!'))
+                    _translate(
+                        'SettingsWindow',
+                        f'{platform}: credentials could not be deleted!'))
                 return
             self.list_widget_platforms.takeItem(
                 self.list_widget_platforms.row(

@@ -6,15 +6,11 @@ Download and parse Twino statement.
 
 """
 
-from PyQt5.QtCore import QCoreApplication
-
 from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
 from easyp2p.p2p_signals import PlatformFailedError
 from easyp2p.platforms.base_platform import BasePlatform
-
-_translate = QCoreApplication.translate
 
 
 class Twino(BasePlatform):
@@ -71,15 +67,10 @@ class Twino(BasePlatform):
         username = get_credentials(self.NAME, self.signals)[0]
         check2fa_url = (
             f'https://www.twino.eu/ws/public/check2fa?email={username}')
-        resp = sess.request(
-            check2fa_url, 'get', _translate(
-                'P2PPlatform', f'{self.NAME}: loading login page failed!'))
+        resp = sess.request(check2fa_url, 'get', self.errors.load_login_failed)
 
         if resp.json():
-            raise PlatformFailedError(_translate(
-                'P2PPlatform',
-                f'{self.NAME}: two factor authorization is not yet '
-                f'supported in easyp2p!'))
+            raise PlatformFailedError(self.errors.tfa_not_supported)
 
         sess.log_into_page(self.LOGIN_URL, 'name', 'password')
 
@@ -93,17 +84,16 @@ class Twino(BasePlatform):
             'processingDateFrom': start_date,
             'processingDateTo': end_date,
         }
-        sess.generate_account_statement(
-            self.GEN_STATEMENT_URL, 'post', data)
+        sess.request(
+            self.GEN_STATEMENT_URL, 'post',
+            self.errors.statement_generation_failed, data)
 
         def download_ready():
             download_url = (
                 f'https://www.twino.eu/ws/web/export-to-excel/{username}/'
                 f'download')
             res = sess.request(
-                download_url, 'get', _translate(
-                    'P2PPlatform',
-                    f'{self.NAME}: download of account statement failed!'),
+                download_url, 'get', self.errors.statement_download_failed,
                 success_codes=(200, 500))
             if res.status_code == 200:
                 with open(self.statement, 'wb') as file:
@@ -113,9 +103,7 @@ class Twino(BasePlatform):
             if res.status_code == 500:
                 return False
 
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.NAME}: download of account statement failed!'))
+            raise RuntimeError(self.errors.statement_download_failed)
 
         sess.wait(download_ready)
 

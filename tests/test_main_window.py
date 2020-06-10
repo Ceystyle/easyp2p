@@ -254,8 +254,8 @@ class MainWindowTests(unittest.TestCase):
             range(self.form.combo_box_start_month.count())}
         all_months_expected = {
             QLocale('de_de').monthName(i, 1) for i in range(1, 13)}
-        self.assertEqual(self.form.groupBox_start_date.title(), 'Startdatum')
-        self.assertEqual(all_months, all_months_expected)
+        self.assertEqual('Startdatum', self.form.groupBox_start_date.title())
+        self.assertEqual(all_months_expected, all_months)
 
     def test_change_language_to_german_to_english(self) -> None:
         """Test changing the language to German and then back to English."""

@@ -6,13 +6,9 @@ Download and parse Bondora statement.
 
 """
 
-from PyQt5.QtCore import QCoreApplication
-
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
 from easyp2p.platforms.base_platform import BasePlatform
-
-_translate = QCoreApplication.translate
 
 
 class Bondora(BasePlatform):
@@ -50,9 +46,8 @@ class Bondora(BasePlatform):
         """
         token_field = '__RequestVerificationToken'
         data = sess.get_values_from_tag_by_name(
-            self.LOGIN_URL, 'input', [token_field], _translate(
-                'P2PPlatform',
-                f'{self.NAME}: loading login page was not successful!'))
+            self.LOGIN_URL, 'input', [token_field],
+            self.errors.load_login_failed)
 
         sess.log_into_page(self.LOGIN_URL, 'Email', 'Password', data)
 

@@ -8,13 +8,9 @@ Download and parse Robocash statement.
 
 import json
 
-from PyQt5.QtCore import QCoreApplication
-
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
 from easyp2p.platforms.base_platform import BasePlatform
-
-_translate = QCoreApplication.translate
 
 
 class Robocash(BasePlatform):
@@ -61,17 +57,12 @@ class Robocash(BasePlatform):
 
         """
         data = sess.get_values_from_tag_by_name(
-            self.LOGIN_URL, 'input', ['_token'], _translate(
-                'P2PPlatform',
-                f'{self.NAME}: loading website was not successful!'))
+            self.LOGIN_URL, 'input', ['_token'], self.errors.load_login_failed)
         sess.log_into_page(self.LOGIN_URL, 'email', 'password', data=data)
 
-        statement_err_msg = _translate(
-            'P2PPlatform',
-            f'{self.NAME}: loading the account statement page failed!')
         token = sess.get_value_from_script(
             self.STATEMENT_URL, {'id': 'report-template'}, 'input',
-            '_token', statement_err_msg)
+            '_token', self.errors.load_statement_page_failed)
 
         data = {
             '_token': token,
@@ -80,13 +71,14 @@ class Robocash(BasePlatform):
             'end_date': self.date_range[1].strftime("%Y-%m-%d"),
             'statement_type': '1'
         }
-        sess.generate_account_statement(
-            self.GEN_STATEMENT_URL, 'post', data)
+        sess.request(
+            self.GEN_STATEMENT_URL, 'post',
+            self.errors.statement_generation_failed, data)
 
         def download_ready():
             report = json.loads(sess.get_value_from_tag(
                 self.STATEMENT_URL, 'report-component', ':initial_report',
-                statement_err_msg))
+                self.errors.load_statement_page_failed))
             if report['filename'] is not None:
                 sess.download_statement(
                     f'https://robo.cash/cabinet/statement/{report["id"]}'

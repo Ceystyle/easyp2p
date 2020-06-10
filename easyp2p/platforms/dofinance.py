@@ -6,13 +6,9 @@ Download and parse DoFinance statement.
 
 """
 
-from PyQt5.QtCore import QCoreApplication
-
 from easyp2p.p2p_parser import P2PParser
 from easyp2p.p2p_session import P2PSession
 from easyp2p.platforms.base_platform import BasePlatform
-
-_translate = QCoreApplication.translate
 
 
 class DoFinance(BasePlatform):
@@ -48,17 +44,13 @@ class DoFinance(BasePlatform):
         """
         token_names = ['_Token[fields]', '_Token[unlocked]']
         data = sess.get_values_from_tag_by_name(
-            self.LOGIN_URL, 'input', token_names, _translate(
-                'P2PPlatform',
-                f'{self.NAME}: loading login page was not successful!'))
+            self.LOGIN_URL, 'input', token_names, self.errors.load_login_failed)
         data['_method'] = 'POST'
         sess.log_into_page(self.LOGIN_URL, 'email', 'password', data)
 
         data = sess.get_values_from_tag_by_name(
-            self.STATEMENT_URL, 'input', token_names, _translate(
-                'P2PPlatform',
-                f'{self.NAME}: loading account statement page was not '
-                f'successful!'))
+            self.STATEMENT_URL, 'input', token_names,
+            self.errors.load_statement_page_failed)
         data['_method'] = 'PUT'
         data['date_from'] = self.date_range[0].strftime('%d.%m.%Y')
         data['date_to'] = self.date_range[1].strftime('%d.%m.%Y')

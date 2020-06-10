@@ -26,13 +26,12 @@ from selenium.common.exceptions import (
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
-from PyQt5.QtCore import QCoreApplication
 
 from easyp2p.p2p_credentials import get_credentials
 from easyp2p.p2p_signals import Signals
 from easyp2p.p2p_chrome import P2PChrome
+from easyp2p.errors import PlatformErrors
 
-_translate = QCoreApplication.translate
 logger = logging.getLogger('easyp2p.p2p_webdriver')
 
 
@@ -77,13 +76,14 @@ class P2PWebDriver:
 
         """
         self.logger = logging.getLogger('easyp2p.p2p_webdriver.P2PWebDriver')
+        self.errors = PlatformErrors(name)
 
         if signals:
             self.signals.connect_signals(signals)
 
         if logout_url is None and logout_locator is None:
-            raise RuntimeError(_translate(
-                'P2PPlatform', f'{name}: no method for logout provided!'))
+            # This should never happen
+            raise RuntimeError(self.errors.no_logout_method)
 
         self.name = name
         self.driver = None
@@ -94,7 +94,6 @@ class P2PWebDriver:
         self.hover_locator = hover_locator
         self.download_dir = None
         self.logged_in = False
-
         self.logger.debug('%s: created P2PWebDriver instance.', self.name)
 
     @signals.watch_errors
@@ -136,9 +135,7 @@ class P2PWebDriver:
                         hover_locator=self.hover_locator)
                 else:
                     # Should never happen since we already check it in __init__
-                    raise RuntimeWarning(_translate(
-                        'P2PPlatform',
-                        f'{self.name}: no method for logout provided!'))
+                    raise RuntimeWarning(self.errors.no_logout_method)
 
                 self.logged_in = False
         finally:
@@ -193,32 +190,24 @@ class P2PWebDriver:
             self.driver.load_url(
                 login_url,
                 EC.element_to_be_clickable((By.NAME, name_field)),
-                _translate(
-                    'P2PPlatform',
-                    f'{self.name}: loading the website took too long!'))
+                self.errors.load_login_timeout)
         else:
             self.driver.load_url(
                 login_url,
                 EC.element_to_be_clickable(login_locator),
-                _translate(
-                    'P2PPlatform',
-                    f'{self.name}: loading the website took too long!'))
+                self.errors.load_login_timeout)
             self.driver.click_button(
                 login_locator,
-                _translate(
-                    'P2PPlatform',
-                    f'{self.name}: loading the website failed!'),
+                self.errors.load_login_failed,
                 wait_until=EC.element_to_be_clickable((By.NAME, name_field)))
 
         credentials = get_credentials(self.name, self.signals)
 
-        error_msg = _translate(
-            'P2PPlatform', f'{self.name}: login was not successful. Are the '
-            'credentials correct?')
-        self.driver.enter_text((By.NAME, name_field), credentials[0], error_msg)
+        self.driver.enter_text(
+            (By.NAME, name_field), credentials[0], self.errors.login_failed)
         time.sleep(fill_delay)
         self.driver.enter_text(
-            (By.NAME, password_field), credentials[1], error_msg,
+            (By.NAME, password_field), credentials[1], self.errors.login_failed,
             hit_return=True, wait_until=wait_until)
 
         self.logged_in = True
@@ -245,9 +234,7 @@ class P2PWebDriver:
             try:
                 self.driver.wait(EC.text_to_be_present_in_element(
                     locator, text), delay=1)
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: invalid username or password!'))
+                raise RuntimeError(self.errors.invalid_credentials)
             except TimeoutException:
                 pass
         self.logged_in = True
@@ -276,10 +263,7 @@ class P2PWebDriver:
         self.driver.load_url(
             statement_url,
             EC.presence_of_element_located(check_locator),
-            _translate(
-                'P2PPlatform',
-                f'{self.name}: loading account statement page was not '
-                'successful!'))
+            self.errors.load_statement_page_failed)
         self.logger.debug(
             '%s: account statement page opened successfully.', self.name)
 
@@ -311,8 +295,7 @@ class P2PWebDriver:
         self.logger.debug('%s: starting log out by button.', self.name)
         self.driver.click_button(
             logout_locator,
-            _translate(
-                'P2PPlatform', f'{self.name}: logout was not successful!'),
+            self.errors.logout_failed,
             wait_until=wait_until, hover_locator=hover_locator)
         self.logger.debug('%s: log out by button successful.', self.name)
 
@@ -334,9 +317,7 @@ class P2PWebDriver:
         """
         self.logger.debug('%s: starting log out by URL.', self.name)
         self.driver.load_url(
-            self.logout_url, wait_until,
-            _translate(
-                'P2PPlatform', f'{self.name}: logout was not successful!'))
+            self.logout_url, wait_until, self.errors.logout_failed)
         self.logger.debug('%s: log out by URL successful.', self.name)
 
     @signals.update_progress
@@ -378,18 +359,17 @@ class P2PWebDriver:
             '%s: starting direct account statement generation for '
             'date range %s.', self.name, str(date_range))
 
-        error_msg = _translate(
-            'P2PPlatform',
-            f'{self.name}: generating account statement failed!')
         self.driver.enter_text(
-            start_locator, date.strftime(date_range[0], date_format), error_msg)
+            start_locator, date.strftime(date_range[0], date_format),
+            self.errors.statement_generation_failed)
         self.driver.enter_text(
-            end_locator, date.strftime(date_range[1], date_format), error_msg,
-            hit_return=True)
+            end_locator, date.strftime(date_range[1], date_format),
+            self.errors.statement_generation_failed, hit_return=True)
 
         if submit_btn_locator:
             self.driver.click_button(
-                submit_btn_locator, error_msg, wait_until=wait_until)
+                submit_btn_locator, self.errors.statement_generation_failed,
+                wait_until=wait_until)
 
         self.logger.debug(
             '%s: account statement generation successful.', self.name)
@@ -460,18 +440,14 @@ class P2PWebDriver:
         if submit_btn_locator is not None:
             self.driver.click_button(
                 submit_btn_locator,
-                _translate(
-                    'P2PPlatform',
-                    f'{self.name}: account statement generation failed!'),
+                self.errors.statement_generation_failed,
                 wait_until=wait_until)
         elif wait_until is not None:
             try:
                 self.driver.wait(wait_until)
             except TimeoutException:
                 self.logger.exception('%s: Timeout.', self.name)
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'{self.name}: account statement generation failed!'))
+                raise RuntimeError(self.errors.statement_generation_failed)
 
         self.logger.debug(
             '%s: account statement generation successful.', self.name)
@@ -492,10 +468,6 @@ class P2PWebDriver:
             RuntimeError: If the calendars could not be located.
 
         """
-        error_msg = _translate(
-            'P2PPlatform',
-            f'{self.name}: starting account statement generation failed!')
-
         try:
             self.driver.wait(EC.element_to_be_clickable(calendar_locator[0]))
             calendars = self.driver.find_elements(*calendar_locator[0])
@@ -503,11 +475,11 @@ class P2PWebDriver:
         except (NoSuchElementException, TimeoutException):
             self.logger.exception(
                 '%s: failed to locate web element.', self.name)
-            raise RuntimeError(error_msg)
+            raise RuntimeError(self.errors.statement_generation_failed)
         except IndexError:
             self.logger.exception(
                 '%s: calendar not found in calendar list.', self.name)
-            raise RuntimeError(error_msg)
+            raise RuntimeError(self.errors.statement_generation_failed)
 
     def _set_date_in_calendar(
             self, calendar_locator: Tuple[Tuple[str, str], int],
@@ -549,9 +521,7 @@ class P2PWebDriver:
             self._set_day_in_calendar(
                 day_locator, target_date, day_class_check)
         except RuntimeError:
-            msg = f'{self.name}: could not locate date in calendar!'
-            self.logger.error(msg)
-            raise RuntimeError(_translate('P2PPlatform', msg))
+            raise RuntimeError(self.errors.calendar_date_not_found)
 
     def _set_month_in_calendar(
             self, prev_month_locator, month_locator, target_date):
@@ -667,16 +637,12 @@ class P2PWebDriver:
                 select.select_by_visible_text(date_dict[locator])
         except NoSuchElementException:
             self.logger.exception('%s: failed to find combo box.', self.name)
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: starting account statement generation failed!'))
+            raise RuntimeError(self.errors.statement_generation_failed)
 
         # Start the account statement generation
         self.driver.click_button(
             submit_btn_locator,
-            _translate(
-                'P2PPlatform',
-                f'{self.name}: starting account statement generation failed!'),
+            self.errors.statement_generation_failed,
             wait_until=wait_until)
         self.logger.debug(
             '%s: account statement generation was successful.', self.name)
@@ -716,76 +682,71 @@ class P2PWebDriver:
 
         self.driver.click_button(
             download_locator,
-            _translate(
-                'P2PPlatform',
-                f'{self.name}: starting download of account statement '
-                f'failed!'),
+            self.errors.statement_download_failed,
             hover_locator=hover_locator)
 
-        if not download_finished(
-                statement, self.driver.download_directory):
-            raise RuntimeError(_translate(
-                'P2PPlatform',
-                f'{self.name}: download of account statement failed!'))
+        if not self.download_finished(statement):
+            raise RuntimeError(self.errors.statement_download_failed)
 
         self.logger.debug('%s: account statement download finished.', self.name)
 
+    def download_finished(
+            self, location: str, max_wait_time: float = 4.0) -> bool:
+        """
+        Wait until statement download is done and rename the file to the value
+        in location.
 
-def download_finished(
-        statement: str, download_directory: str,
-        max_wait_time: float = 4.0) -> bool:
-    """
-    Wait until statement download is done and rename the file to statement.
+        Args:
+            location: Absolute file path where the statement should be saved.
+            max_wait_time: Maximum time in seconds to wait for download to
+                start/finish.
 
-    Args:
-        statement: File name including path where the downloaded file should
-            be saved.
-        download_directory: Download directory.
-        max_wait_time: Maximum time in seconds to wait for download to
-            start/finish.
+        Returns:
+            True if download finished successfully, False if not.
 
-    Returns:
-        True if download finished successfully, False if not.
+        Raises:
+            RuntimeError: If there is more than one file in the download
+            directory.
 
-    Raises:
-        RuntimeError: If there is more than one file in the download directory.
+        """
+        done = False
+        waiting_time = 0
+        download_time = 0
 
-    """
-    done = False
-    waiting_time = 0
-    download_time = 0
+        while not done:
+            ongoing_downloads = glob.glob(
+                os.path.join(self.driver.download_directory, '*.crdownload'))
+            if ongoing_downloads:
+                if download_time > max_wait_time:
+                    logger.error('Download time exceeded max_wait_time.')
+                    return False
+                time.sleep(1)
+                download_time += 1
+            else:
+                filelist = glob.glob(
+                    os.path.join(self.driver.download_directory, '*'))
+                if len(filelist) == 1 and not filelist[0].endswith(
+                        'crdownload'):
+                    shutil.move(filelist[0], location)
+                    return True
 
-    while not done:
-        ongoing_downloads = glob.glob(
-            os.path.join(download_directory, '*.crdownload'))
-        if ongoing_downloads:
-            if download_time > max_wait_time:
-                logger.error('Download time exceeded max_wait_time.')
-                return False
-            time.sleep(1)
-            download_time += 1
-        else:
-            filelist = glob.glob(os.path.join(download_directory, '*'))
-            if len(filelist) == 1 and not filelist[0].endswith('crdownload'):
-                shutil.move(filelist[0], statement)
-                return True
+                if len(filelist) > 1:
+                    # This should never happen since the download directory is a
+                    # newly created temporary directory
+                    logger.error(
+                        'More than one active download found: %s',
+                        str(filelist))
+                    raise RuntimeError(
+                        self.errors.download_directory_not_empty(
+                            self.driver.download_directory))
 
-            if len(filelist) > 1:
-                # This should never happen since the download directory is a
-                # newly created temporary directory
-                logger.error(
-                    'More than one active download found: %s', str(filelist))
-                raise RuntimeError(_translate(
-                    'P2PPlatform',
-                    f'Download directory {download_directory} is not empty!'))
+                if waiting_time > max_wait_time:
+                    # If the download didn't start after more than max_wait_time
+                    # something has gone wrong.
+                    logger.error('Download did not start within max_wait_time.')
+                    return False
 
-            if waiting_time > max_wait_time:
-                # If the download didn't start after more than max_wait_time
-                # something has gone wrong.
-                logger.error('Download did not start within max_wait_time.')
-                return False
+                time.sleep(1)
+                waiting_time += 1
 
-            time.sleep(1)
-            waiting_time += 1
-
-    return False
+        return False
