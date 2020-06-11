@@ -47,47 +47,47 @@
         <translation>Für welche P2P-Plattformen sollen die Ergebnisse geladen werden?</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="170"/>
+        <location filename="../ui/main_window.ui" line="177"/>
         <source>Select/deselect all</source>
         <translation>Alle aus-/abwählen</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="187"/>
+        <location filename="../ui/main_window.ui" line="194"/>
         <source>Start date</source>
         <translation>Startdatum</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="209"/>
+        <location filename="../ui/main_window.ui" line="216"/>
         <source>End date</source>
         <translation>Enddatum</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="236"/>
+        <location filename="../ui/main_window.ui" line="243"/>
         <source>Where should the results be saved?</source>
         <translation>Wo sollen die Ergebnisse gespeichert werden?</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="254"/>
+        <location filename="../ui/main_window.ui" line="261"/>
         <source>Choose File</source>
         <translation>Datei auswählen</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="271"/>
+        <location filename="../ui/main_window.ui" line="278"/>
         <source>Start evaluation</source>
         <translation>Auswertung starten</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="297"/>
+        <location filename="../ui/main_window.ui" line="304"/>
         <source>&amp;Language</source>
         <translation>&amp;Sprache</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="312"/>
+        <location filename="../ui/main_window.ui" line="319"/>
         <source>&amp;English</source>
         <translation>&amp;Englisch</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.ui" line="323"/>
+        <location filename="../ui/main_window.ui" line="330"/>
         <source>&amp;German</source>
         <translation>&amp;Deutsch</translation>
     </message>
@@ -213,22 +213,22 @@
         <translation>Währung</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="113"/>
+        <location filename="../p2p_parser.py" line="115"/>
         <source>{self.name} parser: no account statement available!</source>
         <translation>{self.name}-Parser: kein Kontoauszug vorhanden!</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="276"/>
+        <location filename="../p2p_parser.py" line="278"/>
         <source>{self.name}: columns {missing} missing in account statement!</source>
         <translation>{self.name}: Spalten {missing} fehlen im Kontoauszug!</translation>
     </message>
     <message>
         <location filename="../p2p_parser.py" line="408"/>
         <source>Unknown file format during import:</source>
-        <translation>Unbekanntes Dateiformat beim Import:</translation>
+        <translation type="obsolete">Unbekanntes Dateiformat beim Import:</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="412"/>
+        <location filename="../p2p_parser.py" line="417"/>
         <source>{input_file} could not be found!</source>
         <translation>{input_file}: konnte nicht gefunden werden!</translation>
     </message>
@@ -236,6 +236,11 @@
         <location filename="../p2p_parser.py" line="41"/>
         <source>Bonus payments</source>
         <translation>Bonuszahlungen</translation>
+    </message>
+    <message>
+        <location filename="../p2p_parser.py" line="412"/>
+        <source>Unknown file format during import: {input_file}</source>
+        <translation>Unbekanntes Dateiformat beim Import: {input_file}</translation>
     </message>
 </context>
 <context>

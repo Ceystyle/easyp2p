@@ -102,11 +102,13 @@ class P2PParser:
         """
         self.name = name
         self.date_range = date_range
+
+        if signals:
+            self.signals.connect_signals(signals)
+
         self.df = get_df_from_file(
             statement_file_name, header=header, skipfooter=skipfooter)
         self.logger = logging.getLogger('easyp2p.p2p_parser.P2PParser')
-        if signals:
-            self.signals.connect_signals(signals)
 
         # Check if account statement exists
         if self.df is None:
@@ -170,7 +172,7 @@ class P2PParser:
 
     def _filter_date_range(self, date_format: str) -> None:
         """
-        Only keep dates in data range self.date_range in DataFrame self.df.
+        Only keep dates in self.date_range in DataFrame self.df.
 
         Args:
             date_format: Date format which the platform uses
@@ -404,9 +406,12 @@ def get_df_from_file(
                 df = pd.read_csv(input_file, header=header)
         elif file_format in ('.xlsx', '.xls'):
             df = pd.read_excel(input_file, header=header, skipfooter=skipfooter)
+        elif file_format == '.json':
+            df = pd.read_json(input_file)
         else:
             raise RuntimeError(_translate(
-                'P2PParser', 'Unknown file format during import:'), input_file)
+                'P2PParser',
+                f'Unknown file format during import: {input_file}'))
     except FileNotFoundError:
         logger.exception('File not found.')
         raise RuntimeError(_translate(

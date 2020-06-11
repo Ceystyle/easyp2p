@@ -1,0 +1,22 @@
+{
+  "start_balance" : null,
+  "end_balance" : null,
+  "first_date" : "2016-09-01",
+  "last_date" : "2016-12-31",
+  "late_fee_received" : 0.00,
+  "interest_received" : 0.00,
+  "total_movements" : 0,
+  "principal_received" : 0.00,
+  "funds_in_transit" : 0,
+  "fit_interest" : 0.00,
+  "late_fee_in_transit" : 0,
+  "interest_in_transit" : 0,
+  "principal_in_transit" : 0,
+  "bonus" : 0.00,
+  "investments" : 0.00,
+  "withdrawal" : 0.00,
+  "deposit" : 0.00,
+  "secondary_market_transactions" : 0.00,
+  "secondary_market_commissions" : 0.00,
+  "results" : [ ]
+}

@@ -23,22 +23,19 @@ from tests import INPUT_PREFIX, RESULT_PREFIX, TEST_PREFIX
 
 SKIP_DL_TESTS = input('Run download tests (y/n)?: ').lower() != 'y'
 
-DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
-DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
-DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
-
 
 class BasePlatformTests(unittest.TestCase):
 
     """Class providing base tests for all supported P2P platforms."""
 
+    DATE_RANGE = (date(2018, 9, 1), date(2018, 12, 31))
+    DATE_RANGE_NO_CFS = (date(2016, 9, 1), date(2016, 12, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 8, 1), date(2019, 1, 31))
+
     def setUp(self) -> None:
         """Dummy setUp, needs to be overridden by child classes."""
         self.platform = None
         self.unknown_cf_types = ()
-        self.date_range = DATE_RANGE
-        self.date_range_no_cfs = DATE_RANGE_NO_CFS
-        self.date_range_missing_month = DATE_RANGE_MISSING_MONTH
 
     @unittest.skipIf(SKIP_DL_TESTS, 'Skipping download tests!')
     def run_download_test(
@@ -129,7 +126,8 @@ class BasePlatformTests(unittest.TestCase):
 
         if exp_unknown_cf_types is None:
             exp_unknown_cf_types = ()
-        self.assertEqual(unknown_cf_types, exp_unknown_cf_types)
+
+        self.assertEqual(exp_unknown_cf_types, unknown_cf_types)
 
     def run_write_results(
             self, input_file: str, exp_result_file: str,
@@ -171,7 +169,7 @@ class BasePlatformTests(unittest.TestCase):
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_download_test(
-            f'download_{self.platform.NAME.lower()}_statement', self.date_range)
+            f'download_{self.platform.NAME.lower()}_statement', self.DATE_RANGE)
 
     def test_download_statement_no_cfs(self) -> None:
         """
@@ -182,7 +180,7 @@ class BasePlatformTests(unittest.TestCase):
 
         self.run_download_test(
             f'download_{self.platform.NAME.lower()}_statement_no_cfs',
-            self.date_range_no_cfs)
+            self.DATE_RANGE_NO_CFS)
 
     def test_parse_statement(self):
         """Test parsing platform default statement."""
@@ -190,7 +188,7 @@ class BasePlatformTests(unittest.TestCase):
             self.skipTest('Skip tests for BaseplatformTests!')
 
         self.run_parser_test(
-            f'{self.platform.NAME.lower()}_parser', self.date_range,
+            f'{self.platform.NAME.lower()}_parser', self.DATE_RANGE,
             RESULT_PREFIX+f'download_{self.platform.NAME.lower()}_statement')
 
     def test_parse_statement_no_cfs(self):
@@ -202,7 +200,7 @@ class BasePlatformTests(unittest.TestCase):
             f'download_{self.platform.NAME.lower()}_statement_no_cfs'
         self.run_parser_test(
             f'{self.platform.NAME.lower()}_parser_no_cfs',
-            self.date_range_no_cfs, input_file=input_file)
+            self.DATE_RANGE_NO_CFS, input_file=input_file)
 
     def test_parse_statement_unknown_cf(self) -> None:
         """Test platform parser when unknown cash flow types are present."""
@@ -212,7 +210,7 @@ class BasePlatformTests(unittest.TestCase):
         if not self.unknown_cf_types:
             self.skipTest('No unknown cash flow types for this platform!')
         self.run_parser_test(
-            f'{self.platform.NAME.lower()}_parser_unknown_cf', self.date_range,
+            f'{self.platform.NAME.lower()}_parser_unknown_cf', self.DATE_RANGE,
             exp_unknown_cf_types=self.unknown_cf_types)
 
     def test_parse_statement_missing_month(self):
@@ -222,7 +220,7 @@ class BasePlatformTests(unittest.TestCase):
 
         self.run_parser_test(
             f'{self.platform.NAME.lower()}_parser_missing_month',
-            self.date_range_missing_month)
+            self.DATE_RANGE_MISSING_MONTH)
 
     def test_write_results(self):
         """Test write_results when cash flows are present for all months."""
@@ -232,7 +230,7 @@ class BasePlatformTests(unittest.TestCase):
         self.run_write_results(
             RESULT_PREFIX + f'{self.platform.NAME.lower()}_parser.csv',
             f'write_results_{self.platform.NAME.lower()}.xlsx',
-            self.date_range)
+            self.DATE_RANGE)
 
     def test_write_results_no_cfs(self):
         """Test write_results when there were no cash flows in date range."""
@@ -242,7 +240,7 @@ class BasePlatformTests(unittest.TestCase):
         self.run_write_results(
             RESULT_PREFIX + f'{self.platform.NAME.lower()}_parser_no_cfs.csv',
             f'write_results_{self.platform.NAME.lower()}_no_cfs.xlsx',
-            self.date_range_no_cfs)
+            self.DATE_RANGE_NO_CFS)
 
     def test_write_results_missing_month(self):
         """
@@ -256,7 +254,7 @@ class BasePlatformTests(unittest.TestCase):
         exp_result_file = \
             f'write_results_{self.platform.NAME.lower()}_missing_month.xlsx'
         self.run_write_results(
-            input_file, exp_result_file, self.date_range_missing_month)
+            input_file, exp_result_file, self.DATE_RANGE_MISSING_MONTH)
 
 
 class BondoraTests(BasePlatformTests):
@@ -276,36 +274,35 @@ class BondoraTests(BasePlatformTests):
         """
         self.run_write_results(
             INPUT_PREFIX + 'write_results_mixed_no_cfs.csv',
-            'write_results_mixed_no_cfs.xlsx', self.date_range)
+            'write_results_mixed_no_cfs.xlsx', self.DATE_RANGE)
 
     def test_write_results_all(self):
         """Test write_results for all supported platforms."""
         self.run_write_results(
             INPUT_PREFIX + 'write_results_all.csv',
-            'write_results_all.xlsx', self.date_range)
+            'write_results_all.xlsx', self.DATE_RANGE)
 
     def test_write_results_all_missing_month(self):
         """Test write_results for all supported platforms."""
         self.run_write_results(
             INPUT_PREFIX + 'write_results_all_missing_month.csv',
             'write_results_all_missing_month.xlsx',
-            self.date_range_missing_month)
+            self.DATE_RANGE_MISSING_MONTH)
 
     def test_write_results_no_results(self):
         """Test write_results if there were no results."""
         df = get_df_from_file(INPUT_PREFIX + 'write_results_no_results.csv')
         with tempfile.TemporaryDirectory() as temp_dir:
             output_file = os.path.join(temp_dir, 'test_write_results.xlsx')
-            self.assertFalse(write_results(df, output_file, self.date_range))
+            self.assertFalse(write_results(df, output_file, self.DATE_RANGE))
 
 
 class DoFinanceTests(BasePlatformTests):
 
     """Class containing all tests for DoFinance."""
 
-    date_range = (date(2018, 1, 1), date(2018, 8, 31))
-    date_range_no_cfs = (date(2016, 9, 1), date(2016, 12, 31))
-    date_range_missing_month = (date(2018, 4, 1), date(2018, 9, 30))
+    DATE_RANGE = (date(2018, 1, 1), date(2018, 8, 31))
+    DATE_RANGE_MISSING_MONTH = (date(2018, 4, 1), date(2018, 9, 30))
 
     def setUp(self) -> None:
         self.platform = p2p_platforms.DoFinance
@@ -348,7 +345,7 @@ class IuvoTests(BasePlatformTests):
         found.
         """
         platform = self.platform(  # pylint: disable=not-callable
-            DATE_RANGE, 'dummy_statement')
+            self.DATE_RANGE, 'dummy_statement')
         mock_chrome.side_effect = WebDriverException()
         self.assertRaises(
             PlatformFailedError, platform.download_statement, False)
@@ -402,6 +399,19 @@ class TwinoTests(BasePlatformTests):
         super().setUp()
         self.platform = p2p_platforms.Twino
         self.unknown_cf_types = ('TestCF1 PRINCIPAL', 'TestCF2 INTEREST')
+
+
+class ViventorTests(BasePlatformTests):
+
+    """Class containing all tests for Viventor."""
+
+    DATE_RANGE = (date(2020, 1, 1), date(2020, 5, 31))
+    DATE_RANGE_MISSING_MONTH = DATE_RANGE
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.platform = p2p_platforms.Viventor
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
 
 
 def are_files_equal(

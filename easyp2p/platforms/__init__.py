@@ -13,3 +13,4 @@ from easyp2p.platforms.peerberry import PeerBerry
 from easyp2p.platforms.robocash import Robocash
 from easyp2p.platforms.swaper import Swaper
 from easyp2p.platforms.twino import Twino
+from easyp2p.platforms.viventor import Viventor
