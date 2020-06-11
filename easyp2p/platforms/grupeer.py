@@ -39,8 +39,7 @@ class Grupeer(BasePlatform):
         'Currency': P2PParser.CURRENCY,
     }
     CASH_FLOW_TYPES = {
-        # Treat cashback as interest payment:
-        'Cashback': P2PParser.INTEREST_PAYMENT,
+        'Cashback': P2PParser.BONUS_PAYMENT,
         'Deposit': P2PParser.IN_OUT_PAYMENT,
         'Withdrawal': P2PParser.IN_OUT_PAYMENT,
         'Interest': P2PParser.INTEREST_PAYMENT,

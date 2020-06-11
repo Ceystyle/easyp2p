@@ -70,8 +70,7 @@ class DoFinance(BasePlatform):
         cash_flow_types = {
             'Withdrawal': parser.IN_OUT_PAYMENT,
             'Profit': parser.INTEREST_PAYMENT,
-            # treat bonus payments as interest payments
-            'Investor Bonus': parser.INTEREST_PAYMENT,
+            'Investor Bonus': parser.BONUS_PAYMENT,
         }
 
         for cf_type in parser.df[self.ORIG_CF_COLUMN].unique():

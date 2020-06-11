@@ -138,7 +138,7 @@
 <context>
     <name>P2PParser</name>
     <message>
-        <location filename="../p2p_parser.py" line="41"/>
+        <location filename="../p2p_parser.py" line="48"/>
         <source>Interest payments</source>
         <translation>Zinszahlung</translation>
     </message>
@@ -153,84 +153,89 @@
         <translation>Rückkäufe</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="45"/>
+        <location filename="../p2p_parser.py" line="49"/>
         <source>Investments</source>
         <translation>Investitionen</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="47"/>
+        <location filename="../p2p_parser.py" line="52"/>
         <source>Redemption payments</source>
         <translation>Tilgungszahlungen</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="48"/>
+        <location filename="../p2p_parser.py" line="51"/>
         <source>Late fee payments</source>
         <translation>Verspätungsgebühren</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="49"/>
+        <location filename="../p2p_parser.py" line="50"/>
         <source>Deposit/Outpayment</source>
         <translation>Ein-/Auszahlung</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="50"/>
+        <location filename="../p2p_parser.py" line="45"/>
         <source>Defaults</source>
         <translation>Ausfälle</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="51"/>
+        <location filename="../p2p_parser.py" line="53"/>
         <source>Start balance</source>
         <translation>Startsaldo</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="52"/>
+        <location filename="../p2p_parser.py" line="46"/>
         <source>End balance</source>
         <translation>Endsaldo</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="53"/>
+        <location filename="../p2p_parser.py" line="54"/>
         <source>Total income</source>
         <translation>Gesamteinkommen</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="56"/>
+        <location filename="../p2p_parser.py" line="59"/>
         <source>Date</source>
         <translation>Datum</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="57"/>
+        <location filename="../p2p_parser.py" line="60"/>
         <source>Month</source>
         <translation>Monat</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="58"/>
+        <location filename="../p2p_parser.py" line="61"/>
         <source>Platform</source>
         <translation>Plattform</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="59"/>
+        <location filename="../p2p_parser.py" line="58"/>
         <source>Currency</source>
         <translation>Währung</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="111"/>
+        <location filename="../p2p_parser.py" line="113"/>
         <source>{self.name} parser: no account statement available!</source>
         <translation>{self.name}-Parser: kein Kontoauszug vorhanden!</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="273"/>
+        <location filename="../p2p_parser.py" line="276"/>
         <source>{self.name}: columns {missing} missing in account statement!</source>
         <translation>{self.name}: Spalten {missing} fehlen im Kontoauszug!</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="405"/>
+        <location filename="../p2p_parser.py" line="408"/>
         <source>Unknown file format during import:</source>
         <translation>Unbekanntes Dateiformat beim Import:</translation>
     </message>
     <message>
-        <location filename="../p2p_parser.py" line="409"/>
+        <location filename="../p2p_parser.py" line="412"/>
         <source>{input_file} could not be found!</source>
         <translation>{input_file}: konnte nicht gefunden werden!</translation>
+    </message>
+    <message>
+        <location filename="../p2p_parser.py" line="41"/>
+        <source>Bonus payments</source>
+        <translation>Bonuszahlungen</translation>
     </message>
 </context>
 <context>

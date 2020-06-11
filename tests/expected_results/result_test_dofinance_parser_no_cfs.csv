@@ -1,2 +1,2 @@
-Platform,Currency,Date,Start balance,End balance,Deposit/Outpayment,Investments,Redemption payments,Buybacks,Interest payments,Buyback interest payments,Late fee payments,Defaults,Total income
-DoFinance,EUR,2016-09-01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Platform,Currency,Date,Start balance,End balance,Deposit/Outpayment,Investments,Redemption payments,Buybacks,Interest payments,Buyback interest payments,Late fee payments,Bonus payments,Defaults,Total income
+DoFinance,EUR,2016-09-01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0

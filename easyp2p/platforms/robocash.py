@@ -38,7 +38,7 @@ class Robocash(BasePlatform):
         'Purchasing a loan': P2PParser.INVESTMENT_PAYMENT,
         'Returning a loan': P2PParser.REDEMPTION_PAYMENT,
         'Withdrawal of funds': P2PParser.IN_OUT_PAYMENT,
-        # We don't report cash transfers within Robocash:
+        # We don't report cash transfers between Robocash portfolios:
         'Creating a portfolio': P2PParser.IGNORE,
         'Refilling a portfolio': P2PParser.IGNORE,
         'Withdrawing from a portfolio': P2PParser.IGNORE,

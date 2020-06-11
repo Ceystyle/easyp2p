@@ -33,8 +33,7 @@ class Estateguru(BasePlatform):
         'Cash Flow Type': 'EG Cash Flow Type',
         'Confirmation Date': P2PParser.DATE}
     CASH_FLOW_TYPES = {
-        # Treat bonus payments as normal interest payments
-        'Bonus': P2PParser.INTEREST_PAYMENT,
+        'Bonus': P2PParser.BONUS_PAYMENT,
         'Deposit': P2PParser.IN_OUT_PAYMENT,
         'Withdrawal': P2PParser.IN_OUT_PAYMENT,
         'Indemnity': P2PParser.LATE_FEE_PAYMENT,

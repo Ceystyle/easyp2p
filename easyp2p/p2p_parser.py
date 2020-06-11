@@ -38,26 +38,27 @@ class P2PParser:
     signals = Signals()
 
     # Define all necessary payment types
-    INTEREST_PAYMENT = _translate('P2PParser', 'Interest payments')
+    BONUS_PAYMENT = _translate('P2PParser', 'Bonus payments')
     BUYBACK_INTEREST_PAYMENT = _translate(
         'P2PParser', 'Buyback interest payments')
     BUYBACK_PAYMENT = _translate('P2PParser', 'Buybacks')
-    INVESTMENT_PAYMENT = _translate('P2PParser', 'Investments')
-    IGNORE = 'Ignored'
-    REDEMPTION_PAYMENT = _translate('P2PParser', 'Redemption payments')
-    LATE_FEE_PAYMENT = _translate('P2PParser', 'Late fee payments')
-    IN_OUT_PAYMENT = _translate('P2PParser', 'Deposit/Outpayment')
     DEFAULTS = _translate('P2PParser', 'Defaults')
-    START_BALANCE_NAME = _translate('P2PParser', 'Start balance')
     END_BALANCE_NAME = _translate('P2PParser', 'End balance')
+    IGNORE = 'Ignored'
+    INTEREST_PAYMENT = _translate('P2PParser', 'Interest payments')
+    INVESTMENT_PAYMENT = _translate('P2PParser', 'Investments')
+    IN_OUT_PAYMENT = _translate('P2PParser', 'Deposit/Outpayment')
+    LATE_FEE_PAYMENT = _translate('P2PParser', 'Late fee payments')
+    REDEMPTION_PAYMENT = _translate('P2PParser', 'Redemption payments')
+    START_BALANCE_NAME = _translate('P2PParser', 'Start balance')
     TOTAL_INCOME = _translate('P2PParser', 'Total income')
 
     # Define additional column names
+    CF_TYPE = 'Cash flow type'
+    CURRENCY = _translate('P2PParser', 'Currency')
     DATE = _translate('P2PParser', 'Date')
     MONTH = _translate('P2PParser', 'Month')
     PLATFORM = _translate('P2PParser', 'Platform')
-    CURRENCY = _translate('P2PParser', 'Currency')
-    CF_TYPE = 'Cash flow type'
 
     # TARGET_COLUMNS are the columns which will be shown in the final result
     # file
@@ -71,6 +72,7 @@ class P2PParser:
         INTEREST_PAYMENT,
         BUYBACK_INTEREST_PAYMENT,
         LATE_FEE_PAYMENT,
+        BONUS_PAYMENT,
         DEFAULTS,
         TOTAL_INCOME]
 
@@ -120,6 +122,7 @@ class P2PParser:
             self.INTEREST_PAYMENT,
             self.LATE_FEE_PAYMENT,
             self.BUYBACK_INTEREST_PAYMENT,
+            self.BONUS_PAYMENT,
             self.DEFAULTS]
         self.df[self.TOTAL_INCOME] = 0.
         for col in [col for col in self.df.columns if col in income_columns]:
