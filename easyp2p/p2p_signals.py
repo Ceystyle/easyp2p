@@ -23,6 +23,7 @@ class Signals(QObject):
         super().__init__()
         self.abort = False
         self.abort_signal.connect(self.abort_evaluation)
+        self.connected = False
         self.logger = logging.getLogger('easyp2p.p2p_signals.Signals')
         self.logger.debug('Created Signals instance.')
 
@@ -79,6 +80,7 @@ class Signals(QObject):
         self.add_progress_text.connect(other.add_progress_text)
         self.get_credentials.connect(other.get_credentials)
         other.send_credentials.connect(self.send_credentials)
+        self.connected = True
         self.logger.debug('Connecting signals successful.')
 
     def disconnect_signals(self) -> None:
@@ -86,6 +88,9 @@ class Signals(QObject):
         Disconnect signals. Ignore error if they were not connected or if
         disconnecting fails.
         """
+        if not self.connected:
+            return
+
         self.logger.debug('Disconnecting signals.')
         for signal in [
                 self.add_progress_text, self.get_credentials,
@@ -97,6 +102,7 @@ class Signals(QObject):
                     'Disconnecting signal %s failed.', str(signal))
             else:
                 self.logger.debug('Signal %s disconnected.', str(signal))
+        self.connected = False
 
     def abort_evaluation(self):
         """Set the abort flag to True."""

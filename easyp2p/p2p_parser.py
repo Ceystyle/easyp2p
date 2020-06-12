@@ -367,8 +367,7 @@ class P2PParser:
         self.df = self.df.round(4)
 
         # Disconnect signals
-        if self.signals:
-            self.signals.disconnect_signals()
+        self.signals.disconnect_signals()
 
         self.logger.debug('%s: parser completed successfully.', self.name)
         return unknown_cf_types
