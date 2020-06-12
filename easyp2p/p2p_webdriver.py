@@ -106,8 +106,13 @@ class P2PWebDriver:
 
         """
         self.download_dir = tempfile.TemporaryDirectory()
-        self.driver = P2PChrome(
-            self.download_dir.name, self.headless, self.signals)
+        try:
+            self.driver = P2PChrome(
+                self.download_dir.name, self.headless, self.signals)
+        except RuntimeError as err:
+            self.download_dir.cleanup()
+            self.signals.disconnect_signals()
+            raise RuntimeError(err)
         self.logger.debug('%s: created context manager.', self.name)
         return self
 
