@@ -28,7 +28,7 @@ class Grupeer(BasePlatform):
     LOGIN_URL = 'https://www.grupeer.com/login'
     STATEMENT_URL = \
         'https://www.grupeer.com/account-statement?currency_code=eur'
-    LOGOUT_WAIT_UNTIL = EC.element_to_be_clickable((By.LINK_TEXT, 'Sign In'))
+    LOGOUT_WAIT_UNTIL_LOC = (By.LINK_TEXT, 'Sign In')
     LOGOUT_LOCATOR = (By.LINK_TEXT, 'Logout')
     HOVER_LOCATOR = (By.CLASS_NAME, 'header-auth-menu-name')
 

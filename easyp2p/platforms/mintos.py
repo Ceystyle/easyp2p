@@ -30,8 +30,7 @@ class Mintos(BasePlatform):
     DOWNLOAD_METHOD = 'recaptcha'
     LOGIN_URL = 'https://www.mintos.com/en/login'
     STATEMENT_URL = 'https://www.mintos.com/en/account-statement/'
-    LOGOUT_WAIT_UNTIL = EC.element_to_be_clickable(
-        (By.ID, 'header-login-button'))
+    LOGOUT_WAIT_UNTIL_LOC = (By.ID, 'header-login-button')
     LOGOUT_LOCATOR = (By.XPATH, "//a[contains(@href,'logout')]")
 
     # Parser settings

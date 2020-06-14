@@ -4,20 +4,21 @@
 """Module implementing P2PWebDriver."""
 
 import logging
-import os
-from typing import cast, Optional, Tuple
+from typing import Optional, Tuple
 
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import (
-    NoSuchElementException, StaleElementReferenceException, TimeoutException,
-    WebDriverException)
+    NoSuchElementException, SessionNotCreatedException,
+    StaleElementReferenceException, TimeoutException, WebDriverException)
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.utils import ChromeType
 
-from easyp2p.errors import CHROME_DRIVER_NOT_FOUND
+from easyp2p.errors import CHROME_NOT_FOUND, CHROME_DRIVER_NOT_FOUND
 from easyp2p.p2p_signals import Signals
 
 
@@ -43,28 +44,28 @@ class P2PChrome(Chrome):
         """
         self.download_directory = download_directory
         self.logger = logging.getLogger('easyp2p.p2p_webdriver')
-        self.driver = cast(Chrome, None)
         options = ChromeOptions()
         prefs = {"download.default_directory": self.download_directory}
         options.add_experimental_option("prefs", prefs)
         options.add_argument("--start-maximized")
-        options.binary_location = "/usr/bin/chromium"
         if headless:
             options.add_argument("--headless")
             options.add_argument("--window-size=1920,1200")
         if signals:
             self.signals.connect_signals(signals)
 
-        # Ubuntu doesn't put ChromeDriver in PATH so we need to
-        # explicitly specify its location.
-        # TODO: Find a better solution that works on all systems.
         try:
-            if os.path.isfile('/usr/lib/chromium-browser/chromedriver'):
+            super().__init__(ChromeDriverManager().install(), options=options)
+        except SessionNotCreatedException:
+            self.logger.exception('Error opening Chrome.')
+            try:
                 super().__init__(
-                    executable_path=r'/usr/lib/chromium-browser/chromedriver',
+                    ChromeDriverManager(
+                        chrome_type=ChromeType.CHROMIUM).install(),
                     options=options)
-            else:
-                super().__init__(options=options)
+            except SessionNotCreatedException:
+                self.logger.exception('Error opening Chromium.')
+                raise RuntimeError(CHROME_NOT_FOUND)
         except WebDriverException:
             self.logger.exception('Error opening ChromeDriver.')
             raise RuntimeError(CHROME_DRIVER_NOT_FOUND)
@@ -74,10 +75,6 @@ class P2PChrome(Chrome):
             params = {
                 'behavior': 'allow', 'downloadPath': self.download_directory}
             self.execute_cdp_cmd('Page.setDownloadBehavior', params)
-
-    def __exit__(self, *args):
-        self.signals.disconnect_signals()
-        super().__exit__(self, *args)
 
     def wait(
             self, wait_until: EC, delay: float = 15.0) -> WebElement:

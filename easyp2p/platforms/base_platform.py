@@ -38,7 +38,7 @@ class BasePlatform:
     LOGOUT_URL = None
     GEN_STATEMENT_URL = None
     STATEMENT_URL = None
-    LOGOUT_WAIT_UNTIL = None
+    LOGOUT_WAIT_UNTIL_LOC = None
     LOGOUT_LOCATOR = None
     HOVER_LOCATOR = None
 
@@ -88,7 +88,7 @@ class BasePlatform:
                 headless = False
 
             with P2PWebDriver(
-                    self.NAME, headless, self.LOGOUT_WAIT_UNTIL,
+                    self.NAME, headless, self.LOGOUT_WAIT_UNTIL_LOC,
                     logout_url=self.LOGOUT_URL,
                     logout_locator=self.LOGOUT_LOCATOR,
                     hover_locator=self.HOVER_LOCATOR,

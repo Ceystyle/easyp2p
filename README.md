@@ -42,15 +42,13 @@ P2P platforms.
 
 ### Linux
 
-On most Linux based systems Python 3 is usually already included. The only
-other external dependency of easyp2p is ChromeDriver which can be installed
-by:
-
-    sudo apt-get install chromium-driver
-
-After downloading all files from GitHub easyp2p can simply be installed by:
+On most Linux based systems Python 3 is usually already included. After 
+cloning the repository from GitHub easyp2p can simply be installed by:
 
     sudo python3 setup.py install
+
+In addition several P2P platforms can only be evaluated if either the 
+Chrome or Chromium browser is installed on the system.
 
 ### Windows & Mac
 

@@ -52,15 +52,13 @@ unterstützten P2P-Plattformen erforderlich.
 ### Linux
 
 Auf Linux-basierten Systemen ist Python 3.x in der Regel schon vorinstalliert.
-Daher muss als externe Abhängigkeit lediglich ChromeDriver installiert werden,
-das von easyp2p benutzt wird, um auf die Webseiten der P2P-Plattformen
-zuzugreifen:
-
-    sudo apt-get install chromium-driver
-
-Anschließend kann easyp2p durch den folgenden Befehl installiert werden:
+Nach dem Klonen des GitHub-Repositories kann easyp2p durch den folgenden Befehl
+installiert werden:
 
     sudo python3 setup.py install
+
+Zusätzlich muss zur Auswertung einiger P2P-Plattformen noch entweder der Chrome-
+oder Chromium-Browser auf dem System installiert sein.
 
 ### Windows & Mac
 

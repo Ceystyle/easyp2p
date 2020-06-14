@@ -27,7 +27,7 @@ class Swaper(BasePlatform):
     DOWNLOAD_METHOD = 'webdriver'
     LOGIN_URL = 'https://www.swaper.com/#/dashboard'
     STATEMENT_URL = 'https://www.swaper.com/#/overview/account-statement'
-    LOGOUT_WAIT_UNTIL = EC.presence_of_element_located((By.ID, 'about'))
+    LOGOUT_WAIT_UNTIL_LOC = (By.ID, 'dashboard')
     LOGOUT_LOCATOR = (By.ID, 'logout')
 
     # Parser settings

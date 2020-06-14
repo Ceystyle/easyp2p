@@ -26,7 +26,7 @@ class Iuvo(BasePlatform):
     DOWNLOAD_METHOD = 'webdriver'
     LOGIN_URL = 'https://www.iuvo-group.com/en/login/'
     STATEMENT_URL = 'https://www.iuvo-group.com/en/account-statement/'
-    LOGOUT_WAIT_UNTIL = EC.element_to_be_clickable((By.ID, 'login'))
+    LOGOUT_WAIT_UNTIL_LOC = (By.ID, 'login')
     LOGOUT_LOCATOR = (By.ID, 'p2p_logout')
     HOVER_LOCATOR = (By.LINK_TEXT, 'User name')
 

@@ -50,7 +50,7 @@ class P2PWebDriver:
 
     def __init__(
             self, name: str, headless: bool,
-            logout_wait_until: EC.element_to_be_clickable,
+            logout_wait_until_loc: Tuple[str, str],
             logout_url: Optional[str] = None,
             logout_locator: Optional[Tuple[str, str]] = None,
             hover_locator: Optional[Tuple[str, str]] = None,
@@ -61,8 +61,8 @@ class P2PWebDriver:
         Args:
             name: Name of the P2P platform.
             headless: If True use ChromeDriver in headless mode, if False not.
-            logout_wait_until: Expected condition in case
-                of successful logout.
+            logout_wait_until_loc: Locator of web element which must be
+                clickable in case of a successful logout.
             logout_url: URL of the logout page. Default is None.
             logout_locator: Locator of logout web element. Default is None.
             hover_locator: Locator of web element where the
@@ -88,7 +88,7 @@ class P2PWebDriver:
         self.name = name
         self.driver = None
         self.headless = headless
-        self.logout_wait_until = logout_wait_until
+        self.logout_wait_until_loc = logout_wait_until_loc
         self.logout_url = None
         self.logout_locator = logout_locator
         self.hover_locator = hover_locator
@@ -132,11 +132,12 @@ class P2PWebDriver:
         try:
             if self.logged_in:
                 if self.logout_url is not None:
-                    self.logout_by_url(self.logout_wait_until)
+                    self.logout_by_url(
+                        EC.element_to_be_clickable(self.logout_wait_until_loc))
                 elif self.logout_locator is not None:
                     self.logout_by_button(
                         self.logout_locator,
-                        self.logout_wait_until,
+                        EC.element_to_be_clickable(self.logout_wait_until_loc),
                         hover_locator=self.hover_locator)
                 else:
                     # Should never happen since we already check it in __init__

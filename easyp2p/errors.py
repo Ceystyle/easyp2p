@@ -8,6 +8,9 @@ from PyQt5.QtCore import QCoreApplication
 
 _translate = QCoreApplication.translate
 
+CHROME_NOT_FOUND = _translate(
+    'P2PChrome', 'Either Chrome or Chromium must be installed to evaluate '
+    'this P2P platform!')
 CHROME_DRIVER_NOT_FOUND = _translate('P2PChrome', 'ChromeDriver was not found!')
 
 
