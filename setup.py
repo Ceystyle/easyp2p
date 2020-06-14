@@ -35,13 +35,14 @@ setuptools.setup(
     long_description=long_description,
     url="https://github.com/ceystyle/easyp2p",
     packages=setuptools.find_packages(),
+    package_data={'': ['i18n/*']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Topic :: Office/Business :: Financial :: Investment",
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     install_requires=[
         'arrow', 'bs4', 'keyring', 'lxml', 'pandas', 'PyQt5', 'requests',
         'selenium', 'webdriver-manager', 'xlrd', 'xlsxwriter'],
