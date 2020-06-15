@@ -11,7 +11,6 @@ from datetime import date, timedelta
 import gc
 import logging
 import os
-from pathlib import Path
 import sys
 from typing import Set
 
@@ -47,10 +46,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         end_last_month = date.today().replace(day=1) - timedelta(days=1)
         self.date_range = (end_last_month.replace(day=1), end_last_month)
         self.set_language()
-        self.output_file_changed = False
-        self.set_output_file()
         self.settings = Settings(
             self.date_range, self.line_edit_output_file.text())
+        if not os.path.isdir(self.settings.directory):
+            os.makedirs(self.settings.directory, exist_ok=True)
+        self.output_file_changed = False
+        self.set_output_file()
 
     def init_date_combo_boxes(self) -> None:
         """Set the items for all date combo boxes."""
@@ -136,7 +137,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         end_date = self.date_range[1].strftime('%d%m%Y')
         if not self.output_file_changed:
             output_file = os.path.join(
-                str(Path.home()),
+                self.settings.directory,
                 _translate(
                     'MainWindow',
                     f'P2P_Results_{start_date}-{end_date}.xlsx'))

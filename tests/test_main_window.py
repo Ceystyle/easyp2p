@@ -5,7 +5,6 @@
 
 from datetime import date, timedelta
 import os
-from pathlib import Path
 import sys
 import unittest.mock
 
@@ -76,7 +75,7 @@ class MainWindowTests(unittest.TestCase):
         # Check if output file name is set correctly
         self.assertEqual(
             self.form.line_edit_output_file.text(), os.path.join(
-                str(Path.home()),
+                self.form.settings.directory,
                 f'P2P_Results_{date_range[0].strftime("%d%m%Y")}-'
                 f'{date_range[1].strftime("%d%m%Y")}.xlsx'))
 
@@ -150,7 +149,8 @@ class MainWindowTests(unittest.TestCase):
         self.assertNotEqual(new_output_file, old_output_file)
         self.assertEqual(
             os.path.join(
-                str(Path.home()), 'P2P_Results_01052010-30112015.xlsx'),
+                self.form.settings.directory,
+                'P2P_Results_01052010-30112015.xlsx'),
             new_output_file)
 
     def test_output_file_on_date_change_after_user_change(self) -> None:

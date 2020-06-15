@@ -15,6 +15,6 @@ class Settings:
     """A class to store all settings of easyp2p."""
     date_range: Tuple[date, date]
     output_file: str
-    directory: str = os.path.join(str(Path.home()), '.easyp2p')
+    directory: str = os.path.join(str(Path.home()), 'easyp2p')
     headless: bool = True
     platforms: Optional[Set[str]] = None
