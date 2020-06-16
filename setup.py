@@ -1,5 +1,7 @@
 #  Copyright (c) 2018-2020 Niko Sandschneider
 
+# pylint: disable=missing-function-docstring, missing-module-docstring
+
 import codecs
 import os
 import re
@@ -9,8 +11,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 
 def read(*parts):
-    with codecs.open(os.path.join(here, *parts), 'r') as fp:
-        return fp.read()
+    with codecs.open(os.path.join(here, *parts), 'r') as file:
+        return file.read()
 
 
 def find_version(*file_paths):
@@ -42,7 +44,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Office/Business :: Financial :: Investment",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
+    include_package_data=True,
     install_requires=[
         'arrow', 'bs4', 'keyring', 'lxml', 'pandas', 'PyQt5', 'requests',
         'selenium', 'webdriver-manager', 'xlrd', 'xlsxwriter'],
