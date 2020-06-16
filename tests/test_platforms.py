@@ -21,7 +21,10 @@ from easyp2p.p2p_signals import PlatformFailedError
 
 from tests import INPUT_PREFIX, RESULT_PREFIX, TEST_PREFIX
 
-SKIP_DL_TESTS = input('Run download tests (y/n)?: ').lower() != 'y'
+try:
+    SKIP_DL_TESTS = os.environ['SKIP_DL_TESTS']
+except KeyError:
+    SKIP_DL_TESTS = input('Run download tests (y/n)?: ').lower() != 'y'
 
 
 class BasePlatformTests(unittest.TestCase):
