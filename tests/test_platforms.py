@@ -37,6 +37,8 @@ class BasePlatformTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Dummy setUp, needs to be overridden by child classes."""
+        if not os.path.isdir(os.path.join('tests', 'test_results')):
+            os.makedirs(os.path.join('tests', 'test_results'))
         self.platform = None
         self.unknown_cf_types = ()
 
