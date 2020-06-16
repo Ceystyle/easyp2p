@@ -98,6 +98,10 @@ class BasePlatformTests(unittest.TestCase):
 
         """
         exp_result_file = RESULT_PREFIX + result_file + '.csv'
+        if not os.path.isfile(exp_result_file):
+            self.skipTest(
+                f'Expected results file {exp_result_file} not found!')
+
         if input_file is None:
             statement_without_suffix = INPUT_PREFIX + result_file
         else:
@@ -133,7 +137,7 @@ class BasePlatformTests(unittest.TestCase):
         self.assertEqual(exp_unknown_cf_types, unknown_cf_types)
 
     def run_write_results(
-            self, input_file: str, exp_result_file: str,
+            self, input_file: str, result_file: str,
             date_range: Tuple[date, date]) -> None:
         """
         Test the write_results functionality for the given platforms.
@@ -144,21 +148,26 @@ class BasePlatformTests(unittest.TestCase):
         Args:
             input_file: Input file which contains the parsed results of all
                 selected P2P platforms.
-            exp_result_file: File with expected results without prefix.
+            result_file: File with expected results without prefix.
             date_range: Date range for which to generate the results file.
 
         """
+        exp_result_file = RESULT_PREFIX + result_file
+        if not os.path.isfile(exp_result_file):
+            self.skipTest(
+                f'Expected results file {exp_result_file} not found!')
+
         df = get_df_from_file(input_file)
         df.set_index(
             [P2PParser.PLATFORM, P2PParser.DATE, P2PParser.CURRENCY],
             inplace=True)
-        output_file = TEST_PREFIX + exp_result_file
+        output_file = TEST_PREFIX + result_file
         write_results(df, output_file, date_range)
 
         for worksheet in [DAILY_RESULTS, MONTHLY_RESULTS, TOTAL_RESULTS]:
             df = pd.read_excel(output_file, worksheet, index_col=[0, 1, 2])
             df_exp = pd.read_excel(
-                RESULT_PREFIX + exp_result_file, worksheet,
+                RESULT_PREFIX + result_file, worksheet,
                 index_col=[0, 1, 2])
             try:
                 self.assertTrue(df.equals(df_exp))
