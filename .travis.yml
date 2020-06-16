@@ -3,8 +3,11 @@ cache: pip
 before_install:
   # Upgrade pip, setuptools and wheel to fix installation of PyQt5
   - python3 -m pip install --upgrade pip setuptools wheel
-  # Install libegl1-mesa to fix missing xcb plugin error in PyQt5
+  # Fix missing xcb plugin error in PyQt5
   - sudo apt-get install -qq libegl1-mesa
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3
 install:
   - python3 setup.py install
 script:
