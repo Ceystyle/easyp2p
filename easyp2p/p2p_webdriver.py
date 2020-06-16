@@ -28,7 +28,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 
 from easyp2p.p2p_credentials import get_credentials
-from easyp2p.p2p_signals import Signals
+from easyp2p.p2p_signals import Signals, PlatformFailedError
 from easyp2p.p2p_chrome import P2PChrome
 from easyp2p.errors import PlatformErrors
 
@@ -109,10 +109,10 @@ class P2PWebDriver:
         try:
             self.driver = P2PChrome(
                 self.download_dir.name, self.headless, self.signals)
-        except RuntimeError as err:
+        except PlatformFailedError as err:
             self.download_dir.cleanup()
             self.signals.disconnect_signals()
-            raise RuntimeError(err)
+            raise PlatformFailedError(err)
         self.logger.debug('%s: created context manager.', self.name)
         return self
 
