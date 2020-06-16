@@ -9,6 +9,7 @@ difficult to test individually. They are tested in test_download instead.
 
 """
 
+import logging
 import os
 import shutil
 import unittest.mock
@@ -27,6 +28,7 @@ class DownloadFinishedTests(unittest.TestCase):
     @unittest.mock.patch('easyp2p.p2p_chrome.Chrome.__init__')
     def setUp(self, _) -> None:  # pylint: disable=arguments-differ
         """Create download directory."""
+        logging.disable(logging.CRITICAL)
         self.platform = P2PWebDriver(
             'Test', False, EC.element_to_be_clickable((By.XPATH, 'xxx')),
             logout_url='xxx')

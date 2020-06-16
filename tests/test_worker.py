@@ -4,6 +4,7 @@
 """Module containing all tests for p2p_worker."""
 
 from datetime import date
+import logging
 import os
 import unittest
 from unittest.mock import patch
@@ -22,6 +23,7 @@ class WorkerTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize the WorkerThread."""
+        logging.disable(logging.CRITICAL)
         self.settings = Settings(
             (date(2018, 9, 1), date(2018, 12, 31)),
             os.path.join(os.getcwd(), 'test.xlsx'))

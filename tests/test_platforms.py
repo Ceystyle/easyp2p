@@ -4,6 +4,7 @@
 """Module with statement download tests for all supported P2P platforms."""
 
 from datetime import date
+import logging
 import os
 import tempfile
 from typing import Optional, Tuple
@@ -348,6 +349,7 @@ class IuvoTests(BasePlatformTests):
     """Class containing all tests for Iuvo."""
 
     def setUp(self) -> None:
+        logging.disable(logging.CRITICAL)
         super().setUp()
         self.platform = p2p_platforms.Iuvo
         self.unknown_cf_types = ('TestCF1', 'TestCF2')
