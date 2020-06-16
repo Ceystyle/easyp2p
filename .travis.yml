@@ -6,7 +6,7 @@ before_install:
   # Upgrade pip, setuptools and wheel to fix installation of PyQt5
   - python3 -m pip install --upgrade pip setuptools wheel
   # Fix missing xcb plugin error
-  - sudo apt-get install libx11-xcb1, libegl1-mesa
+  - sudo apt-get install libx11-xcb1 libegl1-mesa
 install:
   - python3 setup.py install
 script:
