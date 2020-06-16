@@ -1,5 +1,5 @@
 language: python
 install:
-  - sudo python3 setup.py install
+  - python3 setup.py install
 script:
   - python3 -m unittest
