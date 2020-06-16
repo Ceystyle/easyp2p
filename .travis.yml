@@ -1,4 +1,7 @@
 language: python
+cache: pip
+before_install:
+  - python3 -m pip install --upgrade pip setuptools wheel
 install:
   - python3 setup.py install
 script:
