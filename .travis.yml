@@ -1,11 +1,12 @@
 language: python
 cache: pip
-services:
-  - xvfb
+services: xvfb
 before_install:
   - export QT_DEBUG_PLUGINS=1
   # Upgrade pip, setuptools and wheel to fix installation of PyQt5
   - python3 -m pip install --upgrade pip setuptools wheel
+  # Fix missing xcb plugin error
+  - sudo apt-get install libx11-xcb1
 install:
   - python3 setup.py install
 script:
