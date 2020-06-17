@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
 import easyp2p.platforms
 from easyp2p.ui.main_window import MainWindow
 
-APP = QApplication(sys.argv)
+QT_APP = QApplication(sys.argv)
 
 
 class MainWindowTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class MainWindowTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Create the GUI."""
-        self.form = MainWindow(APP)
+        self.form = MainWindow(QT_APP)
 
     def set_date_combo_boxes(
             self, start_month: int, start_year: int, end_month: int,
@@ -288,6 +288,4 @@ class MainWindowTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(verbosity=3)
-    suite = unittest.TestLoader().loadTestsFromTestCase(MainWindowTests)
-    result = runner.run(suite)
+    unittest.main()

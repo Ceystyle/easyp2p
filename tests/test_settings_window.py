@@ -5,15 +5,12 @@
 
 from datetime import date
 import os
-import sys
 import unittest.mock
 
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QMessageBox
+from PyQt5.QtWidgets import QDialogButtonBox, QMessageBox
 
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.settings_window import SettingsWindow
-
-app = QApplication(sys.argv)
 
 
 @unittest.mock.patch('easyp2p.ui.settings_window.p2p_cred')

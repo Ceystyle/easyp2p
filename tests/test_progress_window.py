@@ -4,16 +4,13 @@
 """Module containing all tests for the progress window of easyp2p."""
 
 import os
-import sys
 import unittest.mock
 from datetime import date
 
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox
+from PyQt5.QtWidgets import QDialogButtonBox
 
 from easyp2p.p2p_settings import Settings
 from easyp2p.ui.progress_window import ProgressWindow
-
-APP = QApplication(sys.argv)
 
 
 class ProgressWindowTests(unittest.TestCase):
@@ -75,6 +72,4 @@ class ProgressWindowTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(verbosity=3)
-    suite = unittest.TestLoader().loadTestsFromTestCase(ProgressWindowTests)
-    result = runner.run(suite)
+    unittest.main()
