@@ -9,6 +9,7 @@ before_install:
   - python3 -m pip install --upgrade pip setuptools wheel
   # Fix missing xcb plugin error
   - sudo apt-get install libqt5gui5 libxcb-xinerama0
+  - pip install --upgrade --user pycodestyle
 install:
   - python3 setup.py install
 script:
