@@ -6,7 +6,6 @@ Download and parse Swaper statement.
 
 """
 
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
@@ -62,8 +61,7 @@ class Swaper(BasePlatform):
         }
 
         webdriver.log_into_page(
-            self.LOGIN_URL, 'email', 'password',
-            EC.presence_of_element_located((By.ID, 'open-investments')))
+            self.LOGIN_URL, 'email', 'password', (By.ID, 'open-investments'))
 
         webdriver.open_account_statement_page(
             self.STATEMENT_URL, (By.ID, 'account-statement'))

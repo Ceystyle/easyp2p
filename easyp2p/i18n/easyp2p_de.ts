@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="de">
+<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="">
 <context>
     <name>CredentialsWindow</name>
     <message>
@@ -92,37 +91,37 @@
         <translation>&amp;Deutsch</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="138"/>
+        <location filename="../ui/main_window.py" line="141"/>
         <source>P2P_Results_{start_date}-{end_date}.xlsx</source>
         <translation>P2P_Ergebnisse_{start_date}-{end_date}.xlsx</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="182"/>
+        <location filename="../ui/main_window.py" line="185"/>
         <source>Choose output file</source>
         <translation>Wähle Ausgabedatei</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="182"/>
+        <location filename="../ui/main_window.py" line="185"/>
         <source>files</source>
         <translation>Dateien</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="226"/>
+        <location filename="../ui/main_window.py" line="229"/>
         <source>Start date is after end date!</source>
         <translation>Startdatum ist nach Enddatum!</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="226"/>
+        <location filename="../ui/main_window.py" line="229"/>
         <source>Start date must be before end date!</source>
         <translation>Startdatum muss vor Enddatum sein!</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="236"/>
+        <location filename="../ui/main_window.py" line="239"/>
         <source>No P2P platform selected!</source>
         <translation>Keine P2P-Plattform ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../ui/main_window.py" line="236"/>
+        <location filename="../ui/main_window.py" line="239"/>
         <source>Please choose at least one P2P platform!</source>
         <translation>Bitte wähle mindestens eine P2P-Plattform aus!</translation>
     </message>
@@ -491,27 +490,27 @@ easyp2p wird jetzt abgebrochen!</translation>
 <context>
     <name>p2p_credentials</name>
     <message>
-        <location filename="../p2p_credentials.py" line="78"/>
+        <location filename="../p2p_credentials.py" line="79"/>
         <source>Saving in keyring failed!</source>
         <translation>Speichern im Keyring fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../p2p_credentials.py" line="78"/>
+        <location filename="../p2p_credentials.py" line="79"/>
         <source>Saving password in keyring was not successful!</source>
         <translation>Speichern des Passworts im Keyring war nicht erfolgreich!</translation>
     </message>
     <message>
-        <location filename="../p2p_credentials.py" line="109"/>
+        <location filename="../p2p_credentials.py" line="110"/>
         <source>No credentials for {platform} provided! Aborting!</source>
         <translation>Keine Zugangsdaten für {platform} angegeben! Abbruch!</translation>
     </message>
     <message>
-        <location filename="../p2p_credentials.py" line="148"/>
+        <location filename="../p2p_credentials.py" line="149"/>
         <source>{platform} was not found in keyring!</source>
         <translation>{platform} wurde nicht im Keyring gefunden!</translation>
     </message>
     <message>
-        <location filename="../p2p_credentials.py" line="179"/>
+        <location filename="../p2p_credentials.py" line="180"/>
         <source>User name &quot;username&quot; is not allowed!</source>
         <translation>Benutzername &quot;username&quot; ist nicht erlaubt!</translation>
     </message>

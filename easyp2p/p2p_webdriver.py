@@ -35,7 +35,7 @@ from easyp2p.errors import PlatformErrors
 logger = logging.getLogger('easyp2p.p2p_webdriver')
 
 
-class P2PWebDriver:
+class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
 
     """
     Representation of P2P platform including required methods for interaction.
@@ -48,7 +48,7 @@ class P2PWebDriver:
     # Signals for communicating with the GUI
     signals = Signals()
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
             self, name: str, headless: bool,
             logout_wait_until_loc: Tuple[str, str],
             logout_url: Optional[str] = None,
@@ -157,8 +157,8 @@ class P2PWebDriver:
     @signals.update_progress
     def log_into_page(
             self, login_url: str, name_field: str, password_field: str,
-            wait_until: Optional[EC.element_to_be_clickable],
-            login_locator: Tuple[str, str] = None,
+            wait_until_loc: Optional[Tuple[str, str]] = None,
+            login_locator: Optional[Tuple[str, str]] = None,
             fill_delay: float = 0.2) -> None:
         """
         Log into the P2P platform using the provided credentials.
@@ -178,7 +178,8 @@ class P2PWebDriver:
                 entered
             password_field: Name of web element where the password has to be
                 entered
-            wait_until: Expected condition in case of successful login
+            wait_until_loc: Locator of web element which must be clickable if
+                login was successful.
             login_locator: Locator of web element which has to be clicked in
                 order to open login form. Default is None.
             fill_delay: Delay in seconds between filling in password and user
@@ -212,9 +213,13 @@ class P2PWebDriver:
         self.driver.enter_text(
             (By.NAME, name_field), credentials[0], self.errors.login_failed)
         time.sleep(fill_delay)
+        if wait_until_loc:
+            wait_until = EC.element_to_be_clickable(wait_until_loc)
+        else:
+            wait_until = None
         self.driver.enter_text(
-            (By.NAME, password_field), credentials[1], self.errors.login_failed,
-            hit_return=True, wait_until=wait_until)
+            (By.NAME, password_field), credentials[1],
+            self.errors.login_failed, hit_return=True, wait_until=wait_until)
 
         self.logged_in = True
         self.logger.debug('%s: successfully logged in.', self.name)
@@ -381,7 +386,7 @@ class P2PWebDriver:
             '%s: account statement generation successful.', self.name)
 
     @signals.update_progress
-    def generate_statement_calendar(
+    def generate_statement_calendar(  # pylint: disable=too-many-arguments
             self, date_range: Tuple[date, date],
             month_locator: Tuple[str, str],
             prev_month_locator: Tuple[str, str],

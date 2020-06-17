@@ -90,7 +90,7 @@ class Mintos(BasePlatform):
             webdriver: P2PWebDriver instance.
 
         """
-        webdriver.log_into_page(self.LOGIN_URL, '_username', '_password', None)
+        webdriver.log_into_page(self.LOGIN_URL, '_username', '_password')
         webdriver.wait_for_captcha(
             self.LOGIN_URL, (By.CLASS_NAME, 'account-login-error'),
             'Invalid username or password')

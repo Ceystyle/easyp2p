@@ -59,7 +59,7 @@ class Grupeer(BasePlatform):
             webdriver: P2PWebDriver instance.
 
         """
-        webdriver.log_into_page(self.LOGIN_URL, 'email', 'password', None)
+        webdriver.log_into_page(self.LOGIN_URL, 'email', 'password')
         webdriver.wait_for_captcha(
             self.LOGIN_URL, (By.CLASS_NAME, 'text-danger'),
             'These credentials do not match our records.')

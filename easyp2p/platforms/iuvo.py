@@ -6,7 +6,6 @@ Download and parse Iuvo statement.
 """
 
 from bs4 import BeautifulSoup
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from easyp2p.p2p_parser import P2PParser
@@ -59,7 +58,7 @@ class Iuvo(BasePlatform):
         """
         webdriver.log_into_page(
             self.LOGIN_URL, 'login', 'password',
-            EC.element_to_be_clickable((By.LINK_TEXT, 'Account Statement')))
+            (By.LINK_TEXT, 'Account Statement'))
 
         # Click away cookie policy, if present
         webdriver.driver.click_button(
