@@ -167,5 +167,5 @@ class Mintos(BasePlatform):
         detail_col = 'Details'
         parser.check_columns(detail_col)
         if parser.df.shape[0] > 0:
-            parser.df['Loan ID'], parser.df['Cash Flow Type'] = \
-                parser.df[detail_col].str.split(' - ').str
+            parser.df[['Loan ID', 'Cash Flow Type']] = \
+                parser.df[detail_col].str.split(' - ', n=1, expand=True)
