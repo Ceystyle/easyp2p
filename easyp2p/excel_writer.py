@@ -82,7 +82,8 @@ def write_results(
     df_total = _get_total_results(df_monthly)
 
     # Write all three DataFrames to Excel
-    with pd.ExcelWriter(
+    # Work around pylint bug https://github.com/PyCQA/pylint/issues/3060
+    with pd.ExcelWriter(  # pylint: disable=abstract-class-instantiated
             output_file, datetime_format='DD.MM.YYYY',
             engine='xlsxwriter') as writer:
         _write_worksheet(writer, DAILY_RESULTS, df_daily)

@@ -10,8 +10,10 @@ before_install:
   # Fix missing xcb plugin error
   - sudo apt-get install libqt5gui5 libxcb-xinerama0
   - pip install --upgrade pycodestyle
+  - pip install --upgrade pylint
 install:
   - python3 setup.py install
 script:
   - pycodestyle easyp2p/* tests/* --exclude Ui_*,*.pro --ignore W503 --max-line-length=80
+  - pylint easyp2p/ tests/
   - python3 -m unittest
