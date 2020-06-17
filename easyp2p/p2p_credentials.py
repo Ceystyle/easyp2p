@@ -9,7 +9,8 @@ from typing import Optional, Tuple
 
 import keyring
 from keyring.errors import PasswordDeleteError
-from PyQt5.QtCore import QCoreApplication, QObject, pyqtSignal, QEventLoop, pyqtSlot
+from PyQt5.QtCore import (
+    QCoreApplication, QObject, pyqtSignal, QEventLoop, pyqtSlot)
 
 from easyp2p.p2p_signals import Signals
 from easyp2p.ui.credentials_window import CredentialsWindow

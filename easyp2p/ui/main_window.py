@@ -102,10 +102,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Set currently in combo boxes selected date range."""
         start_month = self.combo_box_start_month.currentText()
         start_year = self.combo_box_start_year.currentText()
-        start_date = QLocale().toDate('1'+start_month+start_year, 'dMMMyyyy')
+        start_date = QLocale().toDate(
+            '1' + start_month + start_year, 'dMMMyyyy')
         end_month = self.combo_box_end_month.currentText()
         end_year = self.combo_box_end_year.currentText()
-        end_date = QLocale().toDate('1'+end_month+end_year, 'dMMMyyyy')
+        end_date = QLocale().toDate(
+            '1' + end_month + end_year, 'dMMMyyyy')
         end_date.setDate(
             end_date.year(), end_date.month(), end_date.daysInMonth())
         self.date_range = (start_date.toPyDate(), end_date.toPyDate())

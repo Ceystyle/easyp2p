@@ -64,8 +64,8 @@ class BasePlatformTests(unittest.TestCase):
             date_range, statement_without_suffix)
 
         expected_results = (
-            RESULT_PREFIX + result_file + '.' +
-            platform.statement.split('.')[-1])
+            RESULT_PREFIX + result_file + '.'
+            + platform.statement.split('.')[-1])
 
         if not os.path.isfile(expected_results):
             self.skipTest(
@@ -204,7 +204,7 @@ class BasePlatformTests(unittest.TestCase):
 
         self.run_parser_test(
             f'{self.platform.NAME.lower()}_parser', self.DATE_RANGE,
-            RESULT_PREFIX+f'download_{self.platform.NAME.lower()}_statement')
+            RESULT_PREFIX + f'download_{self.platform.NAME.lower()}_statement')
 
     def test_parse_statement_no_cfs(self):
         """Test platform parser if there were no cash flows in date_range."""

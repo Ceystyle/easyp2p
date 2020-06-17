@@ -12,4 +12,5 @@ before_install:
 install:
   - python3 setup.py install
 script:
+  - pycodestyle easyp2p/* tests/* --exclude Ui_*,*.pro --ignore W503 --max-line-length=80
   - python3 -m unittest
