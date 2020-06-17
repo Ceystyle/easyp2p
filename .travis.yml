@@ -3,8 +3,7 @@ python: "3.7"
 cache: pip
 services: xvfb
 env:
-  - WDM_LOG_LEVEL=0
-  - SKIP_DL_TESTS=True
+  - WDM_LOG_LEVEL=0 SKIP_DL_TESTS=True
 before_install:
   # Upgrade pip, setuptools and wheel to fix installation of PyQt5
   - python3 -m pip install --upgrade pip setuptools wheel
