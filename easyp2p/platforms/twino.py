@@ -62,11 +62,9 @@ class Twino(BasePlatform):
             PlatformFailedError: If two factor authorization is enabled.
 
         """
-        # FIXME: do not ask user twice for credentials if they are not in the
-        # keyring
-        username = get_credentials(self.NAME, self.signals)[0]
+        credentials = get_credentials(self.NAME, self.signals)
         check2fa_url = (
-            f'https://www.twino.eu/ws/public/check2fa?email={username}')
+            f'https://www.twino.eu/ws/public/check2fa?email={credentials[0]}')
         resp = sess.request(check2fa_url, 'get', self.errors.load_login_failed)
 
         if resp.json():
@@ -90,7 +88,7 @@ class Twino(BasePlatform):
 
         def download_ready():
             download_url = (
-                f'https://www.twino.eu/ws/web/export-to-excel/{username}/'
+                f'https://www.twino.eu/ws/web/export-to-excel/{credentials[0]}/'
                 f'download')
             res = sess.request(
                 download_url, 'get', self.errors.statement_download_failed,

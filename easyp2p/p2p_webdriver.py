@@ -71,8 +71,7 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
             signals: Signals instance for communicating with the calling class.
 
        Raises:
-            RuntimeError: If no URL for login or statement page or no logout
-                method is provided
+            RuntimeError: If no logout method is provided.
 
         """
         self.logger = logging.getLogger('easyp2p.p2p_webdriver.P2PWebDriver')
@@ -82,7 +81,6 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
             self.signals.connect_signals(signals)
 
         if logout_url is None and logout_locator is None:
-            # This should never happen
             raise RuntimeError(self.errors.no_logout_method)
 
         self.name = name
@@ -126,7 +124,7 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
         even in case of errors.
 
         Raises:
-            RuntimeError: If no logout method is provided
+            RuntimeWarning: If no logout method is provided.
 
         """
         try:
@@ -155,10 +153,11 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
         self.logger.debug('%s: context manager done.', self.name)
 
     @signals.update_progress
-    def log_into_page(
+    def log_into_page(  # pylint: disable=too-many-arguments
             self, login_url: str, name_field: str, password_field: str,
             wait_until_loc: Optional[Tuple[str, str]] = None,
             login_locator: Optional[Tuple[str, str]] = None,
+            credentials: Optional[Tuple[str, str]] = None,
             fill_delay: float = 0.2) -> None:
         """
         Log into the P2P platform using the provided credentials.
@@ -182,6 +181,9 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
                 login was successful.
             login_locator: Locator of web element which has to be clicked in
                 order to open login form. Default is None.
+            credentials: Tuple (username, password) for the P2P platform.
+                Default is None. If it is None, the credentials will be
+                determined by calling get_credentials.
             fill_delay: Delay in seconds between filling in password and user
                 name fields. Default is 0.
 
@@ -208,7 +210,8 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
                 self.errors.load_login_failed,
                 wait_until=EC.element_to_be_clickable((By.NAME, name_field)))
 
-        credentials = get_credentials(self.name, self.signals)
+        if credentials is None:
+            credentials = get_credentials(self.name, self.signals)
 
         self.driver.enter_text(
             (By.NAME, name_field), credentials[0], self.errors.login_failed)
@@ -265,10 +268,6 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
             check_locator: Locator of a web element which must be present if
                 the account statement page loaded successfully
 
-        Raises:
-            RuntimeError: - If title of the page does not contain check_title
-                          - If loading of page takes too long
-
         """
         self.logger.debug('%s: opening account statement page.', self.name)
         self.driver.load_url(
@@ -298,10 +297,6 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
                 needs to hover in order to make the logout button visible.
                 Default is None.
 
-        Raises:
-            RuntimeWarning: - If loading of page takes too long
-                            - If the download button cannot be found
-
         """
         self.logger.debug('%s: starting log out by button.', self.name)
         self.driver.click_button(
@@ -321,9 +316,6 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
 
         Args:
             wait_until: Expected condition in case of successful logout
-
-        Raises:
-            RuntimeWarning: If loading of logout page takes too long
 
         """
         self.logger.debug('%s: starting log out by URL.', self.name)
@@ -360,10 +352,6 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
             submit_btn_locator: Locator of button which needs to clicked to
                 start account statement generation. Not all P2P platforms
                 require this. Default is None.
-
-        Raises:
-            RuntimeError: If a web element cannot be found or if the generation
-                of the account statement takes too long
 
         """
         self.logger.debug(
@@ -429,9 +417,7 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
                 providing a tuple of class names in day_class_check.
 
         Raises:
-            RuntimeError: - If a web element cannot be found
-                          - If the generation of the account statement
-                            takes too long
+            RuntimeError: If the generation of the account statement fails.
 
         """
         self.logger.debug(
@@ -621,9 +607,9 @@ class P2PWebDriver:  # pylint: disable=too-many-instance-attributes
         Generate account statement by selecting dates in combo boxes.
 
         This method generates the account statement for P2P sites where start
-        and end date need to be set in combo boxes, e.g. Bondora. It will
-        locate the combo boxes, select provided start/end date entries and then
-        start the account statement generation by clicking the submit button.
+        and end date need to be set in combo boxes. It will locate the combo
+        boxes, select provided start/end date entries and then start the
+        account statement generation by clicking the submit button.
 
         Args:
             date_dict: Dictionary mapping the locators of each combo box with
