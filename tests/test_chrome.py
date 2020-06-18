@@ -3,6 +3,7 @@
 """
 Module containing all tests for the P2PChrome class.
 """
+import logging
 import unittest.mock
 
 from webdriver_manager.chrome import ChromeDriverManager
@@ -17,6 +18,7 @@ class P2PChromeTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        logging.disable(logging.CRITICAL)
         cls.chromium_path = ChromeDriverManager(
             chrome_type=ChromeType.CHROMIUM).install()
 
