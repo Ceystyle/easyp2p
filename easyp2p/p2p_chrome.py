@@ -3,7 +3,6 @@
 
 """Module implementing P2PWebDriver."""
 
-from distutils.spawn import find_executable
 import logging
 from typing import Optional, Tuple
 
@@ -16,7 +15,6 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.utils import ChromeType
 
 from easyp2p.errors import CHROME_NOT_FOUND, CHROME_DRIVER_NOT_FOUND
 from easyp2p.p2p_signals import Signals
@@ -58,26 +56,7 @@ class P2PChrome(Chrome):
             super().__init__(ChromeDriverManager().install(), options=options)
         except ValueError:
             self.logger.exception('Error opening Chrome.')
-            try:
-                if find_executable('google-chrome'):
-                    # For tests on systems where Chrome is installed we need to
-                    # explicitly set the Chromium binary location because
-                    # otherwise Chrome is preferred by the ChromeDriver.
-                    options.binary_location = find_executable('chromium')
-                elif find_executable('chromium') and \
-                        find_executable('chromium-browser'):
-                    # If both chromium and chromium-browser are installed, we
-                    # need to pick the latter to avoid version mismatches with
-                    # ChromeDriver.
-                    options.binary_location = find_executable(
-                        'chromium-browser')
-                super().__init__(
-                    ChromeDriverManager(
-                        chrome_type=ChromeType.CHROMIUM).install(),
-                    options=options)
-            except ValueError:
-                self.logger.exception('Error opening Chromium.')
-                raise RuntimeError(CHROME_NOT_FOUND)
+            raise RuntimeError(CHROME_NOT_FOUND)
         except Exception:
             self.logger.exception('Error opening ChromeDriver.')
             raise RuntimeError(CHROME_DRIVER_NOT_FOUND)
