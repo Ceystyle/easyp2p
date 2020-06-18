@@ -42,13 +42,28 @@ P2P platforms.
 
 ### Linux
 
-On most Linux based systems Python 3 is usually already included. After 
-cloning the repository from GitHub easyp2p can simply be installed by:
+easyp2p relies on Python 3 and the Qt5 toolkit. On Debian-based systems such
+as Ubuntu the required packages can be installed by:
 
+    sudo apt install python3 python3-pip git libqt5gui5
+
+Next clone the repository from GitHub:
+ 
+    git clone https://github.com/Ceystyle/easyp2p.git
+
+easyp2p can then simply be installed by:
+
+    cd easyp2p
     sudo python3 setup.py install
 
-In addition several P2P platforms can only be evaluated if either the 
-Chrome or Chromium browser is installed on the system.
+After successful installation easyp2p can be started from any folder in
+the terminal:
+
+    easyp2p
+
+Please note that several P2P platforms (Grupeer, Mintos, Iuvo, Swaper) 
+can only be evaluated if either the Chrome or Chromium browser is 
+installed on the system.
 
 ### Windows & Mac
 

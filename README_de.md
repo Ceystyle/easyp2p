@@ -51,14 +51,29 @@ unterstützten P2P-Plattformen erforderlich.
 
 ### Linux
 
-Auf Linux-basierten Systemen ist Python 3.x in der Regel schon vorinstalliert.
-Nach dem Klonen des GitHub-Repositories kann easyp2p durch den folgenden Befehl
+easyp2p basiert auf Python 3 und dem Qt5-Toolkit. Auf Debian-basierten
+Systemen, z.B. Ubuntu, können die benötigten Pakete folgendermaßen
 installiert werden:
 
+    sudo apt install python3 python3-pip git libqt5gui5
+
+Anschließen muss das Repository von GitHub geklont werden:
+ 
+    git clone https://github.com/Ceystyle/easyp2p.git
+
+Dann kann easyp2p einfach durch folgenden Befehl installiert werden:
+
+    cd easyp2p
     sudo python3 setup.py install
 
-Zusätzlich muss zur Auswertung einiger P2P-Plattformen noch entweder der Chrome-
-oder Chromium-Browser auf dem System installiert sein.
+Nach erfolgreicher Installation kann easyp2p von einem beliebigen Ordner
+im Terminal gestartet werden:
+
+    easyp2p
+
+Zu beachten ist, dass einige P2P-Plattformen (Grupeer, Mintos, Iuvo, Swaper) 
+nur ausgewertet werden können, wenn entweder der Chrome- oder Chromium-Browser
+installiert sind.
 
 ### Windows & Mac
 
