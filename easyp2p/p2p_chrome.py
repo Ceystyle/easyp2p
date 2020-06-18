@@ -59,11 +59,18 @@ class P2PChrome(Chrome):
         except ValueError:
             self.logger.exception('Error opening Chrome.')
             try:
-                # For tests on systems where Chrome is installed we need to
-                # explicitly set the Chromium binary location because otherwise
-                # Chrome is preferred by the ChromeDriver
                 if find_executable('google-chrome'):
+                    # For tests on systems where Chrome is installed we need to
+                    # explicitly set the Chromium binary location because
+                    # otherwise Chrome is preferred by the ChromeDriver.
                     options.binary_location = find_executable('chromium')
+                elif find_executable('chromium') and \
+                        find_executable('chromium-browser'):
+                    # If both chromium and chromium-browser are installed, we
+                    # need to pick the latter to avoid version mismatches with
+                    # ChromeDriver.
+                    options.binary_location = find_executable(
+                        'chromium-browser')
                 super().__init__(
                     ChromeDriverManager(
                         chrome_type=ChromeType.CHROMIUM).install(),
