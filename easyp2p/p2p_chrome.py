@@ -58,7 +58,6 @@ class P2PChrome(Chrome):
         except ValueError:
             self.logger.exception('Error opening Chrome.')
             try:
-                options.binary_location = '/usr/bin/chromium'
                 super().__init__(
                     ChromeDriverManager(
                         chrome_type=ChromeType.CHROMIUM).install(),
