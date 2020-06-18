@@ -8,7 +8,7 @@ before_install:
   # Upgrade pip, setuptools and wheel to fix installation of PyQt5
   - python3 -m pip install --upgrade pip setuptools wheel
   # Fix missing xcb plugin error
-  - sudo apt install libqt5gui5 libxcb-xinerama0 chromium-browser
+  - sudo apt-get install libqt5gui5 libxcb-xinerama0 chromium-browser
   - pip install --upgrade pycodestyle
   - pip install --upgrade pylint
 install:
