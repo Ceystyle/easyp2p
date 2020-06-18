@@ -9,8 +9,7 @@ from typing import Optional, Tuple
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import (
-    NoSuchElementException, SessionNotCreatedException,
-    StaleElementReferenceException, TimeoutException, WebDriverException)
+    NoSuchElementException, StaleElementReferenceException, TimeoutException)
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -56,17 +55,18 @@ class P2PChrome(Chrome):
 
         try:
             super().__init__(ChromeDriverManager().install(), options=options)
-        except SessionNotCreatedException:
+        except ValueError:
             self.logger.exception('Error opening Chrome.')
             try:
+                options.binary_location = '/usr/bin/chromium'
                 super().__init__(
                     ChromeDriverManager(
                         chrome_type=ChromeType.CHROMIUM).install(),
                     options=options)
-            except SessionNotCreatedException:
+            except ValueError:
                 self.logger.exception('Error opening Chromium.')
                 raise RuntimeError(CHROME_NOT_FOUND)
-        except WebDriverException:
+        except Exception:
             self.logger.exception('Error opening ChromeDriver.')
             raise RuntimeError(CHROME_DRIVER_NOT_FOUND)
 

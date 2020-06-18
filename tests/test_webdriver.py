@@ -91,9 +91,4 @@ class DownloadFinishedTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    runner = unittest.TextTestRunner(verbosity=3)
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
-
-    suite.addTests(loader.loadTestsFromTestCase(DownloadFinishedTests))
-    result = runner.run(suite)
+    unittest.main()
