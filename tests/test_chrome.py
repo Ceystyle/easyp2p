@@ -4,7 +4,6 @@
 Module containing all tests for the P2PChrome class.
 """
 import logging
-import os
 import unittest.mock
 
 from webdriver_manager.chrome import ChromeDriverManager
@@ -40,10 +39,6 @@ class P2PChromeTests(unittest.TestCase):
         mock_driver_install.side_effect = ValueError
         self.assertRaises(PlatformFailedError, P2PChrome, 'sample_dir', True)
 
-    # Skip test if Chrome is installed on the system. It will never be
-    # installed in Travis CI, so the test is certainly run there.
-    @unittest.skipIf(
-        os.system('which google-chrome') == 0, 'Chrome is installed!')
     @unittest.mock.patch('easyp2p.p2p_chrome.ChromeDriverManager.install')
     def test_no_chrome_but_chromium(self, mock_driver_install):
         """
