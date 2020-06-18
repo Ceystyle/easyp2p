@@ -3,6 +3,7 @@
 
 """Module implementing P2PWebDriver."""
 
+from distutils.spawn import find_executable
 import logging
 from typing import Optional, Tuple
 
@@ -58,6 +59,7 @@ class P2PChrome(Chrome):
         except ValueError:
             self.logger.exception('Error opening Chrome.')
             try:
+                options.binary_location = find_executable('chromium')
                 super().__init__(
                     ChromeDriverManager(
                         chrome_type=ChromeType.CHROMIUM).install(),
