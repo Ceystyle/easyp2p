@@ -45,8 +45,7 @@ class P2PChromeTests(unittest.TestCase):
         Test that P2PChrome initialization is successful if Chrome is not
         installed, but Chromium is.
         """
-        side_effect = [ValueError, self.chromium_path]
-        mock_driver_install.side_effect = side_effect
+        mock_driver_install.side_effect = [ValueError, self.chromium_path]
         driver = P2PChrome('sample_dir', True)
         self.assertEqual('chrome', driver.name)
         driver.close()

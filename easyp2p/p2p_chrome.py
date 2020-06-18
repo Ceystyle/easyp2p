@@ -62,7 +62,8 @@ class P2PChrome(Chrome):
                 # For tests on systems where Chrome is installed we need to
                 # explicitly set the Chromium binary location because otherwise
                 # Chrome is preferred by the ChromeDriver
-                options.binary_location = find_executable('chromium')
+                if find_executable('google-chrome'):
+                    options.binary_location = find_executable('chromium')
                 super().__init__(
                     ChromeDriverManager(
                         chrome_type=ChromeType.CHROMIUM).install(),
