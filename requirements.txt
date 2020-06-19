@@ -17,8 +17,8 @@ keyring==21.2.1
 lazy-object-proxy==1.5.0
 mccabe==0.6.1
 numpy==1.19.0rc2
-pandas==1.0.4
-pkg-resources==0.0.0
+pandas==1.0.5
+pycodestyle==2.6.0
 pycparser==2.20
 pylint==2.5.3
 pyOpenSSL==19.1.0
@@ -27,14 +27,14 @@ PyQt5-sip==12.8.0
 PyQt5-stubs==5.14.2.2
 python-dateutil==2.8.1
 pytz==2020.1
-requests==2.23.0
+requests==2.24.0
 SecretStorage==3.1.2
 selenium==4.0.0a6.post2
 six==1.15.0
 soupsieve==2.0.1
 toml==0.10.1
 urllib3==1.25.9
-webdriver-manager==3.1.0
+webdriver-manager==3.2.1
 wrapt==1.12.1
 xlrd==1.2.0
 XlsxWriter==1.2.9
