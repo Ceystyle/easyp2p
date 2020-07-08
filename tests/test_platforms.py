@@ -417,6 +417,19 @@ class TwinoTests(BasePlatformTests):
         self.unknown_cf_types = ('TestCF1 PRINCIPAL', 'TestCF2 INTEREST')
 
 
+class ViainvestTests(BasePlatformTests):
+
+    """Class containing all tests for Viventor."""
+
+    DATE_RANGE = (date(2019, 12, 1), date(2020, 6, 30))
+    DATE_RANGE_MISSING_MONTH = DATE_RANGE
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.platform = p2p_platforms.Viainvest
+        self.unknown_cf_types = ('TestCF1', 'TestCF2')
+
+
 class ViventorTests(BasePlatformTests):
 
     """Class containing all tests for Viventor."""

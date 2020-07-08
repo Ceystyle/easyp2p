@@ -21,6 +21,7 @@ Currently the following P2P platforms are supported:
 * Robocash
 * Swaper
 * Twino
+* Viainvest
 * Viventor
 
 ## Why easyp2p?
