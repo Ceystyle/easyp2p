@@ -9,7 +9,7 @@ colorama==0.4.3
 configparser==5.0.0
 coverage==5.1
 crayons==0.3.1
-cryptography==2.9.2
+cryptography==3.2
 idna==2.9
 isort==4.3.21
 jeepney==0.4.3
