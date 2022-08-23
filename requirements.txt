@@ -16,7 +16,7 @@ jeepney==0.4.3
 keyring==21.2.1
 lazy-object-proxy==1.5.0
 mccabe==0.6.1
-numpy==1.19.0rc2
+numpy==1.22.0
 pandas==1.0.5
 pycodestyle==2.6.0
 pycparser==2.20
